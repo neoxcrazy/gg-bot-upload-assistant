@@ -1,6 +1,6 @@
 Dockerfile
 .gitignore
 README.md
-Dockerfile.aarch64
-Dockerfile.disk
-Dockerfile.armhf
+*.mkv
+*.mp4
+.coverage

@@ -4,6 +4,7 @@
     "upload_form": "https://desitorrents.rocks/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://desitorrents.rocks/api/torrents/filter?api_token={api_key}",
     "source": "DesiTorrents",
+    "platform": "UNIT3D",
     "bbcode_line_break": "\n",
     "bbcode_code": "[code][/code]",
 
@@ -55,7 +56,6 @@
         "featured": "string",
         "doubleup": "string",
         "sticky": "string",
-
 
         "category_id": {
             "1": "movie",
@@ -217,11 +217,6 @@
         }
     },
     "banned_groups": [
-        "GalaxyTV",
-        "TGx",
-        "YIFY",
-        "YTS",
-        "RARBG",
-        "Will1896"
+        "DusIcTv"
     ]
 }

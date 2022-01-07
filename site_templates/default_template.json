@@ -4,8 +4,8 @@
     "upload_form": "<HTTPS://DOMAIN.COM/API/UPLOAD/>{api_key}",
     "torrents_search": "<HTTPS://DOMAIN.COM/API/TORRENTS/>{api_key}",
     "source": "<TRACKER_ACRONYM>",
+    "platform": "UNIT3D | XBTIT",
     "bbcode_line_break": "|  [br][/br]  |  OR  |  <br />  |  (Check which one works)  ",
-
 
     "translation": {
         "dot_torrent": "<required_key_file>",
@@ -203,22 +203,20 @@
         "nfo_file": "file",
         "pack": "int",
         "special": "int",
-        "sd": "int"
+        "sd": "int",
+        "season_number": "string",
+        "episode_number": "string"
     },
 
     "dupes": {
-        "request": "POST",
-        "strip_text": false,
-
-        "keys": {
-            "action": "search",
-            "imdb_id": "string"
-        },
+        "request": "GET",
+        "url_format": "{search_url}&imdbId={imdb}",
+        "strip_text": true,
 
         "parse_json": {
-            "top_lvl": "results"
+            "top_lvl": "data",
+            "torrent_details": "attributes"
         },
-
 
         "different_cuts": "100",
         "2160p_remux": 1,

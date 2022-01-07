@@ -4,8 +4,8 @@
     "upload_form": "https://racing4everyone.eu/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://racing4everyone.eu/api/torrents/filter?api_token={api_key}",
     "source": "R4E",
+    "platform": "UNIT3D",
     "bbcode_line_break": "<br />",
-
 
     "translation": {
         "dot_torrent": "torrent",
@@ -21,14 +21,11 @@
         "sd": "sd",
         "optimized": "stream",
 
-
         "live": "<required_key_live>",
         "mal": "<required_key>",
         "igdb": "<required_key>",
         "nfo_file": "<Optional_key>"
     },
-
-
 
     "Required": {
 
@@ -45,14 +42,10 @@
         "sd": "string",
         "stream": "string",
 
-
-
         "category_id": {
             "70": "movie",
             "79": "episode"
         },
-
-
 
         "type": {
             "2160p": {
@@ -81,20 +74,19 @@
     },
 
     "Optional": {
-        "none": "none"
+        "none": "none",
+        "season_number": "string",
+        "episode_number": "string"
     },
 
-
-
     "dupes": {
-        "request": "POST",
+        "request": "GET",
+        "url_format": "{search_url}&imdb={imdb}",
         "strip_text": false,
-        "keys": {
-            "action": "search",
-            "imdb_id": "string"
-        },
+
         "parse_json": {
-            "top_lvl": "results"
+            "top_lvl": "data",
+            "torrent_details": "attributes"
         }
     },
 

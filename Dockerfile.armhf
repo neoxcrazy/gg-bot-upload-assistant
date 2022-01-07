@@ -1,4 +1,4 @@
-FROM arm32v7/alpine:3.15
+FROM arm32v7/alpine:3.14
 
 RUN \
  echo "**** install build packages ****" && \
@@ -12,7 +12,8 @@ RUN \
 	ffmpeg \
 	mediainfo \
 	python3 \
-	mktorrent
+	mktorrent \
+	unrar
 
 WORKDIR /app
 

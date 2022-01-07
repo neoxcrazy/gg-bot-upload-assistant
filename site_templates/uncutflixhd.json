@@ -1,9 +1,9 @@
 {
-    "name": "Blutopia",
-    "url": "https://blutopia.xyz",
-    "upload_form": "https://blutopia.xyz/api/torrents/upload?api_token={api_key}",
-    "torrents_search": "https://blutopia.xyz/api/torrents/filter?api_token={api_key}",
-    "source": "blu",
+    "name": "UNCUTFLIXHD",
+    "url": "https://uncutflixhd.com",
+    "upload_form": "https://uncutflixhd.com/api/torrents/upload?api_token={api_key}",
+    "torrents_search": "https://uncutflixhd.com/api/torrents/filter?api_token={api_key}",
+    "source": "UNCUTFLIXHD",
     "platform": "UNIT3D",
     "bbcode_line_break": "\n",
 
@@ -25,8 +25,7 @@
         "igdb": "igdb",
         "optimized": "stream",
         "nfo_file": "nfo",
-        "season_number": "season_number",
-        "episode_number": "episode_number",
+
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
@@ -42,6 +41,7 @@
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
+
         "tvdb": "string",
         "tmdb": "string",
         "imdb": "string",
@@ -65,12 +65,12 @@
                 "bluray_disc": 2,
                 "dvd_disc": 2
             },
-            "3": {
+            "2": {
                 "remux": 1,
                 "bluray_remux": 2,
                 "dvd_remux": 2
             },
-            "12": {
+            "3": {
                 "bluray_encode": 1
             },
             "4": {
@@ -84,20 +84,21 @@
             }
         },
 
+
         "resolution_id": {
-            "11": {
+            "1": {
                 "4360p": 1
             },
 
-            "1": {
+            "2": {
                 "2160p": 1
             },
 
-            "2": {
+            "3": {
                 "1080p": 1
             },
 
-            "3": {
+            "4": {
                 "1080i": 1
             },
 
@@ -154,54 +155,24 @@
 
     "torrent_title_format": {
         "episode": {
-            "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
             "bluray_remux": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
-            "bluray_encode": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
-            "web": "{title} {year} {s00e00} {repack} {screen_size} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "bluray_encode": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {atmos} {audio_channels} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {s00e00} {repack} {screen_size} {web_source} {web_type} {audio_codec} {atmos} {audio_channels} {dv} {hdr} {video_codec} {release_group}",
             "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
-            "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+            "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {atmos} {audio_channels} {release_group}"
         },
 
         "movie": {
-            "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
-            "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
-            "bluray_encode": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
-            "web": "{title} {year} {edition} {repack} {screen_size} {hybrid} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
-            "hdtv": "{title} {year} {edition} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {video_codec} {release_group}",
-            "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+            "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
+            "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
+            "bluray_encode": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {atmos} {audio_channels} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {edition} {repack} {screen_size} {hybrid} {web_source} {web_type} {audio_codec} {atmos} {audio_channels} {dv} {hdr} {video_codec} {release_group}",
+            "hdtv": "{title} {year} {edition} {repack} {screen_size} {hybrid} {source} {audio_codec} {atmos} {audio_channels} {video_codec} {release_group}",
+            "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {atmos} {audio_channels} {release_group}"
         }
     },
 
-    "banned_groups": [
-        "AROMA",
-        "aXXo",
-        "BRrip",
-        "CM8",
-        "CrEwSaDe",
-        "d3g",
-        "DNL",
-        "FGT",
-        "FaNGDiNG0",
-        "FRDS",
-        "HD2DVD",
-        "HDTime",
-        "iPlanet",
-        "KiNGDOM",
-        "Leffe",
-        "MeGusta",
-        "mHD",
-        "mSD",
-        "nHD",
-        "nikt0",
-        "nSD",
-        "NhaNc3",
-        "PRODJi",
-        "RDN",
-        "SANTi",
-        "STUTTERSHIT",
-        "ViSION",
-        "WAF",
-        "x0r",
-        "YIFY"
-    ]
+    "banned_groups": []
+
 }

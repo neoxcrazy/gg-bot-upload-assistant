@@ -1,20 +1,69 @@
-## GG-BOT Upload Assistant
+# GG-BOT Upload Assistant
 Automatically parse, rename, and upload torrents to trackers using the UNIT3D codebase, Xbtit codebase with custom API Wrapper
 
 ### Supported sites:
-* ACM - [**AsianCinema**](https://asiancinema.me/)
-* ATH - [**Aither**](https://aither.cc/)
-* BHD - [**Beyond-HD**](https://beyond-hd.me)
-* BLU - [**Blutopia**](https://blutopia.xyz)
-* R4E - [**Racing4Everyone**](https://racing4everyone.eu/)
-* Telly - [**Telly.wtf**](https://telly.wtf/)
-* Ntelogo - [**Ntelogo**](https://ntelogo.org/)
-* TSP - [**TheScenePlace**](https://thesceneplace.com/)
-* DT - [**DesiTorrents**](https://desitorrents.rocks/)
+<table>
+    <tbody>
+        <tr style="text-align: center; font-size:20px">
+            <td><strong>Acronym</strong></td>
+            <td><strong>Site Name</strong></td>
+            <td><strong>Platform</strong></td>
+        </th>
+        <tr style="text-align: center">
+            <td><strong>ACM</strong></td>
+            <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>ATH</strong></td>
+            <td><strong><a href="https://aither.cc">Aither</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>BHD</strong></td>
+            <td><strong><a href="https://beyond-hd.me">Beyond-HD</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>BLU</strong></td>
+            <td><strong><a href="https://blutopia.xyz">Blutopia</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>R4E</strong></td>
+            <td><strong><a href="https://racing4everyone.eu">Racing4Everyone</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Telly</strong></td>
+            <td><strong><a href="https://telly.wtf">Telly.wtf</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Ntelogo</strong></td>
+            <td><strong><a href="https://ntelogo.org">Ntelogo</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>TSP</strong></td>
+            <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
+            <td><strong>XBTIT</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>DT</strong></td>
+            <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>UFHD</strong></td>
+            <td><strong><a href="https://uncutflixhd.com/">Uncutflixhd</a></strong></td>
+            <td><strong>UNIT3D</strong></td>
+        </tr>
+    </tbody>
+</table>
 
-
-## Installation
-### Basic setup (Bare Metal / VM):
+<!-- Basic setup -->
+# Basic setup (Bare Metal / VM):
 1. Clone / download this repository
 2. Install necessary packages ```pip3 install -r requirements.txt```
 3. Rename `config.env.sample` to `config.env`
@@ -23,7 +72,7 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
 6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
 7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
    
-### Basic setup (Docker):
+# Basic setup (Docker):
 1. Create new folder / dir [`mkdir GGBotUploader`]
 2. Enter into the new directory [`cd GGBotUploader`]
 3. Pull GG-Bot-Uploader docker image ``` docker pull noobmaster669/gg-bot-uploader:latest```
@@ -39,15 +88,6 @@ docker run -it \
 ```
    <br /> 
 
-## Roadmap
-TBD 
-
-## Contributing
-TBD
-
-## License
-TBD
-
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
@@ -61,16 +101,34 @@ TBD
 **Known Issues:**
 1. BDInfo packed in docker container doesn't work. Hence Full BDs cannot be uploaded using the docker version
 2. Docker volume mounts in debian host system results in permission error in docker container
+    * Workaround: .torrent can be created in debian host os by using mktorrent. Provide argument `--use_mktorrent or -mkt`
 
-## Wiki
-### [Video usage examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Usage:-Video-Examples)
-### [Arguments and User Inputs](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Arguments-and-User-Inputs)
-### [Environment Configuration File (config.env breakdown)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Environment-Configuration-File)
-### [/site_templates/*.json guide](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Tracker-Templates)
-### [Automatic re-uploading (autodl)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/autodl-irssi-automatic-re-uploading)
-### [Docker Run Command Examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Docker-Run-Command-Examples)
+# Wiki
+### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
+### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
+### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
+### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
+### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
+### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
 
-## Change Log
+# Change Log
+**1.2**
+* Feature merges from XPBot
+    * Support for new tracker: Uncutflixhd
+    * Improved dupe check
+    * Improved screenshot upload process
+    * Added support for ptpimg
+    * Removed support for imgyukle
+* Performance Optimizations
+* Platform based site tagging
+* Environment file key validations
+* Extended Streaming Services list as configurable json
+* Extended Scene Groups list as configurable json
+* Extended BluRay regions list as configurable json
+* Improved argument description and help
+* Performance Optimizations
+* Debug mode for detailed analysis
+
 **1.1**
 * Added support for new tracker: DesiTorrents 
 * No spoiler screenshot feature

@@ -4,6 +4,7 @@
     "upload_form": "https://www.thesceneplace.com/api/upload.php?api_key={api_key}",
     "torrents_search": "https://www.thesceneplace.com/api/search.php?api_key={api_key}",
     "source": "TheScenePlace",
+    "platform": "XBTIT",
     "bbcode_line_break": "\n",
 
 
@@ -132,13 +133,15 @@
     },
 
     "Optional": {
-        "nfo_file": "file"
+        "nfo_file": "file",
+        "season_number": "string",
+        "episode_number": "string"
     },
 
     "dupes": {
         "request": "GET",
-        "strip_text": false,
         "url_format": "{search_url}&filter={filter}",
+        "strip_text": false,
 
         "parse_json": {
             "top_lvl": "data"

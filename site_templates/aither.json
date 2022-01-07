@@ -4,6 +4,7 @@
     "upload_form": "https://aither.cc/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://aither.cc/api/torrents/filter?api_token={api_key}",
     "source": "Aither",
+    "platform": "UNIT3D",
     "bbcode_line_break": "\n",
     "bbcode_code": "[code][/code]",
 
@@ -131,13 +132,15 @@
     },
 
     "Optional": {
-        "nfo_file": "file"
+        "nfo_file": "file",
+        "season_number": "string",
+        "episode_number": "string"
     },
 
     "dupes": {
         "request": "GET",
-        "url_format": "{search_url}&imdb={imdb}",
-        "strip_text": false,
+        "url_format": "{search_url}&imdbId={imdb}",
+        "strip_text": true,
 
         "parse_json": {
             "top_lvl": "data",

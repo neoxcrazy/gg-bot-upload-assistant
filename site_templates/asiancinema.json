@@ -4,6 +4,7 @@
     "upload_form": "https://asiancinema.me/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://asiancinema.me/api/torrents/filter?api_token={api_key}",
     "source": "acm",
+    "platform": "UNIT3D",
     "bbcode_line_break": "<br />",
 
 
@@ -26,11 +27,9 @@
         "igdb": "igdb",
         "optimized": "stream",
         "nfo_file": "nfo_file"
-
-
     },
-    "Required": {
 
+    "Required": {
         "torrent": "file",
         "name": "string",
         "description": "string",
@@ -41,8 +40,6 @@
         "igdb": "string",
         "mal": "string",
         "tvdb": "string",
-
-
 
         "category_id": {
             "1": "movie",
@@ -127,7 +124,6 @@
             }
         },
 
-
         "resolution_id": {
             "1": {
                 "2160p": 1
@@ -152,25 +148,25 @@
             }
         },
 
-
-
         "tmdb": "string",
         "imdb": "string"
     },
-    "Optional": {
-        "nfo_file": "file"
-    },
-    "dupes": {
 
+    "Optional": {
+        "nfo_file": "file",
+        "season_number": "string",
+        "episode_number": "string"
+    },
+
+    "dupes": {
         "request": "GET",
+        "strip_text": true,
         "url_format": "{search_url}&imdb={imdb}",
-        "strip_text": false,
 
         "parse_json": {
             "top_lvl": "data",
             "torrent_details": "attributes"
         },
-
 
         "different_cuts": "1",
         "2160p_remux": 1,
