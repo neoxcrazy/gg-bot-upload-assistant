@@ -1,4 +1,4 @@
-## GG-BOT Upload Assistant
+# GG-BOT Upload Assistant
 Automatically parse, rename, and upload torrents to trackers using the UNIT3D codebase, Xbtit codebase with custom API Wrapper
 
 ### Supported sites:
@@ -12,9 +12,8 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
 * TSP - [**TheScenePlace**](https://thesceneplace.com/)
 * DT - [**DesiTorrents**](https://desitorrents.rocks/)
 
-
-## Installation
-### Basic setup (Bare Metal / VM):
+<!-- Basic setup -->
+# Basic setup (Bare Metal / VM):
 1. Clone / download this repository
 2. Install necessary packages ```pip3 install -r requirements.txt```
 3. Rename `config.env.sample` to `config.env`
@@ -23,7 +22,7 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
 6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
 7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
    
-### Basic setup (Docker):
+# Basic setup (Docker):
 1. Create new folder / dir [`mkdir GGBotUploader`]
 2. Enter into the new directory [`cd GGBotUploader`]
 3. Pull GG-Bot-Uploader docker image ``` docker pull noobmaster669/gg-bot-uploader:latest```
@@ -39,15 +38,6 @@ docker run -it \
 ```
    <br /> 
 
-## Roadmap
-TBD 
-
-## Contributing
-TBD
-
-## License
-TBD
-
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
@@ -62,15 +52,15 @@ TBD
 1. BDInfo packed in docker container doesn't work. Hence Full BDs cannot be uploaded using the docker version
 2. Docker volume mounts in debian host system results in permission error in docker container
 
-## Wiki
-### [Video usage examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Usage:-Video-Examples)
-### [Arguments and User Inputs](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Arguments-and-User-Inputs)
-### [Environment Configuration File (config.env breakdown)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Environment-Configuration-File)
-### [/site_templates/*.json guide](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Tracker-Templates)
-### [Automatic re-uploading (autodl)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/autodl-irssi-automatic-re-uploading)
-### [Docker Run Command Examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Docker-Run-Command-Examples)
+# Wiki
+### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
+### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
+### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
+### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
+### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
+### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
 
-## Change Log
+# Change Log
 **1.1**
 * Added support for new tracker: DesiTorrents 
 * No spoiler screenshot feature

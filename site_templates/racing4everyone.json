@@ -1,0 +1,120 @@
+{
+    "name": "Racing4Everyone",
+    "url": "https://racing4everyone.eu",
+    "upload_form": "https://racing4everyone.eu/api/torrents/upload?api_token={api_key}",
+    "torrents_search": "https://racing4everyone.eu/api/torrents/filter?api_token={api_key}",
+    "source": "R4E",
+    "bbcode_line_break": "<br />",
+
+
+    "translation": {
+        "dot_torrent": "torrent",
+        "torrent_title": "name",
+        "description": "description",
+        "mediainfo": "mediainfo",
+        "type": "category_id",
+        "resolution": "type",
+        "tmdb": "tmdb",
+        "imdb": "imdb",
+        "tvdb": "tvdb",
+        "anon": "anonymous",
+        "sd": "sd",
+        "optimized": "stream",
+
+
+        "live": "<required_key_live>",
+        "mal": "<required_key>",
+        "igdb": "<required_key>",
+        "nfo_file": "<Optional_key>"
+    },
+
+
+
+    "Required": {
+
+        "torrent": "file",
+        "name": "string",
+        "description": "string",
+        "mediainfo": "string",
+
+        "tmdb": "string",
+        "tvdb": "string",
+        "imdb": "string",
+
+        "anonymous": "string",
+        "sd": "string",
+        "stream": "string",
+
+
+
+        "category_id": {
+            "70": "movie",
+            "79": "episode"
+        },
+
+
+
+        "type": {
+            "2160p": {
+                "2160p": 1
+            },
+
+            "1080i": {
+                "1080i": 1
+            },
+
+            "1080p": {
+                "1080p": 1
+            },
+
+            "720p": {
+                "720p": 1
+            },
+
+            "SD": {
+                "576p": 2,
+                "576i": 2,
+                "480p": 2,
+                "480i": 2
+            }
+        }
+    },
+
+    "Optional": {
+        "none": "none"
+    },
+
+
+
+    "dupes": {
+        "request": "POST",
+        "strip_text": false,
+        "keys": {
+            "action": "search",
+            "imdb_id": "string"
+        },
+        "parse_json": {
+            "top_lvl": "results"
+        }
+    },
+
+    "torrent_title_format": {
+        "episode": {
+            "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_remux": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_encode": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {s00e00} {repack} {screen_size} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
+            "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+        },
+
+        "movie": {
+            "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_encode": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {edition} {repack} {screen_size} {hybrid} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "hdtv": "{title} {year} {edition} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {video_codec} {release_group}",
+            "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+        }
+    }
+}
