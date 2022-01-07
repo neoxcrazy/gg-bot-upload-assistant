@@ -14,4 +14,4 @@ rtorrent_on_complete_reupload.sh
 /__pycache__/
 /temp_upload/
 /*.torrent
-./vscode/
+/.vscode/
