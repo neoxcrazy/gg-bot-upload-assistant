@@ -1,0 +1,17 @@
+# Project exclude paths
+/venv/
+/config.env
+/upload_script.log
+/.github/
+/temp_upload/description.txt
+/temp_upload/mediainfo.txt
+/images/screenshots/
+/tests.py
+/temp_upload/bbcode_images.txt
+rtorrent_on_complete_reupload.sh
+/*.mkv
+/*.mp4
+/__pycache__/
+/temp_upload/
+/images/*
+/*.torrent

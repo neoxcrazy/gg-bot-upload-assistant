@@ -1,12 +1,161 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-stages:
-- test
-sast:
-  stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
+variables:
+  DOCKER_IMAGE: "docker:stable"
+
+# Image ID: registry.gitlab.com/gg-bot/gg-bot-uploader:{TAG}
+# Image Description: Normal Docker Image build and stored in GitLab Container Registry
+# Build Conditions: On all branches and tags
+gitlab-docker-image:
+  stage: build
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=""
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image '$CI_REGISTRY_IMAGE${tag}"
+    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" .
+    - |
+      echo "Publishing Image to Gitlab Registry: '$CI_REGISTRY_IMAGE${tag}"
+    - docker push "$CI_REGISTRY_IMAGE${tag}"
+  rules:
+    - if: '$CI_COMMIT_BRANCH || $CI_COMMIT_TAG'
+      exists:
+        - Dockerfile
+
+# Image ID: noobmaster669/gg-bot-uploader:{TAG}
+# Image Description: Normal Docker Image build and stored in Docker Registry
+# Build Conditions: On all tags and master branch
+docker-hub-image:
+  stage: build
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=""
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_IMAGE${tag}" .
+    - |
+      echo "Publishing Image to Docker Hubgit a Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
+  rules:
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      exists:
+        - Dockerfile
+
+
+docker-hub-image-aarch64:
+  stage: build
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=""
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_IMAGE${tag}" -f Dockerfile.aarch64 .
+    - |
+      echo "Publishing Image to Docker Hub Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
+  rules:
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      exists:
+        - Dockerfile.aarch64
+
+
+# Image ID: noobmaster669/gg-bot-uploader:arm32v7-{TAG}
+# Image Description: arm32v7 Docker Image build and stored in Docker Registry
+# Build Conditions: On all tags and master branch
+docker-hub-image-armhf:
+  stage: build
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=""
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_IMAGE${tag}" -f Dockerfile.armhf .
+    - |
+      echo "Publishing Image to Docker Hub Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
+    - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}" 
+  rules:
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      exists:
+        - Dockerfile.armhf
