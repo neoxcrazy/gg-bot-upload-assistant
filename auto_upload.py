@@ -177,7 +177,7 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     format_title(config)
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], torrent_info["imdb"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key)
+    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], torrent_info["imdb"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
 
 
 def delete_leftover_files():
