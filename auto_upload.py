@@ -154,6 +154,7 @@ internal_args.add_argument('-internal', action='store_true', help="(Internal) Us
 internal_args.add_argument('-freeleech', action='store_true', help="(Internal) Used to give a new upload freeleech", default=argparse.SUPPRESS)
 internal_args.add_argument('-featured', action='store_true', help="(Internal) feature a new upload", default=argparse.SUPPRESS)
 internal_args.add_argument('-doubleup', action='store_true', help="(Internal) Give a new upload 'double up' status", default=argparse.SUPPRESS)
+internal_args.add_argument('-tripleup', action='store_true', help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]", default=argparse.SUPPRESS)
 internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload", default=argparse.SUPPRESS)
 
 args = parser.parse_args()
@@ -1478,8 +1479,7 @@ def choose_right_tracker_keys():
                         tracker_settings[config["translation"][translation_key]] = "1"
 
                     # Adding support for internal args
-                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky']:
-                        # print(f"{translation_key} in namespace?: {translation_key in args}")
+                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup']:
                         tracker_settings[config["translation"][translation_key]] = "1" if translation_key in args else "0"
 
                     # This work as a sort of 'catch all', if we don't have the correct data in torrent_info, we just send a 0 so we can successfully post
