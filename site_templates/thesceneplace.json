@@ -30,6 +30,7 @@
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
+        "tripleup": "tripleup",
         "sticky": "sticky",
         "freeleech": "free"
 
@@ -55,6 +56,7 @@
         "free": "string",
         "featured": "string",
         "doubleup": "string",
+        "tripleup": "string",
         "sticky": "string",
 
         "category": {

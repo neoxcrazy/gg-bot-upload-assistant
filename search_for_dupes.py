@@ -15,7 +15,10 @@ working_folder = os.path.dirname(os.path.realpath(__file__))
 logging.basicConfig(filename=f'{working_folder}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
-def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api):
+def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
+    if debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
     with open(f'{working_folder}/site_templates/{search_site}.json', "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
     
@@ -91,6 +94,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api):
     # If we get no matches when searching via IMDB ID that means this content hasn't been upload in any format, no possibility for dupes
     if len(existing_release_types.keys()) == 0:
         logging.info(msg='Dupe query did not return any releases that we could parse, assuming no dupes exist.')
+        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['source']).upper()}[/bold], continuing the upload process now\n")
         return False
 
     # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #

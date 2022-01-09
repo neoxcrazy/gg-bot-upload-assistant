@@ -150,11 +150,12 @@ uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', h
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
-internal_args.add_argument('-internal', action='store_true', help="(Internal) Used to mark an upload as 'Internal'", default=argparse.SUPPRESS)
-internal_args.add_argument('-freeleech', action='store_true', help="(Internal) Used to give a new upload freeleech", default=argparse.SUPPRESS)
-internal_args.add_argument('-featured', action='store_true', help="(Internal) feature a new upload", default=argparse.SUPPRESS)
-internal_args.add_argument('-doubleup', action='store_true', help="(Internal) Give a new upload 'double up' status", default=argparse.SUPPRESS)
-internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload", default=argparse.SUPPRESS)
+internal_args.add_argument('-internal', action='store_true', help="(Internal) Used to mark an upload as 'Internal'")
+internal_args.add_argument('-freeleech', action='store_true', help="(Internal) Used to give a new upload freeleech")
+internal_args.add_argument('-featured', action='store_true', help="(Internal) feature a new upload")
+internal_args.add_argument('-doubleup', action='store_true', help="(Internal) Give a new upload 'double up' status")
+internal_args.add_argument('-tripleup', action='store_true', help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]")
+internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload")
 
 args = parser.parse_args()
 
@@ -176,7 +177,7 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     format_title(config)
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], torrent_info["imdb"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key)
+    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], torrent_info["imdb"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
 
 
 def delete_leftover_files():
@@ -438,6 +439,7 @@ def analyze_video_file(missing_value):
 
     # ffprobe/mediainfo need to access to video file not folder, set that here using the 'parse_me' variable
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
+    logging.debug(f"Mediainfo will parse the file: {parse_me}")
     media_info = MediaInfo.parse(parse_me)
     
     # In pretty much all cases "media_info.tracks[1]" is going to be the video track and media_info.tracks[2] will be the primary audio track
@@ -1478,9 +1480,8 @@ def choose_right_tracker_keys():
                         tracker_settings[config["translation"][translation_key]] = "1"
 
                     # Adding support for internal args
-                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky']:
-                        # print(f"{translation_key} in namespace?: {translation_key in args}")
-                        tracker_settings[config["translation"][translation_key]] = "1" if translation_key in args else "0"
+                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup']:
+                        tracker_settings[config["translation"][translation_key]] = "1" if getattr(args, translation_key) is True else "0"
 
                     # This work as a sort of 'catch all', if we don't have the correct data in torrent_info, we just send a 0 so we can successfully post
                     else:
@@ -1687,6 +1688,11 @@ logging.info(starting_new_upload)
 if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
     logging.debug(f"Arguments provided by user: {args}")
+
+if args.tripleup and args.doubleup:
+    console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
+    console.print("Exiting...\n", style='bright_red bold')
+    sys.exit()
 
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path
