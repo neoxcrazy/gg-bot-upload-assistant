@@ -113,38 +113,47 @@ docker run -it \
 
 # Change Log
 **1.2**
-* Feature merges from XPBot
-    * Support for new tracker: Uncutflixhd
-    * Improved dupe check
-    * Improved screenshot upload process
-    * Added support for ptpimg
-    * Removed support for imgyukle
-* Performance Optimizations
-* Platform based site tagging
-* Environment file key validations
-* Extended Streaming Services list as configurable json
-* Extended Scene Groups list as configurable json
-* Extended BluRay regions list as configurable json
-* Improved argument description and help
-* Performance Optimizations
-* Debug mode for detailed analysis
+
+    * Performance Optimizations
+    * Platform based site tagging
+    * Improved argument description and help
+
+    ### New Features
+    * Debug mode for detailed analysis
+    * Extended BluRay regions list as configurable json
+    * Extended Scene Groups list as configurable json
+    * Extended Streaming Services list as configurable json
+    * Environment file key validations
+    * Feature merges from XPBot
+        * Support for new tracker: Uncutflixhd
+        * Improved dupe check
+        * Improved screenshot upload process
+        * Added support for ptpimg
+        * Removed support for imgyukle
+
+    ### Bug Fixes
+    * TSP internal uploads
+    * No dupe message not being shown in certain cases
 
 **1.1**
-* Added support for new tracker: DesiTorrents 
-* No spoiler screenshot feature
-* CICD pipeline optimizations
-* Default screenshots count changes
-* Strip text feature for torrent dupe checks
-* Full season tv-show upload bug fix
-* Updated tag naming bug fix
+
+    * Added support for new tracker: DesiTorrents 
+    * No spoiler screenshot feature
+    * CICD pipeline optimizations
+    * Default screenshots count changes
+    * Strip text feature for torrent dupe checks
+    * Full season tv-show upload bug fix
+    * Updated tag naming bug fix
 
 **1.0.1**
-* Updated naming conventions for HDR, Atmos Audio, and BluRay source
+
+    * Updated naming conventions for HDR, Atmos Audio, and BluRay source
 
 **1.0**
-* Initial Release
-* Added docker images for aarch64 and armhf OS Architectures
-* CICD Pipeline Changes
-* Updated Templates
-* Support for Xbtit Platform with custom API
-* Screenshot thumbnail feature
+
+    * Initial Release
+    * Added docker images for aarch64 and armhf OS Architectures
+    * CICD Pipeline Changes
+    * Updated Templates
+    * Support for Xbtit Platform with custom API
+    * Screenshot thumbnail feature\
