@@ -1,14 +1,15 @@
 # Project exclude paths
-/venv/
-/upload_script.log
-/.github/
+/venv
+*.log
+/.github
 /tests.py
-/*.mkv
-/*.mp4
-/__pycache__/
-/*.torrent
-/images/*
-/temp_upload/*
+*.mkv
+*.mp4
+/__pycache__
+*.torrent
+/images/__pycache__
+/images/screenshots
+/temp_upload
 rtorrent_on_complete_reupload.sh
 config.env
 /.idea/

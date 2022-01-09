@@ -56,6 +56,7 @@
         "free": "string",
         "featured": "string",
         "doubleup": "string",
+        "tripleup": "string",
         "sticky": "string",
 
         "category": {
