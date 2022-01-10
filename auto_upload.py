@@ -487,7 +487,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.debug("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo")
         console.print("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo", style='bold blue')
         generate_and_parse_bdinfo()
-        logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info["bdinfo"])}")
+        logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info['bdinfo'])}")
         # TODO using the generated `torrent_info['bdinfo']` fill in the necessary data
 
         bdinfo_end_time = time.perf_counter()
