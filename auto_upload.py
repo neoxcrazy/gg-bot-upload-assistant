@@ -331,6 +331,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
+            logging.debug(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
             # In auto_mode we just choose the largest playlist
             # TODO add support for auto_mode/user input
             dict_of_playlist_length_size = {}
@@ -482,11 +483,10 @@ def analyze_video_file(missing_value):
             # torrent_info["mediainfo"] = save_location
             return save_location
 
-
         else:
+            # if largest_playlist is already in torrent_info, then why this computation again???
             # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-            bdinfo_output_split = str(' '.join(
-                str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
+            bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
             dict_of_playlist_length_size = {}
@@ -499,11 +499,10 @@ def analyze_video_file(missing_value):
             largest_playlist_value = max(dict_of_playlist_length_size.values())
             largest_playlist = list(dict_of_playlist_length_size.keys())[
                 list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-
+            logging.debug(f"largest_playlist :: {largest_playlist} and largest_playlist from torrent_info :: {torrent_info[largest_playlist]}")
             subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + largest_playlist])
 
-            shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt',
-                        f'{working_folder}/temp_upload/mediainfo.txt')
+            shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
             if os.path.isfile("/usr/bin/sed"):
                 sed_path = "/usr/bin/sed"
             else:
