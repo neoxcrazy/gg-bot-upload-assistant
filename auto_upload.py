@@ -425,7 +425,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # First check to see if we are uploading a 'raw bluray disc'
         if args.disc:
             # Verify that the bdinfo script exists
-            if not os.path.isfile(bdinfo_script):
+            if os.getenv("IS_CONTAINERIZED") != "true" and not os.path.isfile(bdinfo_script):
                 logging.critical("You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
                 logging.info("Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
                 raise AssertionError(f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
