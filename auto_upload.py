@@ -363,14 +363,23 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.info("Type will be detected dynamically!")
         keys_we_need_torrent_info.append('type')    
 
+    keys_we_need_but_missing_torrent_info = []
+    # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
+    # All of that is important but not essential right now so we will try to extract that info later in the script
+    logging.debug(f"Attempting to detect the following keys from guessit :: {keys_we_need_torrent_info}")
+    for basic_key in keys_we_need_torrent_info:
+        if basic_key in guess_it_result:
+            torrent_info[basic_key] = str(guess_it_result[basic_key])
+        else:
+            keys_we_need_but_missing_torrent_info.append(basic_key)
+
     # As guessit evolves and adds more info we can easily support whatever they add
     # and insert it into our main torrent_info dict
+    logging.debug(f"Attempting to detect the following keys from guessit :: {keys_we_want_torrent_info}")
     for wanted_key in keys_we_want_torrent_info:
         if wanted_key in guess_it_result:
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
     
-    logging.debug(f"Torrent info after initial guessit processing :::::::::::::::::::::::::::::::::")
-    logging.debug(pformat(torrent_info))
     # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
     if "type" not in torrent_info:
@@ -498,16 +507,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
         keys_we_need_but_missing_torrent_info_list = ['mediainfo', 'video_codec', 'audio_codec']
-
-
-    keys_we_need_but_missing_torrent_info = []
-    # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
-    # All of that is important but not essential right now so we will try to extract that info later in the script
-    for basic_key in keys_we_need_torrent_info:
-        if basic_key in guess_it_result:
-            torrent_info[basic_key] = str(guess_it_result[basic_key])
-        else:
-            keys_we_need_but_missing_torrent_info.append(basic_key)
 
     # ------------ GuessIt doesn't return a video/audio codec that we should use ------------ #
     # For 'x264', 'AVC', and 'H.264' GuessIt will return 'H.264' which might be a little misleading since things like 'x264' is used for encodes while AVC for Remuxs (usually) etc
