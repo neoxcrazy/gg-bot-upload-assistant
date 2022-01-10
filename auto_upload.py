@@ -160,6 +160,16 @@ internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin 
 args = parser.parse_args()
 
 
+def write_file_contents_to_log_as_debug(file_path):
+    """
+        Method reads and writes the contents of the provided `file_path` to the log as debug lines.
+        note that the method doesn't check for debug mode or not, those checks needs to be done by the caller
+    """
+    with open(file_path, 'r') as file_contents:
+        lines = file_contents.readlines()
+        [ logging.debug(line) for line in lines ]
+
+
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     """
         Method to check for any duplicate torrents in the tracker.
@@ -331,9 +341,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
+            
             logging.info(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
             logging.debug(":::::::::::::::::::::::::::: BDInfo Output ::::::::::::::::::::::::::::")
             logging.debug(bdinfo_output_split)
+            
             # In auto_mode we just choose the largest playlist
             # TODO add support for auto_mode/user input
             dict_of_playlist_length_size = {}
@@ -341,13 +353,12 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             for index, mpls_playlist in enumerate(bdinfo_output_split):
                 if mpls_playlist in all_mpls_playlists:
                     dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
+            
             logging.debug(f"Playlists ordered by size :: {dict_of_playlist_length_size}")
             largest_playlist_value = max(dict_of_playlist_length_size.values())
             largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-            # print(largest_playlist)
             torrent_info["largest_playlist"] = largest_playlist
             logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
-
         else:
             for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
                 found = False  # this is used to break out of the double nested loop
@@ -365,7 +376,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
         if 'raw_video_file' not in torrent_info:
             logging.critical(f"The folder {torrent_info['upload_media']} does not contain any video files")
-            console.print(f"The folder {torrent_info['upload_media']} does not contain any video files\n\n",style='bold red')
+            console.print(f"The folder {torrent_info['upload_media']} does not contain any video files\n\n", style='bold red')
             return "skip_to_next_file"
             # sys.exit(f"The folder {torrent_info['upload_media']} does not contain any video files")
 
@@ -393,10 +404,19 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         if identify_me not in keys_we_need_but_missing_torrent_info:
             keys_we_need_but_missing_torrent_info.append(identify_me)
 
+    # parsing mediainfo, this will be reused for further processing.
+    # only when the required data is mediainfo, this will be computed again, but as `text` format to write to file.
+    parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
+    logging.debug(f"Mediainfo will parse the file: {parse_me}")
+    meddiainfo_start_time = time.perf_counter()
+    media_info_result = MediaInfo.parse(parse_me)
+    meddiainfo_end_time = time.perf_counter()
+    logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
         # Save the analyze_video_file() return result into the 'torrent_info' dict
-        torrent_info[missing_val] = analyze_video_file(missing_value=missing_val)
+        torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
     # Show the user what we identified so far
     columns_we_want = {
@@ -434,23 +454,15 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
 
 
-def analyze_video_file(missing_value):
+def analyze_video_file(missing_value, media_info):
     """
         This method is being called in loop with mediainfo calculation all taking place multiple times.
         Optimize this code for better performance
     """
-    # console.print(f"\nTrying to identify the [bold][green]{missing_value}[/green][/bold]...")
+    logging.debug(f"Trying to identify the [bold][green]{missing_value}[/green][/bold]...")
 
     # ffprobe/mediainfo need to access to video file not folder, set that here using the 'parse_me' variable
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
-    logging.debug(f"Mediainfo will parse the file: {parse_me}")
-    # TODO prevent multiple mediainfo parsing
-    meddiainfo_start_time = time.perf_counter()
-    media_info = MediaInfo.parse(parse_me)
-    meddiainfo_end_time = time.perf_counter()
-    logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
-    logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
-    logging.debug(pformat(media_info))
 
     # In pretty much all cases "media_info.tracks[1]" is going to be the video track and media_info.tracks[2] will be the primary audio track
     media_info_video_track = media_info.tracks[1]
@@ -474,10 +486,11 @@ def analyze_video_file(missing_value):
             # depending on if the user is uploading a folder or file we need for format it correctly so we replace the entire path with just media file/folder name
             logging.info(f"Using the following path in mediainfo.txt: {essential_path}")
 
-            media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me,
-                                                                                                  essential_path)
+            media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me, essential_path)
             save_location = str(working_folder + '/temp_upload/mediainfo.txt')
             logging.info(f'Saving mediainfo to: {save_location}')
+            logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
+            logging.debug(media_info_output)
 
             with open(save_location, 'w+') as f:
                 f.write(media_info_output)
@@ -488,21 +501,8 @@ def analyze_video_file(missing_value):
         else:
             # if largest_playlist is already in torrent_info, then why this computation again???
             # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-            bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
-            all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-
-            dict_of_playlist_length_size = {}
-
-            for index, mpls_playlist in enumerate(bdinfo_output_split):
-                if mpls_playlist in all_mpls_playlists:
-                    dict_of_playlist_length_size[mpls_playlist] = int(
-                        str(bdinfo_output_split[index + 2]).replace(",", ""))
-
-            largest_playlist_value = max(dict_of_playlist_length_size.values())
-            largest_playlist = list(dict_of_playlist_length_size.keys())[
-                list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-            logging.debug(f"largest_playlist :: {largest_playlist} and largest_playlist from torrent_info :: {torrent_info['largest_playlist']}")
-            subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + largest_playlist])
+            logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
+            subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
 
             shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
             if os.path.isfile("/usr/bin/sed"):
@@ -511,6 +511,10 @@ def analyze_video_file(missing_value):
                 sed_path = "/bin/sed"
             os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {working_folder}/temp_upload/mediainfo.txt")
             # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+            # displaying bdinfo to log in debug mode
+            if args.debug:
+                write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
+
             return f'{working_folder}/temp_upload/mediainfo.txt'
 
     def quit_log_reason(reason):
