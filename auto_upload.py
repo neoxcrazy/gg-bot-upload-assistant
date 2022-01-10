@@ -499,7 +499,7 @@ def analyze_video_file(missing_value):
             largest_playlist_value = max(dict_of_playlist_length_size.values())
             largest_playlist = list(dict_of_playlist_length_size.keys())[
                 list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-            logging.debug(f"largest_playlist :: {largest_playlist} and largest_playlist from torrent_info :: {torrent_info[largest_playlist]}")
+            logging.debug(f"largest_playlist :: {largest_playlist} and largest_playlist from torrent_info :: {torrent_info['largest_playlist']}")
             subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + largest_playlist])
 
             shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
