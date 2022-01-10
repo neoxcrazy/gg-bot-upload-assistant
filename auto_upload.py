@@ -329,7 +329,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             torrent_info["raw_video_file"] = bd_max_file
 
-            bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, torrent_info["upload_media"], "-l"])).split())).split(' ')
+            bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
             # In auto_mode we just choose the largest playlist
             # TODO add support for auto_mode/user input
@@ -342,7 +342,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
             # print(largest_playlist)
             torrent_info["largest_playlist"] = largest_playlist
-
+            logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
 
         else:
             for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
@@ -385,7 +385,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # Show the user what is missing & the next steps
         console.print(f"[bold red underline]Unable to automatically detect the following info in the filename:[/bold red underline] [green]{keys_we_need_but_missing_torrent_info}[/green]")    
     # We do some extra processing for the audio & video codecs since they are pretty important for the upload process & accuracy so they get appended each time
-    for identify_me in ['video_codec', 'audio_codec', 'mediainfo']:
+    for identify_me in ['mediainfo', 'video_codec', 'audio_codec']: # fetching mediainfo first before video and audio codecs
         if identify_me not in keys_we_need_but_missing_torrent_info:
             keys_we_need_but_missing_torrent_info.append(identify_me)
 
@@ -441,7 +441,9 @@ def analyze_video_file(missing_value):
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
     logging.debug(f"Mediainfo will parse the file: {parse_me}")
     media_info = MediaInfo.parse(parse_me)
-    
+    logging.debug("PyMediaInfo output ::::::::::::::::::")
+    logging.debug(media_info)
+
     # In pretty much all cases "media_info.tracks[1]" is going to be the video track and media_info.tracks[2] will be the primary audio track
     media_info_video_track = media_info.tracks[1]
     # I've encountered a media file without an audio track one time... this try/exception should handle any future situations like that
@@ -479,7 +481,7 @@ def analyze_video_file(missing_value):
         else:
             # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
             bdinfo_output_split = str(' '.join(
-                str(subprocess.check_output([bdinfo_script, torrent_info["upload_media"], "-l"])).split())).split(' ')
+                str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
             dict_of_playlist_length_size = {}
@@ -493,7 +495,7 @@ def analyze_video_file(missing_value):
             largest_playlist = list(dict_of_playlist_length_size.keys())[
                 list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
 
-            subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + largest_playlist])
+            subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + largest_playlist])
 
             shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt',
                         f'{working_folder}/temp_upload/mediainfo.txt')
@@ -1647,7 +1649,7 @@ def upload_to_site(upload_to, tracker_api_key):
         logging.info(f"upload response for {upload_to}: {response.text.encode('utf8')}")
         # Update discord channel
         if discord_url:
-            requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content='f'Upload response: **{response.text.encode('utf8')}**")
+            requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
 
         if "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
@@ -1880,7 +1882,9 @@ for file in upload_queue:
     guess_it_result = guessit(torrent_info["upload_media"])
     guessit_end_time = time.perf_counter()
     logging.debug(f'Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
-
+    logging.debug("GuessIt output result :::::::::::::::::::::::::::::")
+    logging.debug(guess_it_result)
+    
     # -------- Basic info --------
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
     if identify_type_and_basic_info(torrent_info["upload_media"], guess_it_result) == 'skip_to_next_file':
