@@ -4,3 +4,4 @@ README.md
 *.mkv
 *.mp4
 .coverage
+bdinfo*.txt

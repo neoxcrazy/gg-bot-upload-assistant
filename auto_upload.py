@@ -167,7 +167,114 @@ def write_file_contents_to_log_as_debug(file_path):
     """
     with open(file_path, 'r') as file_contents:
         lines = file_contents.readlines()
-        [ logging.debug(line) for line in lines ]
+        [ logging.debug(line.replace('\\n','')) for line in lines ]
+
+
+def parse_bdinfo(bdinfo_location):
+    # TODO add support for .iso extraction
+    # TODO add support for 3D bluray disks
+    """
+        Attributes in returned bdinfo
+        -----KEY------------DESCRIPTION-----------------------------EXAMPLE VALUE----------
+            playlist: playlist being parsed                     : 00001.MPL
+            size    : size of the disk                          : 54.597935752011836
+            length  : duration of playback                      : 1:37:17
+            title   : title of the disk                         : Venom: Let There Be Carnage - 4K Ultra HD
+            label   : label of the disk                         : Venom.Let.There.Be.Carnage.2021.UHD.BluRay.2160p.HEVC.Atmos.TrueHD7.1-MTeam
+            video   : {
+                "codec"         : video codec                   : MPEG-H HEVC Video
+                "bitrate"       : the video bitrate             : 55873 kbps
+                "resolution"    : the resolution of the video   : 2160p
+                "fps"           : the fps                       : 23.976 fps
+                "aspect_ratio"  : the aspect ratio              : 16:9
+                "profile"       : the video profile             : Main 10 @ Level 5.1 @ High
+                "bit_depth"     : the bit depth                 : 10 bits
+                "dv_hdr"        : DV or HDR (if present)        : HDR10
+                "color"         : the color parameter           : BT.2020
+            }
+            audio   : {
+                "language"      : the audio language            : English
+                "codec"         : the audio codec               : Dolby TrueHD
+                "channels"      : the audo channels             : 7.1
+                "sample_rate"   : the sample rate               : 48 kHz
+                "bitrate"       : the average bit rate          : 4291 kbps
+                "bit_depth"     : the bit depth of the audio    : 24-bit
+                "atmos"         : whether atmos is present      : Atmos Audio
+            }
+    """
+    bdinfo = dict()
+    bdinfo['video'] = list()
+    bdinfo['audio'] = list()
+    with open(bdinfo_location, 'r') as file_contents:
+        lines = file_contents.readlines()
+        for line in lines:
+            line = line.strip()
+            line = line.replace("*", "").strip() if line.startswith("*") else line
+            if line.startswith("Playlist:"):                        # Playlist: 00001.MPLS              ==> 00001.MPLS
+                bdinfo['playlist'] = line.split(':', 1)[1].strip() 
+            elif line.startswith("Disc Size:"):                     # Disc Size: 58,624,087,121 bytes   ==> 54.597935752011836
+                size = line.split(':', 1)[1].replace("bytes", "").replace(",", "")
+                size = float(size)/float(1<<30)
+                bdinfo['size'] = size                              
+            elif line.startswith("Length:"):                        # Length: 1:37:17.831               ==> 1:37:17
+                bdinfo['length'] = line.split(':', 1)[1].split('.',1)[0].strip()
+            elif line.startswith("Video:"):
+                """
+                    video_components: examples [video_components_dict is the mapping of these components and their indexes]
+                    MPEG-H HEVC Video / 55873 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
+                    MPEG-H HEVC Video / 2104 kbps / 1080p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / Dolby Vision / BT.2020
+                    MPEG-H HEVC Video / 35033 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
+                    MPEG-4 AVC Video / 34754 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
+                """
+                video_components_dict = {
+                    0 : "codec",
+                    1 : "bitrate",
+                    2 : "resolution",
+                    3 : "fps",
+                    4 : "aspect_ratio",
+                    5 : "profile",
+                    6 : "bit_depth",
+                    7 : "dv_hdr",
+                    8 : "color",
+                }
+                video_components = line.split(':', 1)[1].split('/')
+                video_metadata = {}
+                for loop_variable in range(0, video_components.__len__()):
+                    video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable]
+                bdinfo["video"].append(video_metadata)
+            elif line.startswith("Audio:"):
+                """
+                    audio_components: examples 
+                    English / Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz /  4291 kbps / 24-bit (AC3 Embedded: 5.1 / 48 kHz /   640 kbps / DN -31dB)
+                    English / DTS-HD Master Audio / 7.1 / 48 kHz /  5002 kbps / 24-bit (DTS Core: 5.1 / 48 kHz /  1509 kbps / 24-bit)
+                    English / Dolby Digital Audio / 5.1 / 48 kHz /   448 kbps / DN -31dB
+                    English / DTS Audio / 5.1 / 48 kHz /   768 kbps / 24-bit
+                """
+                audio_components_dict = {
+                    0 : "language",
+                    1 : "codec", # atmos => added if present optionally
+                    2 : "channels",
+                    3 : "sample_rate",
+                    4 : "bitrate",
+                    5 : "bit_depth" 
+                }
+                if "(" in line:
+                    line = line.split("(")[0] # removing the contents inside bracket
+                audio_components = line.split(':', 1)[1].split('/ ') # not so sure about this /{space}
+                audio_metadata = {}
+                for loop_variable in range(0, audio_components.__len__()):
+                    if "Atmos" in audio_components[loop_variable]: # identifying and tagging atmos audio
+                        codec_split = audio_components[loop_variable].split("/")
+                        audio_metadata["atmos"] = codec_split[1].strip()
+                        audio_components[loop_variable] = codec_split[0].strip()
+
+                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable]
+                bdinfo["audio"].append(audio_metadata)
+            elif line.startswith("Disc Title:"):        # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
+                bdinfo['title'] = line.split(':', 1)[1].strip()
+            elif line.startswith("Disc Label:"):        # Disc Label: Venom.Let.There.Be.Carnage.2021.UHD.BluRay.2160p.HEVC.Atmos.TrueHD7.1-MTeam
+                bdinfo['label'] = line.split(':', 1)[1].strip()
+    return bdinfo
 
 
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
@@ -230,11 +337,10 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     
     # ------------ Save obvious info we are almost guaranteed to get from guessit into torrent_info dict ------------ #
     # But we can immediately assign some values now like Title & Year
-
     if not guess_it_result["title"]:
         raise AssertionError("Guessit could not even extract the title, something is really wrong with this filename..")
-    torrent_info["title"] = guess_it_result["title"]
 
+    torrent_info["title"] = guess_it_result["title"]
     if "year" in guess_it_result:  # Most TV Shows don't have the year included in the filename
         torrent_info["year"] = str(guess_it_result["year"])
 
@@ -254,15 +360,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             keys_we_need_torrent_info.append('type')
     else:
         keys_we_need_torrent_info.append('type')    
-
-    keys_we_need_but_missing_torrent_info = []
-    # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
-    # All of that is important but not essential right now so we will try to extract that info later in the script
-    for basic_key in keys_we_need_torrent_info:
-        if basic_key in guess_it_result:
-            torrent_info[basic_key] = str(guess_it_result[basic_key])
-        else:
-            keys_we_need_but_missing_torrent_info.append(basic_key)
 
     # As guessit evolves and adds more info we can easily support whatever they add
     # and insert it into our main torrent_info dict
@@ -321,7 +418,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                 raise AssertionError(f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
 
             # Now that we've "verified" bdinfo is on the system, we can analyze the folder and continue the upload
-
             if not os.path.exists(f'{torrent_info["upload_media"]}BDMV/STREAM/'):
                 logging.critical("BD folder not recognized. We can only upload if we detect a '/BDMV/STREAM/' folder")
                 raise AssertionError("Currently unable to upload .iso files or disc/folders that does not contain a '/BDMV/STREAM/' folder")
@@ -337,14 +433,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                         bd_max_size = size
                         bd_max_file = os.path.join(folder, bd_file)
 
-            torrent_info["raw_video_file"] = bd_max_file
+            torrent_info["raw_video_file"] = bd_max_file # TODO check what is the need for this attribute
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-            
             logging.info(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
-            logging.debug(":::::::::::::::::::::::::::: BDInfo Output ::::::::::::::::::::::::::::")
-            logging.debug(bdinfo_output_split)
             
             # In auto_mode we just choose the largest playlist
             # TODO add support for auto_mode/user input
@@ -368,7 +461,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                     for track in file_info.tracks:
                         if track.track_type == "Video":
                             torrent_info["raw_video_file"] = individual_file
-                            logging.info(f"Using {individual_file} for mediainfo tests")
+                            logging.info(f"Using {individual_file} for bdinfo tests")
                             found = True
                             break
                     if found:
@@ -380,27 +473,51 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             return "skip_to_next_file"
             # sys.exit(f"The folder {torrent_info['upload_media']} does not contain any video files")
 
-        torrent_info["raw_file_name"] = os.path.basename(
-            os.path.dirname(f"{full_path}/"))  # this is used to isolate the folder name
+        torrent_info["raw_file_name"] = os.path.basename(os.path.dirname(f"{full_path}/"))  # this is used to isolate the folder name
     else:
         # For regular movies and single video files we can use the following the just get the filename
         torrent_info["raw_file_name"] = os.path.basename(full_path)  # this is used to isolate the file name
 
+    
+    #---------------------------------Full Disk BDInfo Parsing--------------------------------------#
+    # if the upload is for a full disk, we parse the bdinfo to indentify more information before moving on to the existing logic.
+    if args.disc:
+        bdinfo_start_time = time.perf_counter()
+        keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
+        logging.debug("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo")
+        console.print("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo", style='bold blue')
+        generate_and_parse_bdinfo()
+        logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info["bdinfo"])}")
+        # TODO using the generated `torrent_info['bdinfo']` fill in the necessary data
+
+        bdinfo_end_time = time.perf_counter()
+        logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
+    else:
+        keys_we_need_but_missing_torrent_info_list = ['mediainfo', 'video_codec', 'audio_codec']
+
+
+    keys_we_need_but_missing_torrent_info = []
+    # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
+    # All of that is important but not essential right now so we will try to extract that info later in the script
+    for basic_key in keys_we_need_torrent_info:
+        if basic_key in guess_it_result:
+            torrent_info[basic_key] = str(guess_it_result[basic_key])
+        else:
+            keys_we_need_but_missing_torrent_info.append(basic_key)
+
     # ------------ GuessIt doesn't return a video/audio codec that we should use ------------ #
     # For 'x264', 'AVC', and 'H.264' GuessIt will return 'H.264' which might be a little misleading since things like 'x264' is used for encodes while AVC for Remuxs (usually) etc
     # For audio it will insert "Dolby Digital Plus" into the dict when what we want is "DD+"
-
-    # analyze_to_identify = ['video_codec', 'audio_codec', 'mediainfo']
-    # console.print(f"\nAnalyzing the video file to try and extract the [bold][green]{analyze_to_identify}[/green][/bold]...\n", highlight=False)
-
     # ------------ If we are missing any other "basic info" we try to identify it here ------------ #
     if len(keys_we_need_but_missing_torrent_info) != 0:
         logging.error("Unable to automatically extract all the required info from the filename")
         logging.error(f"We are missing this info: {keys_we_need_but_missing_torrent_info}")
         # Show the user what is missing & the next steps
         console.print(f"[bold red underline]Unable to automatically detect the following info in the filename:[/bold red underline] [green]{keys_we_need_but_missing_torrent_info}[/green]")    
+    
+    
     # We do some extra processing for the audio & video codecs since they are pretty important for the upload process & accuracy so they get appended each time
-    for identify_me in ['mediainfo', 'video_codec', 'audio_codec']: # fetching mediainfo first before video and audio codecs
+    for identify_me in keys_we_need_but_missing_torrent_info_list: # ['mediainfo', 'video_codec', 'audio_codec'] or ['video_codec', 'audio_codec'] for disks
         if identify_me not in keys_we_need_but_missing_torrent_info:
             keys_we_need_but_missing_torrent_info.append(identify_me)
 
@@ -408,9 +525,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # only when the required data is mediainfo, this will be computed again, but as `text` format to write to file.
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
     logging.debug(f"Mediainfo will parse the file: {parse_me}")
+    
     meddiainfo_start_time = time.perf_counter()
     media_info_result = MediaInfo.parse(parse_me)
     meddiainfo_end_time = time.perf_counter()
+    
     logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
@@ -453,13 +572,37 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     console.line(count=1)
 
 
+def generate_and_parse_bdinfo():
+    """
+        Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
+        Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
+        and result is saved in `torrent_info` as `bdinfo`
+    """
+    # if largest_playlist is already in torrent_info, then why this computation again???
+    # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
+    logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
+    subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
+
+    shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
+    if os.path.isfile("/usr/bin/sed"):
+        sed_path = "/usr/bin/sed"
+    else:
+        sed_path = "/bin/sed"
+    os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {working_folder}/temp_upload/mediainfo.txt")
+    # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+    # displaying bdinfo to log in debug mode
+    if args.debug:
+        write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
+    torrent_info["bdinfo"] = parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
+    return f'{working_folder}/temp_upload/mediainfo.txt'
+
 
 def analyze_video_file(missing_value, media_info):
     """
         This method is being called in loop with mediainfo calculation all taking place multiple times.
         Optimize this code for better performance
     """
-    logging.debug(f"Trying to identify the [bold][green]{missing_value}[/green][/bold]...")
+    logging.debug(f"Trying to identify the {missing_value}...")
 
     # ffprobe/mediainfo need to access to video file not folder, set that here using the 'parse_me' variable
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
@@ -497,25 +640,6 @@ def analyze_video_file(missing_value, media_info):
             # now save the mediainfo txt file location to the dict
             # torrent_info["mediainfo"] = save_location
             return save_location
-
-        else:
-            # if largest_playlist is already in torrent_info, then why this computation again???
-            # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-            logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
-            subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
-
-            shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
-            if os.path.isfile("/usr/bin/sed"):
-                sed_path = "/usr/bin/sed"
-            else:
-                sed_path = "/bin/sed"
-            os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {working_folder}/temp_upload/mediainfo.txt")
-            # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
-            # displaying bdinfo to log in debug mode
-            if args.debug:
-                write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
-
-            return f'{working_folder}/temp_upload/mediainfo.txt'
 
     def quit_log_reason(reason):
         logging.critical(f"auto_mode is enabled (no user input) & we can not auto extract the {missing_value}")
