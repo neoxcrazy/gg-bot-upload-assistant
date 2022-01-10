@@ -12,7 +12,7 @@ import logging
 import argparse
 import subprocess
 import datetime
-import pprint
+from pprint import pformat
 from pathlib import Path
 
 # These packages need to be installed
@@ -441,9 +441,13 @@ def analyze_video_file(missing_value):
     # ffprobe/mediainfo need to access to video file not folder, set that here using the 'parse_me' variable
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
     logging.debug(f"Mediainfo will parse the file: {parse_me}")
+    # TODO prevent multiple mediainfo parsing
+    meddiainfo_start_time = time.perf_counter()
     media_info = MediaInfo.parse(parse_me)
-    logging.debug("PyMediaInfo output ::::::::::::::::::")
-    logging.debug(media_info)
+    meddiainfo_end_time = time.perf_counter()
+    logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+    logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
+    logging.debug(pformat(media_info))
 
     # In pretty much all cases "media_info.tracks[1]" is going to be the video track and media_info.tracks[2] will be the primary audio track
     media_info_video_track = media_info.tracks[1]
@@ -757,7 +761,6 @@ def analyze_video_file(missing_value):
     # have a codec we can return. User input isn't needed here
 
     if missing_value == "video_codec":
-        # pprint.pprint(media_info_video_track.to_data())
         """
             along with video_codec extraction the HDR format is also updated from here.
             Steps:
