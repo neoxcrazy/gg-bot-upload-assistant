@@ -167,7 +167,7 @@ def write_file_contents_to_log_as_debug(file_path):
     """
     with open(file_path, 'r') as file_contents:
         lines = file_contents.readlines()
-        [ logging.debug(line.replace('\\n','')) for line in lines ]
+        [ logging.debug(line.replace('\\n','').strip()) for line in lines ]
 
 
 def parse_bdinfo(bdinfo_location):
@@ -595,6 +595,7 @@ def generate_and_parse_bdinfo():
     # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
     # displaying bdinfo to log in debug mode
     if args.debug:
+        logging.debug("Dumping the BDInfo Quick Summary ::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
     torrent_info["bdinfo"] = parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
     return f'{working_folder}/temp_upload/mediainfo.txt'
