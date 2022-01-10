@@ -331,7 +331,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-            logging.debug(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
+            logging.info(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
+            logging.debug(":::::::::::::::::::::::::::: BDInfo Output ::::::::::::::::::::::::::::")
+            logging.debug(bdinfo_output_split)
             # In auto_mode we just choose the largest playlist
             # TODO add support for auto_mode/user input
             dict_of_playlist_length_size = {}
@@ -339,7 +341,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             for index, mpls_playlist in enumerate(bdinfo_output_split):
                 if mpls_playlist in all_mpls_playlists:
                     dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-            logging.debug(f"dict_of_playlist_length_size :: {dict_of_playlist_length_size}")
+            logging.debug(f"Playlists ordered by size :: {dict_of_playlist_length_size}")
             largest_playlist_value = max(dict_of_playlist_length_size.values())
             largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
             # print(largest_playlist)
@@ -1885,7 +1887,7 @@ for file in upload_queue:
     guess_it_result = guessit(torrent_info["upload_media"])
     guessit_end_time = time.perf_counter()
     logging.debug(f'Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
-    logging.debug("GuessIt output result :::::::::::::::::::::::::::::")
+    logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
     logging.debug(guess_it_result)
     
     # -------- Basic info --------
