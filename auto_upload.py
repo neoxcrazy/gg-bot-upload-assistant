@@ -355,10 +355,12 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     if args.type:
         if args.type[0] in ('tv', 'movie'):
             torrent_info["type"] = 'episode' if args.type[0] == 'tv' else 'movie'
+            logging.info(f"Using user provided type {torrent_info['type']}")
         else:
             logging.error(f'User has provided invalid media type as argument {args.type[0]}. Type will be detected dynamically!')
             keys_we_need_torrent_info.append('type')
     else:
+        logging.info("Type will be detected dynamically!")
         keys_we_need_torrent_info.append('type')    
 
     # As guessit evolves and adds more info we can easily support whatever they add
