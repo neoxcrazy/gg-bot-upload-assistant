@@ -366,7 +366,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     for wanted_key in keys_we_want_torrent_info:
         if wanted_key in guess_it_result:
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
-            
+    
+    logging.debug(f"Torrent info after initial guessit processing :::::::::::::::::::::::::::::::::")
+    logging.debug(pprint(torrent_info))
     # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
     if "type" not in torrent_info:
