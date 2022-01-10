@@ -338,6 +338,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             for index, mpls_playlist in enumerate(bdinfo_output_split):
                 if mpls_playlist in all_mpls_playlists:
                     dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
+            logging.debug(f"dict_of_playlist_length_size :: {dict_of_playlist_length_size}")
             largest_playlist_value = max(dict_of_playlist_length_size.values())
             largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
             # print(largest_playlist)
