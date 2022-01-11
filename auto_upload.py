@@ -499,10 +499,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
         logging.debug("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo")
         console.print("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo", style='bold blue')
-        generate_and_parse_bdinfo()
+        torrent_info["bdinfo"] = generate_and_parse_bdinfo()
         logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info['bdinfo'])}")
         # TODO using the generated `torrent_info['bdinfo']` fill in the necessary data
-
         bdinfo_end_time = time.perf_counter()
         logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
@@ -597,7 +596,6 @@ def generate_and_parse_bdinfo():
     if args.debug:
         logging.debug("Dumping the BDInfo Quick Summary ::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
-    torrent_info["bdinfo"] = parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
     return f'{working_folder}/temp_upload/mediainfo.txt'
 
 
@@ -795,7 +793,7 @@ def analyze_video_file(missing_value, media_info):
 
         # We store some common audio code translations in this dict
         audio_codec_dict = {"AC3": "DD", "AC3+": "DD+", "Dolby Digital Plus": "DD+", "Dolby Digital": "DD",
-                            "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
+                            "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
         if "audio_codec" in torrent_info:
