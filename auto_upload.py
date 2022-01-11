@@ -2206,8 +2206,8 @@ for file in upload_queue:
 
         # -------- Assign specific tracker keys --------
         choose_right_tracker_keys()  # This function takes the info we have the dict torrent_info and associates with the right key/values needed for us to use X trackers API
-        logger.debug(f"Final torrent_info with all data filled ::::::::::::::::::::::::::::")
-        logger.debug(pformat(torrent_info))
+        logging.debug(f"Final torrent_info with all data filled ::::::::::::::::::::::::::::")
+        logging.debug(pformat(torrent_info))
         # -------- Upload everything! --------
         # 1.0 everything we do in this for loop isn't persistent, its specific to each site that you upload to
         # 1.1 things like screenshots, TMDB/IMDB ID's can & are reused for each site you upload to
