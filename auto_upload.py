@@ -1823,7 +1823,7 @@ starting_new_upload = f" {'-' * 24} Starting new upload {'-' * 24} "
 logging.info(starting_new_upload)
 
 if args.debug:
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger("root").setLevel(logging.DEBUG)
     logging.debug(f"Arguments provided by user: {args}")
 
 if args.tripleup and args.doubleup:
