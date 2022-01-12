@@ -749,7 +749,6 @@ def analyze_video_file(missing_value, media_info):
         for stream in audio_info["streams"]:
 
             if "channel_layout" in stream:  # make sure 'channel_layout' exists first (on some amzn webdls it doesn't)
-
                 # convert the words 'mono, stereo, quad' to work with regex below
                 ffmpy_channel_layout_translation = {'mono': '1.0', 'stereo': '2.0', 'quad': '4.0'}
                 if str(stream["channel_layout"]) in ffmpy_channel_layout_translation.keys():
@@ -788,6 +787,7 @@ def analyze_video_file(missing_value, media_info):
         # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
         # Exit the script now
         quit_log_reason(reason="Audio_Channels are not in the filename, and we can't extract it using regex or ffprobe. force_auto_upload=false so we quit now")
+    
     # ---------------- Audio Codec ---------------- #
     if missing_value == "audio_codec":
 
@@ -797,9 +797,11 @@ def analyze_video_file(missing_value, media_info):
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
         if "audio_codec" in torrent_info:
-            if str(torrent_info["audio_codec"]) == audio_codec_dict.keys():
-                logging.info(f'Used (audio_codec_dict + GuessIt) to identify the audio codec: {audio_codec_dict[torrent_info["audio_codec"]]}')
-                return audio_codec_dict[torrent_info["audio_codec"]]
+            logging.debug(f"audio_codec is present in the torrent info [{torrent_info['audio_codec']}]. Trying to match it with audio_codec_dict")
+            for key in audio_codec_dict.keys():
+                if str(torrent_info["audio_codec"]) == key:
+                    logging.info(f'Used (audio_codec_dict + GuessIt) to identify the audio codec: {audio_codec_dict[torrent_info["audio_codec"]]}')
+                    return audio_codec_dict[torrent_info["audio_codec"]]
 
         # This regex is mainly for bluray_discs
         # TODO rewrite this to be more inclusive of other audio codecs
@@ -816,20 +818,16 @@ def analyze_video_file(missing_value, media_info):
 
         # Now we try to identify the audio_codec using pymediainfo
         if media_info_audio_track is not None:
-
             if media_info_audio_track.codec_id is not None:
                 # The release "La.La.Land.2016.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv" when using media_info_audio_track.codec shows the codec as AC3 not EAC3..
                 # so well try to use media_info_audio_track.codec_id first
                 audio_codec = media_info_audio_track.codec_id
-
             elif media_info_audio_track.codec is not None:
                 # On rare occasion *.codec is not available and we need to use *.format
                 audio_codec = media_info_audio_track.codec
-
             elif media_info_audio_track.format is not None:
                 # Only use *.format if *.codec is unavailable
                 audio_codec = media_info_audio_track.format
-
             # Set audio_codec equal to None if neither of those three ^^ exist and we'll move onto user input
             else:
                 audio_codec = None
