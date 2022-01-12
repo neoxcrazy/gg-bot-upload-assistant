@@ -372,7 +372,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info[basic_key] = str(guess_it_result[basic_key])
         else:
             keys_we_need_but_missing_torrent_info.append(basic_key)
-
+ 
     # As guessit evolves and adds more info we can easily support whatever they add
     # and insert it into our main torrent_info dict
     logging.debug(f"Attempting to detect the following keys from guessit :: {keys_we_want_torrent_info}")
@@ -1058,26 +1058,30 @@ def identify_miscellaneous_details(guess_it_result):
 
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
+        """
+            First priority is given to guessit
+            If guessit can get the `streaming_service`, then we'll use that
+            Otherwise regex is used to detect the streaming service
+        """
         # reading stream sources param json.
         # You can add more streaming platforms to the json file.
         # The value of the json keys will be used to create the torrent file name. 
         # the keys are used to match the output from guessit
         streaming_sources = json.load(open(f'{working_folder}/parameters/streaming_services.json'))
-       
-        source_regex = "|".join(streaming_sources.values())
-        match_web_source = re.search(source_regex, torrent_info["raw_file_name"].upper())
-        if match_web_source is not None:
-            torrent_info["web_source"] = match_web_source.group()
-            logging.info(f'Used Regex to extract the WEB Source: {match_web_source.group()}')
+
+        web_source = guess_it_result.get('streaming_service', '')
+        guessit_output = streaming_sources.get(web_source)
+        if guessit_output is not None:
+            torrent_info["web_source"] = guessit_output
+            logging.info(f'Used guessit to extract the WEB Source: {guessit_output}')
         else:
-            web_source = guess_it_result.get('streaming_service', '')
-            guessit_output = streaming_sources.get(web_source)
-            if guessit_output is not None:
-                torrent_info["web_source"] = guessit_output
-                logging.info(f'Used guessit to extract the WEB Source: {guessit_output}')
+            source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
+            match_web_source = re.search(source_regex, torrent_info["raw_file_name"].upper())
+            if match_web_source is not None:
+                torrent_info["web_source"] = match_web_source.group()
+                logging.info(f'Used Regex to extract the WEB Source: {match_web_source.group()}')
             else:
                 logging.error("Not able to extract the web source information from REGEX and GUESSIT")
-
 
     # --- Custom & extra info --- #
     # some torrents have 'extra' info in the title like 'repack', 'DV', 'UHD', 'Atmos', 'remux', etc
@@ -2018,7 +2022,7 @@ for file in upload_queue:
     guessit_end_time = time.perf_counter()
     logging.debug(f'Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
     logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
-    logging.debug(guess_it_result)
+    logging.debug(pformat(guess_it_result))
     
     # -------- Basic info --------
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)

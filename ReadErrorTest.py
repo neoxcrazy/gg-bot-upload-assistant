@@ -194,3 +194,18 @@ parse_bdinfo("./bdinfo_3.txt")
 
 
 # {title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}
+import re
+import json
+from pprint import pprint
+from pprint import pformat
+
+streaming_sources = json.load(open('./parameters/streaming_services.json'))
+source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
+raw_file_name = "Dune.2021.2160p.UHD.BluRay.REMUX.DV.HDR.REPACK.HEVC.Atmos-TRiToN.mkv".upper()
+match_web_source = re.search(source_regex, raw_file_name)
+print(f"source_regex :: {source_regex}" )
+if match_web_source is not None:
+    print(pformat(match_web_source))
+    print(f"MATCH :: XXX{match_web_source.group().replace('.', '').strip()}XXX")
+else:
+    print("is none")
