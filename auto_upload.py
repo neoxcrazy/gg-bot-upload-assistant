@@ -547,11 +547,10 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
     if args.disc:
         bdinfo_start_time = time.perf_counter()
-        logging.debug("Generating and parsing the BDInfo")
-        console.print("Generating and parsing the BDInfo", style='bold blue')
-        torrent_info["bdinfo"] = generate_and_parse_bdinfo()
+        logging.debug(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
+        console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}", style='bold blue')
+        torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO idle and handle non-happy paths
         logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info['bdinfo'])}")
-        # TODO using the generated `torrent_info['bdinfo']` fill in the necessary data
         bdinfo_end_time = time.perf_counter()
         logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
@@ -563,7 +562,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # For audio it will insert "Dolby Digital Plus" into the dict when what we want is "DD+"
     # ------------ If we are missing any other "basic info" we try to identify it here ------------ #
     if len(keys_we_need_but_missing_torrent_info) != 0:
-        logging.error("Unable to automatically extract all the required info from the filename")
+        logging.error("Unable to automatically extract all the required info from the FILENAME")
         logging.error(f"We are missing this info: {keys_we_need_but_missing_torrent_info}")
         # Show the user what is missing & the next steps
         console.print(f"[bold red underline]Unable to automatically detect the following info from the FILENAME:[/bold red underline] [green]{keys_we_need_but_missing_torrent_info}[/green]")    
@@ -647,7 +646,7 @@ def generate_and_parse_bdinfo():
     if args.debug:
         logging.debug("Dumping the BDInfo Quick Summary ::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
-    return f'{working_folder}/temp_upload/mediainfo.txt'
+    return parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
 
 
 def analyze_video_file(missing_value, media_info):
@@ -747,8 +746,12 @@ def analyze_video_file(missing_value, media_info):
     if missing_value == "screen_size":
         width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160"}
 
+        if args.disc and torrent_info["bdinfo"] is not None:
+            logging.info(f"`screen_size` identifed from bdinfo as {torrent_info["bdinfo"]["video"][0][resolution]}")
+            return torrent_info["bdinfo"]["video"][0]["resolution"]
+
         # First we use attempt to use "width" since its almost always constant (Groups like to crop black bars so "height" is always changing)
-        if str(media_info_video_track.width) != "None":
+        elif str(media_info_video_track.width) != "None":
             track_width = str(media_info_video_track.width)
             if track_width in width_to_height_dict:
                 height = width_to_height_dict[track_width]
@@ -773,8 +776,12 @@ def analyze_video_file(missing_value, media_info):
     # ---------------- Audio Channels ---------------- #
     if missing_value == "audio_channels":
 
+        if args.disc and torrent_info["bdinfo"] is not None:
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["audio"][0]["channels"]}")
+            return torrent_info["bdinfo"]["audio"][0]["channels"]
+
         # First try detecting the 'audio_channels' using regex
-        if "raw_file_name" in torrent_info:
+        elif "raw_file_name" in torrent_info:
             # First split the filename by '-' & '.'
             file_name_split = re.sub(r'[-.]', ' ', str(torrent_info["raw_file_name"]))
             # Now search for the audio channels
@@ -845,8 +852,12 @@ def analyze_video_file(missing_value, media_info):
         audio_codec_dict = {"AC3": "DD", "AC3+": "DD+", "Dolby Digital Plus": "DD+", "Dolby Digital": "DD",
                             "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
 
+        if args.disc and torrent_info["bdinfo"] is not None:
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["audio"][0]["codec"]}")
+            return torrent_info["bdinfo"]["audio"][0]["codec"]
+
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
-        if "audio_codec" in torrent_info:
+        elif "audio_codec" in torrent_info:
             logging.debug(f"audio_codec is present in the torrent info [{torrent_info['audio_codec']}]. Trying to match it with audio_codec_dict")
             for key in audio_codec_dict.keys():
                 if str(torrent_info["audio_codec"]) == key:
@@ -975,6 +986,12 @@ def analyze_video_file(missing_value, media_info):
                     torrent_info["hdr"] = "WCG"
         except:
             logging.error(f"Error occured while trying to parse HDR information from mediainfo")
+        
+        # TODO dolby vision and HDR is not handled
+        if args.disc and torrent_info["bdinfo"] is not None: 
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["video"][0]["codec"]}")
+            return torrent_info["bdinfo"]["video"][0]["codec"]
+        
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
         filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'
                                                r'(?P<H265>H(.265|265))|'
