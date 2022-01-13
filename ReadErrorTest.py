@@ -230,3 +230,28 @@ def test():
 print("START")
 print("TEST :: " +  test())
 print("STOP")
+
+
+mylist = []
+mydict1 = {
+    "key" : "value2",
+    "no" : 100
+}
+mydict2 = {
+    "key" : "value1",
+    "no" : 300
+}
+mydict3 = {
+    "key" : "value3",
+    "no" : 200
+}
+
+mylist.append(mydict1)
+mylist.append(mydict2)
+mylist.append(mydict3)
+
+keys = ["no"]
+
+mylist1 = sorted(mylist, key=lambda d: [d["no"]], reverse=True)
+print(mylist)
+print(mylist1)

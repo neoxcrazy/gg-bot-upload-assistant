@@ -461,20 +461,50 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.debug(pformat(bdinfo_output_split))
 
             dict_of_playlist_length_size = {}
+            dict_of_playlist_info_list = [] # list of dict
             # Still identifying the largest playlist here...
             for index, mpls_playlist in enumerate(bdinfo_output_split):
                 if mpls_playlist in all_mpls_playlists:
+                    playlist_details = {}
+                    playlist_details["no"] = bdinfo_output_split[index - 2].replace("\\n", "")
+                    playlist_details["group"] = bdinfo_output_split[index - 1]
+                    playlist_details["file"] = bdinfo_output_split[index]
+                    playlist_details["length"] = bdinfo_output_split[index + 1]
+                    playlist_details["est_bytes"] = bdinfo_output_split[index + 2]
+                    playlist_details["msr_bytes"] = bdinfo_output_split[index + 3]
+                    playlist_details["size"] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
+                    dict_of_playlist_info_list.append(playlist_details)
                     dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-            logging.debug(f"Playlists ordered by size :: {dict_of_playlist_length_size}")
 
+            # sorting list based on the `size` key inside the dictionary
+            dict_of_playlist_info_list = sorted(dict_of_playlist_info_list, key=lambda d: [d["size"]], reverse=True)
+            
             # In auto_mode we just choose the largest playlist
             if auto_mode == 'false':
-                # TODO add support for user input for playlist selection
                 # here we display the playlists identified ordered in decending order by size
                 # the default choice will be the largest playlist file
                 # user will be given the option to choose any different playlist file
-                largest_playlist_value = max(dict_of_playlist_length_size.values())
-                largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
+                bdinfo_list_table = Table(box=box.SQUARE, title='BDInfo Playlists', title_style='bold #be58bf')
+                bdinfo_list_table.add_column("Playlist #", justify="center")
+                bdinfo_list_table.add_column("Group", justify="center")
+                bdinfo_list_table.add_column("Playlist File", justify="center")
+                bdinfo_list_table.add_column("Duration", justify="center")
+                bdinfo_list_table.add_column("Estimated Bytes", justify="center")
+                bdinfo_list_table.add_column("Measured Bytes", justify="center")
+                
+                for playlist_details in dict_of_playlist_info_list:
+                    bdinfo_list_table.add_row({str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
+                        playlist_details['length'], playlist_details['est_bytes'], playlist_details['msr_bytes'], end_section=True )
+                
+                console.print(bdinfo_list_table, justify="center")
+
+                list_of_num = []
+                for i in range(len(dict_of_playlist_info_list)):
+                    i += 1
+                    list_of_num.append(str(i))
+                
+                user_input_playlist_id_num = Prompt.ask("Choose which playlist to analyze#", choices=list_of_num, default="1")
+                largest_playlist = dict_of_playlist_info_list[user_input_playlist_id_num]["file"]
                 torrent_info["largest_playlist"] = largest_playlist
                 logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
             else:
