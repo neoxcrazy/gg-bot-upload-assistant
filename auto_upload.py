@@ -511,9 +511,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     
     #---------------------------------Full Disk BDInfo Parsing--------------------------------------#
     # if the upload is for a full disk, we parse the bdinfo to indentify more information before moving on to the existing logic.
+    keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
     if args.disc:
         bdinfo_start_time = time.perf_counter()
-        keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
         logging.debug("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo")
         console.print("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo", style='bold blue')
         torrent_info["bdinfo"] = generate_and_parse_bdinfo()
@@ -522,7 +522,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         bdinfo_end_time = time.perf_counter()
         logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
-        keys_we_need_but_missing_torrent_info_list = ['mediainfo', 'video_codec', 'audio_codec']
+        # since this is not a disc, media info will be appended to the list
+        keys_we_need_but_missing_torrent_info_list.append("mediainfo")
 
     # ------------ GuessIt doesn't return a video/audio codec that we should use ------------ #
     # For 'x264', 'AVC', and 'H.264' GuessIt will return 'H.264' which might be a little misleading since things like 'x264' is used for encodes while AVC for Remuxs (usually) etc
