@@ -603,12 +603,12 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         'source': 'Source', 
         'screen_size': 'Resolution', 
         'video_codec': 'Video Codec',
-        'hdr': 'HDR Format',
-        'dv': 'Dolby Vision',
+        'hdr': f'{"HDR Format" if "hdr" in torrent_info else ""}',
+        'dv': f'{"Dolby Vision" if "dv" in torrent_info else ""}',
         'audio_codec': 'Audio Codec', 
         'audio_channels': 'Audio Channels',
-        'atmos': f'{"Dolby Atmos" if "atmos" in torrent_info else None}',
-        'release_group': f'{"Release Group" if "release_group" in torrent_info else None}'
+        'atmos': f'{"Dolby Atmos" if "atmos" in torrent_info else ""}',
+        'release_group': f'{"Release Group" if "release_group" in torrent_info else ""}'
     }
     logging.debug(f"The columns that we want to show are {columns_we_want}")
     presentable_type = 'Movie' if torrent_info["type"] == 'movie' else 'TV Show'
@@ -616,13 +616,13 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     codec_result_table = Table(box=box.SQUARE, title='Basic media summary', title_style='bold #be58bf')
 
     for column_display_value in columns_we_want.values():
-        if column_display_value is not None and len(column_display_value) != 0:
+        if len(column_display_value) != 0:
             codec_result_table.add_column(f"{column_display_value}", justify='center', style='#38ACEC')
 
     basic_info = []
     # add the actual data now
     for column_query_key, column_display_value in columns_we_want.items():
-        if column_display_value is not None and len(column_display_value) != 0:
+        if len(column_display_value) != 0:
             torrent_info_key_failsafe = (torrent_info[column_query_key] if column_query_key != 'type' else presentable_type) if column_query_key in torrent_info else None
             basic_info.append(torrent_info_key_failsafe)
 
