@@ -593,7 +593,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
     logging.debug("Torrent Information collected so far :::::::::::::::::::::::::::")
-    logging.debug(pformat(torrent_info))
+    logging.debug(f"\n{pformat(torrent_info)}")
     # Show the user what we identified so far
     columns_we_want = {
         'type': 'Type', 
@@ -602,26 +602,27 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         'year': f'{"Year" if "year" in torrent_info and torrent_info["type"] == "movie" else ""}',
         'source': 'Source', 
         'screen_size': 'Resolution', 
-        'video_codec': 'Video codec',
+        'video_codec': 'Video Codec',
         'hdr': 'HDR Format',
         'dv': 'Dolby Vision',
-        'audio_codec': 'Audio codec', 
-        'audio_channels': 'Channels',
+        'audio_codec': 'Audio Codec', 
+        'audio_channels': 'Audio Channels',
         'atmos': f'{"Dolby Atmos" if "atmos" in torrent_info else None}',
-        'release_group': f'{"Group" if "release_group" in torrent_info else None}'
+        'release_group': f'{"Release Group" if "release_group" in torrent_info else None}'
     }
+    logging.debug(f"The columns that we want to show are {columns_we_want}")
     presentable_type = 'Movie' if torrent_info["type"] == 'movie' else 'TV Show'
 
     codec_result_table = Table(box=box.SQUARE, title='Basic media summary', title_style='bold #be58bf')
 
     for column_display_value in columns_we_want.values():
-        if len(column_display_value) != 0:
+        if column_display_value is not None and len(column_display_value) != 0:
             codec_result_table.add_column(f"{column_display_value}", justify='center', style='#38ACEC')
 
     basic_info = []
     # add the actual data now
     for column_query_key, column_display_value in columns_we_want.items():
-        if len(column_display_value) != 0:
+        if column_display_value is not None and len(column_display_value) != 0:
             torrent_info_key_failsafe = (torrent_info[column_query_key] if column_query_key != 'type' else presentable_type) if column_query_key in torrent_info else None
             basic_info.append(torrent_info_key_failsafe)
 
@@ -861,7 +862,7 @@ def analyze_video_file(missing_value, media_info):
                             "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
 
         if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
+            logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
             return torrent_info["bdinfo"]["audio"][0]["codec"]
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
@@ -997,7 +998,7 @@ def analyze_video_file(missing_value, media_info):
         
         # TODO dolby vision and HDR is not handled
         if args.disc and torrent_info["bdinfo"] is not None: 
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
+            logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"]
         
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
