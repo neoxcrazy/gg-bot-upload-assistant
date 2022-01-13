@@ -485,19 +485,19 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                 # the default choice will be the largest playlist file
                 # user will be given the option to choose any different playlist file
                 bdinfo_list_table = Table(box=box.SQUARE, title='BDInfo Playlists', title_style='bold #be58bf')
-                bdinfo_list_table.add_column("Playlist #", justify="center")
-                bdinfo_list_table.add_column("Group", justify="center")
-                bdinfo_list_table.add_column("Playlist File", justify="center")
-                bdinfo_list_table.add_column("Duration", justify="center")
-                bdinfo_list_table.add_column("Estimated Bytes", justify="center")
-                bdinfo_list_table.add_column("Measured Bytes", justify="center")
+                bdinfo_list_table.add_column("Playlist #", justify="center", style='#38ACEC')
+                bdinfo_list_table.add_column("Group", justify="center", style='#38ACEC')
+                bdinfo_list_table.add_column("Playlist File", justify="center", style='#38ACEC')
+                bdinfo_list_table.add_column("Duration", justify="center", style='#38ACEC')
+                bdinfo_list_table.add_column("Estimated Bytes", justify="center", style='#38ACEC')
+                # bdinfo_list_table.add_column("Measured Bytes", justify="center", style='#38ACEC') # always `-` in the tested BDs
                 
                 for playlist_details in dict_of_playlist_info_list:
                     bdinfo_list_table.add_row(str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
-                        playlist_details['length'], playlist_details['est_bytes'], playlist_details['msr_bytes'], end_section=True)
+                        playlist_details['length'], playlist_details['est_bytes'], end_section=True)
                 
                 console.print("For BluRay disk you need to select which playlist need to be analyzed", style='bold blue')
-                console.print("By default the largest playlist will be selected")
+                console.print("By default the largest playlist will be selected\n")
                 console.print(bdinfo_list_table)
 
                 list_of_num = []
