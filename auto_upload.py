@@ -496,7 +496,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                     bdinfo_list_table.add_row(str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
                         playlist_details['length'], playlist_details['est_bytes'], playlist_details['msr_bytes'], end_section=True)
                 
-                console.print(bdinfo_list_table, justify="center")
+                console.print("For BluRay disk you need to select which playlist need to be analyzed", style='bold blue')
+                console.print("By default the largest playlist will be selected")
+                console.print(bdinfo_list_table)
 
                 list_of_num = []
                 for i in range(len(dict_of_playlist_info_list)):
@@ -544,8 +546,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
     if args.disc:
         bdinfo_start_time = time.perf_counter()
-        logging.debug("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo")
-        console.print("Since this is a Bluray/DVD disc upload, generating and parsing the BDInfo", style='bold blue')
+        logging.debug("Generating and parsing the BDInfo")
+        console.print("Generating and parsing the BDInfo", style='bold blue')
         torrent_info["bdinfo"] = generate_and_parse_bdinfo()
         logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info['bdinfo'])}")
         # TODO using the generated `torrent_info['bdinfo']` fill in the necessary data
