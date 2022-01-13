@@ -592,7 +592,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # Save the analyze_video_file() return result into the 'torrent_info' dict
         torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
-    logging.debug(["Torrent Information collected so far :::::::::::::::::::::::::::")
+    logging.debug("Torrent Information collected so far :::::::::::::::::::::::::::")
     logging.debug(pformat(torrent_info))
     # Show the user what we identified so far
     columns_we_want = {
