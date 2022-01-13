@@ -533,8 +533,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.error("Unable to automatically extract all the required info from the filename")
         logging.error(f"We are missing this info: {keys_we_need_but_missing_torrent_info}")
         # Show the user what is missing & the next steps
-        console.print(f"[bold red underline]Unable to automatically detect the following info in the filename:[/bold red underline] [green]{keys_we_need_but_missing_torrent_info}[/green]")    
-    
+        console.print(f"[bold red underline]Unable to automatically detect the following info from the FILENAME:[/bold red underline] [green]{keys_we_need_but_missing_torrent_info}[/green]")    
+
     
     # We do some extra processing for the audio & video codecs since they are pretty important for the upload process & accuracy so they get appended each time
     for identify_me in keys_we_need_but_missing_torrent_info_list: # ['mediainfo', 'video_codec', 'audio_codec'] or ['video_codec', 'audio_codec'] for disks
@@ -707,8 +707,7 @@ def analyze_video_file(missing_value, media_info):
             # Now that we've got all the source related info, we can return the 'parent source' and move on
             return user_input_source
 
-        else:
-            # shit
+        else: # shit
             quit_log_reason(reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source")
 
     # ---------------- Video Resolution ---------------- #
@@ -889,7 +888,7 @@ def analyze_video_file(missing_value, media_info):
 
         # If the audio_codec has not been extracted yet then we try user_input
         if auto_mode == 'false':
-            audio_codec_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  DTS | DDP | FLAC  )')
+            audio_codec_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  DTS | DDP | FLAC | TrueHD | Opus  )')
             logging.info(f"Used user_input to identify the audio codec: {audio_codec_input}")
             return str(audio_codec_input)
 

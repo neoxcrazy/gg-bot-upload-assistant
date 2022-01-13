@@ -49,6 +49,10 @@ RUN \
 RUN mkdir /app
 WORKDIR /app
 
+RUN \
+	apt update && \
+	apt install -y nano
+
 COPY requirements.txt .
 
 RUN \
