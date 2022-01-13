@@ -494,7 +494,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                 
                 for playlist_details in dict_of_playlist_info_list:
                     bdinfo_list_table.add_row({str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
-                        playlist_details['length'], playlist_details['est_bytes'], playlist_details['msr_bytes'], end_section=True )
+                        playlist_details['length'], playlist_details['est_bytes'], playlist_details['msr_bytes']}, end_section=True)
                 
                 console.print(bdinfo_list_table, justify="center")
 
