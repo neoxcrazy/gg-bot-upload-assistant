@@ -209,3 +209,24 @@ if match_web_source is not None:
     print(f"MATCH :: XXX{match_web_source.group().replace('.', '').strip()}XXX")
 else:
     print("is none")
+
+
+
+def test():
+    audio_codec_dict = {"AC3": "DD", "AC3+": "DD+", "Dolby Digital Plus": "DD+", "Dolby Digital": "DD",
+                                "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
+    torrent_info = dict()
+    torrent_info["audio_codec"] = "AC3"
+    print(str(torrent_info["audio_codec"]) )
+    print(audio_codec_dict.keys())
+    if str(torrent_info["audio_codec"]) == audio_codec_dict.keys():
+        print("YES")
+    else:
+        print("NO")
+
+    for key in audio_codec_dict.keys(): return key if str(torrent_info["audio_codec"]) == key else print(f"NO :: {key}")
+
+
+print("START")
+print("TEST :: " +  test())
+print("STOP")

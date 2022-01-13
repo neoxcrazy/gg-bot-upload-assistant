@@ -379,6 +379,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     for wanted_key in keys_we_want_torrent_info:
         if wanted_key in guess_it_result:
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
+
+    # setting NOGROUP as group if the release_group cannot be identified from guessit
+    if torrent_info["release_group"] is None:
+        torrent_info["release_group"] == "NOGROUP"
+        logging.debuf(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
     
     # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
@@ -418,13 +423,14 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info["upload_media"] = f'{str(torrent_info["upload_media"])}/'
 
         # the episode/file that we select will be stored under "raw_video_file" (full path + episode/file name)
-
+        
         # Some uploads are movies within a folder and those folders occasionally contain non-video files nfo, sub, srt, etc files
         # we need to make sure we select a video file to use for mediainfo later
 
         # First check to see if we are uploading a 'raw bluray disc'
         if args.disc:
-            # Verify that the bdinfo script exists
+            # Verify that the bdinfo script exists only when executed on bare metal / VM instead of container
+            # The containerized version has bdinfo packed inside.
             if not os.getenv("IS_CONTAINERIZED") == "true" and not os.path.isfile(bdinfo_script):
                 logging.critical("You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
                 logging.info("Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
@@ -446,25 +452,36 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                         bd_max_size = size
                         bd_max_file = os.path.join(folder, bd_file)
 
-            torrent_info["raw_video_file"] = bd_max_file # TODO check what is the need for this attribute
+            torrent_info["raw_video_file"] = bd_max_file # file with the largest size inside the STEAM folder
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
             logging.info(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
-            
-            # In auto_mode we just choose the largest playlist
-            # TODO add support for auto_mode/user input
+            logging.debug("BDInfo List Output ::::::::::::::::::::::::::::::::")
+            logging.debug(pformat(bdinfo_output_split))
+
             dict_of_playlist_length_size = {}
             # Still identifying the largest playlist here...
             for index, mpls_playlist in enumerate(bdinfo_output_split):
                 if mpls_playlist in all_mpls_playlists:
                     dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-            
             logging.debug(f"Playlists ordered by size :: {dict_of_playlist_length_size}")
-            largest_playlist_value = max(dict_of_playlist_length_size.values())
-            largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-            torrent_info["largest_playlist"] = largest_playlist
-            logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+
+            # In auto_mode we just choose the largest playlist
+            if auto_mode == 'false':
+                # TODO add support for user input for playlist selection
+                # here we display the playlists identified ordered in decending order by size
+                # the default choice will be the largest playlist file
+                # user will be given the option to choose any different playlist file
+                largest_playlist_value = max(dict_of_playlist_length_size.values())
+                largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
+                torrent_info["largest_playlist"] = largest_playlist
+                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+            else:
+                largest_playlist_value = max(dict_of_playlist_length_size.values())
+                largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
+                torrent_info["largest_playlist"] = largest_playlist
+                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
         else:
             for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
                 found = False  # this is used to break out of the double nested loop
