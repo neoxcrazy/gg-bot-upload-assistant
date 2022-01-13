@@ -504,7 +504,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                     list_of_num.append(str(i))
                 
                 user_input_playlist_id_num = Prompt.ask("Choose which playlist to analyze#", choices=list_of_num, default="1")
-                largest_playlist = dict_of_playlist_info_list[user_input_playlist_id_num]["file"]
+                largest_playlist = dict_of_playlist_info_list[int(user_input_playlist_id_num)]["file"]
                 torrent_info["largest_playlist"] = largest_playlist
                 logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
             else:
