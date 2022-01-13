@@ -747,7 +747,7 @@ def analyze_video_file(missing_value, media_info):
         width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160"}
 
         if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`screen_size` identifed from bdinfo as {torrent_info["bdinfo"]["video"][0][resolution]}")
+            logging.info(f"`screen_size` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['resolution']}")
             return torrent_info["bdinfo"]["video"][0]["resolution"]
 
         # First we use attempt to use "width" since its almost always constant (Groups like to crop black bars so "height" is always changing)
@@ -777,7 +777,7 @@ def analyze_video_file(missing_value, media_info):
     if missing_value == "audio_channels":
 
         if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["audio"][0]["channels"]}")
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['channels']}")
             return torrent_info["bdinfo"]["audio"][0]["channels"]
 
         # First try detecting the 'audio_channels' using regex
@@ -853,7 +853,7 @@ def analyze_video_file(missing_value, media_info):
                             "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
 
         if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["audio"][0]["codec"]}")
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
             return torrent_info["bdinfo"]["audio"][0]["codec"]
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
@@ -989,7 +989,7 @@ def analyze_video_file(missing_value, media_info):
         
         # TODO dolby vision and HDR is not handled
         if args.disc and torrent_info["bdinfo"] is not None: 
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info["bdinfo"]["video"][0]["codec"]}")
+            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"]
         
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
