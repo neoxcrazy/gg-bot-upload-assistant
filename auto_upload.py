@@ -241,6 +241,12 @@ def parse_bdinfo(bdinfo_location):
                 video_metadata = {}
                 for loop_variable in range(0, video_components.__len__()):
                     video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable]
+
+                if "HEVC" in video_metadata["codec"]:
+                    video_metadata["codec"] = "HEVC"
+                elif "AVC" in video_metadata["codec"]:
+                    video_metadata["codec"] = "AVC"
+
                 bdinfo["video"].append(video_metadata)
             elif line.startswith("Audio:"):
                 """
@@ -598,8 +604,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         'source': 'Source', 
         'screen_size': 'Resolution', 
         'video_codec': 'Video codec',
+        'hdr': 'HDR Format',
+        'dv': 'Dolby Vision',
         'audio_codec': 'Audio codec', 
         'audio_channels': 'Channels',
+        'atmos': 'Dolby Atmos',
         'release_group': f'{"Group" if "release_group" in torrent_info else None}'
     }
     presentable_type = 'Movie' if torrent_info["type"] == 'movie' else 'TV Show'
