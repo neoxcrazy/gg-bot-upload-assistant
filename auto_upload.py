@@ -462,9 +462,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-            logging.info(f"All mpls playlists identified from bluray disc {all_mpls_playlists}")
-            logging.debug("BDInfo List Output ::::::::::::::::::::::::::::::::")
-            logging.debug(pformat(bdinfo_output_split))
 
             dict_of_playlist_length_size = {}
             dict_of_playlist_info_list = [] # list of dict
@@ -595,6 +592,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # Save the analyze_video_file() return result into the 'torrent_info' dict
         torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
+    logging.debug(["Torrent Information collected so far :::::::::::::::::::::::::::")
+    logging.debug(pformat(torrent_info))
     # Show the user what we identified so far
     columns_we_want = {
         'type': 'Type', 
@@ -608,7 +607,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         'dv': 'Dolby Vision',
         'audio_codec': 'Audio codec', 
         'audio_channels': 'Channels',
-        'atmos': 'Dolby Atmos',
+        'atmos': f'{"Dolby Atmos" if "atmos" in torrent_info else None}',
         'release_group': f'{"Group" if "release_group" in torrent_info else None}'
     }
     presentable_type = 'Movie' if torrent_info["type"] == 'movie' else 'TV Show'
