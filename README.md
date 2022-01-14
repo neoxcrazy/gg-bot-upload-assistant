@@ -143,6 +143,7 @@ docker run -it \
     ### Bug Fixes
     * TSP internal uploads
     * No dupe message not being shown in certain cases
+    * PA streaming service tagging bug fixed
 
 **1.1**
 
