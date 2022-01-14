@@ -658,6 +658,7 @@ def generate_and_parse_bdinfo():
     if args.debug:
         logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
+    torrent_info["mediainfo"] = str(working_folder + '/temp_upload/mediainfo.txt') # setting bdinfo as mediainfo for full disk uploads
     return parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
 
 
@@ -1820,10 +1821,7 @@ def upload_to_site(upload_to, tracker_api_key):
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key
-        if key in config["Required"]:
-            req_opt = 'Required'
-        else:
-            req_opt = 'Optional'
+        req_opt = 'Required' if key in config["Required"] else 'Optional'
 
         # Now that we know if we are looking for a required or optional key we can try to add it into the payload
         if str(config[req_opt][key]) == "file":
