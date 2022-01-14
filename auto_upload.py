@@ -628,7 +628,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.debug(f"Getting value for {column_query_key} with display {column_display_value} as {torrent_info_key_failsafe} for the torrent details result table")
             basic_info.append(torrent_info_key_failsafe)
 
-    codec_result_table.add_row(basic_info[0], basic_info[1], basic_info[2], basic_info[3], basic_info[4], basic_info[5], basic_info[6], basic_info[7], basic_info[8])
+    codec_result_table.add_row(*basic_info)
 
     console.line(count=2)
     console.print(codec_result_table, justify='center')
