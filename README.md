@@ -120,12 +120,14 @@ docker run -it \
     * Improved argument description and help
     * Frame accurate screenshots
     * Environment file key validations
+    * Code refactor
 
     ### New Features
     * Debug mode for detailed analysis
     * Extended BluRay regions list as configurable json
     * Extended Scene Groups list as configurable json
     * Extended Streaming Services list as configurable json
+    * More details displayed with media summary
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check

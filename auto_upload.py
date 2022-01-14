@@ -1811,7 +1811,10 @@ def choose_right_tracker_keys():
         elif optional_key in ['bdinfo', 'mediainfo']:
             # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
             # for full disks the bdInfo is saved under the same key as mediainfo
-            tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
+            if args.disc and optional_key == "mediainfo":
+                pass # no needfor mediainfo for disc uploads
+            else:
+                tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
 
 
 # ---------------------------------------------------------------------- #
