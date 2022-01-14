@@ -1852,15 +1852,14 @@ def upload_to_site(upload_to, tracker_api_key):
                     val = txt_file.read()
             if req_opt == "Optional":
                 logging.info(f"Optional key {key} and values {val} will be added to payload")
-                print(key, val)
             payload[key] = val
 
     if auto_mode == "false":
         # prompt the user to verify everything looks OK before uploading
 
         # ------- Show the user a table of the API KEY/VAL (TEXT) that we are about to send ------- #
-        review_upload_settings_text_table = Table(title=f"\n\n\n\n[bold][deep_pink1]{upload_to} POST data (Text):[/bold][/deep_pink1]", 
-            show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True, title_justify='left')
+        review_upload_settings_text_table = Table(title=f"\n\n\n\n[bold][deep_pink1]{upload_to} Upload data (Text):[/bold][/deep_pink1]", 
+            show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True)
 
         review_upload_settings_text_table.add_column("Key", justify="left")
         review_upload_settings_text_table.add_column("Value (TEXT)", justify="left")
@@ -1871,8 +1870,8 @@ def upload_to_site(upload_to, tracker_api_key):
         console.print(review_upload_settings_text_table, justify="center")
 
         # ------- Show the user a table of the API KEY/VAL (FILE) that we are about to send ------- #
-        review_upload_settings_files_table = Table(title=f"\n\n\n\n[bold][green3]{upload_to} POST data (FILES):[/green3][/bold]", 
-            show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True, title_justify='left')
+        review_upload_settings_files_table = Table(title=f"\n\n\n\n[bold][green3]{upload_to} Upload data (FILES):[/green3][/bold]", 
+            show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True)
 
         review_upload_settings_files_table.add_column("Key", justify="left")
         review_upload_settings_files_table.add_column("Value (FILE)", justify="left")
@@ -2336,14 +2335,14 @@ for file in upload_queue:
         upload_to_site(upload_to=tracker, tracker_api_key=temp_tracker_api_key)
 
         # Tracker Settings
-        tracker_settings_table = Table(show_header=True, header_style="bold cyan")
+        tracker_settings_table = Table(show_header=True, title='Tracker Settings', header_style="bold cyan")
         tracker_settings_table.add_column("Key", justify="left")
         tracker_settings_table.add_column("Value", justify="left")
 
         for tracker_settings_key, tracker_settings_value in sorted(tracker_settings.items()):
             # Add torrent_info data to each row
             tracker_settings_table.add_row(f"[purple][bold]{tracker_settings_key}[/bold][/purple]", str(tracker_settings_value))
-        console.print(tracker_settings_table)
+        console.print(tracker_settings_table, justify="center")
 
     # -------- Post Processing --------
     # After we upload the media we can move the .torrent & media files to a place the user specifies
@@ -2373,7 +2372,7 @@ for file in upload_queue:
                     shutil.move(torrent_info["upload_media"], move_location_value)
 
     # Torrent Info
-    torrent_info_table = Table(show_header=True, header_style="bold cyan")
+    torrent_info_table = Table(show_header=True, title='Extracted Torrent Metadata', header_style="bold cyan")
     torrent_info_table.add_column("Key", justify="left")
     torrent_info_table.add_column("Value", justify="left")
 
@@ -2381,7 +2380,7 @@ for file in upload_queue:
         # Add torrent_info data to each row
         torrent_info_table.add_row("[purple][bold]{}[/bold][/purple]".format(torrent_info_key), str(torrent_info_value))
     
-    console.print(torrent_info_table)
+    console.print(torrent_info_table, justify="center")
 
     script_end_time = time.perf_counter()
     total_run_time = f'{script_end_time - script_start_time:0.4f}'
