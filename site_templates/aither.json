@@ -13,6 +13,7 @@
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo" : "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -24,9 +25,9 @@
         "anon": "anonymous",
         "live": "live",
         "sd": "sd",
-        "optimized": "stream",
         "nfo_file": "nfo",
-        "bdinfo" : "bdinfo",
+
+        "optimized": "stream",
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
@@ -41,6 +42,7 @@
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
+
         "tvdb": "string",
         "tmdb": "string",
         "imdb": "string",
@@ -119,10 +121,11 @@
 
     "Optional": {
         "nfo_file": "file",
-        "bdinfo": "string",
-        "mediainfo": "string",
         "season_number": "string",
-        "episode_number": "string"
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
     "dupes": {
