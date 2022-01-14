@@ -1813,8 +1813,10 @@ def choose_right_tracker_keys():
             # for full disks the bdInfo is saved under the same key as mediainfo
             logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
             if args.disc and optional_key == "mediainfo":
+                logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
                 pass # no needfor mediainfo for disc uploads
             else:
+                logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                 tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
 
 
@@ -1851,7 +1853,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 with open(val, 'r') as txt_file:
                     val = txt_file.read()
             if req_opt == "Optional":
-                logging.info(f"Optional key {key} and values {val} will be added to payload")
+                logging.info(f"Optional key {key} will be added to payload")
             payload[key] = val
 
     if auto_mode == "false":
@@ -2037,7 +2039,7 @@ console.print(upload_to_trackers_overview)
 
 # If not in 'auto_mode' then verify with the user that they want to continue with the upload
 if auto_mode == "false":
-    if not Confirm.ask("Continue upload to these sites?", default='y'):
+    if not Confirm.ask("Continue upload to these sites?", default='y', justify="center"):
         logging.info("User canceled upload when asked to confirm sites to upload to")
         sys.exit(console.print("\nOK, quitting now..\n", style="bold red", highlight=False))
 
