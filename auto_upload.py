@@ -1004,7 +1004,6 @@ def analyze_video_file(missing_value, media_info):
                 if HLG is present in that then HDR = HLG
                 else if "BT.2020 (10-bit)" is present then HDR = WCG
         """
-        # TODO dolby vision and HDR is not handled
         if args.disc and torrent_info["bdinfo"] is not None: 
             # for full disks here we identify the video_codec, hdr and dv informations
             for index, video_track in enumerate(torrent_info['bdinfo']['video']):

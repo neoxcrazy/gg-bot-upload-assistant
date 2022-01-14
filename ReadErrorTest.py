@@ -259,3 +259,17 @@ print(mylist1)
 
 channel = "7.1"
 print(channel[0:1])
+
+def get_ss_range(duration, num_of_screenshots):
+    first_time_stamp = int(int(duration) / 2 ) / int(int(num_of_screenshots) + 1)
+
+    list_of_ss_timestamps = []
+    for num_screen in range(1, int(num_of_screenshots) + 1):
+        millis = round(first_time_stamp) * num_screen
+        list_of_ss_timestamps.append(str(datetime.strptime("%d:%d:%d" % (int((millis / (1000 * 60 * 60)) % 24), 
+                int((millis / (1000 * 60)) % 60), int((millis / 1000) % 60)), '%H:%M:%S').time()))
+    return list_of_ss_timestamps
+
+for ss_timestamp in get_ss_range(duration=120, num_of_screenshots=5):
+    FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp}'}, 
+            outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
