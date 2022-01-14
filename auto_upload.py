@@ -617,6 +617,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
     for column_display_value in columns_we_want.values():
         if len(column_display_value) != 0:
+            logging.debug(f"Adding column {column_display_value} to the torrent details result table")
             codec_result_table.add_column(f"{column_display_value}", justify='center', style='#38ACEC')
 
     basic_info = []
@@ -624,6 +625,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     for column_query_key, column_display_value in columns_we_want.items():
         if len(column_display_value) != 0:
             torrent_info_key_failsafe = (torrent_info[column_query_key] if column_query_key != 'type' else presentable_type) if column_query_key in torrent_info else None
+            logging.debug(f"Getting value for {column_query_key} with display {column_display_value} as {torrent_info_key_failsafe} for the torrent details result table")
             basic_info.append(torrent_info_key_failsafe)
 
     codec_result_table.add_row(basic_info[0], basic_info[1], basic_info[2], basic_info[3], basic_info[4], basic_info[5], basic_info[6], basic_info[7], basic_info[8])
