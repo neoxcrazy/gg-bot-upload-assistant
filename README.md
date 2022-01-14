@@ -114,16 +114,18 @@ docker run -it \
 # Change Log
 **1.2**
 
+    ### Underhood changes
     * Performance Optimizations
     * Platform based site tagging
     * Improved argument description and help
+    * Frame accurate screenshots
+    * Environment file key validations
 
     ### New Features
     * Debug mode for detailed analysis
     * Extended BluRay regions list as configurable json
     * Extended Scene Groups list as configurable json
     * Extended Streaming Services list as configurable json
-    * Environment file key validations
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check

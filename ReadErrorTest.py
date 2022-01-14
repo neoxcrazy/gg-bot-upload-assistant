@@ -276,5 +276,6 @@ def get_ss_range(duration, num_of_screenshots):
     return list_of_ss_timestamps
 
 for ss_timestamp in get_ss_range(duration=120, num_of_screenshots=5):
-    FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp}'}, 
-            outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
+    FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} '}, 
+            outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'},
+            global_options=[""]).run()
