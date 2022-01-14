@@ -861,11 +861,16 @@ def analyze_video_file(missing_value, media_info):
 
         # We store some common audio code translations in this dict
         audio_codec_dict = {"AC3": "DD", "AC3+": "DD+", "Dolby Digital Plus": "DD+", "Dolby Digital": "DD",
-                            "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", "A_EAC3": "DD+", "A_AC3": "DD"}
+                            "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", 
+                            "A_EAC3": "DD+", "A_AC3": "DD", "Dolby TrueHD" : "TrueHD"}
 
         if args.disc and torrent_info["bdinfo"] is not None:
             logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
-            return torrent_info["bdinfo"]["audio"][0]["codec"]
+            for key in audio_codec_dict.keys():
+                if str(torrent_info["bdinfo"]["audio"][0]["codec"]) == key:
+                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]}')
+                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]
+            logging.error(f"Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {torrent_info['bdinfo']['audio'][0]['codec']}")
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
         elif "audio_codec" in torrent_info:
