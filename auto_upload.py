@@ -240,7 +240,7 @@ def parse_bdinfo(bdinfo_location):
                 video_components = line.split(':', 1)[1].split('/')
                 video_metadata = {}
                 for loop_variable in range(0, len(video_components)):
-                    video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable]
+                    video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable].strip()
 
                 if "HEVC" in video_metadata["codec"]:
                     video_metadata["codec"] = "HEVC"
@@ -1011,7 +1011,7 @@ def analyze_video_file(missing_value, media_info):
                     if "DOLBY" in video_track["dv_hdr"].upper():
                         torrent_info["dv"] = "DV"
                     else: 
-                        torrent_info["hdr"] = video_track["dv_hdr"] 
+                        torrent_info["hdr"] = video_track["dv_hdr"]
             logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
