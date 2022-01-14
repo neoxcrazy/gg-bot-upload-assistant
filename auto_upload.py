@@ -641,6 +641,8 @@ def generate_and_parse_bdinfo():
         Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
         Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
         and result is saved in `torrent_info` as `bdinfo`
+
+        It also sets the `mediainfo` key in torrent_info
     """
     # if largest_playlist is already in torrent_info, then why this computation again???
     # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
@@ -1012,7 +1014,7 @@ def analyze_video_file(missing_value, media_info):
                     if "DOLBY" in video_track["dv_hdr"].upper():
                         torrent_info["dv"] = "DV"
                     else: 
-                        torrent_info["hdr"] = video_track["dv_hdr"]
+                        torrent_info["hdr"] = video_track["dv_hdr"].strip()
             logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
