@@ -1811,6 +1811,7 @@ def choose_right_tracker_keys():
         elif optional_key in ['bdinfo', 'mediainfo']:
             # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
             # for full disks the bdInfo is saved under the same key as mediainfo
+            logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
             if args.disc and optional_key == "mediainfo":
                 pass # no needfor mediainfo for disc uploads
             else:
@@ -1850,6 +1851,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 with open(val, 'r') as txt_file:
                     val = txt_file.read()
             if req_opt == "Optional":
+                logging.info(f"Optional key {key} and values {val} will be added to payload")
                 print(key, val)
             payload[key] = val
 
