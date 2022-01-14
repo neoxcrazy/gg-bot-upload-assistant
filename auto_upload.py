@@ -1770,7 +1770,7 @@ def choose_right_tracker_keys():
                     tracker_settings["custom_edition"] = torrent_info["edition"]
 
         # -!-!- Region -!-!- # (Disc only)
-        if optional_key == 'region' and 'region' in torrent_info:
+        elif optional_key == 'region' and 'region' in torrent_info:
             # This will only run if you are uploading a bluray_disc
             for region in optional_value:
                 if str(region).upper() == str(torrent_info["region"]).upper():
@@ -1778,7 +1778,7 @@ def choose_right_tracker_keys():
                     break
 
         # -!-!- Tags -!-!- #
-        if optional_key == 'tags':  # (Only supported on BHD)
+        elif optional_key == 'tags':  # (Only supported on BHD)
             # We only support 2 tags atm, Scene & WEBDL/RIP on bhd
             # All we currently support regarding tags, is to assign the 'Scene' tag if we are uploading a scene release
             upload_these_tags_list = []
@@ -1802,11 +1802,16 @@ def choose_right_tracker_keys():
         #     # So far
         #     tracker_settings[optional_key] = torrent_info["nfo_file"]
 
-        if optional_key == 'sd' and "sd" in torrent_info:
+        elif optional_key == 'sd' and "sd" in torrent_info:
             tracker_settings[optional_key] = 1
 
-        if optional_key in ['season_number', 'episode_number'] and optional_key in torrent_info:
+        elif optional_key in ['season_number', 'episode_number'] and optional_key in torrent_info:
             tracker_settings[optional_key] = torrent_info.get(optional_key, "")
+
+        elif optional_key in ['bdinfo', 'mediainfo']:
+            # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
+            # for full disks the bdInfo is saved under the same key as mediainfo
+            tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
 
 
 # ---------------------------------------------------------------------- #
