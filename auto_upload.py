@@ -2039,7 +2039,7 @@ console.print(upload_to_trackers_overview)
 
 # If not in 'auto_mode' then verify with the user that they want to continue with the upload
 if auto_mode == "false":
-    if not Confirm.ask("Continue upload to these sites?", default='y', justify="center"):
+    if not Confirm.ask("Continue upload to these sites?", default='y'):
         logging.info("User canceled upload when asked to confirm sites to upload to")
         sys.exit(console.print("\nOK, quitting now..\n", style="bold red", highlight=False))
 
