@@ -239,7 +239,7 @@ def parse_bdinfo(bdinfo_location):
                 }
                 video_components = line.split(':', 1)[1].split('/')
                 video_metadata = {}
-                for loop_variable in range(0, video_components.__len__()):
+                for loop_variable in range(0, len(video_components)):
                     video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable]
 
                 if "HEVC" in video_metadata["codec"]:
@@ -268,7 +268,7 @@ def parse_bdinfo(bdinfo_location):
                     line = line.split("(")[0] # removing the contents inside bracket
                 audio_components = line.split(':', 1)[1].split('/ ') # not so sure about this /{space}
                 audio_metadata = {}
-                for loop_variable in range(0, audio_components.__len__()):
+                for loop_variable in range(0, len(audio_components)):
                     if "Atmos" in audio_components[loop_variable]: # identifying and tagging atmos audio
                         codec_split = audio_components[loop_variable].split("/")
                         audio_metadata["atmos"] = codec_split[1].strip()
@@ -321,7 +321,7 @@ def delete_leftover_files():
             files = glob.glob(f'{working_folder}{old_temp_data}*')
             for f in files:
                 os.remove(f)
-            logging.info("deleted the contents of the folder: {}".format(working_folder + old_temp_data))
+            logging.info("Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
 
 
 def identify_type_and_basic_info(full_path, guess_it_result):
@@ -366,7 +366,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.error(f'User has provided invalid media type as argument {args.type[0]}. Type will be detected dynamically!')
             keys_we_need_torrent_info.append('type')
     else:
-        logging.info("Type will be detected dynamically!")
+        logging.info("Type not provided by user. Type will be detected dynamically!")
         keys_we_need_torrent_info.append('type')    
 
     keys_we_need_but_missing_torrent_info = []
@@ -550,10 +550,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec'] # for disc we don't need mediainfo
     if args.disc:
         bdinfo_start_time = time.perf_counter()
-        logging.debug(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
+        logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}", style='bold blue')
         torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO idle and handle non-happy paths
-        logging.debug(f"Parsed BDInfo output :: {pformat(torrent_info['bdinfo'])}")
+        logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
+        logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
         logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
@@ -592,7 +593,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # Save the analyze_video_file() return result into the 'torrent_info' dict
         torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
-    logging.debug("Torrent Information collected so far :::::::::::::::::::::::::::")
+    logging.debug("::::::::::::::::::::::::::::: Torrent Information collected so far :::::::::::::::::::::::::::::")
     logging.debug(f"\n{pformat(torrent_info)}")
     # Show the user what we identified so far
     columns_we_want = {
@@ -655,7 +656,7 @@ def generate_and_parse_bdinfo():
     # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
     # displaying bdinfo to log in debug mode
     if args.debug:
-        logging.debug("Dumping the BDInfo Quick Summary ::::::::::::::::::::::::::::")
+        logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
     return parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
 
@@ -696,7 +697,7 @@ def analyze_video_file(missing_value, media_info):
             save_location = str(working_folder + '/temp_upload/mediainfo.txt')
             logging.info(f'Saving mediainfo to: {save_location}')
             logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
-            logging.debug(media_info_output)
+            logging.debug(f'\n{media_info_output}')
 
             with open(save_location, 'w+') as f:
                 f.write(media_info_output)
@@ -875,6 +876,13 @@ def analyze_video_file(missing_value, media_info):
         audio_codec_dict = json.load(open(f'{working_folder}/parameters/audio_codecs.json'))
 
         if args.disc and torrent_info["bdinfo"] is not None:
+            # here we populate the audio_codec and atmos information from bdinfo
+            for audio_track in torrent_info['bdinfo']['audio']:
+                if "atmos" in audio_track and len(audio_track["atmos"]) != 0:
+                    logging.info(f"`atmos` identifed from bdinfo as {audio_track['atmos']}")
+                    torrent_info["atmos"] = "Atmos"
+                    break
+
             logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
             for key in audio_codec_dict.keys():
                 if str(torrent_info["bdinfo"]["audio"][0]["codec"]) == key:
@@ -995,8 +1003,17 @@ def analyze_video_file(missing_value, media_info):
         """
         # TODO dolby vision and HDR is not handled
         if args.disc and torrent_info["bdinfo"] is not None: 
+            # for full disks here we identify the video_codec, hdr and dv informations
+            for index, video_track in enumerate(torrent_info['bdinfo']['video']):
+                if video_track["dv_hdr"] is not None and len(video_track["dv_hdr"]) != 0 :
+                    # so hdr or DV is present in this track. next we need to identify which one it is
+                    logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
+                    if "DOLBY" in video_track["dv_hdr"].upper():
+                        torrent_info["dv"] = "DV"
+                    else: 
+                        torrent_info["hdr"] = video_track["dv_hdr"] 
             logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
-            return torrent_info["bdinfo"]["video"][0]["codec"]
+            return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
         try:
             color_primaries = media_info_video_track.color_primaries
@@ -2113,7 +2130,7 @@ for file in upload_queue:
     guessit_end_time = time.perf_counter()
     logging.debug(f'Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
     logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
-    logging.debug(pformat(guess_it_result))
+    logging.debug(f'\n{pformat(guess_it_result)}')
     
     # -------- Basic info --------
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
@@ -2301,8 +2318,8 @@ for file in upload_queue:
 
         # -------- Assign specific tracker keys --------
         choose_right_tracker_keys()  # This function takes the info we have the dict torrent_info and associates with the right key/values needed for us to use X trackers API
-        logging.debug(f"Final torrent_info with all data filled ::::::::::::::::::::::::::::")
-        logging.debug(pformat(torrent_info))
+        logging.debug(f"::::::::::::::::::::::::::::: Final torrent_info with all data filled :::::::::::::::::::::::::::::")
+        logging.debug(f'\n{pformat(torrent_info)}')
         # -------- Upload everything! --------
         # 1.0 everything we do in this for loop isn't persistent, its specific to each site that you upload to
         # 1.1 things like screenshots, TMDB/IMDB ID's can & are reused for each site you upload to
