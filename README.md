@@ -118,16 +118,21 @@ docker run -it \
     * Performance Optimizations
     * Platform based site tagging
     * Improved argument description and help
+    * Dynamic media summary based on the extracted metadata
     * Frame accurate screenshots
     * Environment file key validations
     * Code refactor
 
     ### New Features
-    * Debug mode for detailed analysis
+    * Support for Blu-ray Full Disc uploads [fat image required]
+    * Ability to choose playlist manually for full disk uploads
+    * Improved BDInfo parsing
     * Extended BluRay regions list as configurable json
+    * Debug mode for detailed analysis
     * Extended Scene Groups list as configurable json
     * Extended Streaming Services list as configurable json
-    * More details displayed with media summary
+    * Audio Codec list as configurable json
+    * Extended audio codec list for full disk codecs
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check
@@ -160,4 +165,4 @@ docker run -it \
     * CICD Pipeline Changes
     * Updated Templates
     * Support for Xbtit Platform with custom API
-    * Screenshot thumbnail feature\
+    * Screenshot thumbnail feature
