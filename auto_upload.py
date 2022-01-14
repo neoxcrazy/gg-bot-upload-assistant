@@ -499,8 +499,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                     bdinfo_list_table.add_row(str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
                         playlist_details['length'], playlist_details['est_bytes'], end_section=True)
                 
-                console.print("For BluRay disk you need to select which playlist need to be analyzed", style='bold blue')
-                console.print("By default the largest playlist will be selected\n")
+                console.print("For BluRay disk you need to select which playlist need to be analyzed, by default the largest playlist will be selected\n", style='bold blue')
+                console.print("")
                 console.print(bdinfo_list_table)
 
                 list_of_num = []
@@ -551,8 +551,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     if args.disc:
         bdinfo_start_time = time.perf_counter()
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
-        console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}", style='bold blue')
-        torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO idle and handle non-happy paths
+        console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
+        torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
@@ -1909,7 +1909,7 @@ def upload_to_site(upload_to, tracker_api_key):
         if "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
                 logging.info("Upload to {} was a success!".format(upload_to))
-                console.print(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style="bold green1 underline")
+                console.print(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style="bold green1 underline", justify="center")
             else:
                 logging.critical("Upload to {} failed".format(upload_to))
         else:
@@ -2335,7 +2335,8 @@ for file in upload_queue:
         upload_to_site(upload_to=tracker, tracker_api_key=temp_tracker_api_key)
 
         # Tracker Settings
-        tracker_settings_table = Table(show_header=True, title='Tracker Settings', header_style="bold cyan")
+        console.print("\n\n")
+        tracker_settings_table = Table(show_header=True, title='[bold][deep_pink1]Tracker Settings[/bold][/deep_pink1]', header_style="bold cyan")
         tracker_settings_table.add_column("Key", justify="left")
         tracker_settings_table.add_column("Value", justify="left")
 
@@ -2372,7 +2373,8 @@ for file in upload_queue:
                     shutil.move(torrent_info["upload_media"], move_location_value)
 
     # Torrent Info
-    torrent_info_table = Table(show_header=True, title='Extracted Torrent Metadata', header_style="bold cyan")
+    console.print("\n\n")
+    torrent_info_table = Table(show_header=True, title='[bold][deep_pink1]Extracted Torrent Metadata[/bold][/deep_pink1]', header_style="bold cyan")
     torrent_info_table.add_column("Key", justify="left")
     torrent_info_table.add_column("Value", justify="left")
 

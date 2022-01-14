@@ -140,7 +140,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
      # ---------------------- check if 'num_of_screenshots=0' or not set ---------------------- #
     if num_of_screenshots == "0" or not bool(num_of_screenshots):
         logging.error(f'num_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, continuing without screenshots.')
-        console.print(f'\nnum_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}\n', style='bold red')
+        console.print(f'\nnum_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, \n', style='bold red')
     else:
         # ---------------------- verify at least 1 image-host is set/enabled ---------------------- #
         enabled_img_host_num_loop = 0
