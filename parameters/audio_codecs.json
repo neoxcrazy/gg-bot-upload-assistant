@@ -11,6 +11,7 @@
     "Dolby Digital Plus": "DD+",
     "E-AC-3": "DD+",
     "FLAC": "FLAC",
+    "A_FLAC": "FLAC",
     "Opus": "OPUS",
     "OPUS": "OPUS",
     "MLP FBA": "TrueHD",

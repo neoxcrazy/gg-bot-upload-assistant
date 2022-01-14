@@ -3,7 +3,7 @@
     "url": "https://www.thesceneplace.com",
     "upload_form": "https://www.thesceneplace.com/api/upload.php?api_key={api_key}",
     "torrents_search": "https://www.thesceneplace.com/api/search.php?api_key={api_key}",
-    "source": "TheScenePlace",
+    "source": "TSP",
     "platform": "XBTIT",
     "bbcode_line_break": "\n",
 

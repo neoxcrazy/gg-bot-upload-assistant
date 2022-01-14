@@ -788,8 +788,20 @@ def analyze_video_file(missing_value, media_info):
     if missing_value == "audio_channels":
 
         if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`audio_channels` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['channels']}")
-            return torrent_info["bdinfo"]["audio"][0]["channels"]
+            # Here we iterate over all the audio track identified and returns the largest channel.
+            # 7.1 > 5.1 > 2.0 
+            # presently the subwoofer channel is not considered
+            # if 2.1 and 2.0 tracks are present and we encounter 2.0 first followed by 2.1,
+            # we return 2.0 only. 
+            # # TODO check whether subwoofer or even atmos channels needs to be considered
+            audio_channel = None
+            for audio_track in torrent_info['bdinfo']['audio']:
+                if audio_channel is None:
+                    audio_channel = audio_track["channels"]
+                elif int(audio_track["channels"][0:1]) > int(audio_channel[0:1]):
+                    audio_channel = audio_track["channels"]
+            logging.info(f"`audio_channels` identifed from bdinfo as {audio_channel}")
+            return audio_channel
 
         # First try detecting the 'audio_channels' using regex
         elif "raw_file_name" in torrent_info:
@@ -981,6 +993,11 @@ def analyze_video_file(missing_value, media_info):
                 if HLG is present in that then HDR = HLG
                 else if "BT.2020 (10-bit)" is present then HDR = WCG
         """
+        # TODO dolby vision and HDR is not handled
+        if args.disc and torrent_info["bdinfo"] is not None: 
+            logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
+            return torrent_info["bdinfo"]["video"][0]["codec"]
+            
         try:
             color_primaries = media_info_video_track.color_primaries
             if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
@@ -1000,11 +1017,6 @@ def analyze_video_file(missing_value, media_info):
                     torrent_info["hdr"] = "WCG"
         except:
             logging.error(f"Error occured while trying to parse HDR information from mediainfo")
-        
-        # TODO dolby vision and HDR is not handled
-        if args.disc and torrent_info["bdinfo"] is not None: 
-            logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
-            return torrent_info["bdinfo"]["video"][0]["codec"]
         
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
         filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'

@@ -255,3 +255,7 @@ keys = ["no"]
 mylist1 = sorted(mylist, key=lambda d: [d["no"]], reverse=True)
 print(mylist)
 print(mylist1)
+
+
+channel = "7.1"
+print(channel[0:1])
