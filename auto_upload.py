@@ -860,9 +860,7 @@ def analyze_video_file(missing_value, media_info):
     if missing_value == "audio_codec":
 
         # We store some common audio code translations in this dict
-        audio_codec_dict = {"AC3": "DD", "AC3+": "DD+", "Dolby Digital Plus": "DD+", "Dolby Digital": "DD",
-                            "AAC": "AAC", "AC-3": "DD", "FLAC": "FLAC", "DTS": "DTS", "Opus": "Opus", "OPUS": "Opus", "E-AC-3": "DD+", 
-                            "A_EAC3": "DD+", "A_AC3": "DD", "Dolby TrueHD" : "TrueHD"}
+        audio_codec_dict = json.load(open(f'{working_folder}/parameters/audio_codecs.json'))
 
         if args.disc and torrent_info["bdinfo"] is not None:
             logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
