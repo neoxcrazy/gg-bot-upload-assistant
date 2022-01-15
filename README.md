@@ -134,6 +134,7 @@ docker run -it \
     * Extended Streaming Services list as configurable json
     * Audio Codec list as configurable json
     * Extended audio codec list for full disk codecs
+    * TSP internal uploads
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check
@@ -142,9 +143,9 @@ docker run -it \
         * Removed support for imgyukle
 
     ### Bug Fixes
-    * TSP internal uploads
     * No dupe message not being shown in certain cases
-    * PA streaming service tagging bug fixed
+    * Invalid PA streaming service tagging
+    * PQ10, HLG and WCG HDR Formats not being detected
 
 **1.1**
 
