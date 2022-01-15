@@ -602,6 +602,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         's00e00': f'{("Season" if len(torrent_info["s00e00"]) == 3 else "Episode") if "s00e00" in torrent_info else ""}',
         'year': f'{"Year" if "year" in torrent_info and torrent_info["type"] == "movie" else ""}',
         'source': 'Source', 
+        'edition': f'{"Edition" if "edition" in torrent_info else ""}',
         'screen_size': 'Resolution', 
         'video_codec': 'Video Codec',
         'hdr': f'{"HDR Format" if "hdr" in torrent_info else ""}',
@@ -1812,12 +1813,18 @@ def choose_right_tracker_keys():
             # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
             # for full disks the bdInfo is saved under the same key as mediainfo
             logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
-            if args.disc and optional_key == "mediainfo":
-                logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
-                pass # no needfor mediainfo for disc uploads
+            if args.disc:
+                if optional_key == "mediainfo":
+                    logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
+                else:
+                    logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                    tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
             else:
-                logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
-                tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
+                if optional_key == "bdinfo":
+                    logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
+                else:
+                    logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                    tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
 
 
 # ---------------------------------------------------------------------- #
