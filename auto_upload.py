@@ -1020,6 +1020,7 @@ def analyze_video_file(missing_value, media_info):
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
         try:
+            logging.debug(f"The video track media info details used for HDR detection\n{pformat(media_info_video_track)}")
             color_primaries = media_info_video_track.color_primaries
             if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
                 try:
@@ -1223,14 +1224,17 @@ def identify_miscellaneous_details(guess_it_result):
 
     # Try to split the torrent title and match a few key words
     # End user can add their own 'key_words' that they might want to extract and add to the final torrent title
-    key_words = {'remux': 'REMUX', 'hdr': torrent_info.get("hdr", "HDR"),  'uhd': 'UHD', 'hybrid': 'Hybrid', 'atmos': 'Atmos'}
+    key_words = {'remux': 'REMUX', 'hdr': torrent_info.get("hdr", "HDR"),  'uhd': 'UHD', 'hybrid': 'Hybrid', 'atmos': 'Atmos', 'ddpa' : 'Atmos'}
     
     hdr_hybrid_remux_keyword_search = str(torrent_info["raw_file_name"]).replace(" ", ".").replace("-", ".").split(".")
 
     for word in hdr_hybrid_remux_keyword_search:
         if str(word).lower() in key_words.keys():
             logging.info(f"extracted the key_word: {word.lower()} from the filename")
-            torrent_info[str(word).lower()] = key_words[str(word).lower()]
+            if str(word).lower() == 'ddpa': # special case. TODO find a way to generalize and handle this
+                torrent_info["atmos"] = key_words[str(word).lower()]
+            else:
+                torrent_info[str(word).lower()] = key_words[str(word).lower()]
 
         # Bluray region source
         if "disc" in torrent_info["source_type"]:
