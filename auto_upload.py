@@ -1899,7 +1899,7 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info(f"POST Request: {url}")
     logging.info(f"Response code: {response.status_code}")
 
-    console.print(f'Site response: [blue]{response.text}[/blue]')
+    console.print(f'\nSite response: [blue]{response.text}[/blue]')
     logging.info(response.text)
 
     if response.status_code == 200:
