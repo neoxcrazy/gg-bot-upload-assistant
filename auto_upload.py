@@ -602,7 +602,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         's00e00': f'{("Season" if len(torrent_info["s00e00"]) == 3 else "Episode") if "s00e00" in torrent_info else ""}',
         'year': f'{"Year" if "year" in torrent_info and torrent_info["type"] == "movie" else ""}',
         'source': 'Source', 
-        'edition': f'{"Edition" if "edition" in torrent_info else ""}',
         'screen_size': 'Resolution', 
         'video_codec': 'Video Codec',
         'hdr': f'{"HDR Format" if "hdr" in torrent_info else ""}',
@@ -1294,7 +1293,7 @@ def search_tmdb_for_id(query_title, year, content_type):
     search_tmdb_request_url = f"https://api.themoviedb.org/3/search/{content_type}?api_key={os.getenv('TMDB_API_KEY')}&query={query_title}&page=1&include_adult=false{query_year}"
 
     search_tmdb_request = requests.get(search_tmdb_request_url)
-    logging.info(f"GET Request: {search_tmdb_request_url}")
+    logging.info(f"GET Request: https://api.themoviedb.org/3/search/{content_type}?api_key=<REDACTED>&query={query_title}&page=1&include_adult=false{query_year}")
     if search_tmdb_request.ok:
         # print(json.dumps(search_tmdb_request.json(), indent=4, sort_keys=True))
         if len(search_tmdb_request.json()["results"]) == 0:
@@ -1382,14 +1381,14 @@ def get_external_id(id_site, id_value, content_type):
 
     if id_site == 'tmdb':
         imdb_id_request = requests.get(get_imdb_id_url).json()
-        logging.info(f"GET Request: {get_imdb_id_url}")
+        logging.info(f"GET Request: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
         if imdb_id_request["imdb_id"] is None:
             return ""
         return imdb_id_request["imdb_id"]
 
     if id_site == 'imdb':
         tmdb_id_request = requests.get(get_tmdb_id_url).json()
-        logging.info(f"GET Request: {get_tmdb_id_url}")
+        logging.info(f"GET Request: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
         for item in tmdb_id_request:
             if len(tmdb_id_request[item]) == 1:
                 return str(tmdb_id_request[item][0]["id"])
@@ -1439,8 +1438,9 @@ def compare_tmdb_data_local(content_type):
 
     # We should only need 1 API request, so do that here
     get_media_info_url = f"https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key={os.getenv('TMDB_API_KEY')}"
+
     get_media_info = requests.get(get_media_info_url).json()
-    logging.info(f"GET Request: {get_media_info_url}")
+    logging.info(f"GET Request: https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key=<REDACTED>")
 
     # Check the genres for 'Animation', if we get a hit we should check for a MAL ID just in case
     if "genres" in get_media_info:

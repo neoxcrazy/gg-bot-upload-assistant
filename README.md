@@ -122,6 +122,7 @@ docker run -it \
     * Frame accurate screenshots
     * Environment file key validations
     * Code refactor
+    * Masking sensitive data in log file
 
     ### New Features
     * Support for Blu-ray Full Disc uploads [fat image required]

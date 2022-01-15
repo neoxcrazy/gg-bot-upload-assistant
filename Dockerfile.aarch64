@@ -1,5 +1,8 @@
 FROM arm64v8/alpine:3.14
 
+ENV IS_CONTAINERIZED=true
+ENV IS_FULL_DISK_SUPPORTED=false
+
 RUN \
  echo "**** install build packages ****" && \
  apk add --no-cache --virtual=build-dependencies \
@@ -32,4 +35,3 @@ RUN chmod +x bdinfo
 VOLUME /data /temp_upload
 
 ENTRYPOINT [ "python3", "auto_upload.py"]
-# ENTRYPOINT [ "python3", "ReadErrorTest.py"]
