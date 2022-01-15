@@ -1911,7 +1911,8 @@ def upload_to_site(upload_to, tracker_api_key):
         if "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
                 logging.info("Upload to {} was a success!".format(upload_to))
-                console.print(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style="bold green1 underline", justify="center")
+                # console.print(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style="bold green1 underline", justify="center")
+                console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
                 logging.critical("Upload to {} failed".format(upload_to))
         else:
