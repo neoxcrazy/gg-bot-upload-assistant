@@ -12,6 +12,7 @@
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "source",
         "resolution": "type",
@@ -31,7 +32,6 @@
         "file": "file",
         "name": "string",
         "description": "string",
-        "mediainfo": "file",
         "live": "string",
         "anon": "string",
 
@@ -226,7 +226,10 @@
         "nfo_file": "file",
         "pack": "int",
         "special": "int",
-        "sd": "string"
+        "sd": "string",
+
+        "mediainfo": "file",
+        "bdinfo" : "string"
     },
 
     "dupes": {

@@ -12,6 +12,7 @@
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -26,22 +27,18 @@
         "optimized": "stream",
         "nfo_file": "nfo",
 
-
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
         "sticky": "sticky",
         "freeleech": "free"
-
     },
-
 
     "Required": {
 
         "torrent": "file",
         "name": "string",
         "description": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -52,20 +49,16 @@
         "mal": "string",
         "igdb": "string",
 
-
         "internal": "string",
         "free": "string",
         "featured": "string",
         "doubleup": "string",
         "sticky": "string",
 
-
-
         "category_id": {
             "1": "movie",
             "2": "episode"
         },
-
 
         "type_id": {
             "1": {
@@ -87,7 +80,6 @@
                 "dvd_disc": 2
             }
         },
-
 
         "resolution_id": {
             "1": {
@@ -126,7 +118,10 @@
     "Optional": {
         "nfo": "file",
         "season_number": "string",
-        "episode_number": "string"
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
     "dupes": {
@@ -166,7 +161,6 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
 
     "banned_groups": [
         "group_1_optional",

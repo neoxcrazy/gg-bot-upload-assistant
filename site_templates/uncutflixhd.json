@@ -12,6 +12,7 @@
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -37,7 +38,6 @@
         "torrent": "file",
         "name": "string",
         "description": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -131,7 +131,10 @@
     "Optional": {
         "nfo_file": "file",
         "season_number": "string",
-        "episode_number": "string"
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
     "dupes": {
