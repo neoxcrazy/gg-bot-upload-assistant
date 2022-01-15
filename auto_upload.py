@@ -961,7 +961,9 @@ def analyze_video_file(missing_value, media_info):
                 for stream in audio_info["streams"]:
                     logging.info(f'Used ffprobe to identify the audio codec: {stream["profile"]}')
                     return stream["profile"]
-
+            
+            logging.debug(f"Pymediainfo extracted audio_codec as {audio_codec}")
+            
             if audio_codec in audio_codec_dict.keys():
                 # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
                 logging.info(f'Used (pymediainfo + audio_codec_dict) to identify the audio codec: {audio_codec_dict[audio_codec]}')
