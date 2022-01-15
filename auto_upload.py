@@ -991,20 +991,25 @@ def analyze_video_file(missing_value, media_info):
 
     if missing_value == "video_codec":
         """
-            along with video_codec extraction the HDR format is also updated from here.
+            along with video_codec extraction the HDR format and DV is also updated from here.
             Steps:
             get Color primaries from MediaInfo
             if it is one of "BT.2020", "REC.2020" then
-                try to get HDR format from MediaInfo
-                    if HDR10 is present in HDR Format then HDR = HDR
-                    if HDR10+ is present in HDR Format then HDR = HDR10+
-                on any errors
-                    confirm the HDRFormat doesn't exist in the media info 
-                    check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
-                        HDR = PQ10 
+                if HDR10 is present in HDR Format then 
+                    HDR = HDR
+                if HDR10+ is present in HDR Format then 
+                    HDR = HDR10+
+                confirm the HDRFormat doesn't exist in the media info 
+                check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
+                    HDR = PQ10 
                 get transfer_characteristics_Original from media info
-                if HLG is present in that then HDR = HLG
-                else if "BT.2020 (10-bit)" is present then HDR = WCG
+                if HLG is present in that then 
+                    HDR = HLG
+                else if "BT.2020 (10-bit)" is present then 
+                    HDR = WCG
+            
+            if Dolby Vision is present in HDR Format then mark present of DV
+                
         """
         if args.disc and torrent_info["bdinfo"] is not None: 
             # for full disks here we identify the video_codec, hdr and dv informations
@@ -1021,32 +1026,28 @@ def analyze_video_file(missing_value, media_info):
             
         try:
             logging.debug(f"Logging video track atrtibutes used to detect HDR type")
-            logging.debug(f"color_primaries :: {media_info_video_track.color_primaries}")
-            logging.debug(f"hdr_format :: {media_info_video_track.hdr_format}")
-            logging.debug(f"hdr_format_version :: {media_info_video_track.hdr_format_version}")
-            logging.debug(f"hdr_format_compatibility :: {media_info_video_track.hdr_format_compatibility}")
-            logging.debug(f"transfer_characteristics :: {media_info_video_track.transfer_characteristics}")
-            logging.debug(f"transfer_characteristics_Original :: {media_info_video_track.transfer_characteristics_Original}")
-            logging.debug(f"Video track info from mediainfo :: {pformat(media_info_video_track.to_data())}")
+            logging.debug(f"Video track info from mediainfo \n {pformat(media_info_video_track.to_data())}")
             color_primaries = media_info_video_track.color_primaries
             if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
-                try:
-                    hdr_format = f"{media_info_video_track.hdr_format}, {media_info_video_track.hdr_format_version}, {media_info_video_track.hdr_format_compatibility}"
-                    if "HDR10" in hdr_format:
-                        torrent_info["hdr"] = "HDR"
-                    if "HDR10+" in hdr_format:
-                        torrent_info["hdr"] = "HDR10+"
-                except:
-                    if media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original):
-                        torrent_info["hdr"] = "PQ10"
-                transfer_characteristics = media_info_video_track.transfer_characteristics_Original
-                if transfer_characteristics is not None and "HLG" in transfer_characteristics:
+                hdr_format = f"{media_info_video_track.hdr_format}, {media_info_video_track.hdr_format_version}, {media_info_video_track.hdr_format_compatibility}"
+                if "HDR10" in hdr_format:
+                    torrent_info["hdr"] = "HDR"
+                
+                if "HDR10+" in hdr_format:
+                    torrent_info["hdr"] = "HDR10+"
+                elif media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original):
+                    torrent_info["hdr"] = "PQ10"
+                
+                if media_info_video_track.transfer_characteristics_Original is not None and "HLG" in media_info_video_track.transfer_characteristics_Original:
                     torrent_info["hdr"] = "HLG"
-                elif transfer_characteristics is not None and "BT.2020 (10-bit)" in transfer_characteristics:
+                elif media_info_video_track.transfer_characteristics_Original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_Original:
                     torrent_info["hdr"] = "WCG"
         except Exception as e:
             logging.exception(f"Error occured while trying to parse HDR information from mediainfo.")
         
+        if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
+            torrent_info["dv"] = "DV"
+
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
         filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'
                                                r'(?P<H265>H(.265|265))|'
