@@ -39,7 +39,6 @@
         "torrent": "file",
         "filename": "string",
         "info": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",

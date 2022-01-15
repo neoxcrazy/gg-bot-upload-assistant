@@ -2222,7 +2222,7 @@ for file in upload_queue:
         tracker = upload_to_trackers[0]
         temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
 
-        console.print('\n\n')
+        console.line(count=2)
         console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
 
         dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
@@ -2301,7 +2301,7 @@ for file in upload_queue:
         # dupe check need not be performed if user provided only one tracker.
         # in cases where only one tracker is provided, dupe check will be performed prior to taking screenshots.
         if os.getenv('check_dupes') == 'true' and len(upload_to_trackers) > 1:
-            console.print('\n\n')
+            console.line(count=2)
             console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
             # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
             dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
