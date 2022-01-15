@@ -1020,7 +1020,7 @@ def analyze_video_file(missing_value, media_info):
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
         try:
-            logging.debug(f"The video track media info details used for HDR detection\n{pformat(media_info_video_track)}")
+            logging.debug(f"The video track media info details used for HDR detection\n {pformat(media_info_video_track)}")
             color_primaries = media_info_video_track.color_primaries
             if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
                 try:
@@ -1030,15 +1030,15 @@ def analyze_video_file(missing_value, media_info):
                     if "HDR10+" in hdr_format:
                         torrent_info["hdr"] = "HDR10+"
                 except:
-                    if media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original, None):
+                    if media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original):
                         torrent_info["hdr"] = "PQ10"
                 transfer_characteristics = media_info_video_track.transfer_characteristics_Original
                 if "HLG" in transfer_characteristics:
                     torrent_info["hdr"] = "HLG"
                 elif "BT.2020 (10-bit)" in transfer_characteristics:
                     torrent_info["hdr"] = "WCG"
-        except:
-            logging.error(f"Error occured while trying to parse HDR information from mediainfo")
+        except Exception as e:
+            logging.exception(f"Error occured while trying to parse HDR information from mediainfo.")
         
         # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
         filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'
