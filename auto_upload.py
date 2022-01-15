@@ -1020,7 +1020,14 @@ def analyze_video_file(missing_value, media_info):
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
         try:
-            logging.debug(f"The video track media info details used for HDR detection\n {pformat(media_info_video_track)}")
+            logging.debug(f"Logging video track atrtibutes used to detect HDR type")
+            logging.debug(f"color_primaries :: {media_info_video_track.color_primaries}")
+            logging.debug(f"hdr_format :: {media_info_video_track.hdr_format}")
+            logging.debug(f"hdr_format_version :: {media_info_video_track.hdr_format_version}")
+            logging.debug(f"hdr_format_compatibility :: {media_info_video_track.hdr_format_compatibility}")
+            logging.debug(f"transfer_characteristics :: {media_info_video_track.transfer_characteristics}")
+            logging.debug(f"transfer_characteristics_Original :: {media_info_video_track.transfer_characteristics_Original}")
+            logging.debug(f"Video track info from mediainfo :: {pformat(media_info_video_track.to_data())}")
             color_primaries = media_info_video_track.color_primaries
             if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
                 try:
@@ -1033,9 +1040,9 @@ def analyze_video_file(missing_value, media_info):
                     if media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original):
                         torrent_info["hdr"] = "PQ10"
                 transfer_characteristics = media_info_video_track.transfer_characteristics_Original
-                if "HLG" in transfer_characteristics:
+                if transfer_characteristics is not None and "HLG" in transfer_characteristics:
                     torrent_info["hdr"] = "HLG"
-                elif "BT.2020 (10-bit)" in transfer_characteristics:
+                elif transfer_characteristics is not None and "BT.2020 (10-bit)" in transfer_characteristics:
                     torrent_info["hdr"] = "WCG"
         except Exception as e:
             logging.exception(f"Error occured while trying to parse HDR information from mediainfo.")
