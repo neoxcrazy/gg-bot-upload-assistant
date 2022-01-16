@@ -67,6 +67,8 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
     </tbody>
 </table>
 
+<br>
+
 <!-- Basic setup -->
 # Basic setup (Bare Metal / VM):
 1. Clone / download this repository
@@ -77,6 +79,8 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
 6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
 7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
    
+   <br>
+
 # Basic setup (Docker):
 1. Create new folder / dir [`mkdir GGBotUploader`]
 2. Enter into the new directory [`cd GGBotUploader`]
@@ -108,6 +112,8 @@ docker run -it \
 2. Docker volume mounts in debian host system results in permission error in docker container
     * Workaround: .torrent can be created in debian host os by using mktorrent. Provide argument `--use_mktorrent or -mkt`
 
+<br>
+
 # Wiki
 ### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
 ### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
@@ -116,8 +122,27 @@ docker run -it \
 ### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
 ### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
 
+<br>
+
+# Roadmap
+- [ ] Add Support for new platforms
+    - [ ] AvistaZ
+    - [ ] BIT-HDTV
+- [ ] Full Disk Support
+    - [X] Pack BDInfo inside container for full disk uploads
+    - [ ] Support for Bluray Distributors
+    - [ ] Detect Bluray disk region automatically
+- [ ] Add support for DVDs
+- [ ] Ensure backwards compatibility with bare metal full disk uploads 
+- [ ] Move torrents to different locations based on type
+- [ ] Support for custom messages / descriptions during upload
+- [x] Dynamic media summary
+- [x] Frame accurate screenshots
+
+<br>
+
 # Change Log
-**1.2**
+**1.2 - UNRELEASED**
 
     ### Underhood changes
     * Performance Optimizations
