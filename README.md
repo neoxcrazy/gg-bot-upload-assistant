@@ -140,6 +140,7 @@ docker run -it \
     * Audio Codec list as configurable json
     * Extended audio codec list for full disk codecs
     * TSP internal uploads
+    * New Tracker Support : UHD-Heaven
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check
