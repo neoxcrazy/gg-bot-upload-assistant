@@ -2313,7 +2313,7 @@ for file in upload_queue:
                     description.write(line)
 
                 # Finally append the entire thing with some shameless self promotion ;) & and the closing [/center] tags and some line breaks
-                description.write(f'{bbcode_line_break}{bbcode_line_break} Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT-Uploader[/center]')
+                description.write(f'{bbcode_line_break}{bbcode_line_break} Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
             # Add the finished file to the 'torrent_info' dict
             torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
