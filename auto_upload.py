@@ -80,6 +80,7 @@ acronym_to_tracker = {"blu": "blutopia",
                       "tsp": "thesceneplace",
                       "dt": "desitorrents",
                       "ufhd": "uncutflixhd",
+                      "uhdhvn":"uhdheaven",
                       "ntelogo": "ntelogo"}
 
 # Now assign some of the values we get from 'config.env' to global variables we use later
@@ -92,6 +93,7 @@ api_keys_dict = {
     'r4e_api_key': os.getenv('R4E_API_KEY'),
     'ath_api_key': os.getenv('ATH_API_KEY'),
     'telly_api_key': os.getenv('TELLY_API_KEY'),
+    'uhdhvn_api_key': os.getenv('UHDHVN_API_KEY'),
     'ntelogo_api_key': os.getenv('NTELOGO_API_KEY'),
     'tmdb_api_key': os.getenv('TMDB_API_KEY'),
     'tsp_api_key': os.getenv('TSP_API_KEY')
