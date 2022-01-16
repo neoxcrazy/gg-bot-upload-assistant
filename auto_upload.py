@@ -118,8 +118,6 @@ if len(os.getenv('DISCORD_WEBHOOK')) != 0:
 else:
     discord_url = None
 
-# TODO change the implementation to work with containerized solution
-bdinfo_script = os.getenv('bdinfo_script')
 # TODO integrate this feature with AvistaZ platform
 is_live_on_site = str(os.getenv('live')).lower()
 
@@ -462,7 +460,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
             torrent_info["raw_video_file"] = bd_max_file # file with the largest size inside the STEAM folder
 
-            bdinfo_output_split = str(' '.join(str(subprocess.check_output(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "-l"])).split())).split(' ')
+            bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, torrent_info["upload_media"], "-l"])).split())).split(' ')
             all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
             dict_of_playlist_length_size = {}
@@ -649,7 +647,7 @@ def generate_and_parse_bdinfo():
     # if largest_playlist is already in torrent_info, then why this computation again???
     # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
     logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
-    subprocess.run(["mono", "/usr/src/app/build/BDInfo.exe", torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
+    subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
 
     shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
     if os.path.isfile("/usr/bin/sed"):
@@ -1976,6 +1974,39 @@ if args.tripleup and args.doubleup:
     console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
     console.print("Exiting...\n", style='bright_red bold')
     sys.exit()
+
+"""
+----------------------- Full Disk & BDInfo CLI Related Notes -----------------------
+There is no way to use the `bdinfo_script` to create a bdinfocli docker container implementation inside a 
+docker container unless docker in docker support with the docker socket / docker socket proxy is implemented. 
+ 
+The docker socket approach is not considered due to the security risks associated with it.
+Hence BDInfo usage inside container is prohibited by default.
+
+To allow users to do Full Disks upload with the containeized approach a special docker image is provide that has bdinfo already packed inside.
+This image has the env properties `IS_CONTAINERIZED` and `IS_FULL_DISK_SUPPORTED` set as `true`
+Also this container has an alias `bdinfocli` that can be used to invoke the bdinfo utility.
+
+If the above mentioned envs are true, we override the user configured `bdinfo_script` to the alias `bdinfocli`
+
+Similarly, from inside the normal full disk un-supported images, if user tries to upload a Full Disk,
+we stop upload process immediately with an error message.
+"""
+bdinfo_script = os.getenv('bdinfo_script')
+if os.getenv("IS_CONTAINERIZED") == "true" and os.getenv("IS_FULL_DISK_SUPPORTED") == "true":
+    logging.info("Full disk is supported inside this container. Setting overriding configured `bdinfo_script` to use alias `bdinfocli`")
+    bdinfo_script = "bdinfocli"
+
+if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_FULL_DISK_SUPPORTED") == "true":
+    logging.fatal("User tried to upload Full Disk from an unsupported image!. Stopping upload process.")
+    console.print("\n[bold red on white] ---------------------------- :warning: Unsupported Operation :warning: ---------------------------- [/bold red on white]")
+    console.print("You're trying to upload a [bold red]Full Disk[/bold red] to trackers.",  highlight=False)
+    console.print("Full disk uploads are [bold red]NOT PERMITTED[/bold red] in this image.", highlight=False)
+    console.print("If you wish to upload Full disks please consider the following")
+    console.print("1. Run me on a bare metal or VM following the steps mentioned with bdinfo_script property in wiki")
+    console.print("2. Use a FAT variant of my image that supports Full Disk Uploads [Recommended]")
+    console.print("[bold red on white] ---------------------------- :warning: Unsupported Operation :warning: ---------------------------- [/bold red on white]")
+    sys.exit(console.print("\nQuiting upload process since Full Disk uploads are not allowed in this image.\n", style="bold red", highlight=False))
 
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path

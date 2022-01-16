@@ -65,6 +65,8 @@ RUN \
 COPY . .
 RUN chmod +x auto_upload.py
 
+RUN alias bdinfocli="mono /usr/src/app/build/BDInfo.exe"
+
 VOLUME /data /temp_upload
 
 ENTRYPOINT [ "python3", "auto_upload.py"]
