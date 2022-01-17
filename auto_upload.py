@@ -2422,6 +2422,7 @@ for file in upload_queue:
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
+                    logging.debug(f'moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
                     shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
