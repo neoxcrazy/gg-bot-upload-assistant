@@ -86,6 +86,8 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         if all(x in torrent_title_split for x in ['dvd']):
             existing_release_types[torrent_title] = "dvd"
 
+    logging.debug(f'Existing release types identified from tracker {search_site} are {existing_release_types}')
+
     # This just updates a dict with the number of a particular "type" of release exists on site (e.g. "2 bluray_encodes" or "1 bluray_remux" etc)
     for onsite_quality_type in existing_release_types.values():
         existing_releases_count[onsite_quality_type] += 1
@@ -98,6 +100,8 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         return False
 
     # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #
+    logging.debug(f'Uploading media properties. Resolution :: {torrent_info["screen_size"]}, Source ::: {torrent_info["source_type"]}')
+    logging.debug(f'Filtering torrents from tracker that doesn\'t match the above properties')
     for their_title in list(existing_release_types.keys()):  # we wrap the dict keys in a "list()" so we can modify (pop) keys from it while the loop is running below
         # use guessit to get details about the release
         their_title_guessit = guessit(their_title)
