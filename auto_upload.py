@@ -2407,6 +2407,7 @@ for file in upload_queue:
     # This isn't tracker specific so its outside of that ^^ 'for loop'
 
     move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
+    logging.debug(f"Move locations configured by user :: {move_locations}")
 
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed
@@ -2414,11 +2415,14 @@ for file in upload_queue:
             logging.info(f"The path {move_location_value} exists")
 
             if move_location_key == 'torrent':
+                sub_folder = "/"
+                if os.env("enable_type_base_move") == "true":
+                    sub_folder = sub_folder + torrent_info["type"]
                 # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
-                    shutil.copy(dot_torrent_file, move_locations["torrent"])
+                    shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
@@ -2428,6 +2432,8 @@ for file in upload_queue:
                 else:
                     logging.info(f"Moved {torrent_info['upload_media']} to {move_location_value}")
                     shutil.move(torrent_info["upload_media"], move_location_value)
+        else:
+            logging.error(f"Invalid move path or move path doesn't exist for {move_location_key} as {move_location_value}")
 
     # Torrent Info
     console.print("\n\n")
