@@ -71,11 +71,13 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
             existing_release_types[torrent_title] = 'bluray_remux'
 
         # WEB-DL
-        if all(x in torrent_title_split for x in ['web', 'dl']) and any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265']):
+        if all(x in torrent_title_split for x in ['web', 'dl']) and (any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265'])
+            or all(x in torrent_title_split for x in ['h', '265']) or all(x in torrent_title_split for x in ['h', '264'])):
             existing_release_types[torrent_title] = "webdl"
 
         # WEBRip
-        if all(x in torrent_title_split for x in ['webrip']) and any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265']):
+        if all(x in torrent_title_split for x in ['webrip']) and (any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265'])
+            or all(x in torrent_title_split for x in ['h', '265']) or all(x in torrent_title_split for x in ['h', '264'])):
             existing_release_types[torrent_title] = "webrip"
 
         # HDTV

@@ -280,20 +280,24 @@ def get_ss_range(duration, num_of_screenshots):
 #             outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'},
 #             global_options=[""]).run()
 
-import shutil
-torrent_info = {'type':'movie'}
-move_locations = {'torrent': '/projects/Python Projects/gg-bot-upload-assistant/watch', 'media': ''}
-for move_location_key, move_location_value in move_locations.items():
-    if len(move_location_value) == 0:
-        continue
+# import shutil
+# torrent_info = {'type':'movie'}
+# move_locations = {'torrent': '/projects/Python Projects/gg-bot-upload-assistant/watch', 'media': ''}
+# for move_location_key, move_location_value in move_locations.items():
+#     if len(move_location_value) == 0:
+#         continue
     
-    if os.path.exists(move_location_value):
-        print(f"The move path {move_location_value} exists")
-        if move_location_key == 'torrent':
-            sub_folder = "/"
-            sub_folder = sub_folder + torrent_info["type"] + "/"
-            try:
-                os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
-                shutil.copy("./requirements.txt", move_locations["torrent"] + sub_folder)
-            except Exception as e:
-                print(e)
+#     if os.path.exists(move_location_value):
+#         print(f"The move path {move_location_value} exists")
+#         if move_location_key == 'torrent':
+#             sub_folder = "/"
+#             sub_folder = sub_folder + torrent_info["type"] + "/"
+#             try:
+#                 os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
+#                 shutil.copy("./requirements.txt", move_locations["torrent"] + sub_folder)
+#             except Exception as e:
+#                 print(e)
+
+torrent_title = "The Book of Boba Fett S01E03 2160p WEB-DL DD+ 5 1 Atmos PQ10 H 265-NOSiViD"
+torrent_title_split = torrent_title.replace("-", " ").lower().split(' ')
+print(torrent_title_split)
