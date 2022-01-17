@@ -2430,7 +2430,7 @@ for file in upload_queue:
                     try:
                         shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
                     except Exception as e:
-                        logging.exception(f"Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}")
+                        logging.exception(f'Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
