@@ -2420,6 +2420,7 @@ for file in upload_queue:
                 sub_folder = "/"
                 if os.getenv("enable_type_base_move") == "true":
                     sub_folder = sub_folder + torrent_info["type"] + "/"
+                    os.makedirs(os.path.dirname(sub_folder), exist_ok=True)
                 # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
