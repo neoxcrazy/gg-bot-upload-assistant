@@ -166,6 +166,7 @@ docker run -it \
     * Extended audio codec list for full disk codecs
     * TSP internal uploads
     * New Tracker Support : UHD-Heaven
+    * Move dot torrents based on type after upload
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
         * Improved dupe check
