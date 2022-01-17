@@ -1847,6 +1847,7 @@ def choose_right_tracker_keys():
 def upload_to_site(upload_to, tracker_api_key):
     logging.info("Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
+    url_masked = str(config["upload_form"]).format(api_key="REDACTED")
 
     payload = {}
     files = []
@@ -1914,7 +1915,7 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info("Payload for {site} is {payload}".format(site=upload_to, payload=payload))
     logging.info("Files for {site} is {files}".format(site=upload_to, files=files))
 
-    logging.fatal("URL: {url} \n Data: {data} \n Files: {files}".format(url=url, data=payload, files=files))
+    logging.fatal("URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
 
     response = requests.request("POST", url, data=payload, files=files)
     logging.info(f"POST Request: {url}")
