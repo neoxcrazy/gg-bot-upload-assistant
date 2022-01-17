@@ -182,15 +182,15 @@ def parse_bdinfo(bdinfo_location):
     print(f"Parsed BDInfo :: {pformat(bdinfo)}")
     return bdinfo
 
-parse_bdinfo("./bdinfo_1.txt")
+# parse_bdinfo("./bdinfo_1.txt")
 print()
 print("**********************************************************************")
 print()
-parse_bdinfo("./bdinfo_2.txt")
+# parse_bdinfo("./bdinfo_2.txt")
 print()
 print("**********************************************************************")
 print()
-parse_bdinfo("./bdinfo_3.txt")
+# parse_bdinfo("./bdinfo_3.txt")
 
 
 # {title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}
@@ -275,7 +275,25 @@ def get_ss_range(duration, num_of_screenshots):
                 int((millis / (1000 * 60)) % 60), int((millis / 1000) % 60)), '%H:%M:%S').time()))
     return list_of_ss_timestamps
 
-for ss_timestamp in get_ss_range(duration=120, num_of_screenshots=5):
-    FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} '}, 
-            outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'},
-            global_options=[""]).run()
+# for ss_timestamp in get_ss_range(duration=120, num_of_screenshots=5):
+#     FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} '}, 
+#             outputs={f'./images/screenshots/test - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'},
+#             global_options=[""]).run()
+
+import shutil
+torrent_info = {'type':'movie'}
+move_locations = {'torrent': '/projects/Python Projects/gg-bot-upload-assistant/watch', 'media': ''}
+for move_location_key, move_location_value in move_locations.items():
+    if len(move_location_value) == 0:
+        continue
+    
+    if os.path.exists(move_location_value):
+        print(f"The move path {move_location_value} exists")
+        if move_location_key == 'torrent':
+            sub_folder = "/"
+            sub_folder = sub_folder + torrent_info["type"] + "/"
+            try:
+                os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
+                shutil.copy("./requirements.txt", move_locations["torrent"] + sub_folder)
+            except Exception as e:
+                print(e)

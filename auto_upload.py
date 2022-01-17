@@ -2412,6 +2412,7 @@ for file in upload_queue:
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed
         if len(move_location_value) == 0:
+            logging.debug(f'Move location not configured for {move_location_key}')
             continue
         if os.path.exists(move_location_value):
             logging.info(f"The move path {move_location_value} exists")
@@ -2420,13 +2421,16 @@ for file in upload_queue:
                 sub_folder = "/"
                 if os.getenv("enable_type_base_move") == "true":
                     sub_folder = sub_folder + torrent_info["type"] + "/"
-                    os.makedirs(os.path.dirname(sub_folder), exist_ok=True)
+                    os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
                 # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
                     logging.debug(f'Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
-                    shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
+                    try:
+                        shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
+                    except Exception as e:
+                        logging.exception(f"Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}")
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
@@ -2434,8 +2438,11 @@ for file in upload_queue:
                     console.print(f'\nError, {torrent_info["upload_media"]} is already in the move location you specified: "{move_location_value}"\n', style="red", highlight=False)
                     logging.error(f"{torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
                 else:
-                    logging.info(f"Moved {torrent_info['upload_media']} to {move_location_value}")
-                    shutil.move(torrent_info["upload_media"], move_location_value)
+                    logging.info(f"Moving {torrent_info['upload_media']} to {move_location_value}")
+                    try:
+                        shutil.move(torrent_info["upload_media"], move_location_value)
+                    except Exception as e:
+                        logging.exception(f"Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
         else:
             logging.error(f"Move path doesn't exist for {move_location_key} as {move_location_value}")
 
