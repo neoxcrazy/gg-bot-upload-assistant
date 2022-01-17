@@ -177,6 +177,7 @@ docker run -it \
     * No dupe message not being shown in certain cases
     * Invalid PA streaming service tagging
     * PQ10, HLG and WCG HDR Formats not being detected
+    * TSP dupe check for web sourced contents
 
 **1.1**
 
