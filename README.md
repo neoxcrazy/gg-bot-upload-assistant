@@ -4,65 +4,61 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
 ### Supported sites:
 <table>
     <tbody>
-        <tr style="text-align: center; font-size:20px">
+         <tr style="text-align: center; font-size:20px">
+            <td><strong>Platform</strong></td>
             <td><strong>Acronym</strong></td>
             <td><strong>Site Name</strong></td>
-            <td><strong>Platform</strong></td>
         </th>
         <tr style="text-align: center">
+            <td rowspan="10"><strong>UNIT3D</strong></td>
             <td><strong>ACM</strong></td>
             <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>ATH</strong></td>
             <td><strong><a href="https://aither.cc">Aither</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>BHD</strong></td>
             <td><strong><a href="https://beyond-hd.me">Beyond-HD</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>BLU</strong></td>
             <td><strong><a href="https://blutopia.xyz">Blutopia</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>R4E</strong></td>
             <td><strong><a href="https://racing4everyone.eu">Racing4Everyone</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>Telly</strong></td>
             <td><strong><a href="https://telly.wtf">Telly.wtf</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>Ntelogo</strong></td>
             <td><strong><a href="https://ntelogo.org">Ntelogo</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
-        </tr>
-        <tr style="text-align: center">
-            <td><strong>TSP</strong></td>
-            <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
-            <td><strong>XBTIT</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>DT</strong></td>
             <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>UFHD</strong></td>
             <td><strong><a href="https://uncutflixhd.com/">Uncutflixhd</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>UHDHVN</strong></td>
             <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
-            <td><strong>UNIT3D</strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>XBTIT</strong></td>
+            <td><strong>TSP</strong></td>
+            <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>TBDev</strong></td>
+            <td><strong>SPD</strong></td>
+            <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
         </tr>
     </tbody>
 </table>

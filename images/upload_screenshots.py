@@ -40,6 +40,12 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
     # Annoyingly pyimgbox requires every upload be apart of a "gallery", This is fine if you're uploading a list of multiple images at the same time
     # but because of the way we deal with "backup" image hosts/upload failures its not realistic to pass a list of all the images to imgbox at the same time.
     # so instead we just upload 1 image at a time to imgbox (also creates 1 gallery per image)
+    #
+    # Return values:
+    # 1. Status
+    # 2. BBCode Thumbnail
+    # 3. Full Image URL
+    #
     thumb_size = os.getenv("thumb_size") or "350"
     if img_host == 'ptpimg':
         try:
@@ -49,7 +55,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
             # assuming it is, we can then get the img url, format it into bbcode & return it
 
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
-            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]'
+            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
         except AssertionError:
             logging.error(msg='ptpimg uploaded an image but returned something unexpected (should be a list)')
             console.print(f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
@@ -79,9 +85,9 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
                         if img_type in img_upload_response[parent_key]:
                             if 'delete_url' in img_upload_response:
                                 logging.info(f'{img_host} delete url for {image_path}: {img_upload_response["delete_url"]}')
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]'
+                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
                         else:
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]'
+                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
                 except KeyError as key_error:
                     logging.error(f'{img_host} json KeyError: {key_error}')
                     return False
@@ -104,7 +110,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
                         return False
                     else:
                         logging.info(f'imgbox edit url for {image_path}: {submission["edit_url"]}')
-                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]'
+                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]', submission["image_url"]
 
         if os.path.getsize(image_path) >= 10485760:  # Bytes
             logging.error('Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
@@ -112,7 +118,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
 
         imgbox_asyncio_upload = asyncio.run(imgbox_upload(filepaths=[image_path]))
         if imgbox_asyncio_upload:
-            return True, imgbox_asyncio_upload[1]
+            return True, imgbox_asyncio_upload[1], imgbox_asyncio_upload[2]
 
         # # Python 3.7+ version
         # asyncio.run(imgbox_upload(filepaths=[image_path]))  # call the function that uploads images to imgbox
@@ -166,8 +172,10 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     # -------------------------- Check if any img_hosts are still in the 'enabled_img_hosts_list' list -------------------------- #
     # if no image_hosts are left then we show the user an error that we will continue the upload with screenshots & return back to auto_upload.py
     if not bool(enabled_img_hosts_list):
-        with open(f"{base_path}/temp_upload/bbcode_images.txt", "w") as no_images:
+        with open(f"{base_path}/temp_upload/bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
             no_images.write("[b][color=#FF0000][size=22]None[/size][/color][/b]")
+            append_url_txt.write("No Screenshots Available")
+            append_url_txt.close()
             no_images.close()
         logging.error(f"Continuing upload without screenshots")
         console.print(f'Continuing without screenshots\n', style='chartreuse1')
@@ -198,10 +206,12 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         for img_host in enabled_img_hosts_list:
             # call the function that uploads the screenshot
             upload_image = upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import)
-            # If the upload function returns True, we add it to bbcode_images.txt
+            # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
-                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt:
+                logging.debug(f"Response from image host: {upload_image}")
+                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
+                    append_url_txt.write(f"{upload_image[2]}\n")
                 successfully_uploaded_image_count += 1
                 # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
                 break

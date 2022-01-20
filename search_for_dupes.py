@@ -15,6 +15,19 @@ working_folder = os.path.dirname(os.path.realpath(__file__))
 logging.basicConfig(filename=f'{working_folder}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
+def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
+    """
+        Method to place an item in a list with another list
+    """
+    result = []
+    for i in source_list:
+        if i == item_to_replace:
+            result.extend(list_to_replace_with)
+        else:
+            result.append(i)
+    return result
+
+
 def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -25,19 +38,31 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     imdb = imdb.replace('tt', '') if config["dupes"]["strip_text"] == True else imdb
     url_dupe_payload = None  # this is here just for the log, its not technically needed
 
+    # multiple authentication modes
+    headers = None
+    if config["technical_jargons"]["authentication_mode"] == "API_KEY":
+        pass # headers = None
+    elif config["technical_jargons"]["authentication_mode"] == "BEARER":
+        headers = {'Authorization': f'Bearer {tracker_api}'}
+        logging.info(f"Using Bearer Token authentication method for tracker {search_site} header :: {headers}")
+    elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
+        logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
+        pass
+        
     if str(config["dupes"]["request"]) == "POST":
         # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
         url_dupe_payload = {'action': 'search', config["translation"]["imdb"]: imdb}
-        dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload)
+        dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
     elif search_site == "thesceneplace":
         # custom api different from Unit3D codebase
+        # TODO generalize this
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), filter=torrent_info["title"])
-        dupe_check_response = requests.request("GET", url_dupe_search)
+        dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
     else:
         # GET request (BLU & ACM)
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), imdb=imdb)
-        dupe_check_response = requests.request("GET", url_dupe_search)
+        dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
         
     logging.info(msg=f'Dupe search request | Method: {str(config["dupes"]["request"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
     
@@ -50,7 +75,12 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     existing_release_types = {}  # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
     existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0}  # We also log the num each type shows up on site
 
-    for item in dupe_check_response.json()[str(config["dupes"]["parse_json"]["top_lvl"])]:
+    # adding support for speedapp. Speedapp just returns the torrents as a json array.
+    # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
+    # as the name indicates, it decides whether or not the `dupe_check_response` returned from the tracker
+    # needs any further parsing.
+    torrent_items = dupe_check_response.json()[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response.json()
+    for item in torrent_items:
 
         if "torrent_details" in config["dupes"]["parse_json"]:
             # BLU & ACM have us go 2 "levels" down to get torrent info -->  [data][attributes][name] = torrent title
@@ -62,6 +92,19 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         torrent_title = str(torrent_details["name"])
         torrent_title_split = torrent_title.replace("-", " ").lower().split(' ')
 
+        if len(torrent_title_split) < 4: 
+            """
+                4 because [title] [video_codec] [audio_codec] [group] at the least
+                some trackers returns name with '.' instead of ' '. Eg: Rucker.2022.1080p.WEB.DL.DD5.1.H.264-EVO
+                for them a split with - will return :: ['rucker.2022.1080p.web.dl.dd5.1.h.264', 'evo']
+                thus we need to split by '.' also.
+            """
+            for split in torrent_title_split:
+                if "." in split:
+                    torrent_title_split = replace_item_in_list(torrent_title_split, split, split.split("."))
+
+        logging.debug(f'[DupeCheck] Dupe check torrent title obtained from tracker {search_site} is {torrent_title}')
+        logging.debug(f'[DupeCheck] Torrent title split {torrent_title_split}')
         # Bluray Encode
         if all(x in torrent_title_split for x in ['bluray']) and any(x in torrent_title_split for x in ['720p', '1080i', '1080p', '2160p']) and any(x in torrent_title_split for x in ['x264', 'x265', 'x 264', 'x 265']):
             existing_release_types[torrent_title] = 'bluray_encode'
@@ -98,7 +141,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     # If we get no matches when searching via IMDB ID that means this content hasn't been upload in any format, no possibility for dupes
     if len(existing_release_types.keys()) == 0:
         logging.info(msg='Dupe query did not return any releases that we could parse, assuming no dupes exist.')
-        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['source']).upper()}[/bold], continuing the upload process now\n")
+        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
         return False
 
     # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #
