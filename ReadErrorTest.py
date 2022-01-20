@@ -301,3 +301,44 @@ def get_ss_range(duration, num_of_screenshots):
 torrent_title = "The Book of Boba Fett S01E03 2160p WEB-DL DD+ 5 1 Atmos PQ10 H 265-NOSiViD"
 torrent_title_split = torrent_title.replace("-", " ").lower().split(' ')
 print(torrent_title_split)
+
+print()
+print()
+print()
+print()
+
+
+
+speedapp_json = json.load(open("./site_templates/speedapp.json"))
+if speedapp_json["dupes"]["parse_json"]["is_needed"]:
+    print("true")
+else:
+    print("false")
+
+print(speedapp_json["dupes"]["parse_json"]["is_needed"])
+
+
+
+import requests
+
+
+title = "Rucker-12.2022.1080p.WEB.DL.DD5.1.H.264-EVO Rucker-12.2022.1080p.WEB.DL.DD5.1.H.264-EVO"
+title_split = title.replace("-", " ").lower().split(' ')
+
+print(title_split)
+
+def replace_item(lst, to_replace, replace_with):
+    print(f"replacing {to_replace}")
+    result = []
+    for i in lst:
+        if i == to_replace:
+            result.extend(replace_with)
+        else:
+            result.append(i)
+    return result
+
+for tit in title_split:
+    if "." in tit:
+        title_split = replace_item(title_split, tit, tit.split("."))
+
+print(title_split)
