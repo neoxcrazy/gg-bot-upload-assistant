@@ -64,6 +64,11 @@ Automatically parse, rename, and upload torrents to trackers using the UNIT3D co
             <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
             <td><strong>UNIT3D</strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>SPD</strong></td>
+            <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
+            <td><strong>TBDev</strong></td>
+        </tr>
     </tbody>
 </table>
 
