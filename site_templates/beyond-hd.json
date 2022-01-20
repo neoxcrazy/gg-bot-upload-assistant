@@ -7,6 +7,15 @@
     "platform": "UNIT3D",
     "bbcode_line_break": "[br][/br]",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
+
     "translation": {
         "dot_torrent": "file",
         "torrent_title": "name",
@@ -229,7 +238,7 @@
         "sd": "string",
 
         "mediainfo": "file",
-        "bdinfo" : "string"
+        "bdinfo": "string"
     },
 
     "dupes": {
@@ -242,6 +251,7 @@
         },
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "results"
         },
 

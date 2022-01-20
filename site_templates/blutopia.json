@@ -7,12 +7,21 @@
     "platform": "UNIT3D",
     "bbcode_line_break": "\n",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
+
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
-        "bdinfo" : "bdinfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -133,6 +142,7 @@
         "strip_text": true,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data",
             "torrent_details": "attributes"
         },
