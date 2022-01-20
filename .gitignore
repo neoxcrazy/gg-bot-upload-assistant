@@ -16,3 +16,4 @@ config.env
 .coverage
 /.vscode
 bdinfo*.txt
+tvmaze.py

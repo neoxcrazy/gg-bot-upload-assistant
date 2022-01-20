@@ -31,7 +31,7 @@ from rich.console import Console
 from rich.traceback import install
 from rich.prompt import Prompt, Confirm
 
-# Search for **START** to get to the execution entry point of the bot.
+# Search for **START** to get to the execution entry point of the upload assistant.
 
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
