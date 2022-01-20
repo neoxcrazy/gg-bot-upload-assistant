@@ -18,7 +18,7 @@
         "torrent_title": "name",
         "mediainfo": "media_info",
         "url_images": "screenshots",
-        "shameless_self_promotion": "descr",
+        "shameless_self_promotion": "releaseInfo",
         "type": "category_id",
         "source": "source",
         "resolution": "resolution_id",
@@ -77,7 +77,7 @@
     "Required": {
         "file": "file|base64",
         "name": "string",
-        "description": "string",
+        "releaseInfo": "string",
         "screenshots": "file|array",
         "url": "url",
         "type": "string",
