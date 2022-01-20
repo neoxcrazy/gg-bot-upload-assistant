@@ -44,7 +44,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         pass # headers = None
     elif config["technical_jargons"]["authentication_mode"] == "BEARER":
         headers = {'Authorization': f'Bearer {tracker_api}'}
-        logging.info(f"Using Bearer Token authentication method for tracker {search_site} header :: {headers}")
+        logging.info(f"Using Bearer Token authentication method for tracker {search_site}")
     elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
         logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
         pass
@@ -295,7 +295,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
         return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
-        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['source']).upper()}[/bold], continuing the upload process now\n")
+        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
         return False # no dupes proceed with processing
 
 

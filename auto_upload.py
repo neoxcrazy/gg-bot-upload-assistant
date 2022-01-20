@@ -82,7 +82,7 @@ acronym_to_tracker = {"blu": "blutopia",
                       "dt": "desitorrents",
                       "ufhd": "uncutflixhd",
                       "uhdhvn":"uhdheaven",
-                      "spdapp" : "speedapp",
+                      "spd" : "speedapp",
                       "ntelogo": "ntelogo"}
 
 # Now assign some of the values we get from 'config.env' to global variables we use later
@@ -1535,10 +1535,11 @@ def format_title(json_config):
             generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
+        separator = json_config["title_separator"] or " "
         for key, value in generate_format_string.items():
             # ignore no matches (e.g. most TV Shows don't have the "year" added to its title so unless it was directly specified in the filename we also ignore it)
             if len(value) != 0:  
-                formatted_title = f'{formatted_title}{"-" if key == "release_group" else " "}{value}'
+                formatted_title = f'{formatted_title}{"-" if key == "release_group" else separator}{value}'
 
         # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings" 
         # which is used to store the payload for the actual POST upload request
