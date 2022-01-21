@@ -1733,7 +1733,7 @@ def choose_right_tracker_keys():
         possible_match_layer_1 = []
         for key in config["Required"][(config["translation"][target_val])]:
             # this key is the number provided under the target_val
-            logging.debug(f"Trying to match `{config['translation'][target_val]}` to configured key `{key}`")
+            logging.debug(f"[ResolutionSourceMapping] Trying to match `{config['translation'][target_val]}` to configured key `{key}`")
 
             total_num_of_required_keys = 0
             total_num_of_acquired_keys = 0
@@ -1744,7 +1744,7 @@ def choose_right_tracker_keys():
             select_from_optional_values_list = []
             for sub_key, sub_val in config["Required"][(config["translation"][target_val])][key].items():
                 # for each sub key and its priority we 
-                logging.debug(f'Considering item `{sub_key}` with priority `{sub_val}`')
+                logging.debug(f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
                 # Sub-Key Priorities
                 # --------------------- 
                 # 0 = optional
@@ -1756,21 +1756,21 @@ def choose_right_tracker_keys():
                     # Now check if the sub_key is in the relevant_torrent_info_values list
                     if sub_key in str(relevant_torrent_info_values).lower():
                         total_num_of_acquired_keys += 1
-                        logging.debug(f'Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
+                        logging.debug(f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
 
                 if sub_val == 2:
                     if sub_key in str(relevant_torrent_info_values).lower():
                         total_num_of_acquired_keys_val += 1
-                        logging.debug(f'SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
+                        logging.debug(f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
                     select_from_optional_values_list.append(sub_key)
 
-            logging.debug(f'Optional values list to select from are {select_from_optional_values_list}')
-            logging.debug(f'Total number of required keys: {total_num_of_required_keys}')
-            logging.debug(f'Total number of acquired keys value: {total_num_of_acquired_keys_val}')
-            logging.debug(f'Total number of acquired keys: {total_num_of_acquired_keys}')
+            logging.debug(f'[ResolutionSourceMapping] Optional values list to select from are {select_from_optional_values_list}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of required keys: {total_num_of_required_keys}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys value: {total_num_of_acquired_keys_val}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys: {total_num_of_acquired_keys}')
 
             if int(total_num_of_required_keys) == int(total_num_of_acquired_keys):
-                logging.debug(f'No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
+                logging.debug(f'[ResolutionSourceMapping] No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
                 possible_match_layer_1.append(key)
                 # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately 
                 # (2160p BD remux requires 'remux', '2160p', 'bluray')
@@ -1789,12 +1789,12 @@ def choose_right_tracker_keys():
         # checking whether we were able to get a match in any of the configuration
         if len(possible_match_layer_1) == 1:
             val = possible_match_layer_1.pop()
-            logging.debug(f'Successfully matched one item for `{config["translation"][target_val]}` => `{val}`')
+            logging.debug(f'[ResolutionSourceMapping] Successfully matched one item for `{config["translation"][target_val]}` => `{val}`')
             return val
         else:
             # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
-            logging.critical('Unable to find a suitable "source" match for this file')
-            logging.error("Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+            logging.critical('[ResolutionSourceMapping] Unable to find a suitable "source" match for this file')
+            logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
             console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
             sys.exit()
 
