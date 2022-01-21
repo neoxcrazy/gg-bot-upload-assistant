@@ -1954,7 +1954,7 @@ def choose_right_tracker_keys():
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
 def upload_to_site(upload_to, tracker_api_key):
-    logging.info("Attempting to upload to: {}".format(upload_to))
+    logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
 
@@ -1964,10 +1964,10 @@ def upload_to_site(upload_to, tracker_api_key):
         pass # headers = None
     elif config["technical_jargons"]["authentication_mode"] == "BEARER":
         headers = {'Authorization': f'Bearer {tracker_api_key}'}
-        logging.info(f"Using Bearer Token authentication method for tracker {upload_to}")
+        logging.info(f"[TrackerUpload] Using Bearer Token authentication method for tracker {upload_to}")
     elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
-        logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
-        pass
+        logging.fatal(f'[TrackerUpload] Cookie based authentication is not supported as for now.')
+        # TODO add support for cookie based authentication
 
     payload = {}
     files = []
@@ -1984,33 +1984,33 @@ def upload_to_site(upload_to, tracker_api_key):
                 files.append(post_file)
                 display_files[key] = tracker_settings[f'{key}']
             else:
-                logging.critical("The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
                 continue
         elif str(config[req_opt][key]) == "file|array":
             """
                 for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
             """
             if os.path.isfile(tracker_settings['{}'.format(key)]):
-                logging.debug(f"Setting file|array for key {key}")
+                logging.debug(f"[TrackerUpload] Setting file|array for key {key}")
                 with open(tracker_settings['{}'.format(key)], 'r') as file_contents:
                     array = []
                     for line in file_contents.readlines():
                         array.append(line.strip())
                     payload[key] = array
             else:
-                logging.critical("The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
                 continue
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
             if os.path.isfile(tracker_settings['{}'.format(key)]):
-                logging.debug(f"Setting file|base64 for key {key}")
+                logging.debug(f"[TrackerUpload] Setting file|base64 for key {key}")
                 with open(tracker_settings['{}'.format(key)], 'rb') as binary_file:
                     binary_file_data = binary_file.read()
                     base64_encoded_data = base64.b64encode(binary_file_data)
                     base64_message = base64_encoded_data.decode('utf-8')
                     payload[key] = base64_message
             else:
-                logging.critical("The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -2021,7 +2021,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 with open(val, 'r') as txt_file:
                     val = txt_file.read()
             if req_opt == "Optional":
-                logging.info(f"Optional key {key} will be added to payload")
+                logging.info(f"[TrackerUpload] Optional key {key} will be added to payload")
             payload[key] = val
 
     if auto_mode == "false":
@@ -2057,10 +2057,10 @@ def upload_to_site(upload_to, tracker_api_key):
         continue_upload = Prompt.ask("Do you want to upload with these settings?", choices=["y", "n"])
         if continue_upload != "y":
             console.print(f"\nCanceling upload to [bright_red]{upload_to}[/bright_red]")
-            logging.error(f"User-input chose to cancel the upload to {tracker}")
+            logging.error(f"[TrackerUpload] User chose to cancel the upload to {tracker}")
             return
 
-    logging.fatal("URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
+    logging.fatal("[TrackerUpload] URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
 
     response = None
     if config["technical_jargons"]["payload_type"] == "JSON":
@@ -2068,52 +2068,52 @@ def upload_to_site(upload_to, tracker_api_key):
     else:
         response = requests.request("POST", url, data=payload, files=files, headers=headers)
     
-    logging.info(f"POST Request: {url}")
-    logging.info(f"Response code: {response.status_code}")
+    logging.info(f"[TrackerUpload] POST Request: {url}")
+    logging.info(f"[TrackerUpload] Response code: {response.status_code}")
 
     console.print(f'\nSite response: [blue]{response.text}[/blue]')
-    logging.info(response.text)
+    logging.info(f'[TrackerUpload] {response.text}')
 
     if response.status_code in (200, 201):
-        logging.info(f"upload response for {upload_to}: {response.text.encode('utf8')}")
+        logging.info(f"[TrackerUpload]Uupload response for {upload_to}: {response.text.encode('utf8')}")
         # Update discord channel
         if discord_url:
             requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
 
         if "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
-                logging.info("Upload to {} was a success!".format(upload_to))
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
-                logging.critical("Upload to {} failed".format(upload_to))
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         elif "status" in str(response.json()).lower():
             if str(response.json()["status"]).lower() == "true":
-                logging.info("Upload to {} was a success!".format(upload_to))
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
-                logging.critical("Upload to {} failed".format(upload_to))
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         else:
-            logging.critical("Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
+            logging.critical("[TrackerUpload] Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
     
     elif response.status_code == 404:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print('Upload failed', style='bold red')
-        logging.critical(f"404 was returned on that upload, this is a problem with the site ({tracker})")
-        logging.error("Upload failed")
+        logging.critical(f"[TrackerUpload] 404 was returned on that upload, this is a problem with the site ({tracker})")
+        logging.error("[TrackerUpload] Upload failed")
 
     elif response.status_code == 500:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print("The upload might have [red]failed[/], the site isn't returning the uploads status")
         # This is to deal with the 500 internal server error responses BLU has been recently returning
-        logging.error(f"HTTP response status code '{response.status_code}' was returned (500=Internal Server Error)")
-        logging.info("This doesn't mean the upload failed, instead the site simply isn't returning the upload status")
+        logging.error(f"[TrackerUpload] HTTP response status code '{response.status_code}' was returned (500=Internal Server Error)")
+        logging.info("[TrackerUpload] This doesn't mean the upload failed, instead the site simply isn't returning the upload status")
 
     else:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print("The status code isn't [green]200[/green] so something failed, upload may have failed")
-        logging.error('status code is not 200, upload might have failed')
+        logging.error('[TrackerUpload] Status code is not 200, upload might have failed')
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
