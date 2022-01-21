@@ -1574,14 +1574,16 @@ def generate_dot_torrent(media, announce, source, callback=None):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """
-    logging.info("Creating the .torrent file now")
-    logging.info("announce url: {}".format(announce[0]))
+    logging.info("[DotTorrentGeneration] Creating the .torrent file now")
+    logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
+    logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
+
     if len(glob.glob(working_folder + "/temp_upload/*.torrent")) == 0:
-        logging.info("Existing .torrent file does not exist so we need to generate a new one")
         # we need to actually generate a torrent file "from scratch"
+        logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if args.use_mktorrent:
             print("Using mktorrent to generate the torrent")
-            logging.info("Using MkTorrent to generate the torrent")
+            logging.info("[DotTorrentGeneration] Using MkTorrent to generate the torrent")
             """
             mktorrent options
                 -v => Be verbose.
@@ -1596,17 +1598,17 @@ def generate_dot_torrent(media, announce, source, callback=None):
             Once an updated version is available, the flag can be added
             """
             if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot-Uploader\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
             else:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot-Uploader\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
-            logging.info("Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
+                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
+            logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
         else:
             print("Using python torf to generate the torrent")
             torrent = Torrent(media,
                               trackers=announce,
                               source=source,
-                              comment="Torrent created by GG-Bot-Uploader",
-                              created_by="GG-Bot-Uploader",
+                              comment="Torrent created by GG-Bot Upload Assistant",
+                              created_by="GG-Bot Upload Assistant",
                               exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens","*.sfv"],
                               private=True,
                               creation_date=datetime.datetime.now())
@@ -1614,24 +1616,38 @@ def generate_dot_torrent(media, announce, source, callback=None):
             torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
             # Save the path to .torrent file in torrent_settings
             torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_info["torrent_title"]}.torrent'
-            logging.info("Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
+            logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
     else:
         print("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
-        logging.info("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
+        logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
         edit_torrent = Torrent.read(glob.glob(working_folder + '/temp_upload/*.torrent')[0])
 
+        if len(announce) == 1:
+            logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
+            logging.debug(f"[DotTorrentGeneration] Removing announce-list if present in existing torrent.")
+            edit_torrent.metainfo.pop('announce-list', "")
+        else:
+            logging.debug(f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
+            edit_torrent.metainfo.pop('announce-list', "")
+            edit_torrent.metainfo['announce-list'] = list()
+            for announce_url in announce[1:]:
+                logging.debug(f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
+                announce_list = list()
+                announce_list.append(announce_url)
+                edit_torrent.metainfo['announce-list'].append(announce_list)
+            logging.debug(f"[DotTorrentGeneration] Final announce-list in torrent metadata {edit_torrent.metainfo['announce-list']}")
+
         edit_torrent.metainfo['announce'] = announce[0]
         edit_torrent.metainfo['info']['source'] = source
-        edit_torrent.metainfo['comment'] = ""
         # Edit the previous .torrent and save it as a new copy
         Torrent.copy(edit_torrent).write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
 
     if os.path.isfile(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'):
-        logging.info(f'Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
+        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
     else:
-        logging.error(f'The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
+        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
 
 
 # ---------------------------------------------------------------------- #
@@ -2110,6 +2126,11 @@ logging.info(starting_new_upload)
 
 if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger("torf").setLevel(logging.INFO)
+    logging.getLogger("rebulk.rules").setLevel(logging.INFO)
+    logging.getLogger("rebulk.rebulk").setLevel(logging.INFO)
+    logging.getLogger("rebulk.processors").setLevel(logging.INFO)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
     logging.debug(f"Arguments provided by user: {args}")
 
 if args.tripleup and args.doubleup:
@@ -2522,7 +2543,7 @@ for file in upload_queue:
         generate_dot_torrent(
             media=torrent_info["upload_media"],
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
-            source=tracker,
+            source=config["source"],
             callback=generate_callback
         )
 
