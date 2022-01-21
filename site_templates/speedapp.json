@@ -4,7 +4,7 @@
     "upload_form": "https://speedapp.io/api/upload",
     "torrents_search": "https://speedapp.io/api/torrent",
     "source": "sunshine",
-    "platform": "SpeedApp",
+    "platform": "TBDev",
     "bbcode_line_break": "\n",
     "bbcode_code": "[code][/code]",
     "title_separator" : ".",
