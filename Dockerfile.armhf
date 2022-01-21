@@ -29,7 +29,6 @@ RUN \
 
 COPY . .
 RUN chmod +x auto_upload.py
-RUN chmod +x bdinfo
 
 # ports and volumes
 VOLUME /data /temp_upload
