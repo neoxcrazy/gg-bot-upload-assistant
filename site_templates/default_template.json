@@ -6,6 +6,23 @@
     "source": "<TRACKER_ACRONYM>",
     "platform": "UNIT3D | XBTIT",
     "bbcode_line_break": "|  [br][/br]  |  OR  |  <br />  |  (Check which one works)  ",
+    "title_separator" : "<Separator to be used in the torrent tile name. Eg: `.`[DOT] , ` `[SPACE] etc etc >",
+
+    "technical_jargons": {
+        "authentication_mode": "API_KEY | BEARER",
+        "payload_type": "MULTI-PART | JSON"
+    },
+
+    "hybrid_type": {
+        "required": false,
+        "mapping": {
+            "tracker_required_key_1": {
+                "required_key_category_id": ["required ids"],
+                "required_key_resolution": ["required ids"],
+                "required_key_type_id": ["required ids"]
+            }
+        }
+    },
 
     "translation": {
         "dot_torrent": "<required_key_file>",
@@ -197,6 +214,7 @@
         "strip_text": true,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data",
             "torrent_details": "attributes"
         },

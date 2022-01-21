@@ -12,8 +12,10 @@
 /temp_upload
 rtorrent_on_complete_reupload.sh
 config.env
+config.env.docker
 /.idea/
 .coverage
 /.vscode
 bdinfo*.txt
 tvmaze.py
+dev_comments

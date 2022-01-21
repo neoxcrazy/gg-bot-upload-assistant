@@ -7,6 +7,7 @@ import sys
 import glob
 import time
 import json
+import base64
 import shutil
 import logging
 import argparse
@@ -81,6 +82,7 @@ acronym_to_tracker = {"blu": "blutopia",
                       "dt": "desitorrents",
                       "ufhd": "uncutflixhd",
                       "uhdhvn":"uhdheaven",
+                      "spd" : "speedapp",
                       "ntelogo": "ntelogo"}
 
 # Now assign some of the values we get from 'config.env' to global variables we use later
@@ -93,6 +95,7 @@ api_keys_dict = {
     'r4e_api_key': os.getenv('R4E_API_KEY'),
     'ath_api_key': os.getenv('ATH_API_KEY'),
     'telly_api_key': os.getenv('TELLY_API_KEY'),
+    'spd_api_key': os.getenv('SPD_API_KEY'),
     'uhdhvn_api_key': os.getenv('UHDHVN_API_KEY'),
     'ntelogo_api_key': os.getenv('NTELOGO_API_KEY'),
     'tmdb_api_key': os.getenv('TMDB_API_KEY'),
@@ -1362,7 +1365,7 @@ def search_tmdb_for_id(query_title, year, content_type):
 
         logging.info(f"total number of results for TMDB search: {str(result_num)}")
         # once the loop is done we can show the table to the user
-        console.print(tmdb_search_results)
+        console.print(tmdb_search_results, justify="center")
 
         list_of_num = []  # here we convert our integer that was storing the total num of results into a list
         for i in range(result_num):
@@ -1532,10 +1535,11 @@ def format_title(json_config):
             generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
+        separator = json_config["title_separator"] or " "
         for key, value in generate_format_string.items():
             # ignore no matches (e.g. most TV Shows don't have the "year" added to its title so unless it was directly specified in the filename we also ignore it)
             if len(value) != 0:  
-                formatted_title = f'{formatted_title}{"-" if key == "release_group" else " "}{value}'
+                formatted_title = f'{formatted_title}{"-" if key == "release_group" else separator}{value}'
 
         # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings" 
         # which is used to store the payload for the actual POST upload request
@@ -1570,14 +1574,16 @@ def generate_dot_torrent(media, announce, source, callback=None):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """
-    logging.info("Creating the .torrent file now")
-    logging.info("announce url: {}".format(announce[0]))
+    logging.info("[DotTorrentGeneration] Creating the .torrent file now")
+    logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
+    logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
+
     if len(glob.glob(working_folder + "/temp_upload/*.torrent")) == 0:
-        logging.info("Existing .torrent file does not exist so we need to generate a new one")
         # we need to actually generate a torrent file "from scratch"
+        logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if args.use_mktorrent:
             print("Using mktorrent to generate the torrent")
-            logging.info("Using MkTorrent to generate the torrent")
+            logging.info("[DotTorrentGeneration] Using MkTorrent to generate the torrent")
             """
             mktorrent options
                 -v => Be verbose.
@@ -1592,17 +1598,17 @@ def generate_dot_torrent(media, announce, source, callback=None):
             Once an updated version is available, the flag can be added
             """
             if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot-Uploader\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
             else:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot-Uploader\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
-            logging.info("Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
+                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
+            logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
         else:
             print("Using python torf to generate the torrent")
             torrent = Torrent(media,
                               trackers=announce,
                               source=source,
-                              comment="Torrent created by GG-Bot-Uploader",
-                              created_by="GG-Bot-Uploader",
+                              comment="Torrent created by GG-Bot Upload Assistant",
+                              created_by="GG-Bot Upload Assistant",
                               exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens","*.sfv"],
                               private=True,
                               creation_date=datetime.datetime.now())
@@ -1610,24 +1616,38 @@ def generate_dot_torrent(media, announce, source, callback=None):
             torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
             # Save the path to .torrent file in torrent_settings
             torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_info["torrent_title"]}.torrent'
-            logging.info("Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
+            logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
     else:
         print("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
-        logging.info("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
+        logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
         edit_torrent = Torrent.read(glob.glob(working_folder + '/temp_upload/*.torrent')[0])
 
+        if len(announce) == 1:
+            logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
+            logging.debug(f"[DotTorrentGeneration] Removing announce-list if present in existing torrent.")
+            edit_torrent.metainfo.pop('announce-list', "")
+        else:
+            logging.debug(f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
+            edit_torrent.metainfo.pop('announce-list', "")
+            edit_torrent.metainfo['announce-list'] = list()
+            for announce_url in announce[1:]:
+                logging.debug(f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
+                announce_list = list()
+                announce_list.append(announce_url)
+                edit_torrent.metainfo['announce-list'].append(announce_list)
+            logging.debug(f"[DotTorrentGeneration] Final announce-list in torrent metadata {edit_torrent.metainfo['announce-list']}")
+
         edit_torrent.metainfo['announce'] = announce[0]
         edit_torrent.metainfo['info']['source'] = source
-        edit_torrent.metainfo['comment'] = ""
         # Edit the previous .torrent and save it as a new copy
         Torrent.copy(edit_torrent).write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
 
     if os.path.isfile(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'):
-        logging.info(f'Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
+        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
     else:
-        logging.error(f'The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
+        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
 
 
 # ---------------------------------------------------------------------- #
@@ -1640,6 +1660,7 @@ def choose_right_tracker_keys():
 
     # BLU requires the IMDB with the "tt" removed so we do that here, BHD will automatically put the "tt" back in... so we don't need to make an exception for that
     if "imdb" in torrent_info:
+        torrent_info["imdb_with_tt"] = torrent_info["imdb"]
         if len(torrent_info["imdb"]) >= 2:
             if str(torrent_info["imdb"]).startswith("tt"):
                 torrent_info["imdb"] = str(torrent_info["imdb"]).replace("tt", "")
@@ -1654,14 +1675,66 @@ def choose_right_tracker_keys():
     for torrent_info_k in torrent_info:
         if torrent_info_k in ["source_type", "screen_size", "bluray_disc_type"]:
             relevant_torrent_info_values.append(torrent_info[torrent_info_k])
+        
+    logging.debug(f'The relevant torrent info values for resolution / source identification are {relevant_torrent_info_values}')
+
+
+    def get_hybrid_type(target_val):
+        """
+            Method to get a hybrid type from the source, resolution and type properties of the torrent
+        """
+        logging.debug(f'------------------ Hybrid mapping started ------------------')
+        # getting values for the source, resolution and type properties
+        source = tracker_settings[config["translation"]["source"]]
+        resolution = tracker_settings[config["translation"]["resolution"]]
+        type = tracker_settings[config["translation"]["type"]]
+        logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{type}]')
+
+        for key in config["hybrid_type"]["mapping"]:
+            logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
+            is_valid = None
+            for sub_key, sub_val in config["hybrid_type"]["mapping"][key].items():
+                logging.debug(f'[HybridMapping] The subkey `{sub_key}` need to be one of `{sub_val}` for the mapping to be accepted.')
+                selected_val = None
+                if config["translation"]["source"] == sub_key:
+                    selected_val = source
+                elif config["translation"]["resolution"] == sub_key:
+                     selected_val = resolution
+                elif config["translation"]["type"] == sub_key:
+                     selected_val = type
+                
+                if selected_val is not None:
+                    if selected_val in sub_val:
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val}` for `{sub_key}` and `{key}`")
+                        is_valid = True if is_valid is None else is_valid
+                    else:
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val}` for `{sub_key}` and `{key}`")
+                        is_valid = False
+                else:
+                    is_valid = False
+                    logging.fatal(f"[HybridMapping] Invalid configuration provided for hybrid key mapping. Key ::{key}, sub key :: {sub_key}, sub value :: {sub_val}")
+
+            if is_valid:
+                logging.info(f'[HybridMapping] The hybrid key was identified to be {key}')
+                logging.debug(f'------------------ Hybrid mapping Completed ------------------')
+                # is_valid is true 
+                # all the categories match
+                return key
+        
+        logging.debug(f'------------------ Hybrid mapping Completed With ERRORS ------------------')
+        # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
+        logging.critical('[HybridMapping] Unable to find a suitable "hybrid mapping" match for this file')
+        logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+        console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
+        sys.exit()
 
     def identify_resolution_source(target_val):
-        # 0 = optional
-        # 1 = required
-        # 2 = select from available items in list
-
+        # target_val is type (source) or resolution_id (resolution)
         possible_match_layer_1 = []
         for key in config["Required"][(config["translation"][target_val])]:
+            # this key is the number provided under the target_val
+            logging.debug(f"[ResolutionSourceMapping] Trying to match `{config['translation'][target_val]}` to configured key `{key}`")
+
             total_num_of_required_keys = 0
             total_num_of_acquired_keys = 0
 
@@ -1670,27 +1743,39 @@ def choose_right_tracker_keys():
 
             select_from_optional_values_list = []
             for sub_key, sub_val in config["Required"][(config["translation"][target_val])][key].items():
+                # for each sub key and its priority we 
+                logging.debug(f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
+                # Sub-Key Priorities
+                # --------------------- 
+                # 0 = optional
+                # 1 = required
+                # 2 = select from available items in list
 
                 if sub_val == 1:
                     total_num_of_required_keys += 1
                     # Now check if the sub_key is in the relevant_torrent_info_values list
                     if sub_key in str(relevant_torrent_info_values).lower():
                         total_num_of_acquired_keys += 1
+                        logging.debug(f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
 
                 if sub_val == 2:
                     if sub_key in str(relevant_torrent_info_values).lower():
                         total_num_of_acquired_keys_val += 1
+                        logging.debug(f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
                     select_from_optional_values_list.append(sub_key)
 
-            # print(f'\nselect_from_optional_values_list: {select_from_optional_values_list}')
-            # print(f'total_num_of_required_keys: {total_num_of_required_keys}')
-            # print(f'total_num_of_acquired_keys_val: {total_num_of_acquired_keys_val}')
-            # print(f'total_num_of_acquired_keys: {total_num_of_acquired_keys}\n')
+            logging.debug(f'[ResolutionSourceMapping] Optional values list to select from are {select_from_optional_values_list}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of required keys: {total_num_of_required_keys}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys value: {total_num_of_acquired_keys_val}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys: {total_num_of_acquired_keys}')
 
             if int(total_num_of_required_keys) == int(total_num_of_acquired_keys):
+                logging.debug(f'[ResolutionSourceMapping] No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
                 possible_match_layer_1.append(key)
-                # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately (2160p BD remux requires 'remux', '2160p', 'bluray')
-                # so if we find all those values in select_from_optional_values_list list then we can break knowing that we hit 100% of the required values instead of having to
+                # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately 
+                # (2160p BD remux requires 'remux', '2160p', 'bluray')
+                # so if we find all those values in select_from_optional_values_list list then we can break 
+                # knowing that we hit 100% of the required values instead of having to
                 # cycle through the "optional" values and select one of them
                 if len(select_from_optional_values_list) == 0 and key != "Other":
                     break
@@ -1701,31 +1786,33 @@ def choose_right_tracker_keys():
             if len(possible_match_layer_1) >= 2 and "Other" in possible_match_layer_1:
                 possible_match_layer_1.remove("Other")
 
+        # checking whether we were able to get a match in any of the configuration
         if len(possible_match_layer_1) == 1:
-            target_val = possible_match_layer_1.pop()
+            val = possible_match_layer_1.pop()
+            logging.debug(f'[ResolutionSourceMapping] Successfully matched one item for `{config["translation"][target_val]}` => `{val}`')
+            return val
         else:
             # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
-            logging.critical('Unable to find a suitable "source" match for this file')
-            logging.error("Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
-            console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker',
-                style='Red underline', highlight=False)
+            logging.critical('[ResolutionSourceMapping] Unable to find a suitable "source" match for this file')
+            logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+            console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
             sys.exit()
 
-        return target_val
-
     # ------------ required_items ------------
+    is_hybrid_translation_needed = False
     for required_key, required_value in required_items.items():
         for translation_key, translation_value in config["translation"].items():
             if str(required_key) == str(translation_value):
 
                 # the torrent file is always submitted as a file
-                if required_value == "file":
+                if required_value in ( "file", "file|base64", "file|array"):
+                    # adding support for base64 encoded files
+                    # the actual encoding will be performed in `upload_to_site` method
                     if translation_key in torrent_info:
                         tracker_settings[config["translation"][translation_key]] = torrent_info[translation_key]
                     # Make sure you select the right .torrent file
                     if translation_key == "dot_torrent":
                         tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'
-
                 # The reason why we keep this elif statement here is because the conditional right above is also technically a "string"
                 # but its easier to keep mediainfo and description in text files until we need them so we have that small exception for them
                 elif required_value == "string":
@@ -1752,7 +1839,18 @@ def choose_right_tracker_keys():
                     # This work as a sort of 'catch all', if we don't have the correct data in torrent_info, we just send a 0 so we can successfully post
                     else:
                         tracker_settings[config["translation"][translation_key]] = "0"
-
+                elif required_value == "url":
+                    # URLs can be set only to for certain media databases
+                    url = ""
+                    if translation_key == "imdb":
+                        url = f"https://www.imdb.com/title/{torrent_info['imdb_with_tt']}"
+                    elif translation_key == "tmdb":
+                        url = f"https://www.themoviedb.org/{'movie' if torrent_info['type'] == 'movie' else 'tv'}/{torrent_info['tmdb']}"
+                    elif translation_key == "tvdb":
+                        url = f"https://www.thetvdb.com/?tab=series&id={torrent_info['tvdb']}"
+                    elif translation_key == "mal":
+                        url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
+                    tracker_settings[config["translation"][translation_key]] = url
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
                 if translation_key == "type":
                     for key_cat, val_cat in config["Required"][required_key].items():
@@ -1760,9 +1858,19 @@ def choose_right_tracker_keys():
                             tracker_settings[config["translation"][translation_key]] = key_cat
 
                 if translation_key in ('source', 'resolution'):
-                    # value = identify_resolution_source(translation_key)
                     tracker_settings[config["translation"][translation_key]] = identify_resolution_source(translation_key)
 
+                if translation_key == "hybrid_type" and config["hybrid_type"] is not None and config["hybrid_type"]["required"]:
+                    # to do hybrid translation we need values for source, type and resolution to be resolved before hand.
+                    # we first check whether they have been resolved or not. 
+                    # If those values have been resolved then we can just call the `get_hybrid_type` to resolve it.
+                    # otherwise we mark the present of this hybrid type and do the mapping after all required and optional 
+                    # value mapping have been completed.
+                    if config["translation"]["source"] in tracker_settings and config["translation"]["resolution"] in tracker_settings and config["translation"]["type"] in tracker_settings:
+                        tracker_settings[config["translation"][translation_key]] = get_hybrid_type(translation_key)
+                        is_hybrid_translation_needed = False
+                    else:
+                        is_hybrid_translation_needed = True
     # ------------ optional_items ------------
     # This mainly applies to BHD since they are the tracker with the most 'Optional' fields, BLU/ACM only have 'nfo_file' as an optional item which we take care of later
     # It is for this reason ^^ why the following block is coded with BHD specifically in mind
@@ -1823,31 +1931,43 @@ def choose_right_tracker_keys():
         elif optional_key in ['season_number', 'episode_number'] and optional_key in torrent_info:
             tracker_settings[optional_key] = torrent_info.get(optional_key, "")
 
-        elif optional_key in ['bdinfo', 'mediainfo']:
+        elif optional_key in ['bdinfo', 'mediainfo', 'media_info', 'bd_info']:
             # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
             # for full disks the bdInfo is saved under the same key as mediainfo
             logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
             if args.disc:
-                if optional_key == "mediainfo":
+                if optional_key in ("mediainfo", "media_info"):
                     logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
                 else:
                     logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                     tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
             else:
-                if optional_key == "bdinfo":
+                if optional_key in ("bdinfo", "bd_info"):
                     logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
                     logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                     tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
 
-
+    if is_hybrid_translation_needed:
+        tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
 # ---------------------------------------------------------------------- #
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
 def upload_to_site(upload_to, tracker_api_key):
-    logging.info("Attempting to upload to: {}".format(upload_to))
+    logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
+
+    # multiple authentication modes
+    headers = None
+    if config["technical_jargons"]["authentication_mode"] == "API_KEY":
+        pass # headers = None
+    elif config["technical_jargons"]["authentication_mode"] == "BEARER":
+        headers = {'Authorization': f'Bearer {tracker_api_key}'}
+        logging.info(f"[TrackerUpload] Using Bearer Token authentication method for tracker {upload_to}")
+    elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
+        logging.fatal(f'[TrackerUpload] Cookie based authentication is not supported as for now.')
+        # TODO add support for cookie based authentication
 
     payload = {}
     files = []
@@ -1864,7 +1984,33 @@ def upload_to_site(upload_to, tracker_api_key):
                 files.append(post_file)
                 display_files[key] = tracker_settings[f'{key}']
             else:
-                logging.critical("The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                continue
+        elif str(config[req_opt][key]) == "file|array":
+            """
+                for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
+            """
+            if os.path.isfile(tracker_settings['{}'.format(key)]):
+                logging.debug(f"[TrackerUpload] Setting file|array for key {key}")
+                with open(tracker_settings['{}'.format(key)], 'r') as file_contents:
+                    array = []
+                    for line in file_contents.readlines():
+                        array.append(line.strip())
+                    payload[key] = array
+            else:
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                continue
+        elif str(config[req_opt][key]) == "file|base64":
+            # file encoded as base64 string
+            if os.path.isfile(tracker_settings['{}'.format(key)]):
+                logging.debug(f"[TrackerUpload] Setting file|base64 for key {key}")
+                with open(tracker_settings['{}'.format(key)], 'rb') as binary_file:
+                    binary_file_data = binary_file.read()
+                    base64_encoded_data = base64.b64encode(binary_file_data)
+                    base64_message = base64_encoded_data.decode('utf-8')
+                    payload[key] = base64_message
+            else:
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -1875,7 +2021,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 with open(val, 'r') as txt_file:
                     val = txt_file.read()
             if req_opt == "Optional":
-                logging.info(f"Optional key {key} will be added to payload")
+                logging.info(f"[TrackerUpload] Optional key {key} will be added to payload")
             payload[key] = val
 
     if auto_mode == "false":
@@ -1893,70 +2039,81 @@ def upload_to_site(upload_to, tracker_api_key):
             review_upload_settings_text_table.add_row(f"[deep_pink1]{payload_k}[/deep_pink1]", f"[dodger_blue1]{payload_v}[/dodger_blue1]")
         console.print(review_upload_settings_text_table, justify="center")
 
-        # ------- Show the user a table of the API KEY/VAL (FILE) that we are about to send ------- #
-        review_upload_settings_files_table = Table(title=f"\n\n\n\n[bold][green3]{upload_to} Upload data (FILES):[/green3][/bold]", 
-            show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True)
+        if len(display_files.items()) != 0:
+            # Displaying FILES data if present
+            # ------- Show the user a table of the API KEY/VAL (FILE) that we are about to send ------- #
+            review_upload_settings_files_table = Table(title=f"\n\n\n\n[bold][green3]{upload_to} Upload data (FILES):[/green3][/bold]", 
+                show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim", show_lines=True)
 
-        review_upload_settings_files_table.add_column("Key", justify="left")
-        review_upload_settings_files_table.add_column("Value (FILE)", justify="left")
-        # Insert the path to the files we are uploading
-        for payload_file_k, payload_file_v in sorted(display_files.items()):
-            # Add torrent_info data to each row
-            review_upload_settings_files_table.add_row(f"[green3]{payload_file_k}[/green3]", f"[dodger_blue1]{payload_file_v}[/dodger_blue1]")
-        console.print(review_upload_settings_files_table, justify="center")
+            review_upload_settings_files_table.add_column("Key", justify="left")
+            review_upload_settings_files_table.add_column("Value (FILE)", justify="left")
+            # Insert the path to the files we are uploading
+            for payload_file_k, payload_file_v in sorted(display_files.items()):
+                # Add torrent_info data to each row
+                review_upload_settings_files_table.add_row(f"[green3]{payload_file_k}[/green3]", f"[dodger_blue1]{payload_file_v}[/dodger_blue1]")
+            console.print(review_upload_settings_files_table, justify="center")
 
         # Give the user a chance to stop the upload
         continue_upload = Prompt.ask("Do you want to upload with these settings?", choices=["y", "n"])
         if continue_upload != "y":
             console.print(f"\nCanceling upload to [bright_red]{upload_to}[/bright_red]")
-            logging.error(f"User-input chose to cancel the upload to {tracker}")
+            logging.error(f"[TrackerUpload] User chose to cancel the upload to {tracker}")
             return
 
-    logging.info("Payload for {site} is {payload}".format(site=upload_to, payload=payload))
-    logging.info("Files for {site} is {files}".format(site=upload_to, files=files))
+    logging.fatal("[TrackerUpload] URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
 
-    logging.fatal("URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
-
-    response = requests.request("POST", url, data=payload, files=files)
-    logging.info(f"POST Request: {url}")
-    logging.info(f"Response code: {response.status_code}")
+    response = None
+    if config["technical_jargons"]["payload_type"] == "JSON":
+        response = requests.request("POST", url, json=payload, files=files, headers=headers)
+    else:
+        response = requests.request("POST", url, data=payload, files=files, headers=headers)
+    
+    logging.info(f"[TrackerUpload] POST Request: {url}")
+    logging.info(f"[TrackerUpload] Response code: {response.status_code}")
 
     console.print(f'\nSite response: [blue]{response.text}[/blue]')
-    logging.info(response.text)
+    logging.info(f'[TrackerUpload] {response.text}')
 
-    if response.status_code == 200:
-        logging.info(f"upload response for {upload_to}: {response.text.encode('utf8')}")
+    if response.status_code in (200, 201):
+        logging.info(f"[TrackerUpload]Uupload response for {upload_to}: {response.text.encode('utf8')}")
         # Update discord channel
         if discord_url:
             requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
 
         if "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
-                logging.info("Upload to {} was a success!".format(upload_to))
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
-                logging.critical("Upload to {} failed".format(upload_to))
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+        elif "status" in str(response.json()).lower():
+            if str(response.json()["status"]).lower() == "true":
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
+                console.line(count=2)
+                console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+            else:
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         else:
-            logging.critical("Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
-
+            logging.critical("[TrackerUpload] Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
+    
     elif response.status_code == 404:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print('Upload failed', style='bold red')
-        logging.critical(f"404 was returned on that upload, this is a problem with the site ({tracker})")
-        logging.error("Upload failed")
+        logging.critical(f"[TrackerUpload] 404 was returned on that upload, this is a problem with the site ({tracker})")
+        logging.error("[TrackerUpload] Upload failed")
 
     elif response.status_code == 500:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print("The upload might have [red]failed[/], the site isn't returning the uploads status")
         # This is to deal with the 500 internal server error responses BLU has been recently returning
-        logging.error(f"HTTP response status code '{response.status_code}' was returned (500=Internal Server Error)")
-        logging.info("This doesn't mean the upload failed, instead the site simply isn't returning the upload status")
+        logging.error(f"[TrackerUpload] HTTP response status code '{response.status_code}' was returned (500=Internal Server Error)")
+        logging.info("[TrackerUpload] This doesn't mean the upload failed, instead the site simply isn't returning the upload status")
 
     else:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print("The status code isn't [green]200[/green] so something failed, upload may have failed")
-        logging.error('status code is not 200, upload might have failed')
+        logging.error('[TrackerUpload] Status code is not 200, upload might have failed')
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -1969,9 +2126,15 @@ logging.info(starting_new_upload)
 
 if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger("torf").setLevel(logging.INFO)
+    logging.getLogger("rebulk.rules").setLevel(logging.INFO)
+    logging.getLogger("rebulk.rebulk").setLevel(logging.INFO)
+    logging.getLogger("rebulk.processors").setLevel(logging.INFO)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
     logging.debug(f"Arguments provided by user: {args}")
 
 if args.tripleup and args.doubleup:
+    logging.error("[Main] User tried to pass tripleup and doubleup together. Stopping torrent upload process")
     console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
     console.print("Exiting...\n", style='bright_red bold')
     sys.exit()
@@ -1995,11 +2158,11 @@ we stop upload process immediately with an error message.
 """
 bdinfo_script = os.getenv('bdinfo_script')
 if os.getenv("IS_CONTAINERIZED") == "true" and os.getenv("IS_FULL_DISK_SUPPORTED") == "true":
-    logging.info("Full disk is supported inside this container. Setting overriding configured `bdinfo_script` to use alias `bdinfocli`")
+    logging.info("[Main] Full disk is supported inside this container. Setting overriding configured `bdinfo_script` to use alias `bdinfocli`")
     bdinfo_script = "bdinfocli"
 
 if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_FULL_DISK_SUPPORTED") == "true":
-    logging.fatal("User tried to upload Full Disk from an unsupported image!. Stopping upload process.")
+    logging.fatal("[Main] User tried to upload Full Disk from an unsupported image!. Stopping upload process.")
     console.print("\n[bold red on white] ---------------------------- :warning: Unsupported Operation :warning: ---------------------------- [/bold red on white]")
     console.print("You're trying to upload a [bold red]Full Disk[/bold red] to trackers.",  highlight=False)
     console.print("Full disk uploads are [bold red]NOT PERMITTED[/bold red] in this image.", highlight=False)
@@ -2014,7 +2177,7 @@ user_supplied_paths = args.path
 
 # Verify the script is in "auto_mode" and if needed map rtorrent download path to system path
 if args.reupload:
-    logging.info('reuploading a match from autodl')
+    logging.info('[Main] Reuploading a match from autodl')
 
     # Firstly remove the underscore separator from the trackers the user provided in the autodl filter & make replace args.trackers with it
     args.trackers = str(args.trackers[0]).split('_')
@@ -2022,12 +2185,12 @@ if args.reupload:
     # set auto_mode equal to True for this upload (if its not already)
     # since we are reuploading autodl matches its probably safe to say this is all automated & no one will be available to approve or interact with any prompt
     if auto_mode == 'false':
-        logging.info('Temporarily switching "auto_mode" to "true" for this autodl reupload')
+        logging.info('[Main] Temporarily switching "auto_mode" to "true" for this autodl reupload')
         auto_mode = 'true'
 
     if str(os.getenv('translation_needed')).lower() == 'true':
         # Currently it is only possible for 1 path to be based from autodl but just in case & for futureproofing we will treat it as a list of multiple paths
-        logging.info('Translating paths... ("translation_needed" flag set to True in config.env) ')
+        logging.info('[Main] Translating paths... ("translation_needed" flag set to True in config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
         host_path = f"{os.getenv('host_path')}/".replace('//', '/')
@@ -2042,8 +2205,8 @@ if args.reupload:
             user_supplied_paths.append(translated_path)
 
             # And finally log the changes
-            logging.info(f'rtorrent path: {path}')
-            logging.info(f'Translated path: {translated_path}')
+            logging.info(f'[Main] rtorrent path: {path}')
+            logging.info(f'[Main] Translated path: {translated_path}')
 
 # If a user has supplied a discord webhook URL we can send updates to that channel
 if discord_url:
@@ -2051,7 +2214,7 @@ if discord_url:
 
 # Verify we support the tracker specified
 upload_to_trackers = []
-logging.debug(f"Trackers provided by user {args.trackers}")
+logging.debug(f"[Main] Trackers provided by user {args.trackers}")
 
 for tracker in args.trackers:
     if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
@@ -2061,9 +2224,9 @@ for tracker in args.trackers:
                 raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
             if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
         except AssertionError as err:
-            logging.error("We can't upload to '{}' because that sites API key is not specified".format(tracker))
+            logging.error("[Main] We can't upload to '{}' because that sites API key is not specified".format(tracker))
     else:
-        logging.error("We can't upload to '{}' because that site is not supported".format(tracker))
+        logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
 
 # Make sure that the user provides at least 1 valid tracker we can upload to
 try:
@@ -2071,10 +2234,10 @@ try:
     if len(upload_to_trackers) < 1:
         raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
 except AssertionError as err:  # Log AssertionError in the logfile and quit here
-    logging.exception("No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
+    logging.exception("[Main] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
     raise err
 
-logging.debug(f"Trackers selected by bot: {upload_to_trackers}")
+logging.debug(f"[Main] Trackers selected by bot: {upload_to_trackers}")
 
 # Show the user what sites we will upload to
 console.line(count=2)
@@ -2096,7 +2259,7 @@ console.print(upload_to_trackers_overview)
 # If not in 'auto_mode' then verify with the user that they want to continue with the upload
 if auto_mode == "false":
     if not Confirm.ask("Continue upload to these sites?", default='y'):
-        logging.info("User canceled upload when asked to confirm sites to upload to")
+        logging.info("[Main] User canceled upload when asked to confirm sites to upload to")
         sys.exit(console.print("\nOK, quitting now..\n", style="bold red", highlight=False))
 
 # The user has confirmed what sites to upload to at this point (or auto_mode is set to true)
@@ -2107,8 +2270,8 @@ if auto_mode == "false":
 
 # ---------- Batch mode prep ---------- #
 if args.batch and len(args.path) > 1:
-    logging.critical("the arg '-batch' can not be run with multiple '-path' args")
-    logging.info("the arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
+    logging.critical("[Main] The arg '-batch' can not be run with multiple '-path' args")
+    logging.info("[Main] The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
     console.print("You can not use the arg [deep_sky_blue1]-batch[/deep_sky_blue1] while supplying multiple [deep_sky_blue1]-path[/deep_sky_blue1] args\n", style='bright_red')
     console.print("Exiting...\n", style='bright_red bold')
     sys.exit()
@@ -2117,8 +2280,8 @@ if args.batch and len(args.path) > 1:
 elif args.batch and not os.path.isdir(args.path[0]):
     # Since args.path is required now, we don't need to check if len(args.path) == 0 since that's impossible
     # instead we check to see if its a folder, if not then
-    logging.critical("the arg '-batch' can not be run an a single video file")
-    logging.info("the arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
+    logging.critical("[Main]  The arg '-batch' can not be run an a single video file")
+    logging.info("[Main]  The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
     console.print("We can not [deep_sky_blue1]-batch[/deep_sky_blue1] upload a single video file, [deep_sky_blue1]-batch[/deep_sky_blue1] is supposed to be used on a "
         "single folder containing multiple files you want to individually upload\n", style='bright_red')
     console.print("Exiting...\n", style='bright_red bold')
@@ -2128,49 +2291,51 @@ elif args.batch and not os.path.isdir(args.path[0]):
 upload_queue = []
 
 if args.batch:
-    logging.info("running in batch mode")
-    logging.info(f"Uploading all the items in the folder: {args.path}")
+    logging.info("[Main] Running in batch mode")
+    logging.info(f"[Main] Uploading all the items in the folder: {args.path}")
     # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
     for arg_file in glob.glob(f'{args.path[0]}/*'):
         # Since we are in batch mode, we upload every file/folder we find in the path the user specified
         upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
 else:
-    logging.info("Running in regular '-path' mode, starting upload now")
+    logging.info("[Main] Running in regular '-path' mode, starting upload now")
     # This means the ran the script normally and specified a direct path to some media (or multiple media items, in which case we append it like normal to the list 'upload_queue')
     for arg_file in user_supplied_paths:
         upload_queue.append(arg_file)
 
-logging.debug(f"Upload queue: {upload_queue}")
+logging.debug(f"[Main] Upload queue: {upload_queue}")
 
 # Now for each file we've been supplied (batch more or just the user manually specifying multiple files) we create a loop here that uploads each of them until none are left
 for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
     delete_leftover_files()
     torrent_info.clear()
+    torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
+
 
     # File we're uploading
     console.print(f'Uploading File/Folder: [bold][blue]{file}[/blue][/bold]')
 
     # If the path the user specified is a folder with .rar files in it then we unpack the video file & set the torrent_info key equal to the extracted video file
     if os.path.isdir(file):
-        logging.debug(f"User wants to upload a folder: {file}")
+        logging.debug(f"[Main] User wants to upload a folder: {file}")
         # Set the 'upload_media' right away, if we end up extracting from a rar archive we will just overwriting it with the .mkv we extracted
         torrent_info["upload_media"] = file
 
         # Now we check to see if the dir contains rar files
         rar_file = glob.glob(f"{os.path.join(file, '')}*rar")
         if rar_file:
-            logging.info(f"'{file}' is a .rar archive, extracting now")
-            logging.info(f"rar file: {rar_file[0]}")
+            logging.info(f"[Main] '{file}' is a .rar archive, extracting now")
+            logging.info(f"[Main] rar file: {rar_file[0]}")
 
             # Now verify that unrar is installed
             unrar_sys_package = '/usr/bin/unrar'
             if os.path.isfile(unrar_sys_package):
-                logging.info("Found 'unrar' system package, Using it to extract the video file now")
+                logging.info("[Main] Found 'unrar' system package, Using it to extract the video file now")
 
                 # run the system package unrar and save the extracted file to its parent dir
                 subprocess.run([unrar_sys_package, 'e', rar_file[0], file])
-                logging.debug(f"Successfully extracted file : {rar_file[0]}")
+                logging.debug(f"[Main] Successfully extracted file : {rar_file[0]}")
 
                 # This is how we identify which file we just extracted (Last modified)
                 list_of_files = glob.glob(f"{os.path.join(file, '')}*")
@@ -2178,23 +2343,23 @@ for file in upload_queue:
 
                 # Overwrite the value for 'upload_media' with the path to the video file we just extracted
                 torrent_info["upload_media"] = latest_file
-                logging.debug(f"Using the extracted {latest_file} for further processing")
+                logging.debug(f"[Main] Using the extracted {latest_file} for further processing")
 
             # If the user doesn't have unrar installed then we let them know here and move on to the next file (if exists)
             else:
                 console.print('unrar is not installed, Unable to extract the rar archinve\n', style='bold red')
-                logging.critical('"unrar" is not installed, Unable to extract rar archive')
-                logging.info('Perhaps first try "sudo apt-get install unrar" then run this script again')
+                logging.critical('[Main] `unrar` is not installed, Unable to extract rar archive')
+                logging.info('[Main] Perhaps first try "sudo apt-get install unrar" then run this script again')
                 continue  # Skip this entire 'file upload' & move onto the next (if exists)
     else:
         torrent_info["upload_media"] = file
-        logging.info(f'uploading the following file: {file}')
+        logging.info(f'[Main] Uploading the following file: {file}')
 
     # Performing guessit on the rawfile name and reusing the result instead of calling guessit over and over again
     guessit_start_time = time.perf_counter()
     guess_it_result = guessit(torrent_info["upload_media"])
     guessit_end_time = time.perf_counter()
-    logging.debug(f'Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
+    logging.debug(f'[Main] Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
     logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
     logging.debug(f'\n{pformat(guess_it_result)}')
     
@@ -2202,19 +2367,17 @@ for file in upload_queue:
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
     if identify_type_and_basic_info(torrent_info["upload_media"], guess_it_result) == 'skip_to_next_file':
         # If there is an issue with the file & we can't upload we use this check to skip the current file & move on to the next (if exists)
-        logging.debug(f"Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
+        logging.debug(f"[Main] Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
         continue
 
     # Update discord channel
     if discord_url:
-        requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
-                data=f'content=Uploading: **{torrent_info["upload_media"]}**')
+        requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content=Uploading: **{torrent_info["upload_media"]}**')
 
     # -------- add .nfo if exists --------
     if args.nfo:
         if os.path.isfile(args.nfo[0]):
             torrent_info["nfo_file"] = args.nfo[0]
-
     # If the user didn't supply the path we can still try to auto detect it
     else:
         nfo = glob.glob(f"{torrent_info['upload_media']}/*.nfo")
@@ -2243,16 +2406,16 @@ for file in upload_queue:
 
     if all(x in torrent_info for x in ['imdb', 'tmdb']):
         # This means both the TMDB & IMDB ID are already in the torrent_info dict
-        logging.info("Both TMDB & IMDB ID have been supplied by the user, so no need to make any TMDB API request")
+        logging.info("[Main] Both TMDB & IMDB ID have been supplied by the user, so no need to make any TMDB API request")
     elif any(x in torrent_info for x in ['imdb', 'tmdb']):
         # This means we can skip the search via title/year and instead use whichever ID to get the other (tmdb -> imdb and vice versa)
         missing_id_key = 'tmdb' if 'imdb' in torrent_info else 'imdb'
         existing_id_key = 'tmdb' if 'tmdb' in torrent_info else 'imdb'
-        logging.info(f"We are missing '{missing_id_key}' starting TMDB API request now")
+        logging.info(f"[Main] We are missing '{missing_id_key}' starting TMDB API request now")
         # Now we call the function that will use the TMDB API to get whichever ID we are missing
         torrent_info[missing_id_key] = get_external_id(id_site=existing_id_key, id_value=torrent_info[existing_id_key], content_type=torrent_info["type"])
     else:
-        logging.info("We are missing both the 'TMDB' & 'IMDB' ID, trying to identify it via title & year")
+        logging.info("[Main] We are missing both the 'TMDB' & 'IMDB' ID, trying to identify it via title & year")
         search_tmdb_for_id(query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"])
     # Update discord channel
     if discord_url:
@@ -2266,7 +2429,7 @@ for file in upload_queue:
     # Support for user adding in custom edition if its not obvious from filename
     if args.edition:
         user_input_edition = str(args.edition[0])
-        logging.info(f"User specified edition: {user_input_edition}")
+        logging.info(f"[Main] User specified edition: {user_input_edition}")
         console.print(f"\nUsing the user supplied edition: [medium_spring_green]{user_input_edition}[/medium_spring_green]")
         torrent_info["edition"] = user_input_edition
 
@@ -2285,7 +2448,7 @@ for file in upload_queue:
         # True == dupe_found
         # False == no_dupes/continue upload
         if dupe_check_response :
-            logging.error(f"Could not upload to: {tracker} because we found a dupe on site")
+            logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
             if discord_url:  # Send discord notification if enabled
                 requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
                         data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
@@ -2302,12 +2465,15 @@ for file in upload_queue:
 
     if os.path.exists(f'{working_folder}/temp_upload/bbcode_images.txt'):
         torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/bbcode_images.txt'
+    
+    if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
+         torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
 
     # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
-    logging.info("Now starting tracker specific tasks")
+    logging.info("[Main] Now starting tracker specific tasks")
     for tracker in upload_to_trackers:
         temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
-        logging.info(f"Trying to upload to: {tracker}")
+        logging.info(f"[Main] Trying to upload to: {tracker}")
 
         # Update discord channel
         if discord_url:
@@ -2343,9 +2509,9 @@ for file in upload_queue:
                 # Now write in the actual screenshot bbcode
                 for line in bbcode:
                     description.write(line)
-
-                # Finally append the entire thing with some shameless self promotion ;) & and the closing [/center] tags and some line breaks
-                description.write(f'{bbcode_line_break}{bbcode_line_break} Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
+                description.write("[/center]")
+                # Finally append the entire thing with some shameless self promotion ;) and some line breaks
+                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
             # Add the finished file to the 'torrent_info' dict
             torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
@@ -2363,7 +2529,7 @@ for file in upload_queue:
             # True == dupe_found
             # False == no_dupes/continue upload
             if dupe_check_response:
-                logging.error(f"Could not upload to: {tracker} because we found a dupe on site")
+                logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
                 # Send discord notification if enabled
                 if discord_url:
                     requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
@@ -2378,7 +2544,7 @@ for file in upload_queue:
         generate_dot_torrent(
             media=torrent_info["upload_media"],
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
-            source=tracker,
+            source=config["source"],
             callback=generate_callback
         )
 
@@ -2408,15 +2574,15 @@ for file in upload_queue:
     # This isn't tracker specific so its outside of that ^^ 'for loop'
 
     move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
-    logging.debug(f"Move locations configured by user :: {move_locations}")
+    logging.debug(f"[Main] Move locations configured by user :: {move_locations}")
 
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed
         if len(move_location_value) == 0:
-            logging.debug(f'Move location not configured for {move_location_key}')
+            logging.debug(f'[Main] Move location not configured for {move_location_key}')
             continue
         if os.path.exists(move_location_value):
-            logging.info(f"The move path {move_location_value} exists")
+            logging.info(f"[Main] The move path {move_location_value} exists")
 
             if move_location_key == 'torrent':
                 sub_folder = "/"
@@ -2427,25 +2593,25 @@ for file in upload_queue:
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
-                    logging.debug(f'Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
+                    logging.debug(f'[Main] Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
                     try:
                         shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
                     except Exception as e:
-                        logging.exception(f'Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
+                        logging.exception(f'[Main] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
                 if str(f"{Path(torrent_info['upload_media']).parent}/") == move_location_value:
                     console.print(f'\nError, {torrent_info["upload_media"]} is already in the move location you specified: "{move_location_value}"\n', style="red", highlight=False)
-                    logging.error(f"{torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
+                    logging.error(f"[Main] {torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
                 else:
-                    logging.info(f"Moving {torrent_info['upload_media']} to {move_location_value}")
+                    logging.info(f"[Main] Moving {torrent_info['upload_media']} to {move_location_value}")
                     try:
                         shutil.move(torrent_info["upload_media"], move_location_value)
                     except Exception as e:
-                        logging.exception(f"Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
+                        logging.exception(f"[Main] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
         else:
-            logging.error(f"Move path doesn't exist for {move_location_key} as {move_location_value}")
+            logging.error(f"[Main] Move path doesn't exist for {move_location_key} as {move_location_value}")
 
     # Torrent Info
     console.print("\n\n")
@@ -2461,7 +2627,7 @@ for file in upload_queue:
 
     script_end_time = time.perf_counter()
     total_run_time = f'{script_end_time - script_start_time:0.4f}'
-    logging.info(f"Total runtime is {total_run_time} seconds")
+    logging.info(f"[Main] Total runtime is {total_run_time} seconds")
     # Update discord channel
     if discord_url:
         requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Total runtime: **{total_run_time} seconds**')

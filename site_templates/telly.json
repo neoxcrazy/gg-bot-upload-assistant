@@ -6,7 +6,16 @@
     "source": "Telly",
     "platform": "UNIT3D",
     "bbcode_line_break": "<br />",
+    "title_separator" : " ",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
 
     "translation": {
         "dot_torrent": "torrent",
@@ -146,6 +155,7 @@
         "strip_text": true,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data",
             "torrent_details": "attributes"
         },

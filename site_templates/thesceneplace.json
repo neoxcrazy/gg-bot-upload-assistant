@@ -6,13 +6,23 @@
     "source": "TSP",
     "platform": "XBTIT",
     "bbcode_line_break": "\n",
+    "title_separator" : " ",
+
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
 
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "filename",
         "description": "info",
         "mediainfo": "mediainfo",
-        "bdinfo" : "bdinfo",
+        "bdinfo": "bdinfo",
         "type": "category",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -25,7 +35,7 @@
         "mal": "mal",
         "igdb": "igdb",
         "nfo_file": "nfo",
-        
+
         "optimized": "stream",
         "internal": "internal",
         "featured": "featured",
@@ -135,6 +145,7 @@
         "strip_text": false,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data"
         },
 

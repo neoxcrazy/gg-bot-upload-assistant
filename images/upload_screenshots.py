@@ -40,6 +40,12 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
     # Annoyingly pyimgbox requires every upload be apart of a "gallery", This is fine if you're uploading a list of multiple images at the same time
     # but because of the way we deal with "backup" image hosts/upload failures its not realistic to pass a list of all the images to imgbox at the same time.
     # so instead we just upload 1 image at a time to imgbox (also creates 1 gallery per image)
+    #
+    # Return values:
+    # 1. Status
+    # 2. BBCode Thumbnail
+    # 3. Full Image URL
+    #
     thumb_size = os.getenv("thumb_size") or "350"
     if img_host == 'ptpimg':
         try:
@@ -49,13 +55,13 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
             # assuming it is, we can then get the img url, format it into bbcode & return it
 
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
-            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]'
+            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
         except AssertionError:
-            logging.error(msg='ptpimg uploaded an image but returned something unexpected (should be a list)')
+            logging.error(msg='[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
             console.print(f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
             return False
         except Exception:
-            logging.error(msg='ptpimg upload failed, double check the ptpimg API Key & try again.')
+            logging.error(msg='[Screenshots] ptpimg upload failed, double check the ptpimg API Key & try again.')
             console.print(f"\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
     
@@ -78,19 +84,19 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
                     for img_type in possible_image_types:
                         if img_type in img_upload_response[parent_key]:
                             if 'delete_url' in img_upload_response:
-                                logging.info(f'{img_host} delete url for {image_path}: {img_upload_response["delete_url"]}')
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]'
+                                logging.info(f'[Screenshots] {img_host} delete url for {image_path}: {img_upload_response["delete_url"]}')
+                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
                         else:
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]'
+                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
                 except KeyError as key_error:
-                    logging.error(f'{img_host} json KeyError: {key_error}')
+                    logging.error(f'[Screenshots] {img_host} json KeyError: {key_error}')
                     return False
             else:
-                logging.error(f'{img_host} upload failed. JSON Response: {img_upload_request.json()}')
+                logging.error(f'[Screenshots] {img_host} upload failed. JSON Response: {img_upload_request.json()}')
                 console.print(f"{img_host} upload failed. Status code: [bold]{img_upload_request.status_code}[/bold]", style='red3', highlight=False)
                 return False
         except requests.exceptions.RequestException:
-            logging.error(f"Failed to upload {image_path} to {img_host}")
+            logging.error(f"[Screenshots] Failed to upload {image_path} to {img_host}")
             console.print(f"upload to [bold]{img_host}[/bold] has failed!", style="Red")
             return False
     
@@ -100,19 +106,19 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
             async with pyimgbox.Gallery(title=torrent_title, thumb_width=thumb_size) as gallery:
                 async for submission in gallery.add(filepaths):
                     if not submission['success']:
-                        logging.error(f"{submission['filename']}: {submission['error']}")
+                        logging.error(f"[Screenshots] {submission['filename']}: {submission['error']}")
                         return False
                     else:
-                        logging.info(f'imgbox edit url for {image_path}: {submission["edit_url"]}')
-                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]'
+                        logging.info(f'[Screenshots] imgbox edit url for {image_path}: {submission["edit_url"]}')
+                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]', submission["image_url"]
 
         if os.path.getsize(image_path) >= 10485760:  # Bytes
-            logging.error('Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
+            logging.error('[Screenshots] Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
             return False
 
         imgbox_asyncio_upload = asyncio.run(imgbox_upload(filepaths=[image_path]))
         if imgbox_asyncio_upload:
-            return True, imgbox_asyncio_upload[1]
+            return True, imgbox_asyncio_upload[1], imgbox_asyncio_upload[2]
 
         # # Python 3.7+ version
         # asyncio.run(imgbox_upload(filepaths=[image_path]))  # call the function that uploads images to imgbox
@@ -133,13 +139,13 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     load_dotenv(f"{base_path}config.env")
     num_of_screenshots = os.getenv("num_of_screenshots")
 
-    logging.info(f"Using {upload_media_import} to generate screenshots")
+    logging.info(f"[Screenshots] Using {upload_media_import} to generate screenshots")
     console.print(f'\nTaking [chartreuse1]{str(num_of_screenshots)}[/chartreuse1] screenshots', style="Bold Blue")
 
     enabled_img_hosts_list = []
      # ---------------------- check if 'num_of_screenshots=0' or not set ---------------------- #
     if num_of_screenshots == "0" or not bool(num_of_screenshots):
-        logging.error(f'num_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, continuing without screenshots.')
+        logging.error(f'[Screenshots] num_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, continuing without screenshots.')
         console.print(f'\nnum_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, \n', style='bold red')
     else:
         # ---------------------- verify at least 1 image-host is set/enabled ---------------------- #
@@ -149,7 +155,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             enabled_img_host_num_loop += 1
         # now check if the loop ^^ found any enabled image hosts
         if not bool(enabled_img_host_num_loop):
-            logging.error('All image-hosts are disabled/not set (try setting "img_host_1=imgbox" in config.env)')
+            logging.error('[Screenshots] All image-hosts are disabled/not set (try setting "img_host_1=imgbox" in config.env)')
             console.print(f'\nNo image-hosts are enabled, maybe try setting [dodger_blue2][bold]img_host_1=imgbox[/bold][/dodger_blue2] in [dodger_blue2]config.env[/dodger_blue2]\n', style='bold red')
 
         # -------------------- verify an API key is set for 'enabled_img_hosts' -------------------- #
@@ -161,15 +167,17 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
                 # If the api key is missing then remove the img_host from the 'enabled_img_hosts_list' list
                 enabled_img_hosts_list.remove(img_host_api_check)
         # log the leftover enabled image hosts
-        logging.info(f"Image host order we will try & upload to: {enabled_img_hosts_list}")
+        logging.info(f"[Screenshots] Image host order we will try & upload to: {enabled_img_hosts_list}")
 
     # -------------------------- Check if any img_hosts are still in the 'enabled_img_hosts_list' list -------------------------- #
     # if no image_hosts are left then we show the user an error that we will continue the upload with screenshots & return back to auto_upload.py
     if not bool(enabled_img_hosts_list):
-        with open(f"{base_path}/temp_upload/bbcode_images.txt", "w") as no_images:
+        with open(f"{base_path}/temp_upload/bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
             no_images.write("[b][color=#FF0000][size=22]None[/size][/color][/b]")
+            append_url_txt.write("No Screenshots Available")
+            append_url_txt.close()
             no_images.close()
-        logging.error(f"Continuing upload without screenshots")
+        logging.error(f"[Screenshots] Continuing upload without screenshots")
         console.print(f'Continuing without screenshots\n', style='chartreuse1')
         return
     # ##### Now that we've verified that at least 1 imghost is available & has an api key etc we can try & upload the screenshots ##### #
@@ -187,7 +195,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             outputs={f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
     console.print('Finished taking screenshots!\n', style='sea_green3')
     # log the list of screenshot timestamps
-    logging.info(f'Taking screenshots at the following timestamps {ss_timestamps_list}')
+    logging.info(f'[Screenshots] Taking screenshots at the following timestamps {ss_timestamps_list}')
 
    # ---------------------------------------------------------------------------------------- #
 
@@ -198,10 +206,12 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         for img_host in enabled_img_hosts_list:
             # call the function that uploads the screenshot
             upload_image = upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import)
-            # If the upload function returns True, we add it to bbcode_images.txt
+            # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
-                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt:
+                logging.debug(f"[Screenshots] Response from image host: {upload_image}")
+                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
+                    append_url_txt.write(f"{upload_image[2]}\n")
                 successfully_uploaded_image_count += 1
                 # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
                 break
@@ -209,7 +219,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     # Depending on the image upload outcome we print a success or fail message showing the user what & how many images failed/succeeded
     if len(screenshots_to_upload_list) == successfully_uploaded_image_count:
         console.print(f'Uploaded {successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots', style='sea_green3', highlight=False)
-        logging.info(f'Successfully uploaded {successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots')
+        logging.info(f'[Screenshots] Successfully uploaded {successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots')
     else:
         console.print(f'{len(screenshots_to_upload_list) - successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots failed to upload', style='bold red', highlight=False)
-        logging.error(f'{len(screenshots_to_upload_list) - successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots failed to upload')
+        logging.error(f'[Screenshots] {len(screenshots_to_upload_list) - successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots failed to upload')
