@@ -1688,13 +1688,13 @@ def choose_right_tracker_keys():
         source = tracker_settings[config["translation"]["source"]]
         resolution = tracker_settings[config["translation"]["resolution"]]
         type = tracker_settings[config["translation"]["type"]]
-        logging.debug(f'Selected values :: source [{source}] resolution [{resolution}] type [{type}]')
+        logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{type}]')
 
         for key in config["hybrid_type"]["mapping"]:
-            logging.debug(f"Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
+            logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
             is_valid = None
             for sub_key, sub_val in config["hybrid_type"]["mapping"][key].items():
-                logging.debug(f'The subkey `{sub_key}` need to be one of `{sub_val}` for the mapping to be accepted.')
+                logging.debug(f'[HybridMapping] The subkey `{sub_key}` need to be one of `{sub_val}` for the mapping to be accepted.')
                 selected_val = None
                 if config["translation"]["source"] == sub_key:
                     selected_val = source
@@ -1705,17 +1705,17 @@ def choose_right_tracker_keys():
                 
                 if selected_val is not None:
                     if selected_val in sub_val:
-                        logging.debug(f"The subkey `{sub_key}` `{selected_val}` is present in `{sub_val}` for `{sub_key}` and `{key}`")
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val}` for `{sub_key}` and `{key}`")
                         is_valid = True if is_valid is None else is_valid
                     else:
-                        logging.debug(f"The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val}` for `{sub_key}` and `{key}`")
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val}` for `{sub_key}` and `{key}`")
                         is_valid = False
                 else:
                     is_valid = False
-                    logging.fatal(f"Invalid configuration provided for hybrid key mapping. Key ::{key}, sub key :: {sub_key}, sub value :: {sub_val}")
+                    logging.fatal(f"[HybridMapping] Invalid configuration provided for hybrid key mapping. Key ::{key}, sub key :: {sub_key}, sub value :: {sub_val}")
 
             if is_valid:
-                logging.info(f'The hybrid key was identified to be {key}')
+                logging.info(f'[HybridMapping] The hybrid key was identified to be {key}')
                 logging.debug(f'------------------ Hybrid mapping Completed ------------------')
                 # is_valid is true 
                 # all the categories match
@@ -1723,8 +1723,8 @@ def choose_right_tracker_keys():
         
         logging.debug(f'------------------ Hybrid mapping Completed With ERRORS ------------------')
         # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
-        logging.critical('Unable to find a suitable "hybrid mapping" match for this file')
-        logging.error("Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+        logging.critical('[HybridMapping] Unable to find a suitable "hybrid mapping" match for this file')
+        logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
         console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
         sys.exit()
 
