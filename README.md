@@ -140,6 +140,10 @@ docker run -it \
 # Change Log
 **1.2 - UNRELEASED**
 
+    ### New Trackers
+    * SpeedApp
+    * UHD-Heaven
+
     ### Underhood changes
     * Performance Optimizations
     * Platform based site tagging
@@ -151,6 +155,7 @@ docker run -it \
     * Masking sensitive data in log file
 
     ### New Features
+    * Hybrid category mapping [See Site-Templates Wiki]
     * Support for Blu-ray Full Disc uploads [fat image required]
     * Ability to choose playlist manually for full disk uploads
     * Improved BDInfo parsing
@@ -161,7 +166,6 @@ docker run -it \
     * Audio Codec list as configurable json
     * Extended audio codec list for full disk codecs
     * TSP internal uploads
-    * New Tracker Support : UHD-Heaven
     * Move dot torrents based on type after upload
     * Feature merges from XPBot
         * Support for new tracker: Uncutflixhd
