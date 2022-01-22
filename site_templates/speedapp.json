@@ -33,7 +33,7 @@
 
     "hybrid_type": {
         "required": true,
-        "_comments": {
+        "__comments__": {
             "10": "Movies: SD",
             "7": "Movies: DVD",
             "8": "Movies: HD",
@@ -43,34 +43,90 @@
         },
         "mapping": {
             "10": {
-                "category_id": ["1"],
-                "source": ["6"],
-                "resolution_id": ["6", "7", "8", "9", "10"]
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["6", "7", "8", "9", "10"]
+                }
             },
             "7": {
-                "category_id": ["1"],
-                "source": ["1"],
-                "resolution_id": ["6", "7", "8", "9", "10"]
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["6", "7", "8", "9", "10"]
+                }
             },
             "8": {
-                "category_id": ["1"],
-                "source": ["2", "3", "4", "5", "6"],
-                "resolution_id": ["3", "4", "5"]
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2", "3", "4", "5", "6"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["3", "4", "5"]
+                }
             },
             "17": {
-                "category_id": ["1"],
-                "source": ["1"],
-                "resolution_id": ["1", "2", "3", "4"]
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["1", "2", "3", "4"]
+                }
             },
             "61": {
-                "category_id": ["1"],
-                "source": ["2", "3", "4", "5"],
-                "resolution_id": ["1", "2"]
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2", "3", "4", "5"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["1", "2"]
+                }
             },
             "41": {
-                "category_id": ["2"],
-                "source": [],
-                "resolution_id": []
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                },
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": ["4"]
+                }
+            },
+            "45": {
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
             }
         }
     },
