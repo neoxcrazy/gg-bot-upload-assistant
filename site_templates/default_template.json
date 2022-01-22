@@ -4,17 +4,38 @@
     "upload_form": "<HTTPS://DOMAIN.COM/API/UPLOAD/>{api_key}",
     "torrents_search": "<HTTPS://DOMAIN.COM/API/TORRENTS/>{api_key}",
     "source": "<TRACKER_ACRONYM>",
+    "platform": "UNIT3D | XBTIT",
     "bbcode_line_break": "|  [br][/br]  |  OR  |  <br />  |  (Check which one works)  ",
+    "title_separator": "<Separator to be used in the torrent tile name. Eg: `.`[DOT] , ` `[SPACE] etc etc >",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY | BEARER",
+        "payload_type": "MULTI-PART | JSON"
+    },
+
+    "hybrid_type": {
+        "required": false,
+        "mapping": {
+            "tracker_required_key_1": {
+                "required_key_category_id": ["required ids"],
+                "required_key_resolution": ["required ids"],
+                "required_key_type_id": ["required ids"]
+            }
+        }
+    },
 
     "translation": {
         "dot_torrent": "<required_key_file>",
         "torrent_title": "<required_key_name>",
         "description": "<required_key_description>",
         "mediainfo": "<required_key_mediainfo>",
+        "bdinfo": "<required_key_bdinfo>",
         "type": "<required_key_category_id>",
         "source": "<required_key_type_id>",
         "resolution": "<required_key_resolution>",
+        "shameless_self_promotion": "<do_i_need_to_explain>",
+        "url_images": "<list_of_screenshot_urls>",
+        "hybrid_type": "<hybrid_type>",
         "tmdb": "<required_key_tmdb>",
         "imdb": "<required_key_imdb>",
         "anon": "<required_key_anon>",
@@ -30,18 +51,15 @@
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
+        "tripleup": "tripleup",
         "sticky": "sticky",
         "freeleech": "free"
-
     },
-
-
 
     "Required": {
         "required_key_file": "file",
         "required_key_name": "string",
         "required_key_description": "string",
-        "required_key_mediainfo": "file",
         "required_key_live": "string",
         "required_key_anon": "string",
 
@@ -50,74 +68,62 @@
             "2": "episode"
         },
 
-
         "required_key_resolution": {
             "tracker_required_key_2160p_remux": {
                 "bluray_remux": 1,
                 "2160p": 1
             },
-
             "tracker_required_key_1080p_remux": {
                 "bluray_remux": 1,
                 "1080p": 2,
                 "1080i": 2
             },
-
             "tracker_required_key_2160p": {
                 "2160p": 1,
                 "bluray_encode": 2,
                 "webdl": 2,
                 "webrip": 2
             },
-
             "tracker_required_key_1080p": {
                 "1080p": 1,
                 "bluray_encode": 2,
                 "webdl": 2,
                 "webrip": 2
             },
-
             "tracker_required_key_1080i": {
                 "1080i": 1,
                 "bluray_encode": 2,
                 "webdl": 2,
                 "webrip": 2
             },
-
             "tracker_required_key_720p": {
                 "720p": 1,
                 "bluray_encode": 2,
                 "webdl": 2,
                 "webrip": 2
             },
-
             "tracker_required_key_576p": {
                 "576p": 1,
                 "webdl": 1
             },
-
             "tracker_required_key_540p": {
                 "540p": 1,
                 "webdl": 1
             },
-
             "tracker_required_key_dvd_remux": {
                 "dvd": 1,
                 "576p": 2,
                 "540p": 2,
                 "480p": 2
             },
-
             "tracker_required_key_480p": {
                 "480p": 1,
                 "webdl": 1
             },
-
             "tracker_required_key_Other": {
                 "other": 0
             }
         },
-
 
         "required_key_type_id": {
             "Blu-ray": {
@@ -126,26 +132,21 @@
                 "remux": 2,
                 "encode": 2
             },
-
             "HD-DVD": {
                 "?": 1
             },
-
             "WEB": {
                 "web": 1,
                 "webrip": 2,
                 "webdl": 2
             },
-
             "HDTV": {
                 "hdtv": 1
             },
-
             "DVD": {
                 "dvd": 1
             }
         },
-
         "required_key_imdb": "string",
         "required_key_tmdb": "string"
     },
@@ -203,22 +204,24 @@
         "nfo_file": "file",
         "pack": "int",
         "special": "int",
-        "sd": "int"
+        "sd": "int",
+        "season_number": "string",
+        "episode_number": "string",
+
+        "optional_key_mediainfo": "file",
+        "optional_key_bdinfo": "string"
     },
 
     "dupes": {
-        "request": "POST",
-        "strip_text": false,
-
-        "keys": {
-            "action": "search",
-            "imdb_id": "string"
-        },
+        "request": "GET",
+        "url_format": "{search_url}&imdbId={imdb}",
+        "strip_text": true,
 
         "parse_json": {
-            "top_lvl": "results"
+            "is_needed": true,
+            "top_lvl": "data",
+            "torrent_details": "attributes"
         },
-
 
         "different_cuts": "100",
         "2160p_remux": 1,
@@ -248,7 +251,6 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
 
     "banned_groups": [
         "group_1_optional",

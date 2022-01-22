@@ -3,15 +3,26 @@
     "url": "https://www.thesceneplace.com",
     "upload_form": "https://www.thesceneplace.com/api/upload.php?api_key={api_key}",
     "torrents_search": "https://www.thesceneplace.com/api/search.php?api_key={api_key}",
-    "source": "TheScenePlace",
+    "source": "TSP",
+    "platform": "XBTIT",
     "bbcode_line_break": "\n",
+    "title_separator": " ",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
 
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "filename",
         "description": "info",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -23,23 +34,21 @@
         "tvdb": "tvdb",
         "mal": "mal",
         "igdb": "igdb",
-        "optimized": "stream",
         "nfo_file": "nfo",
 
+        "optimized": "stream",
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
+        "tripleup": "tripleup",
         "sticky": "sticky",
         "freeleech": "free"
-
     },
-
 
     "Required": {
         "torrent": "file",
         "filename": "string",
         "info": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -54,6 +63,7 @@
         "free": "string",
         "featured": "string",
         "doubleup": "string",
+        "tripleup": "string",
         "sticky": "string",
 
         "category": {
@@ -86,61 +96,56 @@
             }
         },
 
-
         "resolution_id": {
             "11": {
                 "4360p": 1
             },
-
             "1": {
                 "2160p": 1
             },
-
             "2": {
                 "1080p": 1
             },
-
             "3": {
                 "1080i": 1
             },
-
             "5": {
                 "720p": 1
             },
-
             "6": {
                 "576p": 1
             },
-
             "7": {
                 "576i": 1
             },
-
             "8": {
                 "480p": 1
             },
-
             "9": {
                 "480i": 1
             },
-
             "10": {
                 "other": 1
             }
-
         }
     },
 
     "Optional": {
-        "nfo_file": "file"
+        "nfo_file": "file",
+        "season_number": "string",
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
     "dupes": {
         "request": "GET",
-        "strip_text": false,
         "url_format": "{search_url}&filter={filter}",
+        "strip_text": false,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data"
         },
 
@@ -172,7 +177,6 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
 
     "banned_groups": [
         "AROMA",

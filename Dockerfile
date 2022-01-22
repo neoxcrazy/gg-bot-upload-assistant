@@ -1,4 +1,7 @@
-FROM alpine:3.15
+FROM alpine:3.14
+
+ENV IS_CONTAINERIZED=true
+ENV IS_FULL_DISK_SUPPORTED=false
 
 RUN \
  echo "**** install build packages ****" && \
@@ -12,7 +15,8 @@ RUN \
 	ffmpeg \
 	mediainfo \
 	python3 \
-	mktorrent
+	mktorrent \
+	unrar
 
 WORKDIR /app
 
@@ -25,10 +29,8 @@ RUN \
 
 COPY . .
 RUN chmod +x auto_upload.py
-RUN chmod +x bdinfo
 
 # ports and volumes
 VOLUME /data /temp_upload
 
 ENTRYPOINT [ "python3", "auto_upload.py"]
-# ENTRYPOINT [ "python3", "ReadErrorTest.py"]

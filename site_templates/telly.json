@@ -4,14 +4,25 @@
     "upload_form": "https://telly.wtf/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://telly.wtf/api/torrents/filter?api_token={api_key}",
     "source": "Telly",
+    "platform": "UNIT3D",
     "bbcode_line_break": "<br />",
+    "title_separator" : " ",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
 
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
 
         "source": "type_id",
@@ -39,7 +50,6 @@
         "torrent": "file",
         "name": "string",
         "description": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -127,20 +137,25 @@
             "10": {
                 "other": 1
             }
-
         }
     },
 
     "Optional": {
-        "nfo_file": "file"
+        "nfo_file": "file",
+        "season_number": "string",
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
     "dupes": {
         "request": "GET",
-        "strip_text": false,
-        "url_format": "{search_url}&imdb={imdb}",
+        "url_format": "{search_url}&imdbId={imdb}",
+        "strip_text": true,
 
         "parse_json": {
+            "is_needed": true,
             "top_lvl": "data",
             "torrent_details": "attributes"
         },

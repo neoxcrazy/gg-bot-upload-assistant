@@ -4,14 +4,25 @@
     "upload_form": "https://ntelogo.org/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://ntelogo.org/api/torrents/filter?api_token={api_key}",
     "source": "Ntelogo",
+    "platform": "UNIT3D",
     "bbcode_line_break": "<br />",
+    "title_separator" : " ",
 
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
 
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
@@ -26,22 +37,18 @@
         "optimized": "stream",
         "nfo_file": "nfo",
 
-
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
         "sticky": "sticky",
         "freeleech": "free"
-
     },
-
 
     "Required": {
 
         "torrent": "file",
         "name": "string",
         "description": "string",
-        "mediainfo": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -52,20 +59,16 @@
         "mal": "string",
         "igdb": "string",
 
-
         "internal": "string",
         "free": "string",
         "featured": "string",
         "doubleup": "string",
         "sticky": "string",
 
-
-
         "category_id": {
             "1": "movie",
             "2": "episode"
         },
-
 
         "type_id": {
             "1": {
@@ -87,7 +90,6 @@
                 "dvd_disc": 2
             }
         },
-
 
         "resolution_id": {
             "1": {
@@ -123,22 +125,26 @@
         }
     },
 
-
     "Optional": {
-        "nfo": "file"
+        "nfo": "file",
+        "season_number": "string",
+        "episode_number": "string",
+
+        "bdinfo": "string",
+        "mediainfo": "string"
     },
 
-
     "dupes": {
-        "request": "POST",
-        "strip_text": false,
-        "keys": {
-            "action": "search",
-            "imdb_id": "string"
-        },
+        "request": "GET",
+        "strip_text": true,
+        "url_format": "{search_url}&imdbId={imdb}",
+
         "parse_json": {
-            "top_lvl": "results"
+            "is_needed": true,
+            "top_lvl": "data",
+            "torrent_details": "attributes"
         },
+
         "different_cuts": "100",
         "2160p_remux": 1,
         "2160p_encode": 1,
@@ -147,7 +153,6 @@
         "720p_encode": 1,
         "else": 1
     },
-
 
     "torrent_title_format": {
         "episode": {
@@ -167,7 +172,6 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
 
     "banned_groups": [
         "group_1_optional",
