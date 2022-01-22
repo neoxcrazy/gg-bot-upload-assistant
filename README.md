@@ -73,8 +73,6 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
     </tbody>
 </table>
 
-<br>
-
 <!-- Basic setup -->
 # Basic setup (Bare Metal / VM):
 1. Clone / download this repository
@@ -85,8 +83,6 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
 7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
 8. Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
-
-<br>
 
 # Basic setup (Docker):
 1. Create new folder / dir [`mkdir GGBotUploader`]
