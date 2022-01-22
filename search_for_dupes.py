@@ -89,21 +89,12 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
             torrent_details = item
 
         torrent_title = str(torrent_details["name"])
-        torrent_title_split = torrent_title.replace("-", " ").lower().split(' ')
-
-        if len(torrent_title_split) < 4: 
-            """
-                4 because [title] [video_codec] [audio_codec] [group] at the least
-                some trackers returns name with '.' instead of ' '. Eg: Rucker.2022.1080p.WEB.DL.DD5.1.H.264-EVO
-                for them a split with - will return :: ['rucker.2022.1080p.web.dl.dd5.1.h.264', 'evo']
-                thus we need to split by '.' also.
-            """
-            for split in torrent_title_split:
-                if "." in split:
-                    torrent_title_split = replace_item_in_list(torrent_title_split, split, split.split("."))
+        torrent_title_split = re.split('[.\s]', torrent_title.replace("-", " ").lower())
+        torrent_title_upper_split = re.split('[.\s]', torrent_title.replace("-", " "))
 
         logging.debug(f'[DupeCheck] Dupe check torrent title obtained from tracker {search_site} is {torrent_title}')
         logging.debug(f'[DupeCheck] Torrent title split {torrent_title_split}')
+        logging.debug(f'[DupeCheck] Torrent title split {torrent_title_upper_split}')
         # Bluray Encode
         if all(x in torrent_title_split for x in ['bluray']) and any(x in torrent_title_split for x in ['720p', '1080i', '1080p', '2160p']) and any(x in torrent_title_split for x in ['x264', 'x265', 'x 264', 'x 265']):
             existing_release_types[torrent_title] = 'bluray_encode'
@@ -113,7 +104,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
             existing_release_types[torrent_title] = 'bluray_remux'
 
         # WEB-DL
-        if all(x in torrent_title_split for x in ['web', 'dl']) and (any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265'])
+        if (any(x in torrent_title_upper_split for x in ['WEB']) or all(x in torrent_title_split for x in ['web', 'dl']) ) and (any(x in torrent_title_split for x in ['h.264', 'h264', 'h 264', 'h.265', 'h265', 'h 265', 'hevc', 'x264', 'x265', 'x.264', 'x.265', 'x 264', 'x 265'])
             or all(x in torrent_title_split for x in ['h', '265']) or all(x in torrent_title_split for x in ['h', '264'])):
             existing_release_types[torrent_title] = "webdl"
 
@@ -185,14 +176,16 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         # Loop through the results & discard everything that is not from the correct season
         number_of_discarded_seasons = 0
         for existing_release_types_key in list(existing_release_types.keys()): # process of elimination
+            logging.debug(f'[DupeCheck] Trying to eliminate `{existing_release_types_key}`')
             if season_num is not None and season_num not in existing_release_types_key: # filter our wrong seasons
+                logging.deubg(f'[DupeCheck] Filtering out `{existing_release_types_key}` since it belongs to different season')
                 existing_release_types.pop(existing_release_types_key)
                 number_of_discarded_seasons += 1
                 continue
 
             # at this point we've filtered out all the different resolutions/types/seasons
             #  so now we check each remaining title to see if its a season pack or individual episode
-            extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num), existing_release_types_key.split(" ")))[0]
+            extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num), re.split("[.\s]", existing_release_types_key)))[0]
             if len(extracted_season_episode_from_title) == 3:
                 logging.info(msg=f'[DupeCheck] Found a season pack for {season_num} on {search_site}')
                 # TODO maybe mark the season pack as a 100% dupe or consider expanding dupe Table to allow for error messages to inform the user
@@ -294,7 +287,10 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
         return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
-        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
+        console.print(f"\n\n[bold red] :warning: Ignored dupes! :warning: [/bold red]", justify="center")
+        console.print(possible_dupes_table, justify="center")
+        console.line(count=2)
+        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
         return False # no dupes proceed with processing
 
 
