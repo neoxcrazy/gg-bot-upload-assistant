@@ -292,5 +292,3 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         console.line(count=2)
         console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
         return False # no dupes proceed with processing
-
-
