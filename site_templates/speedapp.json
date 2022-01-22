@@ -7,7 +7,7 @@
     "platform": "TBDev",
     "bbcode_line_break": "\n",
     "bbcode_code": "[code][/code]",
-    "title_separator" : ".",
+    "title_separator": ".",
 
     "technical_jargons": {
         "authentication_mode": "BEARER",
