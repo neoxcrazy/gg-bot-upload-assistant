@@ -13,8 +13,6 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 * Hybrid type mapping [Refer wiki for detailed explanation]
 * Automatically move torrent and media after .torrent creation
 
-<br>
-
 ## Supported Sites and Platforms:
 <table>
     <tbody>
