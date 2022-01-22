@@ -1694,24 +1694,20 @@ def choose_right_tracker_keys():
             logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
             is_valid = None
             for sub_key, sub_val in config["hybrid_type"]["mapping"][key].items():
-                logging.debug(f'[HybridMapping] The subkey `{sub_key}` need to be one of `{sub_val}` for the mapping to be accepted.')
-                selected_val = None
-                if config["translation"]["source"] == sub_key:
-                    selected_val = source
-                elif config["translation"]["resolution"] == sub_key:
-                     selected_val = resolution
-                elif config["translation"]["type"] == sub_key:
-                     selected_val = type
+                logging.debug(f'[HybridMapping] The subkey `{sub_key}` from `{sub_val["data_source"]}` need to be one of `{sub_val["values"]}` for the mapping to be accepted.')
+                
+                datasource = tracker_settings if sub_val["data_source"] == "tracker" else torrent_info
+                selected_val = datasource[sub_key]
                 
                 if selected_val is not None:
-                    if len(sub_val) == 0:
-                        logging.info(f"[HybridMapping] For the subkey `{sub_key}` the values configured `{sub_val}` is empty. Assuming by default as valid and continuing.")
+                    if len(sub_val["values"]) == 0:
+                        logging.info(f"[HybridMapping] For the subkey `{sub_key}` the values configured `{sub_val['values']}` is empty. Assuming by default as valid and continuing.")
                         is_valid = True if is_valid is None else is_valid
-                    elif selected_val in sub_val:
-                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val}` for `{sub_key}` and `{key}`")
+                    elif str(selected_val) in sub_val['values']:
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
                         is_valid = True if is_valid is None else is_valid
                     else:
-                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val}` for `{sub_key}` and `{key}`")
+                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
                         is_valid = False
                 else:
                     is_valid = False
