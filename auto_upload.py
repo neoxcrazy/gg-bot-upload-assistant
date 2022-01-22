@@ -1155,7 +1155,7 @@ def identify_miscellaneous_details(guess_it_result):
                 'dvd': ['disc', 'remux', 'rip']
             }
             # Since we already know the 'parent source' from an earlier function we don't need to prompt the user for it twice
-            if isinstance(basic_source_to_source_type_dict[str(torrent_info["source"]).lower()], list):
+            if str(torrent_info["source"]).lower() in basic_source_to_source_type_dict and isinstance(basic_source_to_source_type_dict[str(torrent_info["source"]).lower()], list):
                 console.print("\nError: Unable to detect this medias 'format'", style='red')
                 console.print(f"\nWe've successfully detected the 'parent source': [bold]{torrent_info['source']}[/bold] but are unable to detect its 'final form'", highlight=False)
                 logging.error(f"We've successfully detected the 'parent source': [bold]{torrent_info['source']}[/bold] but are unable to detect its 'final form'")
@@ -1704,7 +1704,10 @@ def choose_right_tracker_keys():
                      selected_val = type
                 
                 if selected_val is not None:
-                    if selected_val in sub_val:
+                    if len(sub_val) == 0:
+                        logging.info(f"[HybridMapping] For the subkey `{sub_key}` the values configured `{sub_val}` is empty. Assuming by default as valid and continuing.")
+                        is_valid = True if is_valid is None else is_valid
+                    elif selected_val in sub_val:
                         logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val}` for `{sub_key}` and `{key}`")
                         is_valid = True if is_valid is None else is_valid
                     else:
@@ -1724,7 +1727,7 @@ def choose_right_tracker_keys():
         logging.debug(f'------------------ Hybrid mapping Completed With ERRORS ------------------')
         # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
         logging.critical('[HybridMapping] Unable to find a suitable "hybrid mapping" match for this file')
-        logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+        logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed)")
         console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
         sys.exit()
 
