@@ -113,6 +113,9 @@ docker run -it \
     * `mediainfo.txt` 
     * `url_images.txt`
     * `description.txt`
+5. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
+
+<br>
 
 **Known Issues / Limitations:** (See RoadMap for release plans)
 1. Docker volume mounts in debian host system results in permission error in docker container. (No Proper Fix Available)
