@@ -1036,10 +1036,17 @@ def analyze_video_file(missing_value, media_info):
                 if "dv_hdr" in video_track and len(video_track["dv_hdr"]) != 0 :
                     # so hdr or DV is present in this track. next we need to identify which one it is
                     logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
-                    if "DOLBY" in video_track["dv_hdr"].upper():
+                    if "DOLBY" in video_track["dv_hdr"].upper() or "DOLBY VISION" in video_track["dv_hdr"].upper():
                         torrent_info["dv"] = "DV"
                     else: 
                         torrent_info["hdr"] = video_track["dv_hdr"].strip()
+                        if "HDR10+" in torrent_info["hdr"]:
+                            torrent_info["hdr"] = "HDR10+"
+                        elif "HDR10" in torrent_info["hdr"]:
+                            torrent_info["hdr"] = "HDR"
+                        logging.debug(f'Adding proper HDR Format `{torrent_info["hdr"]}` to torrent info')
+                            
+                        
             logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
@@ -1520,7 +1527,10 @@ def format_title(json_config):
         if "bluray" in torrent_info["source_type"]:
             if "disc" in torrent_info["source_type"]:
                 # Raw bluray discs have a "-" between the words "Blu" & "Ray"
-                torrent_info["source"] = "Blu-ray"
+                if "uhd" in torrent_info:
+                    torrent_info["source"] = f"{torrent_info['uhd']} Blu-ray"
+                else:
+                    torrent_info["source"] = "Blu-ray"
             else:
                 # BluRay encodes & Remuxs just use the complete word "BluRay"
                 torrent_info["source"] = "BluRay"
