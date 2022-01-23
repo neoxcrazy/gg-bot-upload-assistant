@@ -39,7 +39,9 @@
             "8": "Movies: HD",
             "17": "Movies: BluRay",
             "61": "Movies: UHD",
-            "41": "TV: Pack"
+            "41": "TV: Pack",
+            "43": "HDTV: Episodes",
+            "45": "TV: Episodes"
         },
         "mapping": {
             "10": {
@@ -120,6 +122,16 @@
                 "episode_number": {
                     "data_source": "torrent",
                     "values": ["0"]
+                }
+            },
+            "43": {
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                },
+                "resolution_id": {
+                    "data_source": "tracker",
+                    "values": ["6", "7", "8", "9", "10"]
                 }
             },
             "45": {
