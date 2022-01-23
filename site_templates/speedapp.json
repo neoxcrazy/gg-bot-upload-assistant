@@ -18,6 +18,7 @@
         "dot_torrent": "file",
         "torrent_title": "name",
         "mediainfo": "media_info",
+        "bdinfo": "technicalDetails",
         "url_images": "screenshots",
         "shameless_self_promotion": "releaseInfo",
         "type": "category_id",
@@ -217,7 +218,8 @@
 
     "Optional": {
         "nfo_file": "file|base64",
-        "media_info": "string"
+        "media_info": "string",
+        "technicalDetails":"string"
     },
 
     "dupes": {
