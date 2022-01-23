@@ -1033,7 +1033,7 @@ def analyze_video_file(missing_value, media_info):
         if args.disc and torrent_info["bdinfo"] is not None: 
             # for full disks here we identify the video_codec, hdr and dv informations
             for index, video_track in enumerate(torrent_info['bdinfo']['video']):
-                if video_track["dv_hdr"] is not None and len(video_track["dv_hdr"]) != 0 :
+                if "dv_hdr" in video_track and len(video_track["dv_hdr"]) != 0 :
                     # so hdr or DV is present in this track. next we need to identify which one it is
                     logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
                     if "DOLBY" in video_track["dv_hdr"].upper():
