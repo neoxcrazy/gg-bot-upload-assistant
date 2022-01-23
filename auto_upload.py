@@ -785,8 +785,14 @@ def analyze_video_file(missing_value, media_info):
         else:
             # If auto_mode is enabled we can prompt the user for input
             if auto_mode == 'false':
-                screen_size_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g. 720p, 1080p, 2160p) ')
-                return str(screen_size_input)
+                while True:
+                    screen_size_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g. 720p, 1080p, 2160p) ')
+                    if len(str(screen_size_input)) < 2:
+                        logging.error(f'User enterted an invalid input `{str(screen_size_input)}` for {missing_value}. Attempting to read again.')
+                        console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
+                    else:
+                        logging.info(f"Used user_input to identify the {missing_value}: {str(screen_size_input)}")
+                        return str(screen_size_input)
 
             # If we don't have the resolution we can't upload this media since all trackers require the resolution in the upload form
             quit_log_reason(reason="Resolution not in filename, and we can't extract it using pymediainfo. Upload form requires the Resolution")
@@ -861,9 +867,14 @@ def analyze_video_file(missing_value, media_info):
 
         # If no audio_channels have been extracted yet then we try user_input next
         if auto_mode == 'false':
-            audio_channel_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  5.1 | 2.0 | 7.1  )')
-            logging.info(f"Used user_input to identify audio channels: {audio_channel_input}")
-            return str(audio_channel_input)
+            while True:
+                audio_channel_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  5.1 | 2.0 | 7.1  )')
+                if len(str(audio_channel_input)) < 2:
+                    logging.error(f'User enterted an invalid input `{str(audio_channel_input)}` for {missing_value}. Attempting to read again.')
+                    console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
+                else:
+                    logging.info(f"Used user_input to identify {missing_value}: {audio_channel_input}")
+                    return str(audio_channel_input)
 
         # -- ! This runs if auto_mode == true !
         # We could technically upload without the audio channels in the filename, check to see what the user wants
@@ -974,9 +985,14 @@ def analyze_video_file(missing_value, media_info):
 
         # If the audio_codec has not been extracted yet then we try user_input
         if auto_mode == 'false':
-            audio_codec_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  DTS | DDP | FLAC | TrueHD | Opus  )')
-            logging.info(f"Used user_input to identify the audio codec: {audio_codec_input}")
-            return str(audio_codec_input)
+            while True:
+                audio_codec_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  DTS | DDP | FLAC | TrueHD | Opus  )')
+                if len(str(audio_codec_input)) < 2:
+                    logging.error(f'User enterted an invalid input `{str(audio_codec_input)}` for {missing_value}. Attempting to read again.')
+                    console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
+                else:
+                    logging.info(f"Used user_input to identify the {missing_value}: {audio_codec_input}")
+                    return str(audio_codec_input)
 
         # -- ! This runs if auto_mode == true !
         # We could technically upload without the audio codec in the filename, check to see what the user wants
