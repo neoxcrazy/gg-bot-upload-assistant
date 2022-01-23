@@ -290,7 +290,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
         if is_dupes_present:
-            console.print(f"\n\n[bold red] :warning: Ignored dupes! :warning: [/bold red]")
+            console.print(f"\n\n[bold red] :warning: Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
             console.print(possible_dupes_table)
             console.line(count=2)
             console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
