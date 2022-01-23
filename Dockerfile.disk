@@ -63,9 +63,9 @@ RUN \
   pip freeze > requirements.txt
 
 COPY . .
-RUN chmod +x auto_upload.py
-
-RUN alias bdinfocli="mono /usr/src/app/build/BDInfo.exe"
+RUN \
+  chmod +x auto_upload.py && \
+  alias bdinfocli="mono /usr/src/app/build/BDInfo.exe"
 
 VOLUME /data /temp_upload
 
