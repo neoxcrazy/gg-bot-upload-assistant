@@ -902,9 +902,9 @@ def analyze_video_file(missing_value, media_info):
 
             logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
             for key in audio_codec_dict.keys():
-                if str(torrent_info["bdinfo"]["audio"][0]["codec"]) == key:
-                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]}')
-                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]
+                if str(torrent_info["bdinfo"]["audio"][0]["codec"].strip()) == key:
+                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]}')
+                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]
             logging.error(f"Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {torrent_info['bdinfo']['audio'][0]['codec']}")
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
