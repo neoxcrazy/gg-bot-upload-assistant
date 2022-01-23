@@ -1664,8 +1664,11 @@ def choose_right_tracker_keys():
         if len(torrent_info["imdb"]) >= 2:
             if str(torrent_info["imdb"]).startswith("tt"):
                 torrent_info["imdb"] = str(torrent_info["imdb"]).replace("tt", "")
+            else:
+                torrent_info["imdb_with_tt"] = f'tt{torrent_info["imdb"]}'
         else:
             torrent_info["imdb"] = "0"
+            torrent_info["imdb_with_tt"] = "0"
 
     # torrent title
     tracker_settings[config["translation"]["torrent_title"]] = torrent_info["torrent_title"]
