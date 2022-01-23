@@ -66,7 +66,7 @@ COPY . .
 RUN \
   chmod +x auto_upload.py && \
 #   alias bdinfocli="mono /usr/src/app/build/BDInfo.exe" && \
-  echo -e '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe' > /usr/bin/bdinfocli && \
+  echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe' > /usr/bin/bdinfocli && \
     chmod +x /usr/bin/bdinfocli
 
 VOLUME /data /temp_upload
