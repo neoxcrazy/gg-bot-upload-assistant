@@ -201,11 +201,12 @@ from pprint import pformat
 
 streaming_sources = json.load(open('./parameters/streaming_services.json'))
 source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
-raw_file_name = "Dune.2021.2160p.UHD.BluRay.REMUX.DV.HDR.REPACK.HEVC.Atmos-TRiToN.mkv".upper()
+raw_file_name = "Marvel Studios Legends S01 HDR 2160p WEB-DL DSNP DDPA 5.1 H.265-KOGi".upper()
 match_web_source = re.search(source_regex, raw_file_name)
 print(f"source_regex :: {source_regex}" )
 if match_web_source is not None:
     print(pformat(match_web_source))
+    print(pformat(match_web_source.group()))
     print(f"MATCH :: XXX{match_web_source.group().replace('.', '').strip()}XXX")
 else:
     print("is none")
@@ -342,3 +343,6 @@ for tit in title_split:
         title_split = replace_item(title_split, tit, tit.split("."))
 
 print(title_split)
+
+
+

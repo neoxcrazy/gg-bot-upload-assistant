@@ -258,10 +258,11 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
 
     possible_dupes_table = Table(show_header=True, header_style="bold cyan")
     possible_dupes_table.add_column(f"Exceeds Max % ({os.getenv('acceptable_similarity_percentage')}%)", justify="left")
-    possible_dupes_table.add_column(f"Possible Dupes ({str(config['source']).upper()})", justify="left")
+    possible_dupes_table.add_column(f"Possible Dupes ({str(config['name']).upper()})", justify="left")
     possible_dupes_table.add_column("Similarity %", justify="center")
 
     max_dupe_percentage_exceeded = False
+    is_dupes_present = False
     for possible_dupe_title in existing_release_types.keys():
         # If we get a match then run further checks
         possible_dupe_with_percentage_dict[possible_dupe_title] = fuzzy_similarity(our_title=torrent_info["torrent_title"], check_against_title=possible_dupe_title)
@@ -278,6 +279,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         # we just mark an outside var True & finish the for loop that adds the table rows
         if not max_dupe_percentage_exceeded:
             max_dupe_percentage_exceeded = mark_as_dupe
+        is_dupes_present = True
 
     if max_dupe_percentage_exceeded:
         console.print(f"\n\n[bold red on white] :warning: Detected possible dupe! :warning: [/bold red on white]")
@@ -287,8 +289,12 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
         return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
-        console.print(f"\n\n[bold red] :warning: Ignored dupes! :warning: [/bold red]", justify="center")
-        console.print(possible_dupes_table, justify="center")
-        console.line(count=2)
-        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
+        if is_dupes_present:
+            console.print(f"\n\n[bold red] :warning: Ignored dupes! :warning: [/bold red]")
+            console.print(possible_dupes_table)
+            console.line(count=2)
+            console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
+        else:
+            console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
+
         return False # no dupes proceed with processing
