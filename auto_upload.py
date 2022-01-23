@@ -902,9 +902,9 @@ def analyze_video_file(missing_value, media_info):
 
             logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
             for key in audio_codec_dict.keys():
-                if str(torrent_info["bdinfo"]["audio"][0]["codec"]) == key:
-                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]}')
-                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"]]
+                if str(torrent_info["bdinfo"]["audio"][0]["codec"].strip()) == key:
+                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]}')
+                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]
             logging.error(f"Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {torrent_info['bdinfo']['audio'][0]['codec']}")
 
         # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
@@ -1033,13 +1033,20 @@ def analyze_video_file(missing_value, media_info):
         if args.disc and torrent_info["bdinfo"] is not None: 
             # for full disks here we identify the video_codec, hdr and dv informations
             for index, video_track in enumerate(torrent_info['bdinfo']['video']):
-                if video_track["dv_hdr"] is not None and len(video_track["dv_hdr"]) != 0 :
+                if "dv_hdr" in video_track and len(video_track["dv_hdr"]) != 0 :
                     # so hdr or DV is present in this track. next we need to identify which one it is
                     logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
-                    if "DOLBY" in video_track["dv_hdr"].upper():
+                    if "DOLBY" in video_track["dv_hdr"].upper() or "DOLBY VISION" in video_track["dv_hdr"].upper():
                         torrent_info["dv"] = "DV"
                     else: 
                         torrent_info["hdr"] = video_track["dv_hdr"].strip()
+                        if "HDR10+" in torrent_info["hdr"]:
+                            torrent_info["hdr"] = "HDR10+"
+                        elif "HDR10" in torrent_info["hdr"]:
+                            torrent_info["hdr"] = "HDR"
+                        logging.debug(f'Adding proper HDR Format `{torrent_info["hdr"]}` to torrent info')
+                            
+                        
             logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
             return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
             
@@ -1520,7 +1527,10 @@ def format_title(json_config):
         if "bluray" in torrent_info["source_type"]:
             if "disc" in torrent_info["source_type"]:
                 # Raw bluray discs have a "-" between the words "Blu" & "Ray"
-                torrent_info["source"] = "Blu-ray"
+                if "uhd" in torrent_info:
+                    torrent_info["source"] = f"{torrent_info['uhd']} Blu-ray"
+                else:
+                    torrent_info["source"] = "Blu-ray"
             else:
                 # BluRay encodes & Remuxs just use the complete word "BluRay"
                 torrent_info["source"] = "BluRay"
@@ -1948,23 +1958,30 @@ def choose_right_tracker_keys():
 
         elif optional_key in ['season_number', 'episode_number'] and optional_key in torrent_info:
             tracker_settings[optional_key] = torrent_info.get(optional_key, "")
-
-        elif optional_key in ['bdinfo', 'mediainfo', 'media_info', 'bd_info']:
+        
+        else:
+            # checking whether the optional key is for mediainfo or bdinfo
             # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
             # for full disks the bdInfo is saved under the same key as mediainfo
-            logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
-            if args.disc:
-                if optional_key in ("mediainfo", "media_info"):
-                    logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
+            for translation_key, translation_value in config["translation"].items():
+                if translation_key == "mediainfo" and translation_value == optional_key:
+                    logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    if args.disc:
+                        logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
+                    else:
+                        logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
+                        break
+                elif translation_key == "bdinfo" and translation_value == optional_key:
+                    logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    if args.disc:
+                        logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
+                        break
+                    else:
+                        logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
-                    logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
-                    tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
-            else:
-                if optional_key in ("bdinfo", "bd_info"):
-                    logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
-                else:
-                    logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
-                    tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
+                    continue
 
     if is_hybrid_translation_needed:
         tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
