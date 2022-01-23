@@ -1202,8 +1202,8 @@ def identify_miscellaneous_details(guess_it_result):
             source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
             match_web_source = re.search(source_regex, torrent_info["raw_file_name"].upper())
             if match_web_source is not None:
-                torrent_info["web_source"] = match_web_source.group()
-                logging.info(f'Used Regex to extract the WEB Source: {match_web_source.group()}')
+                torrent_info["web_source"] = match_web_source.group().replace('.', '').strip()
+                logging.info(f'Used Regex to extract the WEB Source: {match_web_source.group().replace(".", "").strip()}')
             else:
                 logging.error("Not able to extract the web source information from REGEX and GUESSIT")
 
