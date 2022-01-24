@@ -275,7 +275,7 @@ def parse_bdinfo(bdinfo_location):
                         audio_metadata["atmos"] = codec_split[1].strip()
                         audio_components[loop_variable] = codec_split[0].strip()
 
-                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable]
+                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable].strip()
                 bdinfo["audio"].append(audio_metadata)
             elif line.startswith("Disc Title:"):        # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
                 bdinfo['title'] = line.split(':', 1)[1].strip()
