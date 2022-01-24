@@ -53,10 +53,6 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>UFHD</strong></td>
-            <td><strong><a href="https://uncutflixhd.com/">Uncutflixhd</a></strong></td>
-        </tr>
-        <tr style="text-align: center">
             <td><strong>UHDHVN</strong></td>
             <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
         </tr>
@@ -193,7 +189,6 @@ docker run -it \
     * TSP internal uploads
     * Move dot torrents based on type after upload
     * Feature merges from XPBot
-        * Support for new tracker: Uncutflixhd
         * Improved dupe check
         * Improved screenshot upload process
         * Added support for ptpimg
