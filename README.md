@@ -134,6 +134,7 @@ docker run -it \
 - [X] Frame accurate screenshots
 
 ### v2.1
+- [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
     - [ ] TorrentDB
 - [ ] Improved Full Disk Support
