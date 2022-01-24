@@ -722,6 +722,14 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
+        # for disc uploads / currently only bluray is supported so we can use that
+        # TODO update this to handle DVDs in the future
+        if args.disc and torrent_info["bdinfo"] is not None:
+            source = ""
+            if "screen_size" in torrent_info and torrent_info["screen_size"] == "2160p":
+                source = "UHD"
+                torrent_info['uhd'] = 'UHD'
+            source = source + "Blu-ray"
         # Well shit, this is a problem and I can't think of a good way to consistently & automatically get the right result
         # if auto_mode is set to false we can ask the user but if auto_mode is set to true then we'll just need to quit since we can't upload without it
         if auto_mode == 'false':
@@ -1556,7 +1564,11 @@ def format_title(json_config):
         temp_load_torrent_info = tracker_torrent_name_style.replace("{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
+            # For the customizable title separator feature, we need to replace " " (spaces) in title with the separator.
+            if item == "title":
+                generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info else ""
+            else:
+                generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
         separator = json_config["title_separator"] or " "
