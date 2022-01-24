@@ -151,13 +151,13 @@ docker run -it \
 <br>
 
 # Change Log
-**2.0**
+## **2.0**
 
-    ### New Trackers
+#### New Trackers
     * SpeedApp
     * UHD-Heaven
 
-    ### Underhood changes
+#### Underhood changes
     * Performance Optimizations
     * Platform based site tagging
     * Improved argument description and help
@@ -168,7 +168,7 @@ docker run -it \
     * Masking sensitive data in log file
     * Various steps added to reduce the coupling with UNIT3D codebase
 
-    ### New Features
+#### New Features
     * Hybrid category mapping [See Site-Templates Wiki]
     * Support for Blu-ray Full Disc uploads [fat image required]
     * Ability to choose playlist manually for full disk uploads
@@ -187,13 +187,13 @@ docker run -it \
         * Added support for ptpimg
         * Removed support for imgyukle
 
-    ### Bug Fixes
+#### Bug Fixes
     * No dupe message not being shown in certain cases
     * Invalid PA streaming service tagging
     * PQ10, HLG and WCG HDR Formats not being detected
     * TSP dupe check for web sourced contents
 
-**1.1**
+##  **1.1**
 
     * Added support for new tracker: DesiTorrents 
     * No spoiler screenshot feature
@@ -203,11 +203,11 @@ docker run -it \
     * Full season tv-show upload bug fix
     * Updated tag naming bug fix
 
-**1.0.1**
+##  **1.0.1**
 
     * Updated naming conventions for HDR, Atmos Audio, and BluRay source
 
-**1.0**
+##  **1.0**
 
     * Initial Release
     * Added docker images for aarch64 and armhf OS Architectures
