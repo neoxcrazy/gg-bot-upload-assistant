@@ -1560,6 +1560,8 @@ def format_title(json_config):
 
         # This dict will store the "torrent_info" response for each item in the "naming config"
         generate_format_string = {}
+        separator = json_config["title_separator"] or " "
+
         temp_load_torrent_info = tracker_torrent_name_style.replace("{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
@@ -1570,7 +1572,6 @@ def format_title(json_config):
                 generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
-        separator = json_config["title_separator"] or " "
         for key, value in generate_format_string.items():
             # ignore no matches (e.g. most TV Shows don't have the "year" added to its title so unless it was directly specified in the filename we also ignore it)
             if len(value) != 0:  
