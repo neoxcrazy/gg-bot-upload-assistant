@@ -116,20 +116,9 @@ docker run -it \
 **Known Issues / Limitations:** (See RoadMap for release plans)
 1. Docker volume mounts in debian host system results in permission error in docker container. (No Proper Fix Available)
     * **Workaround**: Torrent file can be created in debian host os by using mktorrent. Use argument `--use_mktorrent or -mkt`
-2. Full Disks uploads may not work as expected on SpeedApp (**UNTESTED**).
-3. No support for Bluray distributors and Bluray disc regions
-4. No official support for Blurays in .iso format
-5. No support for 3D Bluray discs
-
-<br>
-
-# Wiki
-### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
-### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
-### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
-### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
-### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
-### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
+2. No support for Bluray distributors and Bluray disc regions
+3. No official support for Blurays in .iso format
+4. No support for 3D Bluray discs
 
 <br>
 
@@ -146,12 +135,15 @@ docker run -it \
 
 ### v2.1
 - [ ] Add Support for new platforms
-    - [ ] AvistaZ
-    - [ ] BIT-HDTV
     - [ ] TorrentDB
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
+
+### v2.2
+- [ ] Add Support for new platforms
+    - [ ] AvistaZ
+    - [ ] BIT-HDTV
 - [ ] Add support for DVDs
 - [ ] Support for custom messages / descriptions during upload
 
@@ -222,3 +214,14 @@ docker run -it \
     * Updated Templates
     * Support for Xbtit Platform with custom API
     * Screenshot thumbnail feature
+
+
+# Wiki
+### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
+### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
+### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
+### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
+### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
+### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
+
+<br>
