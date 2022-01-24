@@ -727,7 +727,6 @@ def analyze_video_file(missing_value, media_info):
         if args.disc and torrent_info["bdinfo"] is not None:
             if "screen_size" in torrent_info and torrent_info["screen_size"] == "2160p":
                 torrent_info['uhd'] = 'UHD'
-                return "UHD Blu-ray"
             return "Blu-ray"
         # Well shit, this is a problem and I can't think of a good way to consistently & automatically get the right result
         # if auto_mode is set to false we can ask the user but if auto_mode is set to true then we'll just need to quit since we can't upload without it
