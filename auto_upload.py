@@ -275,7 +275,7 @@ def parse_bdinfo(bdinfo_location):
                         audio_metadata["atmos"] = codec_split[1].strip()
                         audio_components[loop_variable] = codec_split[0].strip()
 
-                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable]
+                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable].strip()
                 bdinfo["audio"].append(audio_metadata)
             elif line.startswith("Disc Title:"):        # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
                 bdinfo['title'] = line.split(':', 1)[1].strip()
@@ -388,9 +388,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
 
     # setting NOGROUP as group if the release_group cannot be identified from guessit
-    if torrent_info["release_group"] is None:
-        torrent_info["release_group"] == "NOGROUP"
-        logging.debuf(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
+    if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None ) is None :
+        torrent_info["release_group"] = "NOGROUP"
+        logging.debug(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
     
     # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
@@ -722,6 +722,13 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
+        # for disc uploads / currently only bluray is supported so we can use that
+        # TODO update this to handle DVDs in the future
+        if args.disc and torrent_info["bdinfo"] is not None:
+            if "screen_size" in torrent_info and torrent_info["screen_size"] == "2160p":
+                torrent_info['uhd'] = 'UHD'
+            torrent_info["source_type"] = "bluray_disc"
+            return "bluray"
         # Well shit, this is a problem and I can't think of a good way to consistently & automatically get the right result
         # if auto_mode is set to false we can ask the user but if auto_mode is set to true then we'll just need to quit since we can't upload without it
         if auto_mode == 'false':
@@ -1553,13 +1560,18 @@ def format_title(json_config):
 
         # This dict will store the "torrent_info" response for each item in the "naming config"
         generate_format_string = {}
+        separator = json_config["title_separator"] or " "
+
         temp_load_torrent_info = tracker_torrent_name_style.replace("{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
+            # For the customizable title separator feature, we need to replace " " (spaces) in title with the separator.
+            if item == "title":
+                generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info else ""
+            else:
+                generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
-        separator = json_config["title_separator"] or " "
         for key, value in generate_format_string.items():
             # ignore no matches (e.g. most TV Shows don't have the "year" added to its title so unless it was directly specified in the filename we also ignore it)
             if len(value) != 0:  
