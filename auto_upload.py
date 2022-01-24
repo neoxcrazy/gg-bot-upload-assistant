@@ -388,7 +388,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
 
     # setting NOGROUP as group if the release_group cannot be identified from guessit
-    if "release_group" not in torrent_info or torrent_info["release_group"] is None:
+    if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None ) is None :
         torrent_info["release_group"] == "NOGROUP"
         logging.debuf(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
     

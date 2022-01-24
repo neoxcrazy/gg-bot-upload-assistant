@@ -346,3 +346,16 @@ print(title_split)
 
 
 
+dict_test = {}
+dict_test["test1"] = "hello"
+dict_test["release_group"] = ""
+
+if ( (dict_test["release_group"] if len(dict_test["release_group"]) > 0 else None) if "release_group" in dict_test else None) is None :
+    print("IF")
+else:
+    print("ELSE")
+
+if (dict_test["release_group"] if "release_group" in dict_test and len(dict_test["release_group"]) > 0 else None) is None :
+    print("IF")
+else:
+    print("ELSE")
