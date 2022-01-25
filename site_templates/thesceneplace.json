@@ -141,7 +141,7 @@
 
     "dupes": {
         "request": "GET",
-        "url_format": "{search_url}&filter={filter}",
+        "url_format": "{search_url}&filter={title}",
         "strip_text": false,
 
         "parse_json": {
