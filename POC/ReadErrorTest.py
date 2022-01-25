@@ -357,3 +357,24 @@ else:
     print("ELSE")
 
 print(dict_test["release_group"])
+
+
+
+
+print()
+print()
+print()
+print()
+
+json_payload = '{"search":"<title>"}'
+
+json_payload = json_payload.replace("<title>", "This is my title")
+
+print(json_payload)
+
+import json
+import pprint
+payload = json.loads(json_payload)
+print(pprint.pformat(payload))
+
+print(payload["search"])

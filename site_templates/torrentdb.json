@@ -223,9 +223,16 @@
     },
 
     "dupes": {
-        "request": "GET",
-        "url_format": "{search_url}?imdbId={imdb}",
+        "request": "POST",
         "strip_text": true,
+
+        "_comments" : {
+            "payload" : "payload is the json data that needs to be sent to tracker",
+            "_payload" : "payload must be a valid json",
+            "formatting" : "content to be replaced must be enclosed with <>"
+         },
+
+        "payload":"{\"search\":\"<imdb>\"}", 
 
         "parse_json": {
             "is_needed": false
