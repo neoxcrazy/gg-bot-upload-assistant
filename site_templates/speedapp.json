@@ -148,7 +148,7 @@
         "file": "file|base64",
         "name": "string",
         "releaseInfo": "string",
-        "screenshots": "file|array",
+        "screenshots": "file|string|array",
         "url": "url",
         "type": "string",
 

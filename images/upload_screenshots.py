@@ -185,6 +185,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     # Figure out where exactly to take screenshots by evenly dividing up the length of the video
     ss_timestamps_list = []
     screenshots_to_upload_list = []
+    image_data_paths = []
     for ss_timestamp in track(get_ss_range(duration=duration, num_of_screenshots=num_of_screenshots), description="Taking screenshots.."):
         # Save the ss_ts to the 'ss_timestamps_list' list
         ss_timestamps_list.append(ss_timestamp)
@@ -193,6 +194,13 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         # `-itsoffset -2` added for Frame accurate screenshot
         FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} -itsoffset -2'}, 
             outputs={f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
+        image_data_paths.append(f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
+
+    with open(f"{base_path}/temp_upload/image_paths.txt", "w") as image_paths_txt:
+        logging.debug(f"[Screenshots] Writing image data paths to `image_paths.txt`")
+        for image_path in image_data_paths:
+            image_paths_txt.write(f"{image_path}\n")
+    
     console.print('Finished taking screenshots!\n', style='sea_green3')
     # log the list of screenshot timestamps
     logging.info(f'[Screenshots] Taking screenshots at the following timestamps {ss_timestamps_list}')

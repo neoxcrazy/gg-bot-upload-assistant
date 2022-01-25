@@ -2004,6 +2004,9 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
+    
+    logging.debug("::::::::::::::::::::::::::::: Tracker settings that will be used for creating payload :::::::::::::::::::::::::::::")
+    logging.debug(f'\n{pformat(tracker_settings)}')
 
     # multiple authentication modes
     headers = None
@@ -2026,38 +2029,48 @@ def upload_to_site(upload_to, tracker_api_key):
 
         # Now that we know if we are looking for a required or optional key we can try to add it into the payload
         if str(config[req_opt][key]) == "file":
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
-                post_file = f'{key}', open(tracker_settings[f'{key}'], 'rb')
+            if os.path.isfile(tracker_settings[key]):
+                post_file = f'{key}', open(tracker_settings[key], 'rb')
                 files.append(post_file)
-                display_files[key] = tracker_settings[f'{key}']
+                display_files[key] = tracker_settings[key]
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         elif str(config[req_opt][key]) == "file|array":
+            if os.path.isfile(tracker_settings[key]):
+                with open(tracker_settings[key], "r") as images_data:
+                    for line in images_data.readlines():
+                        post_file = f'{key}[]', open(line.strip(), 'rb') 
+                        files.append(post_file)
+                        display_files[key] = tracker_settings[key]
+            else:
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                continue
+        elif str(config[req_opt][key]) == "file|string|array":
             """
                 for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
             """
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
+            if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file|array for key {key}")
-                with open(tracker_settings['{}'.format(key)], 'r') as file_contents:
+                with open(tracker_settings[key], 'r') as file_contents:
                     array = []
                     for line in file_contents.readlines():
                         array.append(line.strip())
                     payload[key] = array
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
+            if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file|base64 for key {key}")
-                with open(tracker_settings['{}'.format(key)], 'rb') as binary_file:
+                with open(tracker_settings[key], 'rb') as binary_file:
                     binary_file_data = binary_file.read()
                     base64_encoded_data = base64.b64encode(binary_file_data)
                     base64_message = base64_encoded_data.decode('utf-8')
                     payload[key] = base64_message
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -2515,6 +2528,9 @@ for file in upload_queue:
     
     if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
          torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
+
+    if os.path.exists(f'{working_folder}/temp_upload/image_paths.txt'):
+         torrent_info["data_images"] = f'{working_folder}/temp_upload/image_paths.txt'
 
     # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
     logging.info("[Main] Now starting tracker specific tasks")

@@ -109,6 +109,7 @@ docker run -it \
     * `mediainfo.txt` 
     * `url_images.txt`
     * `description.txt`
+    * `image_paths.txt`
 5. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
 
 <br>

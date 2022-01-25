@@ -11,24 +11,22 @@
 
     "technical_jargons": {
         "authentication_mode": "BEARER",
-        "payload_type": "JSON"
+        "payload_type": "MULTI-PART"
     },
 
     "translation": {
-        "dot_torrent": "file",
+        "dot_torrent": "torrent",
         "torrent_title": "name",
         "mediainfo": "media_info",
         "bdinfo": "bdInfo",
-        "url_images": "screenshots",
+        "data_images":"screenshots",
         "shameless_self_promotion": "releaseInfo",
         "type": "category_id",
-        "source": "source",
-        "resolution": "resolution_id",
-        "hybrid_type": "type",
+        "source": "type_id",
+        "resolution": "resolution",
+        "anonymous":"anon",
         "tmdb": "tmdb",
-        "imdb": "url",
-        "tvdb": "tvdb",
-        "mal": "mal",
+        "imdb": "imdb",
         "nfo_file": "nfo"
     },
 
@@ -145,12 +143,14 @@
     },
 
     "Required": {
-        "file": "file|base64",
+        "torrent": "file",
         "name": "string",
         "releaseInfo": "string",
         "screenshots": "file|array",
-        "url": "url",
+        "imdb": "string",
         "type": "string",
+        "anon":"string",
+        "tmdb":"string",
 
         "category_id": {
             "1": "movie",
