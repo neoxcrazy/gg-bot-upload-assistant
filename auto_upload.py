@@ -82,6 +82,7 @@ acronym_to_tracker = {"blu": "blutopia",
                       "dt": "desitorrents",
                       "uhdhvn":"uhdheaven",
                       "spd" : "speedapp",
+                      "tdb" : "torrentdb",
                       "ntelogo": "ntelogo"}
 
 # Now assign some of the values we get from 'config.env' to global variables we use later
@@ -94,6 +95,7 @@ api_keys_dict = {
     'ath_api_key': os.getenv('ATH_API_KEY'),
     'telly_api_key': os.getenv('TELLY_API_KEY'),
     'spd_api_key': os.getenv('SPD_API_KEY'),
+    "tdb_api_key" : os.getenv('TDB_API_KEY'),
     'uhdhvn_api_key': os.getenv('UHDHVN_API_KEY'),
     'ntelogo_api_key': os.getenv('NTELOGO_API_KEY'),
     'tmdb_api_key': os.getenv('TMDB_API_KEY'),
