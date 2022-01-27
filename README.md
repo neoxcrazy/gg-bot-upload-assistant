@@ -138,6 +138,11 @@ docker run -it \
 - [X] Dynamic media summary
 - [X] Frame accurate screenshots
 
+### v2.0.1
+- [X] Add Support for new platforms
+    - [X] SkipTheCommercials
+- [X] Refactor tracker acronyms and api keys to config file
+
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
