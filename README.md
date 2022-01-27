@@ -20,7 +20,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>Site Name</strong></td>
         </th>
         <tr style="text-align: center">
-            <td rowspan="9"><strong>UNIT3D</strong></td>
+            <td rowspan="10"><strong>UNIT3D</strong></td>
             <td><strong>ACM</strong></td>
             <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
         </tr>
@@ -55,6 +55,10 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
         <tr style="text-align: center">
             <td><strong>UHDHVN</strong></td>
             <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>STC</strong></td>
+            <td><strong><a href="https://skipthecommericals.xyz/">SkipTheCommericals</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>XBTIT</strong></td>

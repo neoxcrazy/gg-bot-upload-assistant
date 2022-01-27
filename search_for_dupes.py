@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import requests
+from pprint import pformat
 from distutils import util
 from guessit import guessit
 from fuzzywuzzy import fuzz
@@ -73,7 +74,10 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
     # as the name indicates, it decides whether or not the `dupe_check_response` returned from the tracker
     # needs any further parsing.
-    torrent_items = dupe_check_response.json()[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response.json()
+    logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
+    dupe_check_response = dupe_check_response.json()
+    
+    torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response
     for item in torrent_items:
 
         if "torrent_details" in config["dupes"]["parse_json"]:
