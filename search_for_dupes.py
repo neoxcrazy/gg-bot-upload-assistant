@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import requests
+from pprint import pformat
 from distutils import util
 from guessit import guessit
 from fuzzywuzzy import fuzz
@@ -47,20 +48,15 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         logging.info(f"[DupeCheck] Using Bearer Token authentication method for tracker {search_site}")
     elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
         logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
-        
-    if str(config["dupes"]["request"]) == "POST":
-        # POST request (BHD)
+
+    if str(config["dupes"]["request"]) == "POST": # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
-        url_dupe_payload = {'action': 'search', config["translation"]["imdb"]: imdb}
+        url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", imdb).replace("<title>", torrent_info["title"])
+        logging.debug(f"[DupeCheck] Formatted POST payload {url_dupe_payload} for {search_site}")
+        url_dupe_payload = json.loads(url_dupe_payload)
         dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
-    elif search_site == "thesceneplace":
-        # custom api different from Unit3D codebase
-        # TODO generalize this
-        url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), filter=torrent_info["title"])
-        dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
-    else:
-        # GET request (BLU & ACM)
-        url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), imdb=imdb)
+    else: # GET request (BLU & ACM)
+        url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
         dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
         
     logging.info(msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["request"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
@@ -78,7 +74,10 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
     # as the name indicates, it decides whether or not the `dupe_check_response` returned from the tracker
     # needs any further parsing.
-    torrent_items = dupe_check_response.json()[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response.json()
+    logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
+    dupe_check_response = dupe_check_response.json()
+    
+    torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response
     for item in torrent_items:
 
         if "torrent_details" in config["dupes"]["parse_json"]:

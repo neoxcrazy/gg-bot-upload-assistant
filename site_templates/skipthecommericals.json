@@ -1,12 +1,13 @@
 {
-    "name": "TheScenePlace",
-    "url": "https://www.thesceneplace.com",
-    "upload_form": "https://www.thesceneplace.com/api/upload.php?api_key={api_key}",
-    "torrents_search": "https://www.thesceneplace.com/api/search.php?api_key={api_key}",
-    "source": "TSP",
-    "platform": "XBTIT",
+    "name": "SkipTheCommericals",
+    "url": "https://skipthecommericals.xyz/",
+    "upload_form": "https://skipthecommericals.xyz/api/torrents/upload?api_token={api_key}",
+    "torrents_search": "https://skipthecommericals.xyz/api/torrents/filter?api_token={api_key}",
+    "source": "STC",
+    "platform": "UNIT3D",
     "bbcode_line_break": "\n",
-    "title_separator": " ",
+    "bbcode_code": "[code][/code]",
+    "title_separator" : " ",
 
     "technical_jargons": {
         "authentication_mode": "API_KEY",
@@ -19,36 +20,37 @@
 
     "translation": {
         "dot_torrent": "torrent",
-        "torrent_title": "filename",
-        "description": "info",
+        "torrent_title": "name",
+        "description": "description",
         "mediainfo": "mediainfo",
         "bdinfo": "bdinfo",
-        "type": "category",
+        "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
         "tmdb": "tmdb",
         "imdb": "imdb",
-        "anon": "anonymous",
-        "live": "live",
-        "sd": "sd",
         "tvdb": "tvdb",
         "mal": "mal",
         "igdb": "igdb",
+        "anon": "anonymous",
+        "live": "live",
+        "sd": "sd",
         "nfo_file": "nfo",
+        "season_number": "season_number",
+        "episode_number": "episode_number",
 
         "optimized": "stream",
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",
-        "tripleup": "tripleup",
         "sticky": "sticky",
         "freeleech": "free"
     },
 
     "Required": {
         "torrent": "file",
-        "filename": "string",
-        "info": "string",
+        "name": "string",
+        "description": "string",
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
@@ -63,11 +65,9 @@
         "free": "string",
         "featured": "string",
         "doubleup": "string",
-        "tripleup": "string",
         "sticky": "string",
 
-        "category": {
-            "1": "movie",
+        "category_id": {
             "2": "episode"
         },
 
@@ -77,12 +77,12 @@
                 "bluray_disc": 2,
                 "dvd_disc": 2
             },
-            "3": {
+            "2": {
                 "remux": 1,
                 "bluray_remux": 2,
                 "dvd_remux": 2
             },
-            "12": {
+            "3": {
                 "bluray_encode": 1
             },
             "4": {
@@ -97,16 +97,16 @@
         },
 
         "resolution_id": {
-            "11": {
+            "1": {
                 "4360p": 1
             },
-            "1": {
+            "2": {
                 "2160p": 1
             },
-            "2": {
+            "3": {
                 "1080p": 1
             },
-            "3": {
+            "4": {
                 "1080i": 1
             },
             "5": {
@@ -141,12 +141,13 @@
 
     "dupes": {
         "request": "GET",
-        "url_format": "{search_url}&filter={title}",
-        "strip_text": false,
+        "url_format": "{search_url}&imdbId={imdb}",
+        "strip_text": true,
 
         "parse_json": {
             "is_needed": true,
-            "top_lvl": "data"
+            "top_lvl": "data",
+            "torrent_details": "attributes"
         },
 
         "different_cuts": "1",
@@ -177,47 +178,12 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
     "banned_groups": [
-        "AROMA",
-        "aXXo",
-        "BRrip",
-        "CM8",
-        "CrEwSaDe",
-        "d3g",
-        "DNL",
-        "FGT",
-        "FaNGDiNG0",
-        "FRDS",
-        "HD2DVD",
-        "HDTime",
-        "iPlanet",
-        "KiNGDOM",
-        "Leffe",
-        "MeGusta",
-        "mHD",
-        "mSD",
-        "nHD",
-        "nikt0",
-        "nSD",
-        "NhaNc3",
-        "PRODJi",
-        "RDN",
-        "SANTi",
-        "STUTTERSHIT",
-        "ViSION",
-        "WAF",
-        "x0r",
+        "GalaxyTV",
+        "TGx",
         "YIFY",
-        "Leffe",
-        "MeGusta",
-        "mHD",
-        "mSD",
-        "nHD",
-        "nikt0",
-        "nSD",
-        "NhaNc3",
-        "PRODJi",
-        "RDN"
+        "YTS",
+        "RARBG",
+        "Will1896"
     ]
 }
