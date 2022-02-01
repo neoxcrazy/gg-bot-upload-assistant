@@ -142,6 +142,8 @@ docker run -it \
 - [X] Add Support for new platforms
     - [X] SkipTheCommercials
 - [X] Refactor tracker acronyms and api keys to config file
+- [X] Add support for Imgfi
+- [X] Improved batch mode processing
 
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
