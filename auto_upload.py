@@ -72,33 +72,14 @@ for key in sample_env_keys:
 
 # Used to correctly select json file
 # the value in this dictionay must correspond to the file name of the site template
-acronym_to_tracker = {"blu": "blutopia",
-                      "bhd": "beyond-hd",
-                      "r4e": "racing4everyone",
-                      "acm": "asiancinema",
-                      "ath": "aither",
-                      "telly": "telly",
-                      "tsp": "thesceneplace",
-                      "dt": "desitorrents",
-                      "uhdhvn":"uhdheaven",
-                      "spd" : "speedapp",
-                      "ntelogo": "ntelogo"}
+acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
 
 # Now assign some of the values we get from 'config.env' to global variables we use later
-api_keys_dict = {
-    'bhd_api_key': os.getenv('BHD_API_KEY'),
-    'dt_api_key': os.getenv('DT_API_KEY'),
-    'blu_api_key': os.getenv('BLU_API_KEY'),
-    'acm_api_key': os.getenv('ACM_API_KEY'),
-    'r4e_api_key': os.getenv('R4E_API_KEY'),
-    'ath_api_key': os.getenv('ATH_API_KEY'),
-    'telly_api_key': os.getenv('TELLY_API_KEY'),
-    'spd_api_key': os.getenv('SPD_API_KEY'),
-    'uhdhvn_api_key': os.getenv('UHDHVN_API_KEY'),
-    'ntelogo_api_key': os.getenv('NTELOGO_API_KEY'),
-    'tmdb_api_key': os.getenv('TMDB_API_KEY'),
-    'tsp_api_key': os.getenv('TSP_API_KEY')
-}
+api_keys = json.load(open(f'./parameters/tracker/api_keys.json'))
+api_keys_dict = dict()
+for i in range (0, len(api_keys)):
+    api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper())
+
 # Make sure the TMDB API is provided [Mandatory Property]
 try:
     if len(api_keys_dict['tmdb_api_key']) == 0:
@@ -1834,7 +1815,7 @@ def choose_right_tracker_keys():
             logging.critical('[ResolutionSourceMapping] Unable to find a suitable "source" match for this file')
             logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
             console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
-            sys.exit()
+            return "STOP"
 
     # ------------ required_items ------------
     is_hybrid_translation_needed = False
@@ -1894,9 +1875,18 @@ def choose_right_tracker_keys():
                     for key_cat, val_cat in config["Required"][required_key].items():
                         if torrent_info["type"] == val_cat:
                             tracker_settings[config["translation"][translation_key]] = key_cat
+                    if config["translation"][translation_key] not in tracker_settings:
+                        # this type of upload is not permitted in this tracker
+                        logging.critical('[CategoryMapping] Unable to find a suitable "category/type" match for this file')
+                        logging.error("[CategoryMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+                        console.print(f'\nThis "Category" ([bold]{torrent_info["type"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
+                        return "STOP"
 
                 if translation_key in ('source', 'resolution'):
-                    tracker_settings[config["translation"][translation_key]] = identify_resolution_source(translation_key)
+                    return_value = identify_resolution_source(translation_key)
+                    if return_value == "STOP":
+                        return "STOP"
+                    tracker_settings[config["translation"][translation_key]] = return_value
 
                 if translation_key == "hybrid_type" and config["hybrid_type"] is not None and config["hybrid_type"]["required"]:
                     # to do hybrid translation we need values for source, type and resolution to be resolved before hand.
@@ -2002,6 +1992,9 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
+    
+    logging.debug("::::::::::::::::::::::::::::: Tracker settings that will be used for creating payload :::::::::::::::::::::::::::::")
+    logging.debug(f'\n{pformat(tracker_settings)}')
 
     # multiple authentication modes
     headers = None
@@ -2024,38 +2017,48 @@ def upload_to_site(upload_to, tracker_api_key):
 
         # Now that we know if we are looking for a required or optional key we can try to add it into the payload
         if str(config[req_opt][key]) == "file":
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
-                post_file = f'{key}', open(tracker_settings[f'{key}'], 'rb')
+            if os.path.isfile(tracker_settings[key]):
+                post_file = f'{key}', open(tracker_settings[key], 'rb')
                 files.append(post_file)
-                display_files[key] = tracker_settings[f'{key}']
+                display_files[key] = tracker_settings[key]
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         elif str(config[req_opt][key]) == "file|array":
+            if os.path.isfile(tracker_settings[key]):
+                with open(tracker_settings[key], "r") as images_data:
+                    for line in images_data.readlines():
+                        post_file = f'{key}[]', open(line.strip(), 'rb') 
+                        files.append(post_file)
+                        display_files[key] = tracker_settings[key]
+            else:
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                continue
+        elif str(config[req_opt][key]) == "file|string|array":
             """
                 for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
             """
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
+            if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file|array for key {key}")
-                with open(tracker_settings['{}'.format(key)], 'r') as file_contents:
+                with open(tracker_settings[key], 'r') as file_contents:
                     array = []
                     for line in file_contents.readlines():
                         array.append(line.strip())
                     payload[key] = array
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
-            if os.path.isfile(tracker_settings['{}'.format(key)]):
+            if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file|base64 for key {key}")
-                with open(tracker_settings['{}'.format(key)], 'rb') as binary_file:
+                with open(tracker_settings[key], 'rb') as binary_file:
                     binary_file_data = binary_file.read()
                     base64_encoded_data = base64.b64encode(binary_file_data)
                     base64_message = base64_encoded_data.decode('utf-8')
                     payload[key] = base64_message
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings['{}'.format(key)]))
+                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -2338,10 +2341,19 @@ upload_queue = []
 if args.batch:
     logging.info("[Main] Running in batch mode")
     logging.info(f"[Main] Uploading all the items in the folder: {args.path}")
-    # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
-    for arg_file in glob.glob(f'{args.path[0]}/*'):
-        # Since we are in batch mode, we upload every file/folder we find in the path the user specified
-        upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
+    # # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
+    # for arg_file in glob.glob(f'{args.path[0]}/*'):
+    #     # Since we are in batch mode, we upload every file/folder we find in the path the user specified
+    #     upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
+    # logging.debug(f'[Main] Upload queue for batch mode {upload_queue}')
+    dirlist = [args.path[0]]
+    for (dirpath, dirnames, filenames) in os.walk(dirlist.pop()):
+        dirlist.extend(dirnames)
+        # if filenames.endsWith(".mkv") or filenames.endsWith(".mp4"):
+        upload_queue.extend(
+            filter(lambda file_name: file_name.endswith(".mkv") or file_name.endswith(".mp4"), 
+                map(lambda path_and_file: os.path.join(*path_and_file), zip([dirpath] * len(filenames), filenames))))
+    logging.info(f'[Main] Upload queue for batch mode {upload_queue}')
 else:
     logging.info("[Main] Running in regular '-path' mode, starting upload now")
     # This means the ran the script normally and specified a direct path to some media (or multiple media items, in which case we append it like normal to the list 'upload_queue')
@@ -2514,6 +2526,9 @@ for file in upload_queue:
     if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
          torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
 
+    if os.path.exists(f'{working_folder}/temp_upload/image_paths.txt'):
+         torrent_info["data_images"] = f'{working_folder}/temp_upload/image_paths.txt'
+
     # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
     logging.info("[Main] Now starting tracker specific tasks")
     for tracker in upload_to_trackers:
@@ -2594,7 +2609,11 @@ for file in upload_queue:
         )
 
         # -------- Assign specific tracker keys --------
-        choose_right_tracker_keys()  # This function takes the info we have the dict torrent_info and associates with the right key/values needed for us to use X trackers API
+        # This function takes the info we have the dict torrent_info and associates with the right key/values needed for us to use X trackers API
+        # if for some reason the upload cannot be performed to the specific tracker, the method returns "STOP"
+        if choose_right_tracker_keys() == "STOP":
+            continue
+
         logging.debug(f"::::::::::::::::::::::::::::: Final torrent_info with all data filled :::::::::::::::::::::::::::::")
         logging.debug(f'\n{pformat(torrent_info)}')
         # -------- Upload everything! --------

@@ -20,7 +20,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>Site Name</strong></td>
         </th>
         <tr style="text-align: center">
-            <td rowspan="9"><strong>UNIT3D</strong></td>
+            <td rowspan="10"><strong>UNIT3D</strong></td>
             <td><strong>ACM</strong></td>
             <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
         </tr>
@@ -55,6 +55,10 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
         <tr style="text-align: center">
             <td><strong>UHDHVN</strong></td>
             <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>STC</strong></td>
+            <td><strong><a href="https://skipthecommericals.xyz/">SkipTheCommericals</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>XBTIT</strong></td>
@@ -109,6 +113,7 @@ docker run -it \
     * `mediainfo.txt` 
     * `url_images.txt`
     * `description.txt`
+    * `image_paths.txt`
 5. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
 
 <br>
@@ -132,6 +137,13 @@ docker run -it \
 - [X] Move torrents to different locations based on type
 - [X] Dynamic media summary
 - [X] Frame accurate screenshots
+
+### v2.0.1
+- [X] Add Support for new platforms
+    - [X] SkipTheCommercials
+- [X] Refactor tracker acronyms and api keys to config file
+- [X] Add support for Imgfi
+- [X] Improved batch mode processing
 
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents

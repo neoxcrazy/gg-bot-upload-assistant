@@ -245,6 +245,14 @@
     "dupes": {
         "request": "POST",
         "strip_text": true,
+        
+        "_comments" : {
+            "payload" : "payload is the json data that needs to be sent to tracker",
+            "_payload" : "payload must be a valid json with single quotes",
+            "formatting" : "content to be replaced must be enclosed with <>"
+        },
+
+        "payload":"{\"action\" : \"search\", \"imdb_id\":\"<imdb>\"}", 
 
         "keys": {
             "action": "search",

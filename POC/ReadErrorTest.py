@@ -357,3 +357,52 @@ else:
     print("ELSE")
 
 print(dict_test["release_group"])
+
+
+
+
+print()
+print()
+print()
+print()
+
+json_payload = '{"search":"<title>"}'
+
+json_payload = json_payload.replace("<title>", "This is my title")
+
+print(json_payload)
+
+import json
+import pprint
+payload = json.loads(json_payload)
+print(pprint.pformat(payload))
+
+print(payload["search"])
+
+
+api_keys = json.load(open(f'./parameters/tracker/api_keys.json'))
+api_keys_dict = dict()
+for i in range (0, len(api_keys)):
+    api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper())
+print(pprint.pformat(api_keys_dict))
+print()
+print("**************************************************")
+print()
+
+api_keys_dict = {
+    'bhd_api_key': os.getenv('BHD_API_KEY'),
+    'dt_api_key': os.getenv('DT_API_KEY'),
+    'blu_api_key': os.getenv('BLU_API_KEY'),
+    'acm_api_key': os.getenv('ACM_API_KEY'),
+    'r4e_api_key': os.getenv('R4E_API_KEY'),
+    'ath_api_key': os.getenv('ATH_API_KEY'),
+    'telly_api_key': os.getenv('TELLY_API_KEY'),
+    'spd_api_key': os.getenv('SPD_API_KEY'),
+    "tdb_api_key" : os.getenv('TDB_API_KEY'),
+    'uhdhvn_api_key': os.getenv('UHDHVN_API_KEY'),
+    'ntelogo_api_key': os.getenv('NTELOGO_API_KEY'),
+    'tmdb_api_key': os.getenv('TMDB_API_KEY'),
+    'tsp_api_key': os.getenv('TSP_API_KEY')
+}
+
+print(pprint.pformat(api_keys_dict))

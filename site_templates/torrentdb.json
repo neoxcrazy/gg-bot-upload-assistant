@@ -1,34 +1,32 @@
 {
-    "name": "SpeedApp",
-    "url": "https://speedapp.io/",
-    "upload_form": "https://speedapp.io/api/upload",
-    "torrents_search": "https://speedapp.io/api/torrent",
-    "source": "sunshine",
-    "platform": "TBDev",
+    "name": "TorrentDB",
+    "url": "https://torrentdb.net/",
+    "upload_form": "https://torrentdb.net/api/torrent/upload",
+    "torrents_search": "https://torrentdb.net/api/torrent/search?search=Demon",
+    "source": "TorrentDB.net",
+    "platform": "TorrentDB",
     "bbcode_line_break": "\n",
     "bbcode_code": "[code][/code]",
-    "title_separator": ".",
+    "title_separator": " ",
 
     "technical_jargons": {
         "authentication_mode": "BEARER",
-        "payload_type": "JSON"
+        "payload_type": "MULTI-PART"
     },
 
     "translation": {
-        "dot_torrent": "file",
+        "dot_torrent": "torrent",
         "torrent_title": "name",
-        "mediainfo": "media_info",
+        "mediainfo": "mediainfo",
         "bdinfo": "bdInfo",
-        "url_images": "screenshots",
-        "shameless_self_promotion": "releaseInfo",
+        "data_images":"screenshots",
+        "description": "description",
         "type": "category_id",
-        "source": "source",
-        "resolution": "resolution_id",
-        "hybrid_type": "type",
+        "source": "type_id",
+        "resolution": "resolution",
+        "anonymous":"anonymous",
         "tmdb": "tmdb",
-        "imdb": "url",
-        "tvdb": "tvdb",
-        "mal": "mal",
+        "imdb": "imdb",
         "nfo_file": "nfo"
     },
 
@@ -145,19 +143,22 @@
     },
 
     "Required": {
-        "file": "file|base64",
+        "torrent": "file",
         "name": "string",
-        "releaseInfo": "string",
-        "screenshots": "file|string|array",
-        "url": "url",
+        "screenshots": "file|array",
+        "imdb": "string",
+        "description":"string",
         "type": "string",
+        "anonymous": "int",
+        "anon":"string",
+        "tmdb":"string",
 
         "category_id": {
             "1": "movie",
             "2": "episode"
         },
 
-        "source": {
+        "type_id": {
             "1": {
                 "disc": 1,
                 "bluray_disc": 2,
@@ -182,7 +183,7 @@
             }
         },
 
-        "resolution_id": {
+        "resolution": {
             "1": {
                 "4360p": 1
             },
@@ -218,14 +219,21 @@
 
     "Optional": {
         "nfo_file": "file|base64",
-        "media_info": "string",
+        "mediainfo": "string",
         "bdInfo":"string"
     },
 
     "dupes": {
-        "request": "GET",
-        "url_format": "{search_url}?imdbId={imdb}",
+        "request": "POST",
         "strip_text": true,
+
+        "_comments" : {
+            "payload" : "payload is the json data that needs to be sent to tracker",
+            "_payload" : "payload must be a valid json",
+            "formatting" : "content to be replaced must be enclosed with <>"
+         },
+
+        "payload":"{\"search\":\"<imdb>\"}", 
 
         "parse_json": {
             "is_needed": false
