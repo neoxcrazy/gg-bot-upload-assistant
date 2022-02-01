@@ -1,4 +1,5 @@
 import os
+import json
 import base64
 import asyncio
 import logging
@@ -15,7 +16,6 @@ from ffmpy import FFmpeg
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
 
-
 def get_ss_range(duration, num_of_screenshots):
     # If no spoilers is enabled, then screenshots are taken from first half of the movie or tv show
     # otherwise screenshots are taken at regualar intervals from the whole movie or tv show
@@ -30,7 +30,7 @@ def get_ss_range(duration, num_of_screenshots):
     return list_of_ss_timestamps
 
 
-def upload_screens(img_host, img_host_api, image_path, torrent_title):
+def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path):
     # ptpimg does all for us to upload multiple images at the same time but to simplify things & 
     # allow for simple "backup hosts"/upload failures we instead upload 1 image at a time
     #
@@ -65,16 +65,24 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
             console.print(f"\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
     
-    if img_host in ('imgbb', 'freeimage'):
+    if img_host in ('imgbb', 'freeimage', 'imgfi'):
         # Get the correct image host url/json key
-        available_image_host_urls = {'imgbb': 'https://api.imgbb.com/1/upload', 'freeimage': 'https://freeimage.host/api/1/upload'}
+        available_image_host_urls = json.load(open(f'{base_path}/parameters/image_host_urls.json'))
+
         parent_key = 'data' if img_host == 'imgbb' else 'image'
 
         # Load the img_host_url, api key & img encoded in base64 into a dict called 'data' & post it
         image_host_url = available_image_host_urls[img_host]
-        data = {'key': img_host_api, 'image': base64.b64encode(open(image_path, "rb").read())}
         try:
-            img_upload_request = requests.post(url=image_host_url, data=data)
+            img_upload_request = None
+            data = {'key': img_host_api}
+            if img_host == 'imgfi':
+                files = {'source': open(image_path, 'rb')}
+                img_upload_request = requests.post(url=image_host_url, data=data, files=files)
+            else:
+                data['image'] = base64.b64encode(open(image_path, "rb").read())
+                img_upload_request = requests.post(url=image_host_url, data=data)
+            
             if img_upload_request.ok:
                 img_upload_response = img_upload_request.json()
                 # When you upload an image you get a few links back, you get 'medium', 'thumbnail', 'url', 'url_viewer' and we only need max 2 
@@ -96,7 +104,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title):
                 console.print(f"{img_host} upload failed. Status code: [bold]{img_upload_request.status_code}[/bold]", style='red3', highlight=False)
                 return False
         except requests.exceptions.RequestException:
-            logging.error(f"[Screenshots] Failed to upload {image_path} to {img_host}")
+            logging.exception(f"[Screenshots] Failed to upload {image_path} to {img_host}")
             console.print(f"upload to [bold]{img_host}[/bold] has failed!", style="Red")
             return False
     
@@ -213,7 +221,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         # This is how we fall back to a second host if the first fails
         for img_host in enabled_img_hosts_list:
             # call the function that uploads the screenshot
-            upload_image = upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import)
+            upload_image = upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import, base_path=base_path)
             # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
                 logging.debug(f"[Screenshots] Response from image host: {upload_image}")

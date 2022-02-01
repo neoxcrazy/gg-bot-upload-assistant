@@ -2341,10 +2341,19 @@ upload_queue = []
 if args.batch:
     logging.info("[Main] Running in batch mode")
     logging.info(f"[Main] Uploading all the items in the folder: {args.path}")
-    # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
-    for arg_file in glob.glob(f'{args.path[0]}/*'):
-        # Since we are in batch mode, we upload every file/folder we find in the path the user specified
-        upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
+    # # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
+    # for arg_file in glob.glob(f'{args.path[0]}/*'):
+    #     # Since we are in batch mode, we upload every file/folder we find in the path the user specified
+    #     upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
+    # logging.debug(f'[Main] Upload queue for batch mode {upload_queue}')
+    dirlist = [args.path[0]]
+    for (dirpath, dirnames, filenames) in os.walk(dirlist.pop()):
+        dirlist.extend(dirnames)
+        # if filenames.endsWith(".mkv") or filenames.endsWith(".mp4"):
+        upload_queue.extend(
+            filter(lambda file_name: file_name.endswith(".mkv") or file_name.endswith(".mp4"), 
+                map(lambda path_and_file: os.path.join(*path_and_file), zip([dirpath] * len(filenames), filenames))))
+    logging.info(f'[Main] Upload queue for batch mode {upload_queue}')
 else:
     logging.info("[Main] Running in regular '-path' mode, starting upload now")
     # This means the ran the script normally and specified a direct path to some media (or multiple media items, in which case we append it like normal to the list 'upload_queue')
