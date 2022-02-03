@@ -131,7 +131,7 @@ docker run -it \
 ### v2.0.2
 - [ ] Add Support for new platforms
     - [ ] TorrentDB
-- [ ] Support for custom messages / descriptions during upload
+- [X] Support for custom messages / descriptions during upload
 
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
