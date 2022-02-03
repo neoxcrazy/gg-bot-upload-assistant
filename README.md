@@ -145,10 +145,11 @@ docker run -it \
 - [X] Add support for Imgfi
 - [X] Improved batch mode processing
 
+### v2.0.2
+- [ ] Support for custom messages / descriptions during upload
+
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
-- [ ] Add Support for new platforms
-    - [ ] TorrentDB
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
@@ -157,8 +158,8 @@ docker run -it \
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
     - [ ] BIT-HDTV
+    - [ ] TorrentDB
 - [ ] Add support for DVDs
-- [ ] Support for custom messages / descriptions during upload
 
 <br>
 
