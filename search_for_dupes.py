@@ -30,8 +30,8 @@ def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
 
 
 def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
-    # if debug:
-        # logging.getLogger().setLevel(logging.DEBUG)
+    if debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     with open(f'{working_folder}/site_templates/{search_site}.json', "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
