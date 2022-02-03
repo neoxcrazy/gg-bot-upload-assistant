@@ -2602,13 +2602,16 @@ for file in upload_queue:
                             # note that the = is intentional. since title would be [spoiler=TITILE]. we need to remove =TITLE
                             # if title has already been repalced the below statement won't do anything
                             input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
+
                             if args.debug: # just for debugging purposes
                                 if "][" in input_wrapper_type:
                                     logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
                                 logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
+
                             final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
-                            logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
                             description.write(final_formatted_data)
+                            logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
+                            
                         description.write(bbcode_line_break)
             else: # else for "description_components" in config
                 logging.debug(f"[Main] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
