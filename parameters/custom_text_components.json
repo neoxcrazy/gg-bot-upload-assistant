@@ -22,5 +22,17 @@
         "display_name" : "Note",
         "tracker_reference_key" : "notes_code",
         "title" : false
+    },
+    {
+        "key" : "QUOTE",
+        "display_name" : "Quote",
+        "tracker_reference_key" : "quote_code",
+        "title" : false
+    },
+    {
+        "key" : "ALERT",
+        "display_name" : "Alert",
+        "tracker_reference_key" : "alert_code",
+        "title" : false
     }
 ]

@@ -57,7 +57,7 @@ def collect_custom_messages_from_user(debug):
         choice = Prompt.ask("Choose which type of content to add:", choices=list_of_num, default="1")
         
         if choice == str(len(custom_text_components)): # the last component is always the hardcoded IDIOT key
-            console.print(f"[bold blue]:facepunch: Yes... Yes you are.:facepunch: [/bold blue] [bold red]Skipping custom torrent descriptions and proceeding with upload[/bold red] :angry_face: ", justify='center')
+            console.print(f"[bold blue]:facepunch: Yes... Yes you are.:facepunch: [/bold blue] [bold red]Skipping further custom torrent descriptions collection and proceeding with upload[/bold red] :angry_face: ", justify='center')
             break
         else:
             title = None
@@ -66,7 +66,7 @@ def collect_custom_messages_from_user(debug):
                 title = input("::").split("\\n")[0]
                 logging.debug(f'User provided {title} as title for {custom_text_components[int(choice) - 1]["key"]}')
 
-            console.print(f"Please provide the contents for '{custom_text_components[int(choice) - 1]['key']}'. [bold red on white] Send EOF or Ctrl + D to stop text grabbing [/bold red on white]")
+            console.print(f"Please provide the contents for '{custom_text_components[int(choice) - 1]['key']}'. [bold red on white] Send EOF or Ctrl + D from new line to stop text grabbing [/bold red on white]")
             custom_text = sys.stdin.read()
             console.print(f"[green] ----------------- USER INPUT COLLECTED ----------------- [/green]")
             console.print(custom_text)

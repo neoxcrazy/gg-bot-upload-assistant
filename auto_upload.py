@@ -2595,9 +2595,8 @@ for file in upload_queue:
                             # note that the = is intentional. since title would be [spoiler=TITILE]. we need to remove =TITLE
                             # if title has already been repalced the below statement won't do anything
                             input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
-                            description.write(input_wrapper_type.replace("][", f']{formatted_value}['))
+                            description.write(input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value))
                         description.write(bbcode_line_break)
-
                 torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
 
         # -------- Add bbocode screenshots to description.txt --------

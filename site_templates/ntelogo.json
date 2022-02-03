@@ -12,7 +12,9 @@
         "code_code": "[code][/code]",
         "plain_text_code":"",
         "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
-        "notes_code":"[note][/note]"
+        "notes_code":"[note][/note]",
+        "quote_code":"[quote][/quote]",
+        "alert_code":"[alert][/alert]"
     },
     
     "technical_jargons": {
