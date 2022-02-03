@@ -10,7 +10,6 @@
 
     "description_components":{
         "code_code": "[code][/code]",
-        "plain_text_code":"",
         "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
         "notes_code":"[note][/note]",
         "quote_code":"[quote][/quote]",

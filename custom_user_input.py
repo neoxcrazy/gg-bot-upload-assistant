@@ -14,7 +14,7 @@ def collect_custom_messages_from_user(debug):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logging.debug(f"[CustomInputs] Starting to collect custom messages from user for torrent description")
+    logging.debug(f"[CustomUserInputs] Starting to collect custom messages from user for torrent description")
     
     is_first = True
     user_custom_texts = []
@@ -22,13 +22,13 @@ def collect_custom_messages_from_user(debug):
     custom_text_components = json.load(open(f'{working_folder}/parameters/custom_text_components.json'))
     # creating a list of keys [for warning message]
     components_choices = ", ".join(map(lambda component: f'\'{component["key"]}\'', custom_text_components))
-    logging.debug(f'[CustomInputs] keys configured in the bot :: {components_choices}')
+    logging.debug(f'[CustomUserInputs] keys configured in the bot :: {components_choices}')
     # replacing the last , with or.
     # TODO is there any better approach to do this in python??
     components_choices = components_choices[::-1].replace(" ,", " ro ", 1)[::-1]
     
     # adding I'm and idiot to the components list :p
-    logging.debug(f'[CustomInputs] Adding IDIOT key to the text components')
+    logging.debug(f'[CustomUserInputs] Adding IDIOT key to the text components')
     custom_text_components.append({
         "key" : "IDIOT",
         "display_name": "I'm and idiot",
@@ -64,7 +64,7 @@ def collect_custom_messages_from_user(debug):
             if custom_text_components[int(choice) - 1]["title"]:
                 console.print(f"Please provide the title for the component ([bold green]One Liner[/bold green])")
                 title = input("::").split("\\n")[0]
-                logging.debug(f'User provided {title} as title for {custom_text_components[int(choice) - 1]["key"]}')
+                logging.debug(f'[CustomUserInputs] User provided {title} as title for {custom_text_components[int(choice) - 1]["key"]}')
 
             console.print(f"Please provide the contents for '{custom_text_components[int(choice) - 1]['key']}'. [bold red on white] Send EOF or Ctrl + D from new line to stop text grabbing [/bold red on white]")
             custom_text = sys.stdin.read()
@@ -82,6 +82,5 @@ def collect_custom_messages_from_user(debug):
             )
             if not Confirm.ask("Do you want to add more custom texts?", default="n"):
                 break
-    logging.debug(f'Custom text components collected :: {pformat(user_custom_texts)}')
-    console.print("\n")
+    logging.debug(f'[CustomUserInputs] Custom text components collected :: {pformat(user_custom_texts)}')
     return user_custom_texts

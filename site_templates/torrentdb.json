@@ -6,8 +6,13 @@
     "source": "TorrentDB.net",
     "platform": "TorrentDB",
     "bbcode_line_break": "\n",
-    "bbcode_code": "[code][/code]",
     "title_separator": " ",
+
+    "description_components":{
+        "code_code": "[code][/code]",
+        "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
+        "quote_code":"[quote][/quote]"
+    },
 
     "technical_jargons": {
         "authentication_mode": "BEARER",
@@ -19,7 +24,7 @@
         "torrent_title": "name",
         "mediainfo": "mediainfo",
         "bdinfo": "bdInfo",
-        "data_images":"screenshots",
+        "url_images":"screenshot_urls",
         "description": "description",
         "type": "category_id",
         "source": "type_id",
@@ -145,7 +150,7 @@
     "Required": {
         "torrent": "file",
         "name": "string",
-        "screenshots": "file|array",
+        "screenshot_urls": "file|string|array",
         "imdb": "string",
         "description":"string",
         "type": "string",

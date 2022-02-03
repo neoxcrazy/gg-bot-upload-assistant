@@ -2557,12 +2557,12 @@ for file in upload_queue:
         # -------- format the torrent title --------
         format_title(config)
 
+        # (Theory) BHD has a different bbcode parser then BLU/ACM so the line break is different for each site
+        # this is why we set it in each sites *.json file then retrieve it here in this 'for loop' since its different for each site
+        bbcode_line_break = config['bbcode_line_break']
+
         # -------- Add custom descriptions to description.txt --------
         if "custom_user_inputs" in torrent_info:
-            # (Theory) BHD has a different bbcode parser then BLU/ACM so the line break is different for each site
-            #   this is why we set it in each sites *.json file then retrieve it here in this 'for loop' since its different for each site
-            bbcode_line_break = config['bbcode_line_break']
-
             # If the user is uploading to multiple sites we don't want to keep appending to the same description.txt file so remove it each time and write clean bbcode to it
             #  (Note, this doesn't delete bbcode_images.txt so you aren't uploading the same images multiple times)
             if os.path.isfile(f'{working_folder}/temp_upload/description.txt'):
@@ -2570,41 +2570,52 @@ for file in upload_queue:
 
             # we need to make sure that the tracker supports custom description for torrents. 
             # If tracker supports custom descriptions, the the tracker config will have the `description_components` key.
-            if "description_components" not in config:
-                logging.debug(f"[Main] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
-            else:
+            if "description_components" in config:
+                logging.debug(f'[CustomUserInputs] User has provided custom inputs for torrent description')
                 # here we iterate through all the custom inputs provided by the user
                 # then we check whether this component is supported by the target tracker. If tracker supports it then the `key` will be present in the tracker config.
                 with open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
                     description_components = config["description_components"]
+                    logging.debug(f'[CustomUserInputs] Custom Message components configured for tracker {tracker} are {pformat(description_components)}')
                     for custom_user_input in torrent_info["custom_user_inputs"]:
                         # getting the component type
+                        logging.debug(f'[CustomUserInputs] Custom input data {pformat(custom_user_input)}')
                         if custom_user_input["key"] not in description_components:
+                            logging.debug(f'[CustomUserInputs] This type of component is not supported by the tracker. Writing input to description as plain text')
                             # the provided component is not present in the trackers list. hence we adds this to the description directly (plain text)
                             description.write(custom_user_input["value"])
                         else:
                             # provided component is present in the tracker list, so first we'll format the content to be added to the tracker template
                             input_wrapper_type = description_components[custom_user_input["key"]]
+                            logging.debug(f'[CustomUserInputs] Component wrapper :: `{input_wrapper_type}`')
                             formatted_value = custom_user_input["value"].replace("\\n", bbcode_line_break)
                             # next we need to check whether the text component has any title
                             if "title" in custom_user_input and custom_user_input["title"] is not None:
+                                logging.debug(f'[CustomUserInputs] User has provided a title for this component')
                                 # if user has provided title, next we'll make sure that the tracker supports title for the component.
                                 if "TITLE_PLACEHOLDER" in input_wrapper_type:
-                                    input_wrapper_type = input_wrapper_type.replace("TITLE_PLACEHOLDER", custom_user_input["title"])
+                                    logging.debug(f'[CustomUserInputs] Adding title [{custom_user_input["title"].strip()}] to this component')
+                                    input_wrapper_type = input_wrapper_type.replace("TITLE_PLACEHOLDER", custom_user_input["title"].strip())
+                                else:
+                                    logging.debug(f'[CustomUserInputs] Title is not supported for this component {custom_user_input["key"]} in this tracker {tracker}. Skipping title placement')
                             # in cases where tracker supports title and user hasn't provided any title, we'll just remove the title placeholder
                             # note that the = is intentional. since title would be [spoiler=TITILE]. we need to remove =TITLE
                             # if title has already been repalced the below statement won't do anything
                             input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
-                            description.write(input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value))
+                            if args.debug: # just for debugging purposes
+                                if "][" in input_wrapper_type:
+                                    logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
+                                logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
+                            final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
+                            logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
+                            description.write(final_formatted_data)
                         description.write(bbcode_line_break)
-                torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
+            else: # else for "description_components" in config
+                logging.debug(f"[Main] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
+                
 
-        # -------- Add bbocode screenshots to description.txt --------
+        # -------- Add bbcode screenshots to description.txt --------
         if "bbcode_images" in torrent_info:
-            # (Theory) BHD has a different bbcode parser then BLU/ACM so the line break is different for each site
-            #   this is why we set it in each sites *.json file then retrieve it here in this 'for loop' since its different for each site
-            bbcode_line_break = config['bbcode_line_break']
-
             # if custom_user_inputs is already present in torrent info, then the delete operation would have already be done
             # so we just need to append screenshots to the description.txt
             if "custom_user_inputs" not in torrent_info and os.path.isfile(f'{working_folder}/temp_upload/description.txt'):
@@ -2614,16 +2625,19 @@ for file in upload_queue:
             with open(torrent_info["bbcode_images"], 'r') as bbcode, open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
                 # First add the [center] tags, "Screenshots" header, Size tags etc etc. This only needs to be written once which is why its outside of the 'for loop' below
                 description.write(f'{bbcode_line_break}[center] ---------------------- [size=22]Screenshots[/size] ---------------------- {bbcode_line_break}{bbcode_line_break}')
-
                 # Now write in the actual screenshot bbcode
                 for line in bbcode:
                     description.write(line)
                 description.write("[/center]")
-                # Finally append the entire thing with some shameless self promotion ;) and some line breaks
-                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
-            # Add the finished file to the 'torrent_info' dict
-            torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
+        # TODO what will happen if custom_user_inputs and bbcode_images are not present
+        # will then open throw some errors???
+        with open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
+            # Finally append the entire thing with some shameless self promotion ;) and some line breaks
+            description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
+
+        # Add the finished file to the 'torrent_info' dict
+        torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
 
         # -------- Check for Dupes Multiple Trackers --------
         # when the user has configured multiple trackers to upload to
