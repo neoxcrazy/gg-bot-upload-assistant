@@ -129,6 +129,8 @@ docker run -it \
 
 # Roadmap
 ### v2.0.2
+- [ ] Add Support for new platforms
+    - [ ] TorrentDB
 - [ ] Support for custom messages / descriptions during upload
 
 ### v2.1
@@ -141,7 +143,6 @@ docker run -it \
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
     - [ ] BIT-HDTV
-    - [ ] TorrentDB
 - [ ] Add support for DVDs
 
 <br>
