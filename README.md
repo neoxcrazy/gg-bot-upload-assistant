@@ -128,23 +128,6 @@ docker run -it \
 <br>
 
 # Roadmap
-### v2.0
-- [X] Add Support for new platforms
-    - [X] SpeedApp
-- [X] Full Disk Support
-    - [X] Pack BDInfo inside container for full disk uploads
-- [X] Ensure backwards compatibility with bare metal full disk uploads 
-- [X] Move torrents to different locations based on type
-- [X] Dynamic media summary
-- [X] Frame accurate screenshots
-
-### v2.0.1
-- [X] Add Support for new platforms
-    - [X] SkipTheCommercials
-- [X] Refactor tracker acronyms and api keys to config file
-- [X] Add support for Imgfi
-- [X] Improved batch mode processing
-
 ### v2.0.2
 - [ ] Support for custom messages / descriptions during upload
 
@@ -164,6 +147,18 @@ docker run -it \
 <br>
 
 # Change Log
+## **2.0.1**
+
+#### New Trackers
+    * SkipTheCommercials
+
+#### New Image Hosts
+    * Imgfi
+
+#### Underhood changes
+    * Improved batch processing
+    * Refactor tracker acronyms and api keys to config file
+
 ## **2.0**
 
 #### New Trackers
