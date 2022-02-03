@@ -1,0 +1,26 @@
+[
+    {
+        "key" : "PLAIN TEXT",
+        "display_name": "Plain Text",
+        "tracker_reference_key" : "plain_text_code",
+        "title" : false
+    },
+    {
+        "key" : "CODE",
+        "display_name" : "Code",
+        "tracker_reference_key" : "code_code",
+        "title" : false
+    },
+    {
+        "key" : "SPOILER",
+        "display_name" : "Spoiler",
+        "tracker_reference_key" : "spoiler_code",
+        "title" : true
+    },
+    {
+        "key" : "NOTE",
+        "display_name" : "Note",
+        "tracker_reference_key" : "notes_code",
+        "title" : false
+    }
+]
