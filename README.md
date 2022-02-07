@@ -143,7 +143,9 @@ docker run -it \
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
     - [ ] BIT-HDTV
+    - [ ] Nebulance
 - [ ] Add support for DVDs
+- [ ] New image host: Imgur
 
 <br>
 

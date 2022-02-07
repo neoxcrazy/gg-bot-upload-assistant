@@ -381,6 +381,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # Set a default value for season and episode
         torrent_info["season_number"] = 0
         torrent_info["episode_number"] = 0
+        torrent_info["complete_season"] = 0
 
         if 'season' not in guess_it_result:
             logging.error("could not detect the 'season' using guessit")
@@ -401,6 +402,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             else:
                 # if we don't have an episode number we will just use the season number
                 torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
+                # marking this as full season
+                torrent_info["complete_season"] = "1"
+
             
     # ------------ If uploading folder, select video file from within folder ------------ #
     # First make sure we have the path to the actual video file saved in the torrent_info dict
@@ -1820,11 +1824,12 @@ def choose_right_tracker_keys():
     # ------------ required_items ------------
     is_hybrid_translation_needed = False
     for required_key, required_value in required_items.items():
+        # TODO change this loop to dict get operations
         for translation_key, translation_value in config["translation"].items():
             if str(required_key) == str(translation_value):
 
                 # the torrent file is always submitted as a file
-                if required_value in ( "file", "file|base64", "file|array"):
+                if required_value in ( "file", "file|base64", "file|array", "file|string|array"):
                     # adding support for base64 encoded files
                     # the actual encoding will be performed in `upload_to_site` method
                     if translation_key in torrent_info:
@@ -1870,6 +1875,7 @@ def choose_right_tracker_keys():
                     elif translation_key == "mal":
                         url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
                     tracker_settings[config["translation"][translation_key]] = url
+                
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
                 if translation_key == "type":
                     for key_cat, val_cat in config["Required"][required_key].items():
@@ -1955,8 +1961,8 @@ def choose_right_tracker_keys():
 
         elif optional_key == 'sd' and "sd" in torrent_info:
             tracker_settings[optional_key] = 1
-
-        elif optional_key in ['season_number', 'episode_number'] and optional_key in torrent_info:
+        # TODO generalize this below condition
+        elif optional_key in ['season_number', 'episode_number', "complete_season"] and optional_key in torrent_info:
             tracker_settings[optional_key] = torrent_info.get(optional_key, "")
         
         else:
@@ -2039,12 +2045,13 @@ def upload_to_site(upload_to, tracker_api_key):
                 for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
             """
             if os.path.isfile(tracker_settings[key]):
-                logging.debug(f"[TrackerUpload] Setting file|array for key {key}")
+                logging.debug(f"[TrackerUpload] Setting file {tracker_settings[key]} as string array for key {key}")
                 with open(tracker_settings[key], 'r') as file_contents:
                     array = []
                     for line in file_contents.readlines():
                         array.append(line.strip())
                     payload[key] = array
+                    logging.debug(f"[TrackerUpload] String array data for key {key} :: {payload[key]}")
             else:
                 logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
@@ -2128,7 +2135,21 @@ def upload_to_site(upload_to, tracker_api_key):
         if discord_url:
             requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
 
-        if "success" in str(response.json()).lower():
+        if "success" in response.json():
+            if str(response.json()["success"]).lower() == "true":
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
+                console.line(count=2)
+                console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+            else:
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+        elif "status" in response.json():
+            if str(response.json()["status"]).lower() == "true" or str(response.json()["status"]).lower() == "success":
+                logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
+                console.line(count=2)
+                console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+            else:
+                logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+        elif "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
@@ -2369,6 +2390,10 @@ for file in upload_queue:
     torrent_info.clear()
     torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
 
+    # TODO these are some hardcoded values to be handled at a later point in time
+    # setting this to 0 is fine. But need to add support for these eventually.
+    torrent_info["3d"] = "0"
+    torrent_info["foregin"] = "0"
 
     # File we're uploading
     console.print(f'Uploading File/Folder: [bold][blue]{file}[/blue][/bold]')
@@ -2611,14 +2636,18 @@ for file in upload_queue:
                             final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
                             description.write(final_formatted_data)
                             logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
-                            
+
                         description.write(bbcode_line_break)
             else: # else for "description_components" in config
                 logging.debug(f"[Main] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
                 
 
         # -------- Add bbcode screenshots to description.txt --------
-        if "bbcode_images" in torrent_info:
+        if "bbcode_images" in torrent_info and "url_images" not in config["translation"] and "data_images" not in config["translation"]:
+            # Screenshots will be added to description only if no custom screenshot payload method is provided.
+            # Possible payload mechanisms for screenshot are 1. bbcode, 2. url, 3. post data
+            # TODO implement proper screenshot payload mechanism. [under technical_jargons?????]
+            #
             # if custom_user_inputs is already present in torrent info, then the delete operation would have already be done
             # so we just need to append screenshots to the description.txt
             if "custom_user_inputs" not in torrent_info and os.path.isfile(f'{working_folder}/temp_upload/description.txt'):

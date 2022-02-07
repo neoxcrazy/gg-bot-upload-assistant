@@ -177,7 +177,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         for existing_release_types_key in list(existing_release_types.keys()): # process of elimination
             logging.debug(f'[DupeCheck] Trying to eliminate `{existing_release_types_key}`')
             if season_num is not None and season_num not in existing_release_types_key: # filter our wrong seasons
-                logging.deubg(f'[DupeCheck] Filtering out `{existing_release_types_key}` since it belongs to different season')
+                logging.debug(f'[DupeCheck] Filtering out `{existing_release_types_key}` since it belongs to different season')
                 existing_release_types.pop(existing_release_types_key)
                 number_of_discarded_seasons += 1
                 continue
