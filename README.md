@@ -133,6 +133,9 @@ docker run -it \
     - [ ] TorrentDB
 - [X] Support for custom messages / descriptions during upload
 
+### v2.0.2
+- [ ] Support for custom upload signatures for regular uploaders
+
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Improved Full Disk Support
