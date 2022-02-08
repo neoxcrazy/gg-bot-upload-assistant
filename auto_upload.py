@@ -923,6 +923,7 @@ def analyze_video_file(missing_value, media_info):
 
         # Now we try to identify the audio_codec using pymediainfo
         if media_info_audio_track is not None:
+            logging.debug(f'Audio track info from mediainfo\n {pformat(media_info_audio_track.to_data())}')
             if media_info_audio_track.codec_id is not None:
                 # The release "La.La.Land.2016.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv" when using media_info_audio_track.codec shows the codec as AC3 not EAC3..
                 # so well try to use media_info_audio_track.codec_id first
@@ -1144,13 +1145,15 @@ def identify_miscellaneous_details(guess_it_result):
         We also search for "editions" here, this info is typically made known in the filename so we can use some simple regex to extract it 
         (e.g. extended, Criterion, directors, etc)
     """
+    logging.debug(f'[MiscellaneousDetails] Trying to identify miscellaneous details for torrent.')
     # ------ Specific Source info ------ #
     if "source_type" not in torrent_info:
+        logging.debug(f'[MiscellaneousDetails] Source type is not available. Trying to identify source type')
         match_source = re.search(r'(?P<bluray_remux>.*blu(.ray|ray).*remux.*)|'
-                                 r'(?P<bluray_disc>.*blu(.ray|ray)((?!x(264|265)|h.(265|264)).)*$)|'
+                                 r'(?P<bluray_disc>.*blu(.ray|ray)((?!x(264|265)|h.(265|264)|H.(265|264)|H(265|264)).)*$)|'
                                  r'(?P<webrip>.*web(.rip|rip).*)|'
                                  r'(?P<webdl>.*web(.dl|dl|).*)|'
-                                 r'(?P<bluray_encode>.*blu(.ray|ray).*|x(264|265)|h.(265|264))|'
+                                 r'(?P<bluray_encode>.*blu(.ray|ray).*|x(264|265)|h.(265|264)|H.(265|264)|H(265|264)|x.(265|264))|'
                                  r'(?P<dvd>HD(.DVD|DVD)|.*DVD.*)|'
                                  r'(?P<hdtv>.*HDTV.*)', torrent_info["raw_file_name"], re.IGNORECASE)
         if match_source is not None:
@@ -1195,6 +1198,7 @@ def identify_miscellaneous_details(guess_it_result):
             console.print("Quitting now..")
             # and finally exit since this will affect all trackers we try and upload to, so it makes no sense to try the next tracker
             sys.exit()
+        logging.debug(f'[MiscellaneousDetails] Source type identified as {torrent_info["source_type"]}')
 
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
@@ -1765,9 +1769,9 @@ def choose_right_tracker_keys():
             total_num_of_acquired_keys = 0
 
             # If we have a list of options to choose from, each match is saved here
-            total_num_of_acquired_keys_val = 0
+            total_num_of_optionals_matched = 0
+            optional_keys = []
 
-            select_from_optional_values_list = []
             for sub_key, sub_val in config["Required"][(config["translation"][target_val])][key].items():
                 # for each sub key and its priority we 
                 logging.debug(f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
@@ -1783,30 +1787,34 @@ def choose_right_tracker_keys():
                     if sub_key in str(relevant_torrent_info_values).lower():
                         total_num_of_acquired_keys += 1
                         logging.debug(f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
-
-                if sub_val == 2:
+                elif sub_val == 2:
                     if sub_key in str(relevant_torrent_info_values).lower():
-                        total_num_of_acquired_keys_val += 1
+                        total_num_of_optionals_matched += 1
                         logging.debug(f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
-                    select_from_optional_values_list.append(sub_key)
+                    optional_keys.append(sub_key)
 
-            logging.debug(f'[ResolutionSourceMapping] Optional values list to select from are {select_from_optional_values_list}')
             logging.debug(f'[ResolutionSourceMapping] Total number of required keys: {total_num_of_required_keys}')
-            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys value: {total_num_of_acquired_keys_val}')
             logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys: {total_num_of_acquired_keys}')
+            logging.debug(f'[ResolutionSourceMapping] Optional keys: {optional_keys}')
+            logging.debug(f'[ResolutionSourceMapping] Total number of optionals matched: {total_num_of_optionals_matched}')
 
             if int(total_num_of_required_keys) == int(total_num_of_acquired_keys):
-                logging.debug(f'[ResolutionSourceMapping] No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
-                possible_match_layer_1.append(key)
-                # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately 
-                # (2160p BD remux requires 'remux', '2160p', 'bluray')
-                # so if we find all those values in select_from_optional_values_list list then we can break 
-                # knowing that we hit 100% of the required values instead of having to
-                # cycle through the "optional" values and select one of them
-                if len(select_from_optional_values_list) == 0 and key != "Other":
+                if len(optional_keys) > 0:
+                    if int(total_num_of_optionals_matched) > 0:
+                        logging.debug(f'[ResolutionSourceMapping] Some {total_num_of_optionals_matched} of optional keys {optional_keys} were matched and no of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
+                        possible_match_layer_1.append(key)
+                    else:
+                        logging.debug(f'[ResolutionSourceMapping] No optional keys {optional_keys} were matched.')
+                else:
+                    logging.debug(f'[ResolutionSourceMapping] No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
+                    possible_match_layer_1.append(key)
+                # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately (2160p BD remux requires 'remux', '2160p', 'bluray')
+                # so if we find all those values in optional_keys list then we can break 
+                # knowing that we hit 100% of the required values instead of having to cycle through the "optional" values and select one of them
+                if len(optional_keys) == 0 and key != "other":
                     break
 
-                if len(select_from_optional_values_list) >= 2 and int(total_num_of_acquired_keys_val) == 1:
+                if len(optional_keys) >= 2 and int(total_num_of_optionals_matched) == 1:
                     break
 
             if len(possible_match_layer_1) >= 2 and "Other" in possible_match_layer_1:
@@ -1820,7 +1828,7 @@ def choose_right_tracker_keys():
         else:
             # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
             logging.critical('[ResolutionSourceMapping] Unable to find a suitable "source" match for this file')
-            logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed")
+            logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed)")
             console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
             return "STOP"
 
