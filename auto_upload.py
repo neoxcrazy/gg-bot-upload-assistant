@@ -130,6 +130,9 @@ uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for 
 uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
 uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
 
+uncommon_args.add_argument('-3d', action='store_true', help="Mark the upload as 3D content")
+uncommon_args.add_argument('-foreign', action='store_true', help="Mark the upload as foreign content [Non-English]")
+
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
 internal_args.add_argument('-internal', action='store_true', help="(Internal) Used to mark an upload as 'Internal'")
@@ -1857,7 +1860,7 @@ def choose_right_tracker_keys():
                         tracker_settings[config["translation"][translation_key]] = "1"
 
                     # Adding support for internal args
-                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup']:
+                    elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup', 'foreign', "3d"]:
                         tracker_settings[config["translation"][translation_key]] = "1" if getattr(args, translation_key) is True else "0"
 
                     # This work as a sort of 'catch all', if we don't have the correct data in torrent_info, we just send a 0 so we can successfully post
