@@ -133,7 +133,7 @@ docker run -it \
     - [ ] TorrentDB
 - [X] Support for custom messages / descriptions during upload
 
-### v2.0.2
+### v2.0.3
 - [ ] Support for custom upload signatures for regular uploaders
 
 ### v2.1
