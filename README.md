@@ -134,8 +134,8 @@ docker run -it \
 
 # Roadmap
 ### v2.0.2
-- [ ] Add Support for new platforms
-    - [ ] TorrentDB
+- [X] Add Support for new platforms
+    - [X] TorrentDB
 - [X] Support for custom messages / descriptions during upload
 
 ### v2.0.3
