@@ -2677,7 +2677,18 @@ for file in upload_queue:
         # will then open throw some errors???
         with open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
             # Finally append the entire thing with some shameless self promotion ;) and some line breaks
-            description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
+            if os.getenv("uploader_signature") is not None and len(os.getenv("uploader_signature")) > 0:
+                logging.debug(f'[Main] User has provided custom uploader signature to use.')
+                # the user has provided a custom signature to be used. hence we'll use that.
+                uploader_signature = os.getenv("uploader_signature")
+                logging.debug(f'[Main] User provided signature :: {uploader_signature}')
+                if not uploader_signature.startswith("[center]") and not uploader_signature.endswith("[/center]"):
+                    uploader_signature = f'[center]{uploader_signature}[/center]'
+                uploader_signature = f'{uploader_signature}{bbcode_line_break}[center]Powered by GG-BOT Upload Assistant[/center]'
+                description.write(f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
+            else:
+                logging.debug(f'[Main] User has not provided any custom uploader signature to use. Using default signature')
+                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
         # Add the finished file to the 'torrent_info' dict
         torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'

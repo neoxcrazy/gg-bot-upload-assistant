@@ -137,9 +137,7 @@ docker run -it \
 - [X] Add Support for new platforms
     - [X] TorrentDB
 - [X] Support for custom messages / descriptions during upload
-
-### v2.0.3
-- [ ] Support for custom upload signatures for regular uploaders
+- [X] Support for custom upload signatures for regular uploaders
 
 ### v2.1
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
