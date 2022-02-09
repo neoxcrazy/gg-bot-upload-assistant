@@ -70,6 +70,11 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>SPD</strong></td>
             <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>TorrentDB</strong></td>
+            <td><strong>TDB</strong></td>
+            <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
+        </tr>
     </tbody>
 </table>
 
