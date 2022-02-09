@@ -2058,11 +2058,11 @@ def upload_to_site(upload_to, tracker_api_key):
             if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file {tracker_settings[key]} as string array for key {key}")
                 with open(tracker_settings[key], 'r') as file_contents:
-                    array = []
+                    screenshot_array = []
                     for line in file_contents.readlines():
-                        array.append(line.strip())
-                    payload[key] = array
-                    logging.debug(f"[TrackerUpload] String array data for key {key} :: {payload[key]}")
+                        screenshot_array.append(line.strip())
+                    payload[f'{key}[]' if config["technical_jargons"]["payload_type"] == "MULTI-PART" else key] = screenshot_array
+                    logging.debug(f"[TrackerUpload] String array data for key {key} :: {screenshot_array}")
             else:
                 logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
                 continue
