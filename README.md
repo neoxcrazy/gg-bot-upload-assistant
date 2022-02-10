@@ -140,18 +140,18 @@ docker run -it \
 - [X] Support for custom upload signatures for regular uploaders
 
 ### v2.1
-- [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
+- [ ] New image host: Imgur
 
-### v2.2
+### Backlogs
+- [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
     - [ ] BIT-HDTV
     - [ ] Nebulance
 - [ ] Add support for DVDs
-- [ ] New image host: Imgur
 
 <br>
 
