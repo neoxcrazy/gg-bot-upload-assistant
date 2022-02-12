@@ -5,6 +5,7 @@ import asyncio
 import logging
 import requests
 import pyimgbox
+import ptpimg_uploader
 from datetime import datetime
 from rich import box
 from rich.table import Table
@@ -12,6 +13,7 @@ from rich.console import Console
 from rich.progress import track
 from dotenv import load_dotenv
 from ffmpy import FFmpeg
+from imgurpython import ImgurClient
 
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
@@ -47,7 +49,17 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
     # 3. Full Image URL
     #
     thumb_size = os.getenv("thumb_size") or "350"
-    if img_host == 'ptpimg':
+    if img_host == 'imgur':
+        try:
+            client = ImgurClient(client_id=os.getenv('imgur_client_id'), client_secret=os.getenv('imgur_api_key'))
+            response = client.upload_from_path(image_path)
+            return True, f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', response["link"]
+        except Exception:
+            logging.error(msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
+            console.print(f"\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
+            return False
+
+    elif img_host == 'ptpimg':
         try:
             ptp_img_upload = ptpimg_uploader.upload(api_key=os.getenv('ptpimg_api_key'), files_or_urls=[image_path], timeout=5)
             # Make sure the response we get from ptpimg is a list
@@ -65,7 +77,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             console.print(f"\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
     
-    if img_host in ('imgbb', 'freeimage', 'imgfi'):
+    elif img_host in ('imgbb', 'freeimage', 'imgfi'):
         # Get the correct image host url/json key
         available_image_host_urls = json.load(open(f'{base_path}/parameters/image_host_urls.json'))
 
@@ -109,7 +121,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             return False
     
     # Instead of coding our own solution we'll use the awesome project https://github.com/plotski/pyimgbox to upload to imgbox
-    if img_host == "imgbox":
+    elif img_host == "imgbox":
         async def imgbox_upload(filepaths):
             async with pyimgbox.Gallery(title=torrent_title, thumb_width=thumb_size) as gallery:
                 async for submission in gallery.add(filepaths):
@@ -134,6 +146,8 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         # # Python <= 3.6 friendly alternative
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(imgbox_upload(list_of_images))
+    else:
+        logging.fatal(f'[Screenshots] Invalid imagehost {img_host}. Cannot upload screenshots.')
 
 
 def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, discord_url):
