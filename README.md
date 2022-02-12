@@ -133,17 +133,11 @@ docker run -it \
 <br>
 
 # Roadmap
-### v2.0.2
-- [X] Add Support for new platforms
-    - [X] TorrentDB
-- [X] Support for custom messages / descriptions during upload
-- [X] Support for custom upload signatures for regular uploaders
 
 ### v2.1
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
-- [ ] New image host: Imgur
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
@@ -156,6 +150,30 @@ docker run -it \
 <br>
 
 # Change Log
+## **2.0.3**
+
+#### New Image Hosts
+    * Imgur
+
+#### Bug Fixes
+    * ptp image uploads not working bug fix
+
+<br>
+
+## **2.0.2**
+
+#### New Trackers
+    * TorrentDB
+
+#### New Features
+    * Support for custom messages / descriptions during upload
+    * Support for custom upload signatures for regular uploaders
+
+#### Bug Fixes
+    * SpeedApp screenshots missing bug fixed
+
+<br>
+
 ## **2.0.1**
 
 #### New Trackers
@@ -167,6 +185,8 @@ docker run -it \
 #### Underhood changes
     * Improved batch processing
     * Refactor tracker acronyms and api keys to config file
+
+<br>
 
 ## **2.0**
 
@@ -210,6 +230,8 @@ docker run -it \
     * PQ10, HLG and WCG HDR Formats not being detected
     * TSP dupe check for web sourced contents
 
+<br>
+
 ##  **1.1**
 
     * Added support for new tracker: DesiTorrents 
@@ -220,9 +242,13 @@ docker run -it \
     * Full season tv-show upload bug fix
     * Updated tag naming bug fix
 
+<br>
+
 ##  **1.0.1**
 
     * Updated naming conventions for HDR, Atmos Audio, and BluRay source
+
+<br>
 
 ##  **1.0**
 
