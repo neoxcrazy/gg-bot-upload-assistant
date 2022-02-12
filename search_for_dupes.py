@@ -30,8 +30,8 @@ def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
 
 
 def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
-    # if debug:
-        # logging.getLogger().setLevel(logging.DEBUG)
+    if debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     with open(f'{working_folder}/site_templates/{search_site}.json', "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
@@ -177,7 +177,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
         for existing_release_types_key in list(existing_release_types.keys()): # process of elimination
             logging.debug(f'[DupeCheck] Trying to eliminate `{existing_release_types_key}`')
             if season_num is not None and season_num not in existing_release_types_key: # filter our wrong seasons
-                logging.deubg(f'[DupeCheck] Filtering out `{existing_release_types_key}` since it belongs to different season')
+                logging.debug(f'[DupeCheck] Filtering out `{existing_release_types_key}` since it belongs to different season')
                 existing_release_types.pop(existing_release_types_key)
                 number_of_discarded_seasons += 1
                 continue
