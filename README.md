@@ -70,6 +70,11 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>SPD</strong></td>
             <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>TorrentDB</strong></td>
+            <td><strong>TDB</strong></td>
+            <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
+        </tr>
     </tbody>
 </table>
 
@@ -128,41 +133,41 @@ docker run -it \
 <br>
 
 # Roadmap
-### v2.0
+### v2.0.2
 - [X] Add Support for new platforms
-    - [X] SpeedApp
-- [X] Full Disk Support
-    - [X] Pack BDInfo inside container for full disk uploads
-- [X] Ensure backwards compatibility with bare metal full disk uploads 
-- [X] Move torrents to different locations based on type
-- [X] Dynamic media summary
-- [X] Frame accurate screenshots
-
-### v2.0.1
-- [X] Add Support for new platforms
-    - [X] SkipTheCommercials
-- [X] Refactor tracker acronyms and api keys to config file
-- [X] Add support for Imgfi
-- [X] Improved batch mode processing
+    - [X] TorrentDB
+- [X] Support for custom messages / descriptions during upload
+- [X] Support for custom upload signatures for regular uploaders
 
 ### v2.1
-- [ ] Add support for bitorrent v2 and v2 hybrid torrents
-- [ ] Add Support for new platforms
-    - [ ] TorrentDB
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
+- [ ] New image host: Imgur
 
-### v2.2
+### Backlogs
+- [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
     - [ ] BIT-HDTV
+    - [ ] Nebulance
 - [ ] Add support for DVDs
-- [ ] Support for custom messages / descriptions during upload
 
 <br>
 
 # Change Log
+## **2.0.1**
+
+#### New Trackers
+    * SkipTheCommercials
+
+#### New Image Hosts
+    * Imgfi
+
+#### Underhood changes
+    * Improved batch processing
+    * Refactor tracker acronyms and api keys to config file
+
 ## **2.0**
 
 #### New Trackers

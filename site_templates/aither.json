@@ -6,8 +6,15 @@
     "source": "Aither",
     "platform": "UNIT3D",
     "bbcode_line_break": "\n",
-    "bbcode_code": "[code][/code]",
     "title_separator" : " ",
+
+    "description_components":{
+        "code_code": "[code][/code]",
+        "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
+        "notes_code":"[note][/note]",
+        "quote_code":"[quote][/quote]",
+        "alert_code":"[alert][/alert]"
+    },
 
     "technical_jargons": {
         "authentication_mode": "API_KEY",
