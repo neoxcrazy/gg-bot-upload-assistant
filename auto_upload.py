@@ -100,6 +100,18 @@ if len(os.getenv('DISCORD_WEBHOOK')) != 0:
 else:
     discord_url = None
 
+
+# create a keyvalue class
+class keyvalue(argparse.Action):
+    # Constructor calling
+    def __call__( self , parser, namespace, values, option_string = None):
+        setattr(namespace, self.dest, dict())
+        for value in values:
+            # split it into key and value
+            key, value = value.split('=')
+            # assign into dictionary
+            getattr(namespace, self.dest)[key] = value
+
 # TODO integrate this feature with AvistaZ platform
 is_live_on_site = str(os.getenv('live')).lower()
 
@@ -133,6 +145,10 @@ uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', h
 uncommon_args.add_argument('-3d', action='store_true', help="Mark the upload as 3D content")
 uncommon_args.add_argument('-foreign', action='store_true', help="Mark the upload as foreign content [Non-English]")
 
+# experimental arguments ()
+rare_args = parser.add_argument_group('Experimental Arguments')
+rare_args.add_argument('-kv', '--keyvalue', nargs='*', help="[Expirimental] Accept key value pairs which will be added to trackers", action=keyvalue)
+
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
 internal_args.add_argument('-internal', action='store_true', help="(Internal) Used to mark an upload as 'Internal'")
@@ -143,7 +159,6 @@ internal_args.add_argument('-tripleup', action='store_true', help="(Internal) Gi
 internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload")
 
 args = parser.parse_args()
-
 
 def write_file_contents_to_log_as_debug(file_path):
     """
@@ -2027,6 +2042,11 @@ def upload_to_site(upload_to, tracker_api_key):
     payload = {}
     files = []
     display_files = {}
+
+    if args.keyvalue:
+        logging.info(f'[Main] User wants to add {args.keyvalue} key values to the tracker.')
+        for key, value in args.keyvalue.items():
+            payload[key] = value
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key
