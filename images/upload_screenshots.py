@@ -123,7 +123,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
     # Instead of coding our own solution we'll use the awesome project https://github.com/plotski/pyimgbox to upload to imgbox
     elif img_host == "imgbox":
         async def imgbox_upload(filepaths):
-            async with pyimgbox.Gallery(title=torrent_title, thumb_width=thumb_size) as gallery:
+            async with pyimgbox.Gallery(title=torrent_title, thumb_width=int(thumb_size)) as gallery:
                 async for submission in gallery.add(filepaths):
                     if not submission['success']:
                         logging.error(f"[Screenshots] {submission['filename']}: {submission['error']}")
