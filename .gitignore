@@ -19,3 +19,4 @@ config.env.docker
 bdinfo*.txt
 tvmaze.py
 dev_comments.txt
+/_ignore

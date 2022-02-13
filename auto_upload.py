@@ -127,6 +127,7 @@ required_args.add_argument('-p', '--path', nargs='*', required=True, help="Use t
 common_args = parser.add_argument_group('Commonly Used Arguments')
 common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
 common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
+common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
 common_args.add_argument('-anon', action='store_true', help="if you want your upload to be anonymous (no other info needed, just input '-anon'")
 
 # Less commonly used args (Not essential for most)
@@ -1331,25 +1332,22 @@ def search_tmdb_for_id(query_title, year, content_type):
     console.rule(f"TMDB Search Results", style='red', align='center')
     console.line(count=1)
 
-    if content_type == "episode":  # translation for TMDB API
-        content_type = "tv"
+    content_type = "tv" if content_type == "episode" else content_type # translation for TMDB API
+    query_year = "&year=" + str(year) if len(year) != 0 else ""
 
     result_num = 0
     result_dict = {}
 
-    if len(year) != 0:
-        query_year = "&year=" + str(year)
-    else:
-        query_year = ""
 
+    logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/search/{content_type}?api_key=<REDACTED>&query={query_title}&page=1&include_adult=false{query_year}")
+    
     search_tmdb_request_url = f"https://api.themoviedb.org/3/search/{content_type}?api_key={os.getenv('TMDB_API_KEY')}&query={query_title}&page=1&include_adult=false{query_year}"
-
     search_tmdb_request = requests.get(search_tmdb_request_url)
-    logging.info(f"GET Request: https://api.themoviedb.org/3/search/{content_type}?api_key=<REDACTED>&query={query_title}&page=1&include_adult=false{query_year}")
+    
     if search_tmdb_request.ok:
         # print(json.dumps(search_tmdb_request.json(), indent=4, sort_keys=True))
         if len(search_tmdb_request.json()["results"]) == 0:
-            logging.critical("No results found on TMDB using the title '{}' and the year '{}'".format(query_title, year))
+            logging.critical("[Main] No results found on TMDB using the title '{}' and the year '{}'".format(query_title, year))
             sys.exit("No results found on TMDB, try running this script again but manually supply the tmdb or imdb ID")
 
         tmdb_search_results = Table(show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim")
@@ -1359,7 +1357,8 @@ def search_tmdb_for_id(query_title, year, content_type):
         tmdb_search_results.add_column("Release Date", justify="center")
         tmdb_search_results.add_column("Language", justify="center")
         tmdb_search_results.add_column("Overview", justify="center")
-
+        
+        selected_tmdb_results = 0
         for possible_match in search_tmdb_request.json()["results"]:
 
             result_num += 1  # This counter is used so that when we prompt a user to select a match, we know which one they are referring to
@@ -1372,7 +1371,7 @@ def search_tmdb_for_id(query_title, year, content_type):
             if len(title_match) > 0:
                 title_match_result = title_match.pop()
             else:
-                logging.error(f"Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+                logging.error(f"[Main] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
                 title_match_result = "N.A."
 
             # Same situation as with the movie/tv title. The key changes depending on what the content type is
@@ -1380,14 +1379,14 @@ def search_tmdb_for_id(query_title, year, content_type):
             if len(year_match) > 0:
                 year = year_match.pop()
             else:
-                logging.error(f"Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+                logging.error(f"[Main] Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
                 year = "N.A."
 
             if "overview" in possible_match:
                 if len(possible_match["overview"]) > 1:
                     overview = possible_match["overview"]
                 else:
-                    logging.error(f"Overview not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+                    logging.error(f"[Main] Overview not found on TMDB for TMDB ID: {str(possible_match['id'])}")
                     overview = "N.A."
             else:
                 overview = "N.A."
@@ -1397,8 +1396,9 @@ def search_tmdb_for_id(query_title, year, content_type):
             tmdb_search_results.add_row(
                 f"[chartreuse1][bold]{str(result_num)}[/bold][/chartreuse1]", title_match_result,
                 f"themoviedb.org/{content_type}/{str(possible_match['id'])}", str(year), possible_match["original_language"], overview, end_section=True )
+            selected_tmdb_results += 1
 
-        logging.info(f"total number of results for TMDB search: {str(result_num)}")
+        logging.info(f"[Main] Total number of results for TMDB search: {str(result_num)}")
         # once the loop is done we can show the table to the user
         console.print(tmdb_search_results, justify="center")
 
@@ -1408,42 +1408,75 @@ def search_tmdb_for_id(query_title, year, content_type):
             # The idea is that we can then show the user all valid options they can select
             list_of_num.append(str(i))
 
-        if auto_mode == 'false':
+        if auto_mode == 'false' and selected_tmdb_results > 1 and (os.getenv("auto_select_tmdb_result") or False):
             # prompt for user input with 'list_of_num' working as a list of valid choices
             user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
         else:
             console.print("auto selected #1...")
             user_input_tmdb_id_num = "1"
-            logging.info(f"auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+            logging.info(f"[Main] auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
 
         # We take the users (valid) input (or auto selected number) and use it to retrieve the appropriate TMDB ID
         torrent_info["tmdb"] = str(result_dict[user_input_tmdb_id_num])
         # Now we can call the function 'get_external_id()' to try and identify the IMDB ID (insert it into torrent_info dict right away)
-        torrent_info["imdb"] = str(get_external_id(id_site='tmdb', id_value=torrent_info["tmdb"], content_type=torrent_info["type"]))
+        torrent_info["imdb"] = str(get_external_id(id_site='tmdb', id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"]))
+        if torrent_info["type"] == "episode":  # getting TVmaze ID
+            # Now we can call the function 'get_external_id()' to try and identify the TVmaze ID (insert it into torrent_info dict right away)
+            torrent_info["tvmaze"] = str(get_external_id(id_site='imdb', id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"]))
 
 
-def get_external_id(id_site, id_value, content_type):
-    # This is pretty self explanatory, We only call this function when we only have 1 ID (TMDB or IMDB doesn't matter)
-    # If we only have 1 ID then we can use TMDB API to get the other sites ID, we do that below
-    if content_type == "episode":  # translation for TMDB API
-        content_type = "tv"
+def get_external_id(id_site, id_value, external_site, content_type):
+    """
+        This method is called when we need to get id for `external_site` using the id `id_value` which we already have for site `id_site`
 
-    get_imdb_id_url = f"https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key={os.getenv('TMDB_API_KEY')}&language=en-US"
-    get_tmdb_id_url = f"https://api.themoviedb.org/3/find/{id_value}?api_key={os.getenv('TMDB_API_KEY')}&language=en-US&external_source=imdb_id"
+        imdb id can be obtained from tmdb id
+        tmdb id can be obtained from imdb id
+        tvmaze id can be obtained from imdb id
+    """
 
-    if id_site == 'tmdb':
-        imdb_id_request = requests.get(get_imdb_id_url).json()
-        logging.info(f"GET Request: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
-        if imdb_id_request["imdb_id"] is None:
-            return ""
-        return imdb_id_request["imdb_id"]
+    content_type = "tv" if content_type == "episode" else content_type  # translation for TMDB API
 
-    if id_site == 'imdb':
-        tmdb_id_request = requests.get(get_tmdb_id_url).json()
-        logging.info(f"GET Request: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
-        for item in tmdb_id_request:
-            if len(tmdb_id_request[item]) == 1:
-                return str(tmdb_id_request[item][0]["id"])
+    get_imdb_id_from_tmdb_url = f"https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key={os.getenv('TMDB_API_KEY')}&language=en-US"
+    get_tmdb_id_from_imdb_url = f"https://api.themoviedb.org/3/find/{id_value}?api_key={os.getenv('TMDB_API_KEY')}&language=en-US&external_source=imdb_id"
+    get_tvmaze_id_from_imdb_url = f"https://api.tvmaze.com/lookup/shows?imdb={id_value}"
+    get_imdb_id_from_tvmaze_url = f"https://api.tvmaze.com/shows/{id_value}"
+    
+    try:
+        if external_site == "imdb": # we need imdb id
+            if id_site == "tmdb": # we have tmdb id
+                logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
+                imdb_id_request = requests.get(get_imdb_id_from_tmdb_url).json()
+                if imdb_id_request["imdb_id"] is None:
+                    logging.debug(f"[Main] Returning imdb id as ``")
+                    return ""
+                logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['imdb_id']}`")
+                return imdb_id_request["imdb_id"]
+            else: # we have tvmaze
+                logging.info(f"[Main] GET Request: {get_imdb_id_from_tvmaze_url}")
+                imdb_id_request = requests.get(get_imdb_id_from_tvmaze_url).json()
+                logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['externals']['imdb']}`")
+                return imdb_id_request['externals']['imdb']
+        elif external_site == "tvmaze": # we need tvmaze id
+            # tv maze needs imdb id to search
+            if id_site == "imdb":
+                logging.info(f"[Main] GET Request: {get_tvmaze_id_from_imdb_url}")
+                tvmaze_id_request = requests.get(get_tvmaze_id_from_imdb_url).json()
+                logging.debug(f"[Main] Returning tvmaze id as `{tvmaze_id_request['id']}`")
+                return tvmaze_id_request["id"]
+            else:
+                logging.error(f"[Main] Cannot fetch tvmaze id without imdb id.")
+                logging.debug(f"[Main] Returning tvmaze id as ``")
+                return ""
+        else: # we need tmdb id
+            logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
+            tmdb_id_request = requests.get(get_tmdb_id_from_imdb_url).json()
+            for item in tmdb_id_request:
+                if len(tmdb_id_request[item]) == 1:
+                    logging.debug(f"[Main] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
+                    return str(tmdb_id_request[item][0]["id"])
+    except Exception as ex:
+        logging.exception(f"[Main] Error while fetching external id. Returning `` as the id")
+        return ""
 
 
 def search_for_mal_id(content_type, tmdb_id):
@@ -1492,7 +1525,7 @@ def compare_tmdb_data_local(content_type):
     get_media_info_url = f"https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key={os.getenv('TMDB_API_KEY')}"
 
     get_media_info = requests.get(get_media_info_url).json()
-    logging.info(f"GET Request: https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key=<REDACTED>")
+    logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key=<REDACTED>")
 
     # Check the genres for 'Animation', if we get a hit we should check for a MAL ID just in case
     if "genres" in get_media_info:
@@ -2505,31 +2538,58 @@ for file in upload_queue:
         requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
             data=f'content='f'Video Code: **{torrent_info["video_codec"]}**  |  Audio Code: **{torrent_info["audio_codec"]}**')
 
+    movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
+
     # -------- Get TMDB & IMDB ID --------
     # If the TMDB/IMDB was not supplied then we need to search TMDB for it using the title & year
-
-    for media_id_key, media_id_val in {"tmdb": args.tmdb, "imdb": args.imdb}.items():
+    for media_id_key, media_id_val in {"tmdb": args.tmdb, "imdb": args.imdb, "tvmaze": args.tvmaze}.items():
         if media_id_val is not None and len(media_id_val[0]) > 1:  # we include ' > 1 ' to prevent blank ID's and issues later
-
             # We have one more check here to verify that the "tt" is included for the IMDB ID (TMDB won't accept it if it doesnt)
             if media_id_key == 'imdb' and not str(media_id_val[0]).lower().startswith('tt'):
-                torrent_info["imdb"] = f'tt{media_id_val[0]}'
+                torrent_info[media_id_key] = f'tt{media_id_val[0]}'
             else:
                 torrent_info[media_id_key] = media_id_val[0]
 
-    if all(x in torrent_info for x in ['imdb', 'tmdb']):
+    if all(x in torrent_info for x in movie_db_providers):
         # This means both the TMDB & IMDB ID are already in the torrent_info dict
-        logging.info("[Main] Both TMDB & IMDB ID have been supplied by the user, so no need to make any TMDB API request")
-    elif any(x in torrent_info for x in ['imdb', 'tmdb']):
+        logging.info("[Main] TMDB, TVmaze & IMDB ID have been supplied by the user, so no need to make any TMDB API request")
+    elif any(x in torrent_info for x in ['imdb', 'tmdb', 'tvmaze']):
         # This means we can skip the search via title/year and instead use whichever ID to get the other (tmdb -> imdb and vice versa)
-        missing_id_key = 'tmdb' if 'imdb' in torrent_info else 'imdb'
-        existing_id_key = 'tmdb' if 'tmdb' in torrent_info else 'imdb'
-        logging.info(f"[Main] We are missing '{missing_id_key}' starting TMDB API request now")
-        # Now we call the function that will use the TMDB API to get whichever ID we are missing
-        torrent_info[missing_id_key] = get_external_id(id_site=existing_id_key, id_value=torrent_info[existing_id_key], content_type=torrent_info["type"])
+        ids_present = list(filter(lambda id : id in torrent_info, movie_db_providers))
+        ids_missing = [id for id in movie_db_providers if id not in ids_present]
+
+        logging.info(f"[Main] We have '{ids_present}' with us currently.")
+        logging.info(f"[Main] We are missing '{ids_missing}' starting External Database API requests now")
+        # highest priority is given to imdb id.
+        # if imdb id is provided by the user, then we use it to figure our the other two ids.
+        # else we go for tmdb id and then tvmaze id
+        if "imdb" in ids_present:
+            # imdb id is available. 
+            torrent_info["tmdb"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
+            if torrent_info["type"] == "episode":
+                torrent_info["tvmaze"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
+        elif "tmdb" in ids_present:
+            torrent_info["imdb"] = get_external_id(id_site="tmdb", id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"])
+            # we got value for imdb id, now we can use that to find out the tvmaze id
+            if torrent_info["type"] == "episode":
+                torrent_info["tvmaze"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
+        elif "tvmaze" in ids_present:
+            if torrent_info["type"] == "episode":
+                # we get the imdb id from tvmaze
+                torrent_info["imdb"] = get_external_id(id_site="tvmaze", id_value=torrent_info["tvmaze"], external_site="imdb", content_type=torrent_info["type"])
+                # and use the imdb id to find out the tmdb id
+                torrent_info["tmdb"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
+            else:
+                logging.fatal(f"[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
+                # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
+                search_tmdb_for_id(query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"])
+                torrent_info["tvmaze"] = "0"
+        # there will not be an else case for the above if else ladder.
     else:
-        logging.info("[Main] We are missing both the 'TMDB' & 'IMDB' ID, trying to identify it via title & year")
+        logging.info("[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
+        # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
         search_tmdb_for_id(query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"])
+
     # Update discord channel
     if discord_url:
         requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, 

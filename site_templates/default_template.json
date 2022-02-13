@@ -49,6 +49,7 @@
         "anon": "<required_key_anon>",
         "live": "<required_key_live>",
         "tvdb": "<required_key>",
+        "tvmaze": "<required_key>",
         "mal": "<required_key>",
         "igdb": "<required_key>",
 
