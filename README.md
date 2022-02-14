@@ -138,6 +138,7 @@ docker run -it \
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
+- [X] Add support for TVmaze
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
