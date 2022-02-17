@@ -145,6 +145,8 @@ docker run -it \
     - [ ] AvistaZ
     - [ ] BIT-HDTV
     - [ ] Nebulance
+    - [ ] Anthelion
+    - [ ] MoreThanTV
 - [ ] Add support for DVDs
 
 <br>
