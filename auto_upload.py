@@ -1988,7 +1988,8 @@ def choose_right_tracker_keys():
         elif optional_key == 'sd' and "sd" in torrent_info:
             tracker_settings[optional_key] = 1
         # TODO generalize this below condition
-        elif optional_key in ['season_number', 'episode_number', "complete_season"] and optional_key in torrent_info:
+        # TODO temporary fix for torrentdb tv series fix added
+        elif optional_key in ['season_number', 'episode_number', "complete_season", "season", "episode"] and optional_key in torrent_info:
             tracker_settings[optional_key] = torrent_info.get(optional_key, "")
         
         else:
