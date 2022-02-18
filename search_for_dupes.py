@@ -29,7 +29,7 @@ def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
     return result
 
 
-def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
+def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_api, debug):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -51,10 +51,24 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
 
     if str(config["dupes"]["request"]) == "POST": # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
-        url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", imdb).replace("<title>", torrent_info["title"])
+
+        #-------------------------------------------------------------------------
+        # Temporary fix for BIT-HDTV TODO need to find a better solution for this.
+        if search_site == "bit-hdtv":
+            url_replacer = f"https://www.imdb.com/title/{imdb}"
+            if torrent_info["type"] == "episode":
+                url_replacer = f"https://www.tvmaze.com/shows/{tvmaze}"
+            url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", url_replacer).replace("<title>", torrent_info["title"])
+        else:
+            url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", imdb).replace("<title>", torrent_info["title"])
+        #-------------------------------------------------------------------------
+
         logging.debug(f"[DupeCheck] Formatted POST payload {url_dupe_payload} for {search_site}")
         url_dupe_payload = json.loads(url_dupe_payload)
-        dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
+        if str(config["dupes"]["payload_type"]) == "JSON":
+            dupe_check_response = requests.request("POST", url_dupe_search, json=url_dupe_payload, headers=headers)
+        else:
+            dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
     else: # GET request (BLU & ACM)
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
         dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
@@ -63,6 +77,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     
     if dupe_check_response.status_code != 200:
         logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_response.status_code}")
+        logging.error(f"[DupeCheck] payload response from {search_site} {dupe_check_response.json()}")
         logging.info(f"[DupeCheck] Dupe check for {search_site} failed, assuming no dupes and continuing upload")
         return False
 
@@ -76,7 +91,7 @@ def search_for_dupes_api(search_site, imdb, torrent_info, tracker_api, debug):
     # needs any further parsing.
     logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
     dupe_check_response = dupe_check_response.json()
-    
+    logging.debug(dupe_check_response)
     torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response
     for item in torrent_items:
 
