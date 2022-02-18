@@ -231,6 +231,8 @@
             "top_lvl": "data",
             "torrent_details": "attributes"
         },
+        "payload":"{\"search\":\"<imdb>\"}", 
+        "payload_type": "MULTI-PART",
 
         "different_cuts": "100",
         "2160p_remux": 1,

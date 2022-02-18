@@ -261,7 +261,8 @@
         },
 
         "payload":"{\"action\" : \"search\", \"imdb_id\":\"<imdb>\"}", 
-
+        "payload_type": "MULTI-PART",
+        
         "keys": {
             "action": "search",
             "imdb_id": "string"
