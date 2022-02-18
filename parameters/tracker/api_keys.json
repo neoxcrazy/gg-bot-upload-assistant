@@ -12,5 +12,6 @@
     "ntelogo_api_key",
     "tmdb_api_key",
     "tsp_api_key",
-    "stc_api_key"
+    "stc_api_key",
+    "bhdtv_api_key"
 ]
