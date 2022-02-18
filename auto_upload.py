@@ -301,7 +301,8 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     format_title(config)
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], torrent_info["imdb"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
+    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], 
+        imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
 
 
 def delete_leftover_files():
@@ -1423,6 +1424,8 @@ def search_tmdb_for_id(query_title, year, content_type):
         if torrent_info["type"] == "episode":  # getting TVmaze ID
             # Now we can call the function 'get_external_id()' to try and identify the TVmaze ID (insert it into torrent_info dict right away)
             torrent_info["tvmaze"] = str(get_external_id(id_site='imdb', id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"]))
+        else:
+            torrent_info["tvmaze"] = 0
 
 
 def get_external_id(id_site, id_value, external_site, content_type):
@@ -1880,13 +1883,16 @@ def choose_right_tracker_keys():
             console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
             return "STOP"
 
-    # ------------ required_items ------------
+    
+    # Filling in data for all the keys that have mapping/translations
+    # Here we iterate over the translation mapping and for each translation key, we check the required and optional items for that value
+    # once identified we handle it
     is_hybrid_translation_needed = False
-    for required_key, required_value in required_items.items():
-        # TODO change this loop to dict get operations
-        for translation_key, translation_value in config["translation"].items():
+    for translation_key, translation_value in config["translation"].items():
+        # ------------ required_items start ------------
+        for required_key, required_value in required_items.items():
+            # get the proper mapping, the elements that doesn't match can be ignored
             if str(required_key) == str(translation_value):
-
                 # the torrent file is always submitted as a file
                 if required_value in ( "file", "file|base64", "file|array", "file|string|array"):
                     # adding support for base64 encoded files
@@ -1933,6 +1939,10 @@ def choose_right_tracker_keys():
                         url = f"https://www.thetvdb.com/?tab=series&id={torrent_info['tvdb']}"
                     elif translation_key == "mal":
                         url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
+                    elif translation_key == "tvmaze":
+                        url = f"https://www.tvmaze.com/shows/{torrent_info['tvmaze']}"
+                    else:
+                        logging.error(f"[CategoryMapping] Invalid key for url translation provided -- Key {translation_key}")
                     tracker_settings[config["translation"][translation_key]] = url
                 
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
@@ -1964,72 +1974,69 @@ def choose_right_tracker_keys():
                         is_hybrid_translation_needed = False
                     else:
                         is_hybrid_translation_needed = True
-    # ------------ optional_items ------------
-    # This mainly applies to BHD since they are the tracker with the most 'Optional' fields, BLU/ACM only have 'nfo_file' as an optional item which we take care of later
-    # It is for this reason ^^ why the following block is coded with BHD specifically in mind
-    for optional_key, optional_value in optional_items.items():
+        # ------------ required_items end ------------
 
-        # -!-!- Editions -!-!- #
-        if optional_key == 'edition' and 'edition' in torrent_info:
-            # First we remove any 'fluff' so that we can try to match the edition to the list BHD has, if not we just upload it as a custom edition
-            local_edition_formatted = str(torrent_info["edition"]).lower().replace("edition", "").replace("cut", "").replace("'", "").replace(" ", "")
-            if local_edition_formatted.endswith('s'):  # Remove extra 's'
-                local_edition_formatted = local_edition_formatted[:-1]
-            # Now check to see if what we got out of the filename already exists on BHD
-            for bhd_edition in optional_value:
-                if str(bhd_edition).lower() == local_edition_formatted:
-                    # If its a match we save the value to tracker_settings here
-                    tracker_settings[optional_key] = bhd_edition
-                    break
-                else:
-                    # We use the 'custom_edition' to set our own, again we only do this if we can't match what BHD already has available to select
-                    tracker_settings["custom_edition"] = torrent_info["edition"]
+        # ------------ optional_items start ------------
+        # This mainly applies to BHD since they are the tracker with the most 'Optional' fields, 
+        # BLU/ACM only have 'nfo_file' as an optional item which we take care of later
+        for optional_key, optional_value in optional_items.items():
+            if str(required_key) == str(translation_value):
+                # -!-!- Editions -!-!- #
+                if optional_key == 'edition' and 'edition' in torrent_info:
+                    # First we remove any 'fluff' so that we can try to match the edition to the list BHD has, if not we just upload it as a custom edition
+                    local_edition_formatted = str(torrent_info["edition"]).lower().replace("edition", "").replace("cut", "").replace("'", "").replace(" ", "")
+                    if local_edition_formatted.endswith('s'):  # Remove extra 's'
+                        local_edition_formatted = local_edition_formatted[:-1]
+                    # Now check to see if what we got out of the filename already exists on BHD
+                    for bhd_edition in optional_value:
+                        if str(bhd_edition).lower() == local_edition_formatted:
+                            # If its a match we save the value to tracker_settings here
+                            tracker_settings[optional_key] = bhd_edition
+                            break
+                        else:
+                            # We use the 'custom_edition' to set our own, again we only do this if we can't match what BHD already has available to select
+                            tracker_settings["custom_edition"] = torrent_info["edition"]
 
-        # -!-!- Region -!-!- # (Disc only)
-        elif optional_key == 'region' and 'region' in torrent_info:
-            # This will only run if you are uploading a bluray_disc
-            for region in optional_value:
-                if str(region).upper() == str(torrent_info["region"]).upper():
-                    tracker_settings[optional_key] = region
-                    break
+                # -!-!- Region -!-!- # (Disc only)
+                elif optional_key == 'region' and 'region' in torrent_info:
+                    # This will only run if you are uploading a bluray_disc
+                    for region in optional_value:
+                        if str(region).upper() == str(torrent_info["region"]).upper():
+                            tracker_settings[optional_key] = region
+                            break
 
-        # -!-!- Tags -!-!- #
-        elif optional_key == 'tags':  # (Only supported on BHD)
-            # We only support 2 tags atm, Scene & WEBDL/RIP on bhd
-            # All we currently support regarding tags, is to assign the 'Scene' tag if we are uploading a scene release
-            upload_these_tags_list = []
-            for tag in optional_value:
+                # -!-!- Tags -!-!- #
+                elif optional_key == 'tags':  # (Only supported on BHD)
+                    # We only support 2 tags atm, Scene & WEBDL/RIP on bhd
+                    # All we currently support regarding tags, is to assign the 'Scene' tag if we are uploading a scene release
+                    upload_these_tags_list = []
+                    for tag in optional_value:
 
-                # This will check for the 'Scene' tag
-                if str(tag).lower() in str(torrent_info.keys()).lower():
-                    upload_these_tags_list.append(str(tag))
-                    # tracker_settings[optional_key] = str(tag)
+                        # This will check for the 'Scene' tag
+                        if str(tag).lower() in str(torrent_info.keys()).lower():
+                            upload_these_tags_list.append(str(tag))
+                            # tracker_settings[optional_key] = str(tag)
 
-                # This will check for webdl/webrip tag
-                if str(tag) in ["WEBRip", "WEBDL"]:
-                    # Check if we are uploading one of those ^^ 'sources'
-                    if str(tag).lower() == str(torrent_info["source_type"]).lower():
-                        upload_these_tags_list.append(str(tag))
-            if len(upload_these_tags_list) != 0:
-                tracker_settings[optional_key] = ",".join(upload_these_tags_list)
+                        # This will check for webdl/webrip tag
+                        if str(tag) in ["WEBRip", "WEBDL"]:
+                            # Check if we are uploading one of those ^^ 'sources'
+                            if str(tag).lower() == str(torrent_info["source_type"]).lower():
+                                upload_these_tags_list.append(str(tag))
+                    if len(upload_these_tags_list) != 0:
+                        tracker_settings[optional_key] = ",".join(upload_these_tags_list)
 
-        # TODO figure out why .nfo uploads fail on BHD & don't display on BLU...
-        # if optional_key in ["nfo_file", "nfo"] and "nfo_file" in torrent_info:
-        #     # So far
-        #     tracker_settings[optional_key] = torrent_info["nfo_file"]
+                # TODO figure out why .nfo uploads fail on BHD & don't display on BLU...
+                # if optional_key in ["nfo_file", "nfo"] and "nfo_file" in torrent_info:
+                #     # So far
+                #     tracker_settings[optional_key] = torrent_info["nfo_file"]
 
-        elif optional_key == 'sd' and "sd" in torrent_info:
-            tracker_settings[optional_key] = 1
-        # TODO generalize this below condition
-        elif optional_key in ['season_number', 'episode_number', "complete_season"] and optional_key in torrent_info:
-            tracker_settings[optional_key] = torrent_info.get(optional_key, "")
-        
-        else:
-            # checking whether the optional key is for mediainfo or bdinfo
-            # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
-            # for full disks the bdInfo is saved under the same key as mediainfo
-            for translation_key, translation_value in config["translation"].items():
-                if translation_key == "mediainfo" and translation_value == optional_key:
+                elif optional_key == 'sd' and "sd" in torrent_info:
+                    tracker_settings[optional_key] = 1
+                
+                # checking whether the optional key is for mediainfo or bdinfo
+                # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
+                # for full disks the bdInfo is saved under the same key as mediainfo
+                elif translation_key == "mediainfo":
                     logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
                         logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
@@ -2037,7 +2044,7 @@ def choose_right_tracker_keys():
                         logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                         tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
                         break
-                elif translation_key == "bdinfo" and translation_value == optional_key:
+                elif translation_key == "bdinfo":
                     logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
                         logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
@@ -2046,10 +2053,13 @@ def choose_right_tracker_keys():
                     else:
                         logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
-                    continue
+                    tracker_settings[optional_key] = torrent_info.get(translation_key, "")
+        # ------------ optional_items end ------------
 
+    # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
         tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
+
 # ---------------------------------------------------------------------- #
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
@@ -2568,6 +2578,8 @@ for file in upload_queue:
             torrent_info["tmdb"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
             if torrent_info["type"] == "episode":
                 torrent_info["tvmaze"] = get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
+            else:
+                torrent_info["tvmaze"]
         elif "tmdb" in ids_present:
             torrent_info["imdb"] = get_external_id(id_site="tmdb", id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"])
             # we got value for imdb id, now we can use that to find out the tvmaze id
