@@ -75,6 +75,11 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>TDB</strong></td>
             <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>BIT-HDTV</strong></td>
+            <td><strong>BHDTV</strong></td>
+            <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
+        </tr>
     </tbody>
 </table>
 
@@ -135,17 +140,23 @@ docker run -it \
 # Roadmap
 
 ### v2.1
+- [X] Add support for TVmaze
+- [ ] Add Support for new platforms
+    - [ ] BIT-HDTV
+- [X] Improved translations for tracker key mapping
+
+### v2.1.1
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
-- [X] Add support for TVmaze
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
     - [ ] AvistaZ
-    - [ ] BIT-HDTV
     - [ ] Nebulance
+    - [ ] Anthelion
+    - [ ] MoreThanTV
 - [ ] Add support for DVDs
 
 <br>
