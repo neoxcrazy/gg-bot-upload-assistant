@@ -41,15 +41,21 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
 
     # multiple authentication modes
     headers = None
-    if config["technical_jargons"]["authentication_mode"] == "API_KEY":
+    if config["dupes"]["technical_jargons"]["authentication_mode"] == "API_KEY":
         pass # headers = None
-    elif config["technical_jargons"]["authentication_mode"] == "BEARER":
+    elif config["dupes"]["technical_jargons"]["authentication_mode"] == "BEARER":
         headers = {'Authorization': f'Bearer {tracker_api}'}
         logging.info(f"[DupeCheck] Using Bearer Token authentication method for tracker {search_site}")
-    elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
+    elif config["dupes"]["technical_jargons"]["authentication_mode"] == "HEADER":
+        if len(config["dupes"]["technical_jargons"]["header_key"]) > 0:
+            headers = {config["dupes"]["technical_jargons"]["header_key"]: tracker_api}
+            logging.info(f"[DupeCheck] Using Header based authentication method for tracker {search_site}")
+        else:
+            logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {search_site}.')
+    elif config["dupes"]["technical_jargons"]["authentication_mode"] == "COKKIE":
         logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
 
-    if str(config["dupes"]["request"]) == "POST": # POST request (BHD)
+    if str(config["dupes"]["technical_jargons"]["request_method"]) == "POST": # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
 
         #-------------------------------------------------------------------------
@@ -65,7 +71,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
 
         logging.debug(f"[DupeCheck] Formatted POST payload {url_dupe_payload} for {search_site}")
         url_dupe_payload = json.loads(url_dupe_payload)
-        if str(config["dupes"]["payload_type"]) == "JSON":
+        if str(config["dupes"]["technical_jargons"]["payload_type"]) == "JSON":
             dupe_check_response = requests.request("POST", url_dupe_search, json=url_dupe_payload, headers=headers)
         else:
             dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
@@ -73,7 +79,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
         dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
         
-    logging.info(msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["request"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
+    logging.info(msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["technical_jargons"]["request_method"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
     
     if dupe_check_response.status_code != 200:
         logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_response.status_code}")
