@@ -291,7 +291,12 @@
     },
 
     "dupes": {
-        "request": "POST",
+        "technical_jargons": {
+            "authentication_mode": "BEARER",
+            "payload_type": "MULTI-PART",
+            "request_method": "POST"
+        },
+
         "strip_text": true,
 
         "_comments" : {
@@ -301,7 +306,6 @@
         },
 
         "payload":"{\"search\":\"<imdb>\"}", 
-        "payload_type": "MULTI-PART",
 
         "parse_json": {
             "is_needed": false

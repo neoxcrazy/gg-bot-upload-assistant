@@ -146,7 +146,13 @@
     },
 
     "dupes": {
-        "request": "GET",
+
+        "technical_jargons": {
+            "authentication_mode": "API_KEY",
+            "payload_type": "MULTI-PART",
+            "request_method": "GET"
+        },
+
         "url_format": "{search_url}&imdbId={imdb}",
         "strip_text": true,
 

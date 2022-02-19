@@ -1,7 +1,7 @@
 {
     "name": "BIT-HDTV",
     "url": "https://www.bit-hdtv.com/",
-    "upload_form": "https://api.bit-hdtv.com/torrents/upload?api_token={api_key}",
+    "upload_form": "https://old.bit-hdtv.tk/takeupload.php?api_key={api_key}&format=json",
     "torrents_search": "https://api.bit-hdtv.com/torrent/search/advanced",
     "source": "BIT-HDTV",
     "platform": "BIT-HDTV",
@@ -15,6 +15,7 @@
     },
 
     "technical_jargons": {
+        "_comment": "These are for the upload api",
         "authentication_mode": "BEARER",
         "payload_type": "MULTI-PART"
     },
@@ -289,7 +290,14 @@
     },
 
     "dupes": {
-        "request": "POST",
+
+        "technical_jargons": {
+            "authentication_mode": "HEADER",
+            "header_key":"X-API-KEY",
+            "payload_type": "JSON",
+            "request_method": "POST"
+        },
+
         "strip_text": false,
 
         "_comments" : {
@@ -299,7 +307,6 @@
         },
 
         "payload":"{\"pageSize\": 100, \"search\": \"<imdb>\", \"searchType\": 4}", 
-        "payload_type": "JSON",
 
         "parse_json": {
             "top_lvl": "data",
