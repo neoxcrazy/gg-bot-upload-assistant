@@ -36,6 +36,7 @@ from rich.prompt import Prompt, Confirm
 
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
+from mediainfo_summary_extractor import prepare_mediainfo_summary
 
 # Method that will search for dupes in trackers.
 from search_for_dupes import search_for_dupes_api
@@ -325,7 +326,6 @@ def delete_leftover_files():
                 os.remove(f)
             logging.info("Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
 
-
 def identify_type_and_basic_info(full_path, guess_it_result):
     """
         guessit is typically pretty good at getting the title, year, resolution, group extracted
@@ -399,9 +399,10 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         raise AssertionError("'type' is not set in the guessit output, something is seriously wrong with this filename")
     if torrent_info["type"] == "episode":  # guessit uses 'episode' for all tv related content (including seasons)
         # Set a default value for season and episode
-        torrent_info["season_number"] = 0
-        torrent_info["episode_number"] = 0
-        torrent_info["complete_season"] = 0
+        torrent_info["season_number"] = "0"
+        torrent_info["episode_number"] = "0"
+        torrent_info["complete_season"] = "0"
+        torrent_info["individual_episodes"] = "0"
 
         if 'season' not in guess_it_result:
             logging.error("could not detect the 'season' using guessit")
@@ -419,6 +420,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             if 'episode' in guess_it_result:
                 torrent_info["episode_number"] = int(guess_it_result["episode"])
                 torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
+                torrent_info["individual_episodes"] = "1"
             else:
                 # if we don't have an episode number we will just use the season number
                 torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
@@ -591,8 +593,13 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     meddiainfo_start_time = time.perf_counter()
     media_info_result = MediaInfo.parse(parse_me)
     meddiainfo_end_time = time.perf_counter()
-    
     logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+    
+    meddiainfo_start_time = time.perf_counter()
+    torrent_info["mediainfo_summary"] = prepare_mediainfo_summary(media_info_result.to_data())
+    meddiainfo_end_time = time.perf_counter()
+    logging.debug(f"Time taken for mediainfo summary generation :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+    logging.debug(f'Generated MediaInfo summary :: \n {pformat(torrent_info["mediainfo_summary"])}')
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
@@ -1887,12 +1894,18 @@ def choose_right_tracker_keys():
     # Filling in data for all the keys that have mapping/translations
     # Here we iterate over the translation mapping and for each translation key, we check the required and optional items for that value
     # once identified we handle it
+    logging.info(f"[Main] Starting translations from torrent info to tracker settings.")
     is_hybrid_translation_needed = False
+
     for translation_key, translation_value in config["translation"].items():
+        logging.debug(f"[Main] Trying to translate {translation_key} to {translation_value}")
+
         # ------------ required_items start ------------
         for required_key, required_value in required_items.items():
             # get the proper mapping, the elements that doesn't match can be ignored
             if str(required_key) == str(translation_value):
+                logging.debug(f"[Main] Key {translation_key} mapped to required item {required_key} with value type as {required_value}")
+                
                 # the torrent file is always submitted as a file
                 if required_value in ( "file", "file|base64", "file|array", "file|string|array"):
                     # adding support for base64 encoded files
@@ -1902,16 +1915,12 @@ def choose_right_tracker_keys():
                     # Make sure you select the right .torrent file
                     if translation_key == "dot_torrent":
                         tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'
+                
                 # The reason why we keep this elif statement here is because the conditional right above is also technically a "string"
                 # but its easier to keep mediainfo and description in text files until we need them so we have that small exception for them
                 elif required_value == "string":
-
-                    # We dump all the info from torrent_info in tracker_settings here
-                    if translation_key in torrent_info:
-                        tracker_settings[config["translation"][translation_key]] = torrent_info[translation_key]
-
                     # BHD requires the key "live" (0 = Sent to drafts and 1 = Live on site)
-                    elif required_key == "live":
+                    if required_key == "live":
                         live = '1' if is_live_on_site == 'true' else '0'
                         logging.info(f"Upload live status: {'Live (Visible)' if is_live_on_site == 'true' else 'Draft (Hidden)'}")
                         tracker_settings[config["translation"][translation_key]] = live
@@ -1924,13 +1933,17 @@ def choose_right_tracker_keys():
                     # Adding support for internal args
                     elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup', 'foreign', "3d"]:
                         tracker_settings[config["translation"][translation_key]] = "1" if getattr(args, translation_key) is True else "0"
-
+                    
+                    # We dump all the info from torrent_info in tracker_settings here
+                    elif translation_key in torrent_info:
+                        tracker_settings[config["translation"][translation_key]] = torrent_info[translation_key]
                     # This work as a sort of 'catch all', if we don't have the correct data in torrent_info, we just send a 0 so we can successfully post
                     else:
                         tracker_settings[config["translation"][translation_key]] = "0"
+
                 elif required_value == "url":
                     # URLs can be set only to for certain media databases
-                    url = ""
+                    url = tracker_settings[config["translation"][translation_key]] if config["translation"][translation_key] in tracker_settings else ""
                     if translation_key == "imdb":
                         url = f"https://www.imdb.com/title/{torrent_info['imdb_with_tt']}"
                     elif translation_key == "tmdb":
@@ -1939,17 +1952,28 @@ def choose_right_tracker_keys():
                         url = f"https://www.thetvdb.com/?tab=series&id={torrent_info['tvdb']}"
                     elif translation_key == "mal":
                         url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
-                    elif translation_key == "tvmaze":
+                    # This and condition is a patch for BIT-HDTV. For this tracker both imdb and tvmaze needs to be mapped to same key url, 
+                    # depending on the type of the upload. For movies, it need to be imdb url, and for tv it needs to be tvmaze url.
+                    # TODO check whether a much cleaner approach can be used here  
+                    elif translation_key == "tvmaze" and torrent_info["type"] == "episode": 
                         url = f"https://www.tvmaze.com/shows/{torrent_info['tvmaze']}"
                     else:
-                        logging.error(f"[CategoryMapping] Invalid key for url translation provided -- Key {translation_key}")
+                        logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
                     tracker_settings[config["translation"][translation_key]] = url
+
+                else:
+                    logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
                 
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
                 if translation_key == "type":
                     for key_cat, val_cat in config["Required"][required_key].items():
                         if torrent_info["type"] == val_cat:
                             tracker_settings[config["translation"][translation_key]] = key_cat
+                        elif val_cat in torrent_info and torrent_info[val_cat] == "1":
+                            # special case whether we can check for certain values in torrent info to decide the type
+                            # eg: complete_season, individual_episodes etc
+                            tracker_settings[config["translation"][translation_key]] = key_cat
+                    
                     if config["translation"][translation_key] not in tracker_settings:
                         # this type of upload is not permitted in this tracker
                         logging.critical('[CategoryMapping] Unable to find a suitable "category/type" match for this file')
@@ -1960,7 +1984,7 @@ def choose_right_tracker_keys():
                 if translation_key in ('source', 'resolution'):
                     return_value = identify_resolution_source(translation_key)
                     if return_value == "STOP":
-                        return "STOP"
+                        return return_value
                     tracker_settings[config["translation"][translation_key]] = return_value
 
                 if translation_key == "hybrid_type" and config["hybrid_type"] is not None and config["hybrid_type"]["required"]:
@@ -1980,7 +2004,8 @@ def choose_right_tracker_keys():
         # This mainly applies to BHD since they are the tracker with the most 'Optional' fields, 
         # BLU/ACM only have 'nfo_file' as an optional item which we take care of later
         for optional_key, optional_value in optional_items.items():
-            if str(required_key) == str(translation_value):
+            if str(optional_key) == str(translation_value):
+                logging.debug(f"[Main] Key {translation_key} mapped to optional item {optional_key} with value type as {optional_value}")
                 # -!-!- Editions -!-!- #
                 if optional_key == 'edition' and 'edition' in torrent_info:
                     # First we remove any 'fluff' so that we can try to match the edition to the list BHD has, if not we just upload it as a custom edition
@@ -2056,6 +2081,11 @@ def choose_right_tracker_keys():
                     tracker_settings[optional_key] = torrent_info.get(translation_key, "")
         # ------------ optional_items end ------------
 
+    # Adding default values from template to tracker settings
+    for default_key, default_value in config["Default"].items():
+        logging.debug(f'Adding default key `{default_key}` with value `{default_value}` to tracker settings')
+        tracker_settings[default_key] = default_value
+
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
         tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
@@ -2067,7 +2097,10 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
-    
+    payload = {}
+    files = []
+    display_files = {}
+
     logging.debug("::::::::::::::::::::::::::::: Tracker settings that will be used for creating payload :::::::::::::::::::::::::::::")
     logging.debug(f'\n{pformat(tracker_settings)}')
 
@@ -2075,16 +2108,21 @@ def upload_to_site(upload_to, tracker_api_key):
     headers = None
     if config["technical_jargons"]["authentication_mode"] == "API_KEY":
         pass # headers = None
+    elif config["technical_jargons"]["authentication_mode"] == "API_KEY_PAYLOAD":
+        # api key needs to be added in payload. the key in payload for api key can be obtained from `auth_payload_key`
+        payload[config["technical_jargons"]["auth_payload_key"]] = tracker_api_key
     elif config["technical_jargons"]["authentication_mode"] == "BEARER":
         headers = {'Authorization': f'Bearer {tracker_api_key}'}
         logging.info(f"[TrackerUpload] Using Bearer Token authentication method for tracker {upload_to}")
-    elif config["technical_jargons"]["authentication_mode"] == "COKKIE":
+    elif config["technical_jargons"]["authentication_mode"] == "HEADER":
+        if len(config["technical_jargons"]["header_key"]) > 0:
+            headers = {config["technical_jargons"]["header_key"]: tracker_api_key}
+            logging.info(f"[DupeCheck] Using Header based authentication method for tracker {upload_to}")
+        else:
+            logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {upload_to}.')
+    # TODO add support for cookie based authentication
+    elif config["technical_jargons"]["authentication_mode"] == "COOKIE":
         logging.fatal(f'[TrackerUpload] Cookie based authentication is not supported as for now.')
-        # TODO add support for cookie based authentication
-
-    payload = {}
-    files = []
-    display_files = {}
 
     if args.keyvalue:
         logging.info(f'[Main] User wants to add {args.keyvalue} key values to the tracker.')
@@ -2093,7 +2131,7 @@ def upload_to_site(upload_to, tracker_api_key):
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key
-        req_opt = 'Required' if key in config["Required"] else 'Optional'
+        req_opt = 'Required' if key in config["Required"] else 'Optional' if key in config["Optional"] else "Default"
 
         # Now that we know if we are looking for a required or optional key we can try to add it into the payload
         if str(config[req_opt][key]) == "file":
@@ -2102,7 +2140,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 files.append(post_file)
                 display_files[key] = tracker_settings[key]
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         elif str(config[req_opt][key]) == "file|array":
             if os.path.isfile(tracker_settings[key]):
@@ -2112,7 +2150,7 @@ def upload_to_site(upload_to, tracker_api_key):
                         files.append(post_file)
                         display_files[key] = tracker_settings[key]
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         elif str(config[req_opt][key]) == "file|string|array":
             """
@@ -2127,7 +2165,7 @@ def upload_to_site(upload_to, tracker_api_key):
                     payload[f'{key}[]' if config["technical_jargons"]["payload_type"] == "MULTI-PART" else key] = screenshot_array
                     logging.debug(f"[TrackerUpload] String array data for key {key} :: {screenshot_array}")
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
@@ -2139,7 +2177,7 @@ def upload_to_site(upload_to, tracker_api_key):
                     base64_message = base64_encoded_data.decode('utf-8')
                     payload[key] = base64_message
             else:
-                logging.critical("[TrackerUpload] The file/path {} does not exist!".format(tracker_settings[key]))
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -2204,11 +2242,11 @@ def upload_to_site(upload_to, tracker_api_key):
     logging.info(f'[TrackerUpload] {response.text}')
 
     if response.status_code in (200, 201):
-        logging.info(f"[TrackerUpload]Uupload response for {upload_to}: {response.text.encode('utf8')}")
+        logging.info(f"[TrackerUpload] Upload response for {upload_to}: {response.text.encode('utf8')}")
         # Update discord channel
         if discord_url:
             requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
-
+        
         if "success" in response.json():
             if str(response.json()["success"]).lower() == "true":
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
@@ -2462,7 +2500,7 @@ for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
     delete_leftover_files()
     torrent_info.clear()
-    torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
+    torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
 
     # TODO these are some hardcoded values to be handled at a later point in time
     # setting this to 0 is fine. But need to add support for these eventually.
@@ -2657,6 +2695,9 @@ for file in upload_queue:
 
     if os.path.exists(f'{working_folder}/temp_upload/bbcode_images.txt'):
         torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/bbcode_images.txt'
+
+    if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'):
+        torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'
     
     if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
          torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
@@ -2780,7 +2821,7 @@ for file in upload_queue:
                 description.write(f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
             else:
                 logging.debug(f'[Main] User has not provided any custom uploader signature to use. Using default signature')
-                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
+                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
         # Add the finished file to the 'torrent_info' dict
         torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
