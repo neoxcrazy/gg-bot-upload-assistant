@@ -52,7 +52,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             logging.info(f"[DupeCheck] Using Header based authentication method for tracker {search_site}")
         else:
             logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {search_site}.')
-    elif config["dupes"]["technical_jargons"]["authentication_mode"] == "COKKIE":
+    elif config["dupes"]["technical_jargons"]["authentication_mode"] == "COOKIE":
         logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
 
     if str(config["dupes"]["technical_jargons"]["request_method"]) == "POST": # POST request (BHD)
