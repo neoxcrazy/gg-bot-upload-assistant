@@ -139,13 +139,14 @@ docker run -it \
 
 # Roadmap
 
-### v2.1
+### v2.0.4
 - [X] Add support for TVmaze
 - [ ] Add Support for new platforms
-    - [ ] BIT-HDTV
+    - [X] BIT-HDTV
 - [X] Improved translations for tracker key mapping
+- [X] Support for screenshot without thumbnail size restriction
 
-### v2.1.1
+### v2.1
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
@@ -153,7 +154,6 @@ docker run -it \
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] AvistaZ
     - [ ] Nebulance
     - [ ] Anthelion
     - [ ] MoreThanTV
