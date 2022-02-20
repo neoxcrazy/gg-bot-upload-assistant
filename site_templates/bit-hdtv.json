@@ -1,36 +1,36 @@
 {
     "name": "BIT-HDTV",
     "url": "https://www.bit-hdtv.com/",
-    "upload_form": "https://old.bit-hdtv.tk/takeupload.php?api_key={api_key}&format=json",
-    "torrents_search": "https://api.bit-hdtv.com/torrent/search/advanced",
+    "upload_form": "https://old.bit-hdtv.tk/takeupload.php",
+    "torrents_search": "https://api.bit-hdtv.tk/torrent/search/advanced",
     "source": "BIT-HDTV",
     "platform": "BIT-HDTV",
     "bbcode_line_break": "\n",
     "title_separator": ".",
 
     "description_components":{
-        "code_code": "[code][/code]",
-        "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
         "quote_code":"[quote][/quote]"
     },
 
     "technical_jargons": {
         "_comment": "These are for the upload api",
-        "authentication_mode": "BEARER",
+        "authentication_mode": "API_KEY_PAYLOAD",
+        "auth_payload_key":"api_key",
         "payload_type": "MULTI-PART"
     },
 
     "translation": {
         "dot_torrent": "file",
         "torrent_title": "name",
-        "description": "descr",
         "mediainfo": "mediainfo",
         "bdinfo" : "mediainfo",
         "type": "cat",
         "source": "source",
         "hybrid_type":"subcat",
         "resolution": "resolution",
-        "url_images": "screens",
+        "shameless_self_promotion" : "sdescr",
+        "mediainfo_summary" : "descr",
+        "bbcode_images_nothumb": "screen",
         "imdb": "url",
         "tvmaze": "url",
         "nfo_file": "nfo"
@@ -62,11 +62,11 @@
             "17": "TV Season: Remux",
             "18": "TV Season: Blu-ray",
 
-            "TODO":"MAPPING PENDING FOR TV and TV/Season",
             "_cat" : {
                 "data_source": "tracker",
-                "7":"movie",
-                "10":"tv"
+                "7": "movie",
+                "12": "complete_season",
+                "10": "individual_episodes"
             },
             "_source" : {
                 "data_source": "tracker",
@@ -226,6 +226,56 @@
                     "data_source": "tracker",
                     "values": ["1"]
                 }
+            },
+            "13": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                }
+            },
+            "14": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["4", "5"]
+                }
+            },
+            "16": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                }
+            },
+            "17": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
+            },
+            "18": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                }
             }
         }
     },
@@ -233,13 +283,16 @@
     "Required": {
         "file": "file",
         "name": "string",
-        "descr": "string",
-        "screens":"file|string|array",
+        "screen":"string",
         "url": "url",
+        "subcat": "string",
+        "sdescr": "string",
+        "descr" : "string",
 
         "cat": {
             "7": "movie",
-            "10": "episode"
+            "12": "complete_season",
+            "10": "individual_episodes"
         },
 
         "source": {
@@ -287,6 +340,10 @@
     "Optional": {
         "nfo": "file",
         "mediainfo": "string"
+    },
+
+    "Default":{
+        "format": "json"
     },
 
     "dupes": {
