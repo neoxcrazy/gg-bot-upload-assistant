@@ -145,6 +145,7 @@ docker run -it \
     - [X] BIT-HDTV
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
+- [X] Hybrid mapping for STC torrent types
 
 ### v2.1
 - [ ] Improved Full Disk Support
