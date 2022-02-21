@@ -1420,7 +1420,7 @@ def search_tmdb_for_id(query_title, year, content_type):
             # prompt for user input with 'list_of_num' working as a list of valid choices
             user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
         else:
-            console.print("auto selected #1...")
+            console.print("Auto selected the #1 result from TMDB...")
             user_input_tmdb_id_num = "1"
             logging.info(f"[Main] auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
 
@@ -2656,12 +2656,12 @@ for file in upload_queue:
         console.print(f"\nUsing the user supplied edition: [medium_spring_green]{user_input_edition}[/medium_spring_green]")
         torrent_info["edition"] = user_input_edition
 
-    if Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
+    if auto_mode == "false" and Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
         logging.debug(f'[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
         from custom_user_input import collect_custom_messages_from_user
         torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(debug=args.debug)
     else:
-        logging.debug(f'[Main] User decided not to add custom text to torrent description')
+        logging.debug(f'[Main] User decided not to add custom text to torrent description or running in auto_mode')
 
     # -------- Dupe check for single tracker uploads --------
     # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
