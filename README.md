@@ -141,7 +141,7 @@ docker run -it \
 
 ### v2.0.4
 - [X] Add support for TVmaze
-- [ ] Add Support for new platforms
+- [X] Add Support for new platforms
     - [X] BIT-HDTV
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
