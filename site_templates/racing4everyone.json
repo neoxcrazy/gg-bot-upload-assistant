@@ -97,6 +97,8 @@
         "bdinfo": "string",
         "mediainfo": "string"
     },
+    
+    "Default":{},
 
     "dupes": {
         "technical_jargons": {

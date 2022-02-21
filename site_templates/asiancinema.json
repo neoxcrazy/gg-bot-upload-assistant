@@ -178,6 +178,8 @@
         "mediainfo": "string"
     },
 
+    "Default":{},
+
     "dupes": {
         "technical_jargons": {
             "authentication_mode": "API_KEY",

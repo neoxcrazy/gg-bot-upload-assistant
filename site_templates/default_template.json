@@ -221,6 +221,8 @@
         "optional_key_bdinfo": "string"
     },
 
+    "Default":{},
+
     "dupes": {
         "request": "GET",
         "url_format": "{search_url}&imdbId={imdb}",

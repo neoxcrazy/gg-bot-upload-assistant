@@ -222,6 +222,8 @@
         "bdInfo":"string"
     },
 
+    "Default":{},
+
     "dupes": {
 
         "technical_jargons": {

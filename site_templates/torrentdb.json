@@ -290,6 +290,8 @@
         "complete_season":"string"
     },
 
+    "Default":{},
+
     "dupes": {
         "technical_jargons": {
             "authentication_mode": "BEARER",
