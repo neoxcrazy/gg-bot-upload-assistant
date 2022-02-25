@@ -66,11 +66,16 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 url_replacer = f"https://www.tvmaze.com/shows/{tvmaze}"
             url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", url_replacer).replace("<title>", torrent_info["title"])
         else:
-            url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", imdb).replace("<title>", torrent_info["title"])
+            url_dupe_payload = config["dupes"]["payload"].replace("<imdb>", str(imdb)).replace("<tvmaze>", str(tvmaze)).replace("<tmdb>", str(tmdb)).replace("<api_key>", tracker_api).replace("<title>", torrent_info["title"])
         #-------------------------------------------------------------------------
 
         logging.debug(f"[DupeCheck] Formatted POST payload {url_dupe_payload} for {search_site}")
         url_dupe_payload = json.loads(url_dupe_payload)
+
+        if config["dupes"]["technical_jargons"]["authentication_mode"] == "API_KEY_PAYLOAD":
+            # adding Authentication api_key to payload
+            url_dupe_payload[config["dupes"]["technical_jargons"]["auth_payload_key"]] = tracker_api
+
         if str(config["dupes"]["technical_jargons"]["payload_type"]) == "JSON":
             dupe_check_response = requests.request("POST", url_dupe_search, json=url_dupe_payload, headers=headers)
         else:
@@ -98,18 +103,23 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # needs any further parsing.
     logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
     dupe_check_response = dupe_check_response.json()
-    logging.debug(dupe_check_response)
-    torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])] if config["dupes"]["parse_json"]["is_needed"] else dupe_check_response
-    for item in torrent_items:
+    
+    torrent_items = dupe_check_response
+    if config["dupes"]["parse_json"]["is_needed"]:
+        torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])]
+        if "second_level" in config["dupes"]["parse_json"]:
+            torrent_items = torrent_items[config["dupes"]["parse_json"]["second_level"]]
 
+    for item in torrent_items:
         if "torrent_details" in config["dupes"]["parse_json"]:
             # BLU & ACM have us go 2 "levels" down to get torrent info -->  [data][attributes][name] = torrent title
             torrent_details = item[str(config["dupes"]["parse_json"]["torrent_details"])]
         else:
             # BHD only has us go down 1 "level" to get torrent info --> [data][name] = torrent title
             torrent_details = item
-
-        torrent_title = str(torrent_details["name"])
+        
+        torrent_name_key = config["dupes"]["parse_json"]["torrent_name"] if "torrent_name" in config["dupes"]["parse_json"] else "name"
+        torrent_title = str(torrent_details[torrent_name_key])
         torrent_title_split = re.split('[.\s]', torrent_title.replace("-", " ").lower())
         torrent_title_upper_split = re.split('[.\s]', torrent_title.replace("-", " "))
 

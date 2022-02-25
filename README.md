@@ -80,6 +80,11 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>BHDTV</strong></td>
             <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>Gazelle</strong></td>
+            <td><strong>NBL</strong></td>
+            <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
+        </tr>
     </tbody>
 </table>
 
@@ -143,6 +148,7 @@ docker run -it \
 - [X] Add support for TVmaze
 - [X] Add Support for new platforms
     - [X] BIT-HDTV
+    - [ ] Nebulance
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
@@ -156,7 +162,6 @@ docker run -it \
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] Nebulance
     - [ ] Anthelion
     - [ ] MoreThanTV
 - [ ] Add support for DVDs

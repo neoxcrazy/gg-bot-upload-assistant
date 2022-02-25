@@ -1,0 +1,195 @@
+{
+    "name": "Nebulance",
+    "url": "https://nebulance.io",
+    "upload_form": "https://nebulance.io/upload.php?api_key={api_key}",
+    "torrents_search": "https://nebulance.io/api.php?api_token={api_key}",
+    "source": "NBL",
+    "platform": "Gazelle",
+    "bbcode_line_break": "\n",
+    "title_separator" : " ",
+
+    "description_components":{
+        "code_code": "[code][/code]",
+        "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
+        "notes_code":"[note][/note]",
+        "quote_code":"[quote][/quote]",
+        "alert_code":"[alert][/alert]"
+    },
+
+    "technical_jargons": {
+        "authentication_mode": "API_KEY",
+        "payload_type": "MULTI-PART"
+    },
+
+    "hybrid_type": {
+        "required": false
+    },
+
+    "translation": {
+        "dot_torrent": "file_input",
+        "torrent_title": "name",
+        "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
+        "type": "category",
+        "source": "type_id",
+        "resolution": "resolution_id",
+        "tvmaze": "tvmazeid"
+    },
+
+    "Required": {
+        "file_input": "file",
+        "tvmazeid": "string",
+        "name":"string",
+
+        "category": {
+            "1": "individual_episodes",
+            "3": "complete_season"
+        },
+
+        "type_id": {
+            "1": {
+                "disc": 1,
+                "bluray_disc": 2,
+                "dvd_disc": 2
+            },
+            "3": {
+                "remux": 1,
+                "bluray_remux": 2,
+                "dvd_remux": 2
+            },
+            "12": {
+                "bluray_encode": 1
+            },
+            "4": {
+                "webdl": 1
+            },
+            "5": {
+                "webrip": 1
+            },
+            "6": {
+                "hdtv": 1
+            }
+        },
+
+        "resolution_id": {
+            "11": {
+                "4360p": 1
+            },
+            "1": {
+                "2160p": 1
+            },
+            "2": {
+                "1080p": 1
+            },
+            "3": {
+                "1080i": 1
+            },
+            "5": {
+                "720p": 1
+            },
+            "6": {
+                "576p": 1
+            },
+            "7": {
+                "576i": 1
+            },
+            "8": {
+                "480p": 1
+            },
+            "9": {
+                "480i": 1
+            },
+            "10": {
+                "other": 1
+            }
+        }
+    },
+
+    "Optional": {
+        "bdinfo": "string",
+        "mediainfo": "string"
+    },
+
+    "Default":{},
+
+    "dupes": {
+        
+        "technical_jargons": {
+            "authentication_mode": "API_KEY",
+            "payload_type": "JSON",
+            "request_method": "POST"
+        },
+
+        "strip_text": true,
+
+        "payload": "{\"jsonrpc\": \"2.0\",\"id\": 1,\"method\": \"getTorrents\",\"params\": [\"<api_key>\",{\"tvmaze\": <tvmaze>},10,0]}",
+        
+        "parse_json": {
+            "is_needed": true,
+            "top_lvl": "result",
+            "second_level": "items",
+            "torrent_name": "rls_name"
+        },
+
+        "different_cuts": "1",
+        "2160p_remux": 1,
+        "2160p_encode": 1,
+        "1080p_remux": 1,
+        "1080p_encode": 100,
+        "720p_encode": 100,
+        "else": 1
+    },
+
+    "torrent_title_format": {
+        "episode": {
+            "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_remux": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_encode": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {s00e00} {repack} {screen_size} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
+            "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+        },
+
+        "movie": {
+            "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
+            "bluray_encode": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "web": "{title} {year} {edition} {repack} {screen_size} {hybrid} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
+            "hdtv": "{title} {year} {edition} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {video_codec} {release_group}",
+            "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
+        }
+    },
+
+    "banned_groups": [
+        "AROMA",
+        "aXXo",
+        "BRrip",
+        "CM8",
+        "CrEwSaDe",
+        "d3g",
+        "DNL",
+        "FGT",
+        "FaNGDiNG0",
+        "FRDS",
+        "HD2DVD",
+        "HDTime",
+        "iPlanet",
+        "KiNGDOM",
+        "Leffe",
+        "MeGusta",
+        "mHD",
+        "mSD",
+        "nHD",
+        "nikt0",
+        "nSD",
+        "NhaNc3",
+        "PRODJi",
+        "RDN",
+        "SANTi",
+        "STUTTERSHIT",
+        "ViSION",
+        "WAF",
+        "x0r",
+        "YIFY"
+    ]
+}
