@@ -1,8 +1,8 @@
 {
     "name": "BIT-HDTV",
     "url": "https://www.bit-hdtv.com/",
-    "upload_form": "https://old.bit-hdtv.tk/takeupload.php",
-    "torrents_search": "https://api.bit-hdtv.tk/torrent/search/advanced",
+    "upload_form": "https://bit-hdtv.com/takeupload.php",
+    "torrents_search": "https://api.bit-hdtv.com/torrent/search/advanced",
     "source": "BIT-HDTV",
     "platform": "BIT-HDTV",
     "bbcode_line_break": "\n",

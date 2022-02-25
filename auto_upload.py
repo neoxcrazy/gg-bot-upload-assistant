@@ -485,11 +485,18 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     meddiainfo_end_time = time.perf_counter()
     logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
     
-    meddiainfo_start_time = time.perf_counter()
-    torrent_info["mediainfo_summary"] = prepare_mediainfo_summary(media_info_result.to_data())
-    meddiainfo_end_time = time.perf_counter()
-    logging.debug(f"Time taken for mediainfo summary generation :: {(meddiainfo_end_time - meddiainfo_start_time)}")
-    logging.debug(f'Generated MediaInfo summary :: \n {pformat(torrent_info["mediainfo_summary"])}')
+    if args.disc:
+        # for full disk uploads the bdinfo summary itself will be set as the `mediainfo_summary`
+        logging.info("[Main] Full Disk Upload. Setting bdinfo summary as mediainfo summary")
+        with open(f'{working_folder}/temp_upload/mediainfo.txt', 'r') as summary:
+            bdInfo_summary = summary.read()
+            torrent_info["mediainfo_summary"] = bdInfo_summary
+    else:
+        meddiainfo_start_time = time.perf_counter()
+        torrent_info["mediainfo_summary"] = prepare_mediainfo_summary(media_info_result.to_data())
+        meddiainfo_end_time = time.perf_counter()
+        logging.debug(f"Time taken for mediainfo summary generation :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+        logging.debug(f'Generated MediaInfo summary :: \n {pformat(torrent_info["mediainfo_summary"])}')
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
@@ -1504,11 +1511,7 @@ def format_title(json_config):
         temp_load_torrent_info = tracker_torrent_name_style.replace("{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            # For the customizable title separator feature, we need to replace " " (spaces) in title with the separator.
-            if item == "title":
-                generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info else ""
-            else:
-                generate_format_string[item] = torrent_info[item] if item in torrent_info else ""
+            generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
         for key, value in generate_format_string.items():
@@ -2141,6 +2144,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
+                console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         elif "status" in response.json():
             if str(response.json()["status"]).lower() == "true" or str(response.json()["status"]).lower() == "success":
@@ -2148,6 +2152,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
+                console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         elif "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
@@ -2155,6 +2160,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
+                console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         elif "status" in str(response.json()).lower():
             if str(response.json()["status"]).lower() == "true":
@@ -2162,8 +2168,10 @@ def upload_to_site(upload_to, tracker_api_key):
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
             else:
+                console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         else:
+            console.print('Upload to tracker failed.', style='bold red')
             logging.critical("[TrackerUpload] Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
     
     elif response.status_code == 404:
