@@ -90,6 +90,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # Now that we have the response from tracker(X) we can parse the json and try to identify dupes
     existing_release_types = {}  # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
     existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0}  # We also log the num each type shows up on site
+    single_episode_upload_with_season_pack_available = False
 
     # adding support for speedapp. Speedapp just returns the torrents as a json array.
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
@@ -218,24 +219,20 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                         # possible_dupe_with_percentage_dict[existing_release_types_key] = 100
                         logging.critical(msg=f'[DupeCheck] Canceling upload to {search_site} because uploading a full season pack is already available: {existing_release_types_key}')
                         return True
-
-                    # if this is an interactive upload then we can prompt the user & let them choose if they want to cancel or continue the upload
-                    logging.error(msg="[DupeCheck] Almost all trackers don't allow individual episodes to be uploaded after season pack is released")
-                    console.print(f"\n[bold red on white] :warning: Need user input! :warning: [/bold red on white]")
-                    console.print(f"You're trying to upload an [bold red]Individual Episode[/bold red] [bold]({torrent_info['title']} {torrent_info['s00e00']})[/bold] to {search_site}",  highlight=False)
-                    console.print(f"A [bold red]Season Pack[/bold red] is already available: {existing_release_types_key}", highlight=False)
-                    console.print("Most sites [bold red]don't allow[/bold red] individual episode uploads when the season pack is available")
-                    console.print('---------------------------------------------------------')
-                    if not bool(Confirm.ask("Ignore and continue upload?", default=False)):
-                        return True
+                    
+                    logging.error("[DupeCheck] Marking existence of season pack for single episode upload.")
+                    # marking this case when user is trying to upload a single episode when a season pack already exists on the tracker.
+                    # when this flag is enabled, we'll show all the season packs in a table and prompt the user to decide whether or not to upload the torrent.
+                    single_episode_upload_with_season_pack_available = True
 
             # now we just need to make sure the episode we're trying to upload is not already on site
-            number_of_discarded_episodes = 0
-            if (extracted_season_episode_from_title != torrent_info['s00e00']) or (episode_num is not None and episode_num not in existing_release_types_key):
-                number_of_discarded_episodes += 1
-                existing_release_types.pop(existing_release_types_key)        
+            if not single_episode_upload_with_season_pack_available:
+                number_of_discarded_episodes = 0
+                if (extracted_season_episode_from_title != torrent_info['s00e00']) or (episode_num is not None and episode_num not in existing_release_types_key):
+                    number_of_discarded_episodes += 1
+                    existing_release_types.pop(existing_release_types_key)        
 
-            logging.info(msg=f'[DupeCheck] Filtered out: {number_of_discarded_episodes} results for having different episode numbers (looking for {episode_num})')
+                logging.info(msg=f'[DupeCheck] Filtered out: {number_of_discarded_episodes} results for having different episode numbers (looking for {episode_num})')
         
         logging.info(msg=f'[DupeCheck] Filtered out: {number_of_discarded_seasons} results for not being the right season ({season_num})')
 
@@ -283,6 +280,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
 
     max_dupe_percentage_exceeded = False
     is_dupes_present = False
+    logging.debug(f"[DupeCheck] Existing release types that are dupes: {existing_release_types}")
     for possible_dupe_title in existing_release_types.keys():
         # If we get a match then run further checks
         possible_dupe_with_percentage_dict[possible_dupe_title] = fuzzy_similarity(our_title=torrent_info["torrent_title"], check_against_title=possible_dupe_title)
@@ -297,17 +295,34 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
 
         # because we want to show the user every possible dupe (not just the ones that exceed the max percentage) 
         # we just mark an outside var True & finish the for loop that adds the table rows
-        if not max_dupe_percentage_exceeded:
+        # 
+        # Also if `single_episode_upload_with_season_pack_available`, then we mark the release as dupe
+        # TODO Should season packs be tagged as 100% dupe???
+        if not max_dupe_percentage_exceeded or single_episode_upload_with_season_pack_available:
             max_dupe_percentage_exceeded = mark_as_dupe
         is_dupes_present = True
 
     if max_dupe_percentage_exceeded:
         console.print(f"\n\n[bold red on white] :warning: Detected possible dupe! :warning: [/bold red on white]")
         console.print(possible_dupes_table)
-        # If auto_mode is enabled then return true in all cases
-        # If user chooses Yes / y => then we return False indicating that there are no dupes and processing can continue
-        # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
-        return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
+        
+        if single_episode_upload_with_season_pack_available:
+            # if this is an interactive upload then we can prompt the user & let them choose if they want to cancel or continue the upload
+            logging.error(msg="[DupeCheck] Almost all trackers don't allow individual episodes to be uploaded after season pack is released")
+            console.print(f"\n[bold red on white] :warning: Need user input! :warning: [/bold red on white]")
+            console.print(f"You're trying to upload an [bold red]Individual Episode[/bold red] [bold green]({torrent_info['title']} {torrent_info['s00e00']})[/bold green] to [bold]{search_site}[/bold]",  highlight=False)
+            console.print(f"[bold red]Season Packs[/bold red] are already available: [bold green]({existing_release_types_key})[/bold green]", highlight=False)
+            console.print("Most sites [bold red]don't allow[/bold red] individual episode uploads when the season pack is available")
+            console.print('---------------------------------------------------------')
+            # If auto_mode is enabled then return true in all cases
+            # If user chooses Yes / y => then we return False indicating that there are no dupes and processing can continue
+            # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
+            return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nIgnore and continue upload?"))
+        else:
+            # If auto_mode is enabled then return true in all cases
+            # If user chooses Yes / y => then we return False indicating that there are no dupes and processing can continue
+            # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
+            return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
         if is_dupes_present:
             console.print(f"\n\n[bold red] :warning: Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")

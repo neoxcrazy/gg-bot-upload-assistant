@@ -37,6 +37,7 @@ from rich.prompt import Prompt, Confirm
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
 from mediainfo_summary_extractor import prepare_mediainfo_summary
+from parse_bdinfo import parse_bdinfo
 
 # Method that will search for dupes in trackers.
 from search_for_dupes import search_for_dupes_api
@@ -162,6 +163,7 @@ internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin 
 
 args = parser.parse_args()
 
+
 def write_file_contents_to_log_as_debug(file_path):
     """
         Method reads and writes the contents of the provided `file_path` to the log as debug lines.
@@ -170,119 +172,6 @@ def write_file_contents_to_log_as_debug(file_path):
     with open(file_path, 'r') as file_contents:
         lines = file_contents.readlines()
         [ logging.debug(line.replace('\\n','').strip()) for line in lines ]
-
-
-def parse_bdinfo(bdinfo_location):
-    # TODO add support for .iso extraction
-    # TODO add support for 3D bluray disks
-    """
-        Attributes in returned bdinfo
-        -----KEY------------DESCRIPTION-----------------------------EXAMPLE VALUE----------
-            playlist: playlist being parsed                     : 00001.MPL
-            size    : size of the disk                          : 54.597935752011836
-            length  : duration of playback                      : 1:37:17
-            title   : title of the disk                         : Venom: Let There Be Carnage - 4K Ultra HD
-            label   : label of the disk                         : Venom.Let.There.Be.Carnage.2021.UHD.BluRay.2160p.HEVC.Atmos.TrueHD7.1-MTeam
-            video   : {
-                "codec"         : video codec                   : MPEG-H HEVC Video
-                "bitrate"       : the video bitrate             : 55873 kbps
-                "resolution"    : the resolution of the video   : 2160p
-                "fps"           : the fps                       : 23.976 fps
-                "aspect_ratio"  : the aspect ratio              : 16:9
-                "profile"       : the video profile             : Main 10 @ Level 5.1 @ High
-                "bit_depth"     : the bit depth                 : 10 bits
-                "dv_hdr"        : DV or HDR (if present)        : HDR10
-                "color"         : the color parameter           : BT.2020
-            }
-            audio   : {
-                "language"      : the audio language            : English
-                "codec"         : the audio codec               : Dolby TrueHD
-                "channels"      : the audo channels             : 7.1
-                "sample_rate"   : the sample rate               : 48 kHz
-                "bitrate"       : the average bit rate          : 4291 kbps
-                "bit_depth"     : the bit depth of the audio    : 24-bit
-                "atmos"         : whether atmos is present      : Atmos Audio
-            }
-    """
-    bdinfo = dict()
-    bdinfo['video'] = list()
-    bdinfo['audio'] = list()
-    with open(bdinfo_location, 'r') as file_contents:
-        lines = file_contents.readlines()
-        for line in lines:
-            line = line.strip()
-            line = line.replace("*", "").strip() if line.startswith("*") else line
-            if line.startswith("Playlist:"):                        # Playlist: 00001.MPLS              ==> 00001.MPLS
-                bdinfo['playlist'] = line.split(':', 1)[1].strip() 
-            elif line.startswith("Disc Size:"):                     # Disc Size: 58,624,087,121 bytes   ==> 54.597935752011836
-                size = line.split(':', 1)[1].replace("bytes", "").replace(",", "")
-                size = float(size)/float(1<<30)
-                bdinfo['size'] = size                              
-            elif line.startswith("Length:"):                        # Length: 1:37:17.831               ==> 1:37:17
-                bdinfo['length'] = line.split(':', 1)[1].split('.',1)[0].strip()
-            elif line.startswith("Video:"):
-                """
-                    video_components: examples [video_components_dict is the mapping of these components and their indexes]
-                    MPEG-H HEVC Video / 55873 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
-                    MPEG-H HEVC Video / 2104 kbps / 1080p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / Dolby Vision / BT.2020
-                    MPEG-H HEVC Video / 35033 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
-                    MPEG-4 AVC Video / 34754 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
-                """
-                video_components_dict = {
-                    0 : "codec",
-                    1 : "bitrate",
-                    2 : "resolution",
-                    3 : "fps",
-                    4 : "aspect_ratio",
-                    5 : "profile",
-                    6 : "bit_depth",
-                    7 : "dv_hdr",
-                    8 : "color",
-                }
-                video_components = line.split(':', 1)[1].split('/')
-                video_metadata = {}
-                for loop_variable in range(0, len(video_components)):
-                    video_metadata[video_components_dict[loop_variable]] = video_components[loop_variable].strip()
-
-                if "HEVC" in video_metadata["codec"]:
-                    video_metadata["codec"] = "HEVC"
-                elif "AVC" in video_metadata["codec"]:
-                    video_metadata["codec"] = "AVC"
-
-                bdinfo["video"].append(video_metadata)
-            elif line.startswith("Audio:"):
-                """
-                    audio_components: examples 
-                    English / Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz /  4291 kbps / 24-bit (AC3 Embedded: 5.1 / 48 kHz /   640 kbps / DN -31dB)
-                    English / DTS-HD Master Audio / 7.1 / 48 kHz /  5002 kbps / 24-bit (DTS Core: 5.1 / 48 kHz /  1509 kbps / 24-bit)
-                    English / Dolby Digital Audio / 5.1 / 48 kHz /   448 kbps / DN -31dB
-                    English / DTS Audio / 5.1 / 48 kHz /   768 kbps / 24-bit
-                """
-                audio_components_dict = {
-                    0 : "language",
-                    1 : "codec", # atmos => added if present optionally
-                    2 : "channels",
-                    3 : "sample_rate",
-                    4 : "bitrate",
-                    5 : "bit_depth" 
-                }
-                if "(" in line:
-                    line = line.split("(")[0] # removing the contents inside bracket
-                audio_components = line.split(':', 1)[1].split('/ ') # not so sure about this /{space}
-                audio_metadata = {}
-                for loop_variable in range(0, len(audio_components)):
-                    if "Atmos" in audio_components[loop_variable]: # identifying and tagging atmos audio
-                        codec_split = audio_components[loop_variable].split("/")
-                        audio_metadata["atmos"] = codec_split[1].strip()
-                        audio_components[loop_variable] = codec_split[0].strip()
-
-                    audio_metadata[audio_components_dict[loop_variable]] = audio_components[loop_variable].strip()
-                bdinfo["audio"].append(audio_metadata)
-            elif line.startswith("Disc Title:"):        # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
-                bdinfo['title'] = line.split(':', 1)[1].strip()
-            elif line.startswith("Disc Label:"):        # Disc Label: Venom.Let.There.Be.Carnage.2021.UHD.BluRay.2160p.HEVC.Atmos.TrueHD7.1-MTeam
-                bdinfo['label'] = line.split(':', 1)[1].strip()
-    return bdinfo
 
 
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
@@ -325,6 +214,7 @@ def delete_leftover_files():
             for f in files:
                 os.remove(f)
             logging.info("Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
+
 
 def identify_type_and_basic_info(full_path, guess_it_result):
     """
@@ -1157,7 +1047,6 @@ def analyze_video_file(missing_value, media_info):
 
         return regex_video_codec
     # TODO write more block/tests here as we come across issues
-
     # !!! [ Block tests/probes end here ] !!!
 
 
@@ -1640,7 +1529,6 @@ def format_title(json_config):
 # ---------------------------------------------------------------------- #
 #                       generate/edit .torrent file                      #
 # ---------------------------------------------------------------------- #
-
 def generate_callback(torrent, filepath, pieces_done, pieces_total):
     calculate_percentage = 100 * float(pieces_done) / float(pieces_total)
     print_progress_bar(calculate_percentage, 100, prefix='Creating .torrent file:', suffix='Complete', length=30)
@@ -1739,7 +1627,6 @@ def generate_dot_torrent(media, announce, source, callback=None):
 # ---------------------------------------------------------------------- #
 #                  Set correct tracker API Key/Values                    #
 # ---------------------------------------------------------------------- #
-
 def choose_right_tracker_keys():
     required_items = config["Required"]
     optional_items = config["Optional"]
@@ -2090,6 +1977,7 @@ def choose_right_tracker_keys():
     if is_hybrid_translation_needed:
         tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
 
+
 # ---------------------------------------------------------------------- #
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
@@ -2290,6 +2178,15 @@ def upload_to_site(upload_to, tracker_api_key):
         # This is to deal with the 500 internal server error responses BLU has been recently returning
         logging.error(f"[TrackerUpload] HTTP response status code '{response.status_code}' was returned (500=Internal Server Error)")
         logging.info("[TrackerUpload] This doesn't mean the upload failed, instead the site simply isn't returning the upload status")
+
+    elif response.status_code == 400:
+        console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
+        console.print('Upload failed.', style='bold red')
+        try:
+            logging.critical(f'[TrackerUpload] 400 was returned on that upload, this is a problem with the site ({tracker}). Error: Error {response.json()["error"] if "error" in response.json() else response.json()}')
+        except:
+            logging.critical(f'[TrackerUpload] 400 was returned on that upload, this is a problem with the site ({tracker}).')
+        logging.error("[TrackerUpload] Upload failed")
 
     else:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')

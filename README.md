@@ -146,6 +146,7 @@ docker run -it \
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
+- [X] Added support for more streaming services
 
 ### v2.1
 - [ ] Improved Full Disk Support

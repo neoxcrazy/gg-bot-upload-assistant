@@ -53,7 +53,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         try:
             client = ImgurClient(client_id=os.getenv('imgur_client_id'), client_secret=os.getenv('imgur_api_key'))
             response = client.upload_from_path(image_path)
-            return True, f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', response["link"]
+            return True, f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', f'[url={response["link"]}][img]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', response["link"]
         except Exception:
             logging.error(msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
             console.print(f"\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
@@ -67,7 +67,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             # assuming it is, we can then get the img url, format it into bbcode & return it
 
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
-            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]',f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
+            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
         except AssertionError:
             logging.error(msg='[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
             console.print(f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
