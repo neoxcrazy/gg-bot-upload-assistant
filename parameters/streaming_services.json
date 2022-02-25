@@ -221,6 +221,7 @@
     "SHO": "SHO",
     "Showtime": "SHO",
     "SNET": "SNET",
+    "SNXT": "SNXT",
     "Sportsnet": "SNET",
     "Sony": "SONY",
     "SPIK": "SPIK",
@@ -228,6 +229,7 @@
     "Spike TV": "SPKE",
     "SPRT": "SPRT",
     "Sprout": "SPRT",
+    "SS": "SS",
     "STAN": "STAN",
     "Stan": "STAN",
     "STARZ": "STARZ",
@@ -287,9 +289,11 @@
     "Yahoo": "YHOO",
     "YT": "YT",
     "ZDF": "ZDF",
+    "ZEE5":"ZEE5",
     "iP": "iP",
     "BBC iPlayer": "iP",
     "iQIYI": "iQIYI",
     "iT": "iT",
-    "iTunes": "iT"
+    "iTunes": "iT",
+    "JC":"JC"
 }
