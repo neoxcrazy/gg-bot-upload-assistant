@@ -46,6 +46,9 @@
         "optimized": "stream",
         "nfo_file": "nfo",
 
+        "season_number": "season_number",
+        "episode_number": "episode_number",
+
         "internal": "internal",
         "featured": "featured",
         "doubleup": "doubleup",

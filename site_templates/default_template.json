@@ -53,6 +53,8 @@
         "mal": "<required_key>",
         "igdb": "<required_key>",
 
+        "season_number": "<Optional_key>",
+        "episode_number": "<Optional_key>",
         "sd": "<Optional_key>",
         "optimized": "<Optional_key>",
         "nfo_file": "<Optional_key>",

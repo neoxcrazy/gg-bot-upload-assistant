@@ -43,7 +43,9 @@
         "mal": "mal",
         "igdb": "igdb",
         "optimized": "stream",
-        "nfo_file": "nfo_file"
+        "nfo_file": "nfo_file",
+        "season_number": "season_number",
+        "episode_number": "episode_number"
     },
 
     "Required": {
@@ -245,6 +247,8 @@
         "pack": "int",
         "special": "int",
         "sd": "string",
+        "season_number": "string",
+        "episode_number": "string",
 
         "mediainfo": "file",
         "bdinfo": "string"
