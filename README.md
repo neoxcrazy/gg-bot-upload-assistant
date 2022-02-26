@@ -153,7 +153,8 @@ docker run -it \
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
 - [X] Added support for more streaming services
-- [X] DTS-X audio codec bug fix Issue#11
+- [X] DTS-X audio codec bug fix: Issue#11
+- [X] Multiple dupe prompt bug fix: Issue#9 
 
 ### v2.1
 - [ ] Improved Full Disk Support
