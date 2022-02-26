@@ -236,7 +236,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # ------------ Save obvious info we are almost guaranteed to get from guessit into torrent_info dict ------------ #
     # But we can immediately assign some values now like Title & Year
     if not guess_it_result["title"]:
-        raise AssertionError("Guessit could not even extract the title, something is really wrong with this filename..")
+        raise AssertionError("Guessit could not even extract the title, something is really wrong with this filename.")
 
     torrent_info["title"] = guess_it_result["title"]
     if "year" in guess_it_result:  # Most TV Shows don't have the year included in the filename
@@ -282,6 +282,10 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None ) is None :
         torrent_info["release_group"] = "NOGROUP"
         logging.debug(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
+    elif torrent_info["release_group"].startswith("X-"):
+        # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
+        logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
+        torrent_info["release_group"] = torrent_info["release_group"][2:]
     
     # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
@@ -877,10 +881,19 @@ def analyze_video_file(missing_value, media_info):
             if "DTS" in audio_codec:
                 # DTS audio is a bit "special" and has a few possible profiles so we deal with that here
                 # We'll first try to extract it all via regex, should that fail we can use ffprobe
-                match_dts_audio = re.search(r'DTS(-HD(.MA\.)|-ES\.|(.x\.|x\.)|(.HD\.|HD\.)|)', torrent_info["raw_file_name"].replace(" ", "."), re.IGNORECASE)
+                match_dts_audio = re.search(r'DTS(-HD(.MA.)|-ES.|(.[xX].|[xX].)|(.HD.|HD.)|)', torrent_info["raw_file_name"].replace(" ", "."), re.IGNORECASE)
                 if match_dts_audio is not None:
-                    logging.info(f'Used (pymediainfo + regex) to identify the audio codec: {str(match_dts_audio.group()).upper().replace(".", " ")}')
-                    return str(match_dts_audio.group()).upper().replace(".", " ").strip()
+                    # Some releases have DTS-X-RELEASE_GROUP, in this case we only need DTS-X
+                    return_value =str(match_dts_audio.group()).upper().replace(".", " ").strip()
+                    if return_value.endswith("-"):
+                        return_value = return_value[:len(return_value)-1]
+                    
+                    logging.info(f'Used (pymediainfo + regex) to identify the audio codec: {return_value}')
+                    if return_value in audio_codec_dict.keys():
+                        # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
+                        logging.info(f'Used (pymediainfo + regex + audio_codec_dict) to identify the audio codec: {audio_codec_dict[return_value]}')
+                        return audio_codec_dict[return_value]
+                    return return_value
 
                 # If the regex failed we can try ffprobe
                 audio_info_probe = FFprobe( inputs={parse_me: None}, 

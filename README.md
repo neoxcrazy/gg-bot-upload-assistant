@@ -153,11 +153,15 @@ docker run -it \
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
 - [X] Added support for more streaming services
+- [X] DTS-X audio codec bug fix Issue#11
 
 ### v2.1
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
+
+### v3.0
+- [ ] Proper support for re-upload with autodl irssi
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
