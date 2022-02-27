@@ -1532,6 +1532,17 @@ def format_title(json_config):
             if len(value) != 0:  
                 formatted_title = f'{formatted_title}{"-" if key == "release_group" else separator}{value}'
 
+        # Custom title translations specific to tracker
+        # Certain terms might not be allowed in certain trackers. Such terms are configured in a separate config in the tracker template.
+        # Eg: DD+ might not be allowed in certain trackers. Instead they'll use DDP
+        # These translations are then applied here.
+        if "torrent_title_translation" in json_config:
+            torrent_title_translation = json_config["torrent_title_translation"]
+            logging.info(f"Going to apply title translations to generated title: {formatted_title}")
+            for key, val in torrent_title_translation.items():
+                formatted_title = formatted_title.replace(key, val)
+
+        logging.info(f"Torrent title after formatting and translations: {formatted_title}")
         # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings" 
         # which is used to store the payload for the actual POST upload request
         torrent_info["torrent_title"] = str(formatted_title[1:])

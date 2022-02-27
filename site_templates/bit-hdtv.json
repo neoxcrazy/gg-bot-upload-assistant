@@ -398,6 +398,13 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
+
+    "torrent_title_translation" : {
+        "DD+" : "DDP",
+        "HDR10+" : "HDR10Plus",
+        "DTS:X": "DTS-X"
+    },
+
     "banned_groups": [
         "AROMA",
         "aXXo",
