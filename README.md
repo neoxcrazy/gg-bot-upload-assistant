@@ -148,7 +148,7 @@ docker run -it \
 - [X] Add support for TVmaze
 - [X] Add Support for new platforms
     - [X] BIT-HDTV
-    - [ ] Nebulance
+    - [X] Nebulance
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
@@ -159,6 +159,7 @@ docker run -it \
 - [X] Issue#15: HLG not detected from file name bug fixed
 
 ### v2.1
+- [ ] Bug Fixes
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
