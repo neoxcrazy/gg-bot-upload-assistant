@@ -990,12 +990,12 @@ def analyze_video_file(missing_value, media_info):
                 
                 if "HDR10+" in hdr_format:
                     torrent_info["hdr"] = "HDR10+"
-                elif media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_Original):
+                elif media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_original):
                     torrent_info["hdr"] = "PQ10"
                 
-                if media_info_video_track.transfer_characteristics_Original is not None and "HLG" in media_info_video_track.transfer_characteristics_Original:
+                if media_info_video_track.transfer_characteristics_original is not None and "HLG" in media_info_video_track.transfer_characteristics_original:
                     torrent_info["hdr"] = "HLG"
-                elif media_info_video_track.transfer_characteristics_Original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_Original:
+                elif media_info_video_track.transfer_characteristics_original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_original:
                     torrent_info["hdr"] = "WCG"
         except Exception as e:
             logging.exception(f"Error occured while trying to parse HDR information from mediainfo.")
