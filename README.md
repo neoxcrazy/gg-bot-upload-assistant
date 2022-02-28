@@ -108,7 +108,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 6. Fill out the required values in `config.env`
 7. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
 ```
-docker run -it \
+docker run --rm -it \
     -v <PATH_TO_YOUR_MEDIA>:/data \
     --env-file config.env \
     noobmaster669/gg-bot-uploader -t ATH TSP -p "/data/<YOUR_FILE_FOLDER>"
@@ -288,11 +288,11 @@ docker run -it \
 
 
 # Wiki
-### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
-### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
-### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
-### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
-### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
-### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
+### [Video usage examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Usage:-Video-Examples)
+### [Arguments and User Inputs](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Arguments-and-User-Inputs)
+### [Environment Configuration File (config.env breakdown)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Environment-Configuration-File)
+### [/site_templates/*.json guide](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Tracker-Templates)
+### [Automatic re-uploading (autodl)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/autodl-irssi-automatic-re-uploading)
+### [Docker Run Command Examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Docker-Run-Command-Examples)
 
 <br>
