@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import math
 import glob
 import time
 import json
@@ -1571,6 +1572,41 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
         print()
 
 
+def calculate_piece_size(size):
+    """
+    Return the piece size for a total torrent size of ``size`` bytes
+
+    For torrents up to 1 GiB, the maximum number of pieces is 1024 which
+    means the maximum piece size is 1 MiB.  With increasing torrent size
+    both the number of pieces and the maximum piece size are gradually
+    increased up to 10,240 pieces of 8 MiB.  For torrents larger than 80 GiB
+    the piece size is :attr:`piece_size_max` with as many pieces as
+    necessary.
+
+    It is safe to override this method to implement a custom algorithm.
+
+    :return: calculated piece size
+    """
+    if size <= 2**30:          # 1 GiB / 1024 pieces = 1 MiB max
+        pieces = size / 1024
+    elif size <= 4 * 2**30:    # 4 GiB / 2048 pieces = 2 MiB max
+        pieces = size / 2048
+    elif size <= 6 * 2**30:    # 6 GiB / 3072 pieces = 2 MiB max
+        pieces = size / 3072
+    elif size <= 8 * 2**30:    # 8 GiB / 2048 pieces = 4 MiB max
+        pieces = size / 2048
+    elif size <= 16 * 2**30:   # 16 GiB / 2048 pieces = 8 MiB max
+        pieces = size / 2048
+    elif size <= 32 * 2**30:   # 32 GiB / 2048 pieces = 16 MiB max
+        pieces = size / 2048
+    elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
+        pieces = size / 4096
+    elif size > 64 * 2**30:
+        pieces = size / 10240
+    # Math is magic!
+    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
+
+
 def generate_dot_torrent(media, announce, source, callback=None):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
@@ -1613,8 +1649,12 @@ def generate_dot_torrent(media, announce, source, callback=None):
                               exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens","*.sfv"],
                               private=True,
                               creation_date=datetime.datetime.now())
+            torrent.piece_size=calculate_piece_size(torrent.size)
+            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
+            logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
             torrent.generate(callback=callback)
             torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
+            torrent.verify_filesize(media)
             # Save the path to .torrent file in torrent_settings
             torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_info["torrent_title"]}.torrent'
             logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
