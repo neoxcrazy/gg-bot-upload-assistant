@@ -2470,7 +2470,6 @@ for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
     delete_leftover_files()
     torrent_info.clear()
-    torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
 
     # TODO these are some hardcoded values to be handled at a later point in time
     # setting this to 0 is fine. But need to add support for these eventually.
@@ -2678,6 +2677,8 @@ for file in upload_queue:
     # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
     logging.info("[Main] Now starting tracker specific tasks")
     for tracker in upload_to_trackers:
+        torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Upload Assistant'
+        
         temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
         logging.info(f"[Main] Trying to upload to: {tracker}")
 
