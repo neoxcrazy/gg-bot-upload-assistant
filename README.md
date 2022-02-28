@@ -155,6 +155,7 @@ docker run -it \
 - [X] Added support for more streaming services
 - [X] Issue#9: Multiple dupe prompt being asked bug fixed
 - [X] Issue#11: DTS-X audio codec naming error bug fixed
+- [X] Issue#14: BHDTV <3 symbol missing bug fixed
 - [X] Issue#15: HLG not detected from file name bug fixed
 
 ### v2.1
