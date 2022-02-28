@@ -1604,6 +1604,7 @@ def calculate_piece_size(size):
     elif size > 64 * 2**30:
         pieces = size / 10240
     # Math is magic!
+    # piece_size_max :: 16 * 1024 * 1024 => 16MB
     return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
