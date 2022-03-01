@@ -131,7 +131,7 @@ common_args = parser.add_argument_group('Commonly Used Arguments')
 common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
 common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
 common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
-common_args.add_argument('-anon', action='store_true', help="if you want your upload to be anonymous (no other info needed, just input '-anon'")
+common_args.add_argument('-anon', action='store_true', help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
 
 # Less commonly used args (Not essential for most)
 uncommon_args = parser.add_argument_group('Less Common Arguments')
@@ -148,10 +148,6 @@ uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', h
 
 uncommon_args.add_argument('-3d', action='store_true', help="Mark the upload as 3D content")
 uncommon_args.add_argument('-foreign', action='store_true', help="Mark the upload as foreign content [Non-English]")
-
-# experimental arguments ()
-rare_args = parser.add_argument_group('Experimental Arguments')
-rare_args.add_argument('-kv', '--keyvalue', nargs='*', help="[Expirimental] Accept key value pairs which will be added to trackers", action=keyvalue)
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
@@ -2079,11 +2075,6 @@ def upload_to_site(upload_to, tracker_api_key):
     # TODO add support for cookie based authentication
     elif config["technical_jargons"]["authentication_mode"] == "COOKIE":
         logging.fatal(f'[TrackerUpload] Cookie based authentication is not supported as for now.')
-
-    if args.keyvalue:
-        logging.info(f'[Main] User wants to add {args.keyvalue} key values to the tracker.')
-        for key, value in args.keyvalue.items():
-            payload[key] = value
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key

@@ -290,7 +290,9 @@
         "complete_season":"string"
     },
 
-    "Default":{},
+    "Default":{
+        "skip_duplicate_check" : "1"
+    },
 
     "dupes": {
         "technical_jargons": {
