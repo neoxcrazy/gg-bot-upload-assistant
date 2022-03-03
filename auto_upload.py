@@ -2645,6 +2645,9 @@ for file in upload_queue:
 
     if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'):
         torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'
+
+    if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'):
+        torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'
     
     if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
          torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'

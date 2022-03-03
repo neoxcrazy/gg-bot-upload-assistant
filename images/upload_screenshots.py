@@ -45,8 +45,10 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
     #
     # Return values:
     # 1. Status
-    # 2. BBCode Thumbnail
-    # 3. Full Image URL
+    # 2. BBCode|Medium|SizeLimit
+    # 3. BBCode|Medium|NoSizeLimit
+    # 4. BBCode|Thumbnail|NoSizeLimit
+    # 5. Full Image URL
     #
     thumb_size = os.getenv("thumb_size") or "350"
     if img_host == 'imgur':
@@ -54,7 +56,14 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             client = ImgurClient(client_id=os.getenv('imgur_client_id'), client_secret=os.getenv('imgur_api_key'))
             response = client.upload_from_path(image_path)
             logging.debug(f'[Screenshots] Imgur image upload response: {response}')
-            return True, f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', f'[url={response["link"]}][img]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', response["link"]
+            # return data
+            return [
+                True, 
+                f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', 
+                f'[url={response["link"]}][img]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]',
+                f'[url={response["link"]}][img]{"t.".join(response["link"].rsplit(".", 1))}[/img][/url]',
+                response["link"]
+            ]
         except Exception:
             logging.error(msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
             console.print(f"\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
@@ -69,7 +78,13 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             logging.debug(f'[Screenshots] Ptpimg image upload response: {ptp_img_upload}')
             # TODO need to see the response and decide on the thumnail image and size
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
-            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
+            return [
+                True, 
+                f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', 
+                f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]',
+                f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', 
+                ptp_img_upload[0]
+            ]
         except AssertionError:
             logging.error(msg='[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
             console.print(f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
@@ -104,12 +119,41 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
                 # so we set the order/list to try and get the ones we want
                 possible_image_types = ['thumb', 'medium']
                 try:
-                    for img_type in possible_image_types:
-                        if img_type in img_upload_response[parent_key]:
-                            if 'delete_url' in img_upload_response:
-                                logging.info(f'[Screenshots] {img_host} delete url for {image_path}: {img_upload_response["delete_url"]}')
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]',f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]    
-                    return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]',f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
+                    returnList = []
+                    returnList.append(True) # setting the return status as true
+
+                    if 'medium' in img_upload_response[parent_key]:
+                        img_type = 'medium'
+                        # if medium sized image is present then we'll use that as the second and thrid entry in the list.
+                        # second one with thumbnail size limit and thrid without
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        if 'thumb' not in img_upload_response[parent_key]:
+                            # thumbnail sized image is not present, hence we'll use medium sized image as fourth entry
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+
+                    if 'thumb' in img_upload_response[parent_key]:
+                        img_type = 'thumb'
+                        if len(returnList) == 3:
+                            # if medium sized image was present, then the size of the list would be 3 
+                            # hence we only need to add the 4th one as the thumbnail sized image without any size limits
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        else:
+                            # no medium image type is present. hence we'll use thumb for those as well
+                            # second will be the thumbnail sized image with size limit
+                            # third and fourth will be thumbnail sized image wihtout any limits
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                    
+                    if len(returnList) != 4:
+                        # neither of medium nor thumbnail sized image was present, so we'll just add the full image url as 2 3 and 4th entry
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
+                    
+                    returnList.append(img_upload_response[parent_key]["url"])
+                    return returnList
                 except KeyError as key_error:
                     logging.error(f'[Screenshots] {img_host} json KeyError: {key_error}')
                     return False
@@ -133,7 +177,13 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
                         return False
                     else:
                         logging.info(f'[Screenshots] imgbox edit url for {image_path}: {submission["edit_url"]}')
-                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]',f'[url={submission["web_url"]}][img]{submission["thumbnail_url"]}[/img][/url]', submission["image_url"]
+                        return [
+                            True, 
+                            f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["image_url"]}[/img][/url]',
+                            f'[url={submission["web_url"]}][img]{submission["image_url"]}[/img][/url]', 
+                            f'[url={submission["web_url"]}][img]{submission["thumbnail_url"]}[/img][/url]',
+                            submission["image_url"]
+                        ]
 
         if os.path.getsize(image_path) >= 10485760:  # Bytes
             logging.error('[Screenshots] Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
@@ -141,7 +191,14 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
 
         imgbox_asyncio_upload = asyncio.run(imgbox_upload(filepaths=[image_path]))
         if imgbox_asyncio_upload:
-            return True, imgbox_asyncio_upload[1], imgbox_asyncio_upload[2]
+            return [
+                True, 
+                imgbox_asyncio_upload[1], 
+                imgbox_asyncio_upload[2], 
+                imgbox_asyncio_upload[3],
+                imgbox_asyncio_upload[4],
+                imgbox_asyncio_upload[5]
+            ]
 
         # # Python 3.7+ version
         # asyncio.run(imgbox_upload(filepaths=[image_path]))  # call the function that uploads images to imgbox
@@ -242,10 +299,11 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
                 logging.debug(f"[Screenshots] Response from image host: {upload_image}")
-                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
+                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/bbcode_images_thumb_nothumb.txt", "a") as append_bbcode_thumb_nothumb_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
                     append_bbcode_nothumb_txt.write(f"{upload_image[2]} ")
-                    append_url_txt.write(f"{upload_image[3]}\n")
+                    append_bbcode_thumb_nothumb_txt.write(f"{upload_image[3]}\n")
+                    append_url_txt.write(f"{upload_image[4]}\n")
                 successfully_uploaded_image_count += 1
                 # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
                 break
