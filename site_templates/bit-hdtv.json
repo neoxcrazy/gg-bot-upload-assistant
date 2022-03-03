@@ -30,7 +30,7 @@
         "resolution": "resolution",
         "shameless_self_promotion" : "sdescr",
         "mediainfo_summary" : "descr",
-        "bbcode_images_nothumb": "screen",
+        "bbcode_images_thumb_nothumb": "screen",
         "imdb": "url",
         "tvmaze": "url",
         "nfo_file": "nfo"
