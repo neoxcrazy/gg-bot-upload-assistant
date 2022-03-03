@@ -19,130 +19,120 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 * Customizable uploader signature for torrent descriptions
 
 <br>
+
+## Supported Platforms And Trackers
 <table>
- <tr>
-    <td><b style="font-size:30px"> &nbsp; Supported Sites and Platforms</b></td>
-    <td><b style="font-size:30px"> &nbsp; Supported Image Hosts</b></td>
- </tr>
- <tr>
-    <td valign="top">
-        <table>
-            <tbody>
-                <tr style="text-align: center; font-size:20px">
-                    <td><strong>Platform</strong></td>
-                    <td><strong>Acronym</strong></td>
-                    <td><strong>Site Name</strong></td>
-                </th>
-                <tr style="text-align: center">
-                    <td rowspan="10"><strong>UNIT3D</strong></td>
-                    <td><strong>ACM</strong></td>
-                    <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>ATH</strong></td>
-                    <td><strong><a href="https://aither.cc">Aither</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>BHD</strong></td>
-                    <td><strong><a href="https://beyond-hd.me">Beyond-HD</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>BLU</strong></td>
-                    <td><strong><a href="https://blutopia.xyz">Blutopia</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>R4E</strong></td>
-                    <td><strong><a href="https://racing4everyone.eu">Racing4Everyone</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>Telly</strong></td>
-                    <td><strong><a href="https://telly.wtf">Telly.wtf</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>Ntelogo</strong></td>
-                    <td><strong><a href="https://ntelogo.org">Ntelogo</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>DT</strong></td>
-                    <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>UHDHVN</strong></td>
-                    <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>STC</strong></td>
-                    <td><strong><a href="https://skipthecommericals.xyz/">SkipTheCommericals</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>XBTIT</strong></td>
-                    <td><strong>TSP</strong></td>
-                    <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>TBDev</strong></td>
-                    <td><strong>SPD</strong></td>
-                    <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>TorrentDB</strong></td>
-                    <td><strong>TDB</strong></td>
-                    <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>BIT-HDTV</strong></td>
-                    <td><strong>BHDTV</strong></td>
-                    <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
-                </tr>
-                <tr style="text-align: center">
-                    <td><strong>Gazelle</strong></td>
-                    <td><strong>NBL</strong></td>
-                    <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
-                </tr>
-            </tbody>
-        </table>
-    </td>
-    <td valign="top">
-        <div>
-            <table>
-                <tbody>
-                    <tr style="text-align: center; font-size:20px">
-                        <td><strong>#</strong></td>
-                        <td><strong>Image Host</strong></td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>imgbox</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>imgbb</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>freeimage</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>ptpimg</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>imgfi</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>imgur</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>snappie</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </td>
- </tr>
+    <tbody>
+        <tr style="text-align: center; font-size:20px">
+            <td><strong>Platform</strong></td>
+            <td><strong>Acronym</strong></td>
+            <td><strong>Site Name</strong></td>
+        </th>
+        <tr style="text-align: center">
+            <td rowspan="10"><strong>UNIT3D</strong></td>
+            <td><strong>ACM</strong></td>
+            <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>ATH</strong></td>
+            <td><strong><a href="https://aither.cc">Aither</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>BHD</strong></td>
+            <td><strong><a href="https://beyond-hd.me">Beyond-HD</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>BLU</strong></td>
+            <td><strong><a href="https://blutopia.xyz">Blutopia</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>R4E</strong></td>
+            <td><strong><a href="https://racing4everyone.eu">Racing4Everyone</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Telly</strong></td>
+            <td><strong><a href="https://telly.wtf">Telly.wtf</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Ntelogo</strong></td>
+            <td><strong><a href="https://ntelogo.org">Ntelogo</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>DT</strong></td>
+            <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>UHDHVN</strong></td>
+            <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>STC</strong></td>
+            <td><strong><a href="https://skipthecommericals.xyz/">SkipTheCommericals</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>XBTIT</strong></td>
+            <td><strong>TSP</strong></td>
+            <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>TBDev</strong></td>
+            <td><strong>SPD</strong></td>
+            <td><strong><a href="https://speedapp.io/">SpeedApp</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>TorrentDB</strong></td>
+            <td><strong>TDB</strong></td>
+            <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>BIT-HDTV</strong></td>
+            <td><strong>BHDTV</strong></td>
+            <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Gazelle</strong></td>
+            <td><strong>NBL</strong></td>
+            <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
+        </tr>
+    </tbody>
+</table>
+
+## Supported image Hosts
+<table>
+    <tbody>
+        <tr style="text-align: center; font-size:20px">
+            <td><strong>#</strong></td>
+            <td><strong>Image Host</strong></td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>imgbox</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>imgbb</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>freeimage</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>ptpimg</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>imgfi</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>imgur</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>snappie</td>
+        </tr>
+    </tbody>
 </table>
 
 <br>
