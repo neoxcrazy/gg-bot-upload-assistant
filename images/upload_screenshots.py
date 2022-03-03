@@ -302,7 +302,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
                 with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/bbcode_images_thumb_nothumb.txt", "a") as append_bbcode_thumb_nothumb_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
                     append_bbcode_nothumb_txt.write(f"{upload_image[2]} ")
-                    append_bbcode_thumb_nothumb_txt.write(f"{upload_image[3]}\n")
+                    append_bbcode_thumb_nothumb_txt.write(f"{upload_image[3]}")
                     append_url_txt.write(f"{upload_image[4]}\n")
                 successfully_uploaded_image_count += 1
                 # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
