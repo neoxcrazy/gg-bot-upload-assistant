@@ -5,6 +5,7 @@ import asyncio
 import logging
 import requests
 import pyimgbox
+import ptpimg_uploader
 from datetime import datetime
 from rich import box
 from rich.table import Table
@@ -12,6 +13,7 @@ from rich.console import Console
 from rich.progress import track
 from dotenv import load_dotenv
 from ffmpy import FFmpeg
+from imgurpython import ImgurClient
 
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
@@ -47,15 +49,27 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
     # 3. Full Image URL
     #
     thumb_size = os.getenv("thumb_size") or "350"
-    if img_host == 'ptpimg':
+    if img_host == 'imgur':
+        try:
+            client = ImgurClient(client_id=os.getenv('imgur_client_id'), client_secret=os.getenv('imgur_api_key'))
+            response = client.upload_from_path(image_path)
+            logging.debug(f'[Screenshots] Imgur image upload response: {response}')
+            return True, f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', f'[url={response["link"]}][img]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', response["link"]
+        except Exception:
+            logging.error(msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
+            console.print(f"\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
+            return False
+
+    elif img_host == 'ptpimg':
         try:
             ptp_img_upload = ptpimg_uploader.upload(api_key=os.getenv('ptpimg_api_key'), files_or_urls=[image_path], timeout=5)
             # Make sure the response we get from ptpimg is a list
             assert type(ptp_img_upload) == list
             # assuming it is, we can then get the img url, format it into bbcode & return it
-
+            logging.debug(f'[Screenshots] Ptpimg image upload response: {ptp_img_upload}')
+            # TODO need to see the response and decide on the thumnail image and size
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
-            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
+            return True, f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', ptp_img_upload[0]
         except AssertionError:
             logging.error(msg='[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
             console.print(f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
@@ -65,7 +79,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             console.print(f"\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
     
-    if img_host in ('imgbb', 'freeimage', 'imgfi'):
+    elif img_host in ('imgbb', 'freeimage', 'imgfi', 'snappie'):
         # Get the correct image host url/json key
         available_image_host_urls = json.load(open(f'{base_path}/parameters/image_host_urls.json'))
 
@@ -76,7 +90,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         try:
             img_upload_request = None
             data = {'key': img_host_api}
-            if img_host == 'imgfi':
+            if img_host in ('imgfi', 'snappie'):
                 files = {'source': open(image_path, 'rb')}
                 img_upload_request = requests.post(url=image_host_url, data=data, files=files)
             else:
@@ -85,17 +99,17 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             
             if img_upload_request.ok:
                 img_upload_response = img_upload_request.json()
+                logging.debug(f'[Screenshots] Image upload response: {img_upload_response}')
                 # When you upload an image you get a few links back, you get 'medium', 'thumbnail', 'url', 'url_viewer' and we only need max 2 
                 # so we set the order/list to try and get the ones we want
-                possible_image_types = ['medium', 'thumb']
+                possible_image_types = ['thumb', 'medium']
                 try:
                     for img_type in possible_image_types:
                         if img_type in img_upload_response[parent_key]:
                             if 'delete_url' in img_upload_response:
                                 logging.info(f'[Screenshots] {img_host} delete url for {image_path}: {img_upload_response["delete_url"]}')
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
-                        else:
-                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
+                            return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]',f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]    
+                    return True, f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key]["url"]}[/img][/url]',f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]', img_upload_response[parent_key]["url"]
                 except KeyError as key_error:
                     logging.error(f'[Screenshots] {img_host} json KeyError: {key_error}')
                     return False
@@ -109,16 +123,17 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
             return False
     
     # Instead of coding our own solution we'll use the awesome project https://github.com/plotski/pyimgbox to upload to imgbox
-    if img_host == "imgbox":
+    elif img_host == "imgbox":
         async def imgbox_upload(filepaths):
-            async with pyimgbox.Gallery(title=torrent_title, thumb_width=thumb_size) as gallery:
+            async with pyimgbox.Gallery(title=torrent_title, thumb_width=int(thumb_size)) as gallery:
                 async for submission in gallery.add(filepaths):
+                    logging.debug(f'[Screenshots] Imgbox image upload response: {submission}')
                     if not submission['success']:
                         logging.error(f"[Screenshots] {submission['filename']}: {submission['error']}")
                         return False
                     else:
                         logging.info(f'[Screenshots] imgbox edit url for {image_path}: {submission["edit_url"]}')
-                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]', submission["image_url"]
+                        return True, f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["thumbnail_url"]}[/img][/url]',f'[url={submission["web_url"]}][img]{submission["thumbnail_url"]}[/img][/url]', submission["image_url"]
 
         if os.path.getsize(image_path) >= 10485760:  # Bytes
             logging.error('[Screenshots] Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
@@ -134,6 +149,8 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         # # Python <= 3.6 friendly alternative
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(imgbox_upload(list_of_images))
+    else:
+        logging.fatal(f'[Screenshots] Invalid imagehost {img_host}. Cannot upload screenshots.')
 
 
 def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, discord_url):
@@ -225,9 +242,10 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
                 logging.debug(f"[Screenshots] Response from image host: {upload_image}")
-                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
+                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
-                    append_url_txt.write(f"{upload_image[2]}\n")
+                    append_bbcode_nothumb_txt.write(f"{upload_image[2]} ")
+                    append_url_txt.write(f"{upload_image[3]}\n")
                 successfully_uploaded_image_count += 1
                 # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
                 break

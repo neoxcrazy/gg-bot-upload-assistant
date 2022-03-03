@@ -1,20 +1,29 @@
 # **GG-BOT Upload Assistant**
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases.
 
-# Main Features
-* Automatic parsing of input file
-* Mediainfo and BDInfo generation and parsing
-* Frame accurate screenshots
-* Automatic screenshot uploading
-* Dot torrent file creation
-* Proper torrent title naming according to target tracker
-* Hybrid type mapping [Refer wiki for detailed explanation]
-* Automatically move torrent and media after .torrent creation
+<br>
 
-## Supported Sites and Platforms:
+# Main Features
+* Generate, parse and attach Mediainfo or BDInfo to torrent uploads
+* Support for Full Disk uploads
+* Frame Accurate Screenshots
+* Generates, uploads and attach screenshots to torrent description
+* Ability to decide the thumbnail size for screenshots in bbcode
+* Obtains TMDB/IMDB/MAL ids automatically
+* Creates name following proper conventions
+* Generate .torrent with pytor or mktorrent
+* Uploads to various trackers seamlessly
+* Multiple Image Host support
+* Packed as a docker container. (No need to install any additional tools)
+* Automatically move .torrent and media to specified folders after upload
+* Customizable uploader signature for torrent descriptions
+
+<br>
+
+## Supported Platforms And Trackers
 <table>
     <tbody>
-         <tr style="text-align: center; font-size:20px">
+        <tr style="text-align: center; font-size:20px">
             <td><strong>Platform</strong></td>
             <td><strong>Acronym</strong></td>
             <td><strong>Site Name</strong></td>
@@ -75,11 +84,62 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>TDB</strong></td>
             <td><strong><a href="https://torrentdb.net/">TorrentDB</a></strong></td>
         </tr>
+        <tr style="text-align: center">
+            <td><strong>BIT-HDTV</strong></td>
+            <td><strong>BHDTV</strong></td>
+            <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>Gazelle</strong></td>
+            <td><strong>NBL</strong></td>
+            <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
+        </tr>
     </tbody>
 </table>
 
+## Supported image Hosts
+<table>
+    <tbody>
+        <tr style="text-align: center; font-size:20px">
+            <td><strong>#</strong></td>
+            <td><strong>Image Host</strong></td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>imgbox</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>imgbb</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>freeimage</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>ptpimg</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>imgfi</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>imgur</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>snappie</td>
+        </tr>
+    </tbody>
+</table>
+
+<br>
+
 <!-- Basic setup -->
-# Basic setup (Bare Metal / VM):
+# Basic setup
+## Bare Metal / VM:
 1. Clone / download this repository
 2. Install necessary packages ```pip3 install -r requirements.txt```
 3. Rename `config.env.sample` to `config.env`
@@ -89,7 +149,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
 8. Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
 
-# Basic setup (Docker):
+## Docker:
 1. Create new folder / dir [`mkdir GGBotUploader`]
 2. Enter into the new directory [`cd GGBotUploader`]
 3. Pull GG-Bot-Uploader docker image ``` docker pull noobmaster669/gg-bot-uploader:latest``` (See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags)
@@ -98,12 +158,13 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 6. Fill out the required values in `config.env`
 7. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
 ```
-docker run -it \
+docker run --rm -it \
     -v <PATH_TO_YOUR_MEDIA>:/data \
     --env-file config.env \
     noobmaster669/gg-bot-uploader -t ATH TSP -p "/data/<YOUR_FILE_FOLDER>"
 ```
-   <br /> 
+
+<br /> 
 
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
@@ -133,113 +194,186 @@ docker run -it \
 <br>
 
 # Roadmap
-### v2.0.2
-- [X] Add Support for new platforms
-    - [X] TorrentDB
-- [X] Support for custom messages / descriptions during upload
-- [X] Support for custom upload signatures for regular uploaders
+
+### v2.0.5
+- [ ] Fix existing bugs
+- [ ] Add more bugs to be fixed
+- [ ] Add Support for new platforms
+    - [ ] Anasch
 
 ### v2.1
+- [ ] Fix existing bugs
+- [ ] Add more bugs to be fixed
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
-- [ ] New image host: Imgur
+
+### v3.0
+- [ ] Fix existing bugs
+- [ ] Add more bugs to be fixed
+- [ ] Proper support for re-upload with autodl irssi
+- [ ] Improved dupe check
+- [ ] Support for communicating with torrent clients
+- [ ] Implement a caching mechanism
+- [ ] Auto upload report dashboard ??
+- [ ] CLI to tag uploads manually
+- [ ] Discord notification for auto uploaded data
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] AvistaZ
-    - [ ] BIT-HDTV
-    - [ ] Nebulance
+    - [ ] Anthelion
+    - [ ] MoreThanTV
 - [ ] Add support for DVDs
 
 <br>
 
 # Change Log
+## **2.0.4**
+
+    New Trackers
+        * BIT-HDTV
+        * Nebulance
+
+    New Image Hosts
+        * Snappie
+
+    New Features
+        * Added new bugs to be fixed :p
+        * Support for TVMaze and a database for TV Shows
+        * Improved key translations and mapping for tracker specific jobs
+        * Support for screenshots without thumbnail size limit
+        * New Hybrid Mapping for tracker SkipTheCommercials
+        * Added support for more streaming services
+
+    Bug Fixes
+        * Issue#9: Multiple dupe prompt being asked bug fixed
+        * Issue#11: DTS-X audio codec naming error bug fixed
+        * Issue#14: BHDTV <3 symbol missing bug fixed
+        * Issue#15: HLG not detected from file name bug fixed
+
+<br>
+
+## **2.0.3**
+
+    New Image Hosts
+        * Imgur
+
+    Bug Fixes
+        * ptp image uploads not working bug fix
+
+<br>
+
+## **2.0.2**
+
+    New Trackers
+        * TorrentDB
+
+    New Features
+        * Support for custom messages / descriptions during upload
+        * Support for custom upload signatures for regular uploaders
+
+    Bug Fixes
+        * SpeedApp screenshots missing bug fixed
+
+<br>
+
 ## **2.0.1**
 
-#### New Trackers
-    * SkipTheCommercials
+    New Trackers
+        * SkipTheCommercials
 
-#### New Image Hosts
-    * Imgfi
+    New Image Hosts
+        * Imgfi
 
-#### Underhood changes
-    * Improved batch processing
-    * Refactor tracker acronyms and api keys to config file
+    Underhood changes
+        * Improved batch processing
+        * Refactor tracker acronyms and api keys to config file
+
+<br>
 
 ## **2.0**
 
-#### New Trackers
-    * SpeedApp
-    * UHD-Heaven
+    New Trackers
+        * SpeedApp
+        * UHD-Heaven
 
-#### Underhood changes
-    * Performance Optimizations
-    * Platform based site tagging
-    * Improved argument description and help
-    * Dynamic media summary based on the extracted metadata
-    * Frame accurate screenshots
-    * Environment file key validations
-    * Code refactor
-    * Masking sensitive data in log file
-    * Various steps added to reduce the coupling with UNIT3D codebase
+    Underhood changes
+        * Performance Optimizations
+        * Platform based site tagging
+        * Improved argument description and help
+        * Dynamic media summary based on the extracted metadata
+        * Frame accurate screenshots
+        * Environment file key validations
+        * Code refactor
+        * Masking sensitive data in log file
+        * Various steps added to reduce the coupling with UNIT3D codebase
 
-#### New Features
-    * Hybrid category mapping [See Site-Templates Wiki]
-    * Support for Blu-ray Full Disc uploads [fat image required]
-    * Ability to choose playlist manually for full disk uploads
-    * Improved BDInfo parsing
-    * Extended BluRay regions list as configurable json
-    * Debug mode for detailed analysis
-    * Extended Scene Groups list as configurable json
-    * Extended Streaming Services list as configurable json
-    * Audio Codec list as configurable json
-    * Extended audio codec list for full disk codecs
-    * TSP internal uploads
-    * Move dot torrents based on type after upload
-    * Feature merges from XPBot
-        * Improved dupe check
-        * Improved screenshot upload process
-        * Added support for ptpimg
-        * Removed support for imgyukle
+    New Features
+        * Hybrid category mapping [See Site-Templates Wiki]
+        * Support for Blu-ray Full Disc uploads [fat image required]
+        * Ability to choose playlist manually for full disk uploads
+        * Improved BDInfo parsing
+        * Extended BluRay regions list as configurable json
+        * Debug mode for detailed analysis
+        * Extended Scene Groups list as configurable json
+        * Extended Streaming Services list as configurable json
+        * Audio Codec list as configurable json
+        * Extended audio codec list for full disk codecs
+        * TSP internal uploads
+        * Move dot torrents based on type after upload
+        * Feature merges from XPBot
+            * Improved dupe check
+            * Improved screenshot upload process
+            * Added support for ptpimg
+            * Removed support for imgyukle
 
-#### Bug Fixes
-    * No dupe message not being shown in certain cases
-    * Invalid PA streaming service tagging
-    * PQ10, HLG and WCG HDR Formats not being detected
-    * TSP dupe check for web sourced contents
+    Bug Fixes
+        * No dupe message not being shown in certain cases
+        * Invalid PA streaming service tagging
+        * PQ10, HLG and WCG HDR Formats not being detected
+        * TSP dupe check for web sourced contents
+
+<br>
 
 ##  **1.1**
+    New Trackers
+        * DesiTorrents 
+    New Features
+        * No spoiler screenshot feature
+        * CICD pipeline optimizations
+        * Default screenshots count changes
+        * Strip text feature for torrent dupe checks
+    Bug Fixes
+        * Full season tv-show upload bug fix
+        * Updated tag naming bug fix
 
-    * Added support for new tracker: DesiTorrents 
-    * No spoiler screenshot feature
-    * CICD pipeline optimizations
-    * Default screenshots count changes
-    * Strip text feature for torrent dupe checks
-    * Full season tv-show upload bug fix
-    * Updated tag naming bug fix
+<br>
 
 ##  **1.0.1**
+    Bug Fixes
+        * Updated naming conventions for HDR, Atmos Audio, and BluRay source
 
-    * Updated naming conventions for HDR, Atmos Audio, and BluRay source
+<br>
 
 ##  **1.0**
+    New Features
+        * Initial Release
+        * Added docker images for aarch64 and armhf OS Architectures
+        * CICD Pipeline Changes
+        * Updated Templates
+        * Support for Xbtit Platform with custom API
+        * Screenshot thumbnail feature
 
-    * Initial Release
-    * Added docker images for aarch64 and armhf OS Architectures
-    * CICD Pipeline Changes
-    * Updated Templates
-    * Support for Xbtit Platform with custom API
-    * Screenshot thumbnail feature
-
+<br>
 
 # Wiki
-### [Video usage examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Video-examples)
-### [Arguments and User Inputs](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Arguments-and-User-Inputs)
-### [Environment Configuration File (config.env breakdown)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Environment-Configuration-File)
-### [/site_templates/*.json guide](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Tracker-Templates)
-### [Automatic re-uploading (autodl)](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/autodl-irssi-automatic-re-uploading)
-### [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples)
+### [Video usage examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Usage:-Video-Examples)
+### [Arguments and User Inputs](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Arguments-and-User-Inputs)
+### [Environment Configuration File (config.env breakdown)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Environment-Configuration-File)
+### [/site_templates/*.json guide](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Tracker-Templates)
+### [Automatic re-uploading (autodl)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/autodl-irssi-automatic-re-uploading)
+### [Docker: Run Command Examples](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Docker-Run-Command-Examples)
+### [Docker: Noob Friendly Setup Guide](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/Noob-Friendly-Setup-Guide)
 
 <br>

@@ -43,6 +43,8 @@
         "live": "live",
         "sd": "sd",
         "nfo_file": "nfo",
+        "season_number": "season_number",
+        "episode_number": "episode_number",
 
         "optimized": "stream",
         "internal": "internal",
@@ -121,8 +123,15 @@
         "mediainfo": "string"
     },
 
+    "Default":{},
+
     "dupes": {
-        "request": "GET",
+        "technical_jargons": {
+            "authentication_mode": "API_KEY",
+            "payload_type": "MULTI-PART",
+            "request_method": "GET"
+        },
+        
         "url_format": "{search_url}&imdbId={imdb}",
         "strip_text": true,
 

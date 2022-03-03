@@ -26,5 +26,6 @@
     "DTS Audio": "DTS",
     "DTS-HD Master Audio": "DTS-HD MA",
     "DTS-HD High-Res Audio": "DTS-HD HRA",
-    "DTS:X Master Audio": "DTS:X"
+    "DTS:X Master Audio": "DTS:X",
+    "DTS-X": "DTS:X"
   }
