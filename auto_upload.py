@@ -2739,7 +2739,7 @@ for file in upload_queue:
                 
 
         # -------- Add bbcode screenshots to description.txt --------
-        if "bbcode_images" in torrent_info and "url_images" not in config["translation"] and "data_images" not in config["translation"]:
+        if "bbcode_images" in torrent_info and not ("url_images" in config["translation"] or "url_images" in config["translation"]):
             # Screenshots will be added to description only if no custom screenshot payload method is provided.
             # Possible payload mechanisms for screenshot are 1. bbcode, 2. url, 3. post data
             # TODO implement proper screenshot payload mechanism. [under technical_jargons?????]
