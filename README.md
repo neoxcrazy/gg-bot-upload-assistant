@@ -145,10 +145,13 @@ docker run --rm -it \
 # Roadmap
 
 ### v2.0.4
+- [X] Added new bugs to be fixed :p
 - [X] Add support for TVmaze
 - [X] Add Support for new platforms
     - [X] BIT-HDTV
     - [X] Nebulance
+- [X] New image host
+    - [X] Snappie
 - [X] Improved translations for tracker key mapping
 - [X] Support for screenshot without thumbnail size restriction
 - [X] Hybrid mapping for STC torrent types
@@ -158,6 +161,10 @@ docker run --rm -it \
 - [X] Issue#14: BHDTV <3 symbol missing bug fixed
 - [X] Issue#15: HLG not detected from file name bug fixed
 
+### v2.0.5
+- [ ] Add Support for new platforms
+    - [ ] Anasch
+
 ### v2.1
 - [ ] Bug Fixes
 - [ ] Improved Full Disk Support
@@ -166,6 +173,12 @@ docker run --rm -it \
 
 ### v3.0
 - [ ] Proper support for re-upload with autodl irssi
+- [ ] Improved dupe check
+- [ ] Support for communicating with torrent clients
+- [ ] Implement a caching mechanism
+- [ ] Auto upload report dashboard ??
+- [ ] CLI to tag uploads manually
+- [ ] Discord notification for auto uploaded data
 
 ### Backlogs
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents

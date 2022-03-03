@@ -103,19 +103,6 @@ if len(os.getenv('DISCORD_WEBHOOK')) != 0:
 else:
     discord_url = None
 
-
-# create a keyvalue class
-class keyvalue(argparse.Action):
-    # Constructor calling
-    def __call__( self , parser, namespace, values, option_string = None):
-        setattr(namespace, self.dest, dict())
-        for value in values:
-            # split it into key and value
-            key, value = value.split('=')
-            # assign into dictionary
-            getattr(namespace, self.dest)[key] = value
-
-# TODO integrate this feature with AvistaZ platform
 is_live_on_site = str(os.getenv('live')).lower()
 
 # Setup args
@@ -2266,6 +2253,12 @@ starting_new_upload = f" {'-' * 24} Starting new upload {'-' * 24} "
 
 logging.info(starting_new_upload)
 
+if args.tripleup and args.doubleup:
+    logging.error("[Main] User tried to pass tripleup and doubleup together. Stopping torrent upload process")
+    console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
+    console.print("Exiting...\n", style='bright_red bold')
+    sys.exit()
+
 if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
     logging.getLogger("torf").setLevel(logging.INFO)
@@ -2274,12 +2267,6 @@ if args.debug:
     logging.getLogger("rebulk.processors").setLevel(logging.INFO)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
     logging.debug(f"Arguments provided by user: {args}")
-
-if args.tripleup and args.doubleup:
-    logging.error("[Main] User tried to pass tripleup and doubleup together. Stopping torrent upload process")
-    console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
-    console.print("Exiting...\n", style='bright_red bold')
-    sys.exit()
 
 """
 ----------------------- Full Disk & BDInfo CLI Related Notes -----------------------
