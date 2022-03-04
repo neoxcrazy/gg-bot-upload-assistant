@@ -21,10 +21,6 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
-    },
-
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
@@ -32,7 +28,8 @@
         "mediainfo": "mediainfo",
         "bdinfo": "bdinfo",
         "type": "category_id",
-        "source": "type_id",
+        "source": "source",
+        "hybrid_type":"type_id",
         "resolution": "resolution_id",
         "tmdb": "tmdb",
         "imdb": "imdb",
@@ -61,6 +58,7 @@
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
+        "type_id":"string",
 
         "tvdb": "string",
         "tmdb": "string",
@@ -78,7 +76,7 @@
             "2": "episode"
         },
 
-        "type_id": {
+        "source": {
             "1": {
                 "disc": 1,
                 "bluray_disc": 2,
@@ -137,6 +135,97 @@
         }
     },
 
+    
+    "hybrid_type": {
+        "required": true,
+        "__comments__": {
+            "1" : "Single Episode -> Full Disk",
+            "2" : "Single Episode -> Remux",
+            "3" : "Single Episode -> Encode",
+            "4" : "Single Episode -> WEB-DL",
+            "5" : "Single Episode -> WEBRip",
+            "6" : "Single Episode -> HDTV",
+            "18" : "Season Pack -> FullDisk, remux, encode-> Seasons-HD-Retail",
+            "13" : "Season Pack -> 720+ -> Seasons-HD",
+            "14" : "Season Pack -> below 720p -> Seasons-SD",
+            "17" : "Season Pack -> DVD, remux, encode -> Seasons-SD-Retail -> NOT POSSIBLE",
+            "15" : "Documentaries -> NOT POSSIBLE",
+            "16" : "Sports -> NOT POSSIBLE",
+            "19" : "Non-English -> NOT POSSIBLE",
+            "20" : "DVDRip -> NOT POSSIBLE",
+            
+            "Season Pack" : "If episode_number == 0. then season pack"
+        },
+        "mapping": {
+            "18" : {
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": ["0"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1", "2", "3"]
+                }
+            },
+            "13" : {
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": ["0"]
+                },
+                "resolution_id":{
+                    "data_source": "tracker",
+                    "values": ["1", "2", "3", "4", "5"]
+                }
+            },
+            "14" : {
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": ["0"]
+                },
+                "resolution_id":{
+                    "data_source": "tracker",
+                    "values": ["6", "7", "8", "9", "10"]
+                }
+            },
+            "1" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                }
+            },
+            "2" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
+            },
+            "3" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                }
+            },
+            "4" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["4"]
+                }
+            },
+            "5" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["5"]
+                }
+            },
+            "6" : {
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                }
+            }
+        }
+    },
+
     "Optional": {
         "nfo_file": "file",
         "season_number": "string",
@@ -146,8 +235,15 @@
         "mediainfo": "string"
     },
 
+    "Default":{},
+
     "dupes": {
-        "request": "GET",
+        "technical_jargons": {
+            "authentication_mode": "API_KEY",
+            "payload_type": "MULTI-PART",
+            "request_method": "GET"
+        },
+        
         "url_format": "{search_url}&imdbId={imdb}",
         "strip_text": true,
 

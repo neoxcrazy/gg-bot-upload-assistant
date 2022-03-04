@@ -39,6 +39,8 @@
         "anon": "anonymous",
         "sd": "sd",
         "optimized": "stream",
+        "season_number": "season_number",
+        "episode_number": "episode_number",
 
         "live": "<required_key_live>",
         "mal": "<required_key>",
@@ -97,9 +99,16 @@
         "bdinfo": "string",
         "mediainfo": "string"
     },
+    
+    "Default":{},
 
     "dupes": {
-        "request": "GET",
+        "technical_jargons": {
+            "authentication_mode": "API_KEY",
+            "payload_type": "MULTI-PART",
+            "request_method": "GET"
+        },
+        
         "url_format": "{search_url}&imdb={imdb}",
         "strip_text": false,
 
