@@ -200,6 +200,7 @@ docker run --rm -it \
 - [ ] Add more bugs to be fixed
 - [ ] Add Support for new platforms
     - [ ] Anasch
+- [ ] Ability to upload to all available trackers (USE WITH CAUTION)
 
 ### v2.1
 - [ ] Fix existing bugs
