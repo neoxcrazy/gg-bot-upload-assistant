@@ -199,7 +199,8 @@ docker run --rm -it \
 - [ ] Fix existing bugs
 - [ ] Add more bugs to be fixed
 - [ ] Add Support for new platforms
-    - [ ] Anasch
+    - [ ] ReelFliX
+    - [ ] New Platform From STC
 - [ ] Ability to upload to all available trackers (USE WITH CAUTION)
 
 ### v2.1
@@ -214,15 +215,25 @@ docker run --rm -it \
 - [ ] Add more bugs to be fixed
 - [ ] Proper support for re-upload with autodl irssi
 - [ ] Improved dupe check
-- [ ] Support for communicating with torrent clients
-- [ ] Implement a caching mechanism
+- [X] Modularize existing codebase
+- [X] Support for tmdb/imdb id from mediainfo 
+- [X] Support for communicating with torrent clients
+    - [X] qBittorrent
+- [X] Implement a caching mechanism
 - [ ] Auto upload report dashboard ??
 - [ ] CLI to tag uploads manually
 - [ ] Discord notification for auto uploaded data
 
 ### Backlogs
+- [ ] Add support for various storage mechanism as cache replacement
+    - [ ] MongoDB
+    - [ ] File System
+- [ ] Support for communicating with torrent clients
+    - [ ] Deluge
+    - [ ] ruTorrent
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
+    - [ ] Anasch
     - [ ] Anthelion
     - [ ] MoreThanTV
 - [ ] Add support for DVDs
