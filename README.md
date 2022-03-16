@@ -198,7 +198,7 @@ docker run --rm -it \
 ### v2.0.5
 - [ ] Fix existing bugs
 - [ ] Add more bugs to be fixed
-- [ ] Support for default trackers
+- [X] Support for default trackers
 - [ ] Add Support for new platforms
     - [ ] ReelFliX
     - [ ] New Platform From STC
