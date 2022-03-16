@@ -110,7 +110,7 @@ parser = argparse.ArgumentParser()
 
 # Required Arguments [Mandatory]
 required_args = parser.add_argument_group('Required Arguments')
-required_args.add_argument('-t', '--trackers', nargs='*', required=True, help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
+required_args.add_argument('-t', '--trackers', nargs='*', required=False, help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
 required_args.add_argument('-p', '--path', nargs='*', required=True, help="Use this to provide path(s) to file/folder")
 
 # Commonly used args:
@@ -2345,6 +2345,7 @@ if discord_url:
 upload_to_trackers = []
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
 
+logging.info("[Main] Validating the trackers provide by user in command line argument")
 for tracker in args.trackers:
     if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
         # Make sure that an API key is set for that site
@@ -2357,11 +2358,32 @@ for tracker in args.trackers:
     else:
         logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
 
+
 # Make sure that the user provides at least 1 valid tracker we can upload to
 try:
     # if len(upload_to_trackers) == 0 that means that the user either didn't provide any site at all, the site is not supported, or the API key isn't provided
     if len(upload_to_trackers) < 1:
-        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
+        logging.error("[Main] Validation failed for all trackers provided in command line arguments")
+        logging.info("[Main] Attempting check and validate and default trackers configured")
+        
+        default_tracker_list = os.getenv("default_tracker_list")
+        if len(default_tracker_list) > 0:
+            default_tracker_list= [ x.strip() for x in default_tracker_list.split(',') ]
+        
+        for tracker in default_tracker_list:
+        if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
+            # Make sure that an API key is set for that site
+            try:
+                if len(api_keys_dict[(str(tracker).lower()) + "_api_key"]) <= 1:
+                    raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
+                if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
+            except AssertionError as err:
+                logging.error("[Main] We can't upload to '{}' because that sites API key is not specified".format(tracker))
+        else:
+            logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
+
+        if len(upload_to_trackers) < 1:
+            raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
 except AssertionError as err:  # Log AssertionError in the logfile and quit here
     logging.exception("[Main] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
     raise err
