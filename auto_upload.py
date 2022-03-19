@@ -110,11 +110,12 @@ parser = argparse.ArgumentParser()
 
 # Required Arguments [Mandatory]
 required_args = parser.add_argument_group('Required Arguments')
-required_args.add_argument('-t', '--trackers', nargs='*', required=False, help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
 required_args.add_argument('-p', '--path', nargs='*', required=True, help="Use this to provide path(s) to file/folder")
 
 # Commonly used args:
 common_args = parser.add_argument_group('Commonly Used Arguments')
+common_args.add_argument('-t', '--trackers', nargs='*', help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
+common_args.add_argument('-a', '--all_trackers', action='store_true', help="Select all trackers that can be uploaded to")
 common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
 common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
 common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
@@ -2364,13 +2365,17 @@ try:
     # if len(upload_to_trackers) == 0 that means that the user either didn't provide any site at all, the site is not supported, or the API key isn't provided
     if len(upload_to_trackers) < 1:
         logging.error("[Main] Validation failed for all trackers provided as command line arguments")
-        logging.info("[Main] Attempting check and validate and default trackers configured")
         
-        default_tracker_list = os.getenv("default_trackers_list") or ""
-        if len(default_tracker_list) > 0:
-            default_tracker_list= [ x.strip() for x in default_tracker_list.split(',') ]
+        if args.all_trackers: # user wants to upload to all the trackers possible
+            tracker_list = acronym_to_tracker.keys()
+            logging.info(f"[Main] User has chosen to upload to add possible trackers: {tracker_list}")
+        else:
+            logging.info("[Main] Attempting check and validate and default trackers configured")
+            tracker_list = os.getenv("default_trackers_list") or ""
+            if len(tracker_list) > 0:
+                tracker_list= [ x.strip() for x in tracker_list.split(',') ]
         
-        for tracker in default_tracker_list:
+        for tracker in tracker_list:
             if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
                 # Make sure that an API key is set for that site
                 try:

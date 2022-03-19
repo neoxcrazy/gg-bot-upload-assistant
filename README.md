@@ -197,12 +197,10 @@ docker run --rm -it \
 
 ### v2.0.5
 - [ ] Fix existing bugs
-- [ ] Add more bugs to be fixed
 - [X] Support for default trackers
-- [ ] Add Support for new platforms
-    - [ ] ReelFliX
+- [X] Add Support for new platforms
     - [X] SkipTheTrailers
-- [ ] Ability to upload to all available trackers (USE WITH CAUTION)
+- [X] Ability to upload to all available trackers (USE WITH CAUTION)
 
 ### v2.1
 - [ ] Fix existing bugs
@@ -236,6 +234,7 @@ docker run --rm -it \
 - [ ] Add Support for new platforms
     - [ ] Anasch
     - [ ] Anthelion
+    - [ ] ReelFliX
     - [ ] MoreThanTV
 - [ ] Add support for DVDs
 
