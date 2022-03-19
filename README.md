@@ -201,7 +201,7 @@ docker run --rm -it \
 - [X] Support for default trackers
 - [ ] Add Support for new platforms
     - [ ] ReelFliX
-    - [ ] New Platform From STC
+    - [X] SkipTheTrailers
 - [ ] Ability to upload to all available trackers (USE WITH CAUTION)
 
 ### v2.1
