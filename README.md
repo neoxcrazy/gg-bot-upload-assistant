@@ -196,21 +196,17 @@ docker run --rm -it \
 # Roadmap
 
 ### v2.0.5
-- [ ] Fix existing bugs
 - [X] Support for default trackers
 - [X] Add Support for new platforms
     - [X] SkipTheTrailers
 - [X] Ability to upload to all available trackers (USE WITH CAUTION)
 
 ### v2.1
-- [ ] Fix existing bugs
-- [ ] Add more bugs to be fixed
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
 
 ### v3.0
-- [ ] Fix existing bugs
 - [ ] Add more bugs to be fixed
 - [ ] Proper support for re-upload with autodl irssi
 - [ ] Improved dupe check
