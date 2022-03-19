@@ -1,9 +1,9 @@
 {
-    "name": "UHD-Heaven",
-    "url": "https://uhd-heaven.xyz/",
-    "upload_form": "https://uhd-heaven.xyz/api/torrents/upload?api_token={api_key}",
-    "torrents_search": "https://uhd-heaven.xyz/api/torrents/filter?api_token={api_key}",
-    "source": "UHDHEAVEN",
+    "name": "SkipTheTrailers",
+    "url": "https://skipthetrailers.xyz/",
+    "upload_form": "https://skipthetrailers.xyz/api/torrents/upload?api_token={api_key}",
+    "torrents_search": "https://skipthetrailers.xyz/api/torrents/filter?api_token={api_key}",
+    "source": "STT",
     "platform": "UNIT3D",
     "bbcode_line_break": "\n",
     "title_separator" : " ",
@@ -21,19 +21,16 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
-    },
-
     "translation": {
         "dot_torrent": "torrent",
+        "nfo_file": "nfo",
         "torrent_title": "name",
-        "description": "description",
-        "mediainfo": "mediainfo",
-        "bdinfo": "bdinfo",
         "type": "category_id",
         "source": "type_id",
         "resolution": "resolution_id",
+        "description": "description",
+        "mediainfo": "mediainfo",
+        "bdinfo": "bdinfo",
         "tmdb": "tmdb",
         "imdb": "imdb",
         "tvdb": "tvdb",
@@ -42,9 +39,6 @@
         "anon": "anonymous",
         "live": "live",
         "sd": "sd",
-        "nfo_file": "nfo",
-        "season_number": "season_number",
-        "episode_number": "episode_number",
 
         "optimized": "stream",
         "internal": "internal",
@@ -75,8 +69,7 @@
         "sticky": "string",
 
         "category_id": {
-            "1": "movie",
-            "2": "episode"
+            "1": "movie"
         },
 
         "type_id": {
@@ -98,6 +91,9 @@
             },
             "5": {
                 "webrip": 1
+            },
+            "6": {
+                "hdtv": 1
             }
         },
 
@@ -108,17 +104,41 @@
             "2": {
                 "2160p": 1
             },
-            "11": {
+            "3": {
                 "1080p": 1
+            },
+            "4": {
+                "1080i": 1
+            },
+            "5": {
+                "720p": 1
+            },
+            "6": {
+                "576p": 1
+            },
+            "7": {
+                "576i": 1
+            },
+            "8": {
+                "480p": 1
+            },
+            "9": {
+                "480i": 1
+            },
+            "10": {
+                "other": 1
             }
         }
     },
 
+    
+    "hybrid_type": {
+        "required": false
+    },
+
+
     "Optional": {
         "nfo_file": "file",
-        "season_number": "string",
-        "episode_number": "string",
-
         "bdinfo": "string",
         "mediainfo": "string"
     },
@@ -151,15 +171,6 @@
     },
 
     "torrent_title_format": {
-        "episode": {
-            "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
-            "bluray_remux": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
-            "bluray_encode": "{title} {year} {s00e00} {repack} {screen_size} {uhd} {hybrid} {source} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
-            "web": "{title} {year} {s00e00} {repack} {screen_size} {web_source} {web_type} {audio_codec} {audio_channels} {atmos} {dv} {hdr} {video_codec} {release_group}",
-            "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
-            "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
-        },
-
         "movie": {
             "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
             "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",

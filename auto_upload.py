@@ -1899,7 +1899,7 @@ def choose_right_tracker_keys():
                         logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
                     tracker_settings[config["translation"][translation_key]] = url
 
-                else:
+                elif translation_key not in ['type', 'source', 'resolution', 'hybrid_type']:
                     logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
                 
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
@@ -2366,7 +2366,7 @@ try:
         logging.error("[Main] Validation failed for all trackers provided as command line arguments")
         logging.info("[Main] Attempting check and validate and default trackers configured")
         
-        default_tracker_list = os.getenv("default_tracker_list") or ""
+        default_tracker_list = os.getenv("default_trackers_list") or ""
         if len(default_tracker_list) > 0:
             default_tracker_list= [ x.strip() for x in default_tracker_list.split(',') ]
         
