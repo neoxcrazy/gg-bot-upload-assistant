@@ -1276,19 +1276,36 @@ def search_tmdb_for_id(query_title, year, content_type):
             # Get the movie/tv 'title' from json response
             # TMDB will return either "title" or "name" depending on if the content your searching for is a TV show or movie
             title_match = list(map(possible_match.get, filter(lambda x: x in "title, name", possible_match)))
+            title_match_result = "N.A."
             if len(title_match) > 0:
                 title_match_result = title_match.pop()
             else:
-                logging.error(f"[Main] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
-                title_match_result = "N.A."
+                logging.error(f"[MetadataUtils] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+            logging.info(f'[MetadataUtils] Selected Title: [{title_match_result}]')
 
             # Same situation as with the movie/tv title. The key changes depending on what the content type is
             year_match = list(map(possible_match.get, filter(lambda x: x in "release_date, first_air_date", possible_match)))
+            selected_year = "N.A."
             if len(year_match) > 0:
-                year = year_match.pop()
+                selected_year = year_match.pop()
             else:
-                logging.error(f"[Main] Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
-                year = "N.A."
+                logging.error(f"[MetadataUtils] Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+            logging.info(f'[MetadataUtils] Selected Year: [{selected_year}]')
+
+            # attempting to eliminate tmdb results based on year.
+            # if the year we have is 2005, then we will only consider releases from year 2004, 2005 and 2006
+            # entries from all other years will be eliminated
+            if year != "" and int(year) > 0 and selected_year != "N.A." and len(selected_year) > 0:
+                year = int(year)
+                selected_year_sub_part = int(selected_year.split("-")[0])
+                logging.info(f"[MetadataUtils] Applying year filter. Expected years are [{year - 1}, {year}, or {year + 1}]. Obtained year [{selected_year_sub_part}]")
+                if selected_year_sub_part == year or  selected_year_sub_part == year - 1 or  selected_year_sub_part == year + 1:
+                    logging.debug(f"[MetadataUtils] The possible match has passed the year filter")
+                else:
+                    logging.info(f"[MetadataUtils] The possible match failed to pass year filter.")
+                    del result_dict[str(result_num)]
+                    result_num -= 1
+                    continue
 
             if "overview" in possible_match:
                 if len(possible_match["overview"]) > 1:
@@ -1303,7 +1320,7 @@ def search_tmdb_for_id(query_title, year, content_type):
             # Now add that json data to a row in the table we show the user
             tmdb_search_results.add_row(
                 f"[chartreuse1][bold]{str(result_num)}[/bold][/chartreuse1]", title_match_result,
-                f"themoviedb.org/{content_type}/{str(possible_match['id'])}", str(year), possible_match["original_language"], overview, end_section=True )
+                f"themoviedb.org/{content_type}/{str(possible_match['id'])}", str(selected_year), possible_match["original_language"], overview, end_section=True )
             selected_tmdb_results += 1
 
         logging.info(f"[Main] Total number of results for TMDB search: {str(result_num)}")
