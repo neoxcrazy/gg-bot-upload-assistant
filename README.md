@@ -200,38 +200,40 @@ docker run --rm -it \
 - [X] Add Support for new platforms
     - [X] SkipTheTrailers
 - [X] Ability to upload to all available trackers (USE WITH CAUTION)
+- [X] Issue#19: Multiple episode naming bug fixed
 
-### v2.1
-- [ ] Improved Full Disk Support
-    - [ ] Support for Bluray Distributors
-    - [ ] Detect Bluray disk region automatically
+### v2.0.6
+- [ ] Add Support for new platforms
+    - [ ] Anasch
 
 ### v3.0
-- [ ] Add more bugs to be fixed
-- [ ] Proper support for re-upload with autodl irssi
-- [ ] Improved dupe check
-- [X] Modularize existing codebase
-- [X] Support for tmdb/imdb id from mediainfo 
+- [X] Automatic torrent re-uploader
+- [X] Improved dupe check - Phase 1
+- [X] Improved TMDB metadata search
 - [X] Support for communicating with torrent clients
-    - [X] qBittorrent
+    - [X] Qbittorrent
+    - [X] Rutorrent
 - [X] Implement a caching mechanism
-- [ ] Auto upload report dashboard ??
-- [ ] CLI to tag uploads manually
+    - [X] Mongo DB
+    - [X] Redis DB - Half baked 
+- [X] GG-Bot Visor for reports and failure recoveries
+- [ ] Support for overriding target tracker through categories
+- [ ] Bug Fixes and Testing
 - [ ] Discord notification for auto uploaded data
 
 ### Backlogs
-- [ ] Add support for various storage mechanism as cache replacement
-    - [ ] MongoDB
-    - [ ] File System
+- [ ] Improved Full Disk Support
+    - [ ] Support for Bluray Distributors
+    - [ ] Detect Bluray disk region automatically
+- [ ] Improved dupe check - Phase 2
 - [ ] Support for communicating with torrent clients
     - [ ] Deluge
-    - [ ] ruTorrent
+    - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] Anasch
     - [ ] Anthelion
-    - [ ] ReelFliX
     - [ ] MoreThanTV
+    - [ ] ReelFliX
 - [ ] Add support for DVDs
 
 <br>
