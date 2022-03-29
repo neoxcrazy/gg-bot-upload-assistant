@@ -297,8 +297,14 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info["season_number"] = int(guess_it_result["season"])
             # check if we have an episode number
             if 'episode' in guess_it_result:
-                torrent_info["episode_number"] = int(guess_it_result["episode"])
-                torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
+                if type(guess_it_result["episode"]) is list:
+                    torrent_info["episode_number"] = int(guess_it_result["episode"][0])
+                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
+                    for episode in guess_it_result["episode"]:
+                        torrent_info["s00e00"] = f'{torrent_info["s00e00"]}E{episode:02d}'
+                else:
+                    torrent_info["episode_number"] = int(guess_it_result["episode"])
+                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
                 torrent_info["individual_episodes"] = "1"
             else:
                 # if we don't have an episode number we will just use the season number
