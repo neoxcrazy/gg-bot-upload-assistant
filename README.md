@@ -201,6 +201,7 @@ docker run --rm -it \
     - [X] SkipTheTrailers
 - [X] Ability to upload to all available trackers (USE WITH CAUTION)
 - [X] Issue#19: Multiple episode naming bug fixed
+- [X] Issue#20: Uploader crash when handling complete packs from tracker
 
 ### v2.0.6
 - [ ] Add Support for new platforms
