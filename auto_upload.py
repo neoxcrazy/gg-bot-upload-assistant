@@ -1374,36 +1374,36 @@ def get_external_id(id_site, id_value, external_site, content_type):
                 logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
                 imdb_id_request = requests.get(get_imdb_id_from_tmdb_url).json()
                 if imdb_id_request["imdb_id"] is None:
-                    logging.debug(f"[Main] Returning imdb id as ``")
-                    return ""
+                    logging.debug(f"[Main] Returning imdb id as `0`")
+                    return "0"
                 logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['imdb_id']}`")
-                return imdb_id_request["imdb_id"]
+                return imdb_id_request["imdb_id"] if imdb_id_request["imdb_id"] is not None else "0"
             else: # we have tvmaze
                 logging.info(f"[Main] GET Request: {get_imdb_id_from_tvmaze_url}")
                 imdb_id_request = requests.get(get_imdb_id_from_tvmaze_url).json()
                 logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['externals']['imdb']}`")
-                return imdb_id_request['externals']['imdb']
+                return imdb_id_request['externals']['imdb'] if imdb_id_request['externals']['imdb'] is not None else "0"
         elif external_site == "tvmaze": # we need tvmaze id
             # tv maze needs imdb id to search
             if id_site == "imdb":
                 logging.info(f"[Main] GET Request: {get_tvmaze_id_from_imdb_url}")
                 tvmaze_id_request = requests.get(get_tvmaze_id_from_imdb_url).json()
                 logging.debug(f"[Main] Returning tvmaze id as `{tvmaze_id_request['id']}`")
-                return tvmaze_id_request["id"]
+                return tvmaze_id_request["id"] if tvmaze_id_request["id"] is not None else "0"
             else:
                 logging.error(f"[Main] Cannot fetch tvmaze id without imdb id.")
-                logging.debug(f"[Main] Returning tvmaze id as ``")
-                return ""
+                logging.debug(f"[Main] Returning tvmaze id as `0`")
+                return "0"
         else: # we need tmdb id
             logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
             tmdb_id_request = requests.get(get_tmdb_id_from_imdb_url).json()
             for item in tmdb_id_request:
                 if len(tmdb_id_request[item]) == 1:
                     logging.debug(f"[Main] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
-                    return str(tmdb_id_request[item][0]["id"])
+                    return str(tmdb_id_request[item][0]["id"]) if tmdb_id_request[item][0]["id"] is not None else "0"
     except Exception as ex:
         logging.exception(f"[Main] Error while fetching external id. Returning `` as the id")
-        return ""
+        return "0"
 
 
 def search_for_mal_id(content_type, tmdb_id):
