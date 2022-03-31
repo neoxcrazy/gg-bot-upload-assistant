@@ -202,6 +202,7 @@ docker run --rm -it \
 - [X] Ability to upload to all available trackers (USE WITH CAUTION)
 - [X] Issue#19: Multiple episode naming bug fixed
 - [X] Issue#20: Uploader crash when handling complete packs from tracker
+- [X] Issue#23: IMDB Id cannot be obtained from TVMaze
 
 ### v2.0.6
 - [ ] Add Support for new platforms
