@@ -201,7 +201,7 @@ docker run --rm -it \
 
 ### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients
-- [X] Support for communicating with torrent clients [cross-seeding]
+- [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
     - [X] Qbittorrent
     - [X] Rutorrent
 - [ ] Migrate torrent client feature from v3.0 alpha version
@@ -215,7 +215,7 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
-    - [X] Redis DB - Half baked 
+    - [X] Redis DB - Half baked (Might be deprecated)
 - [X] GG-Bot Visor for reports and failure recoveries
 - [ ] Support for overriding target tracker through categories
 - [ ] Bug Fixes and Testing
