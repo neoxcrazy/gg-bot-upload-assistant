@@ -110,11 +110,12 @@ parser = argparse.ArgumentParser()
 
 # Required Arguments [Mandatory]
 required_args = parser.add_argument_group('Required Arguments')
-required_args.add_argument('-t', '--trackers', nargs='*', required=True, help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
 required_args.add_argument('-p', '--path', nargs='*', required=True, help="Use this to provide path(s) to file/folder")
 
 # Commonly used args:
 common_args = parser.add_argument_group('Commonly Used Arguments')
+common_args.add_argument('-t', '--trackers', nargs='*', help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
+common_args.add_argument('-a', '--all_trackers', action='store_true', help="Select all trackers that can be uploaded to")
 common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
 common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
 common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
@@ -296,8 +297,14 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info["season_number"] = int(guess_it_result["season"])
             # check if we have an episode number
             if 'episode' in guess_it_result:
-                torrent_info["episode_number"] = int(guess_it_result["episode"])
-                torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
+                if type(guess_it_result["episode"]) is list:
+                    torrent_info["episode_number"] = int(guess_it_result["episode"][0])
+                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
+                    for episode in guess_it_result["episode"]:
+                        torrent_info["s00e00"] = f'{torrent_info["s00e00"]}E{episode:02d}'
+                else:
+                    torrent_info["episode_number"] = int(guess_it_result["episode"])
+                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
                 torrent_info["individual_episodes"] = "1"
             else:
                 # if we don't have an episode number we will just use the season number
@@ -1269,19 +1276,36 @@ def search_tmdb_for_id(query_title, year, content_type):
             # Get the movie/tv 'title' from json response
             # TMDB will return either "title" or "name" depending on if the content your searching for is a TV show or movie
             title_match = list(map(possible_match.get, filter(lambda x: x in "title, name", possible_match)))
+            title_match_result = "N.A."
             if len(title_match) > 0:
                 title_match_result = title_match.pop()
             else:
-                logging.error(f"[Main] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
-                title_match_result = "N.A."
+                logging.error(f"[MetadataUtils] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+            logging.info(f'[MetadataUtils] Selected Title: [{title_match_result}]')
 
             # Same situation as with the movie/tv title. The key changes depending on what the content type is
             year_match = list(map(possible_match.get, filter(lambda x: x in "release_date, first_air_date", possible_match)))
+            selected_year = "N.A."
             if len(year_match) > 0:
-                year = year_match.pop()
+                selected_year = year_match.pop()
             else:
-                logging.error(f"[Main] Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
-                year = "N.A."
+                logging.error(f"[MetadataUtils] Year not found on TMDB for TMDB ID: {str(possible_match['id'])}")
+            logging.info(f'[MetadataUtils] Selected Year: [{selected_year}]')
+
+            # attempting to eliminate tmdb results based on year.
+            # if the year we have is 2005, then we will only consider releases from year 2004, 2005 and 2006
+            # entries from all other years will be eliminated
+            if year != "" and int(year) > 0 and selected_year != "N.A." and len(selected_year) > 0:
+                year = int(year)
+                selected_year_sub_part = int(selected_year.split("-")[0])
+                logging.info(f"[MetadataUtils] Applying year filter. Expected years are [{year - 1}, {year}, or {year + 1}]. Obtained year [{selected_year_sub_part}]")
+                if selected_year_sub_part == year or  selected_year_sub_part == year - 1 or  selected_year_sub_part == year + 1:
+                    logging.debug(f"[MetadataUtils] The possible match has passed the year filter")
+                else:
+                    logging.info(f"[MetadataUtils] The possible match failed to pass year filter.")
+                    del result_dict[str(result_num)]
+                    result_num -= 1
+                    continue
 
             if "overview" in possible_match:
                 if len(possible_match["overview"]) > 1:
@@ -1296,7 +1320,7 @@ def search_tmdb_for_id(query_title, year, content_type):
             # Now add that json data to a row in the table we show the user
             tmdb_search_results.add_row(
                 f"[chartreuse1][bold]{str(result_num)}[/bold][/chartreuse1]", title_match_result,
-                f"themoviedb.org/{content_type}/{str(possible_match['id'])}", str(year), possible_match["original_language"], overview, end_section=True )
+                f"themoviedb.org/{content_type}/{str(possible_match['id'])}", str(selected_year), possible_match["original_language"], overview, end_section=True )
             selected_tmdb_results += 1
 
         logging.info(f"[Main] Total number of results for TMDB search: {str(result_num)}")
@@ -1309,13 +1333,18 @@ def search_tmdb_for_id(query_title, year, content_type):
             # The idea is that we can then show the user all valid options they can select
             list_of_num.append(str(i))
 
-        if auto_mode == 'false' and selected_tmdb_results > 1 and (os.getenv("auto_select_tmdb_result") or False):
-            # prompt for user input with 'list_of_num' working as a list of valid choices
-            user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
-        else:
+        if auto_mode == 'true':
             console.print("Auto selected the #1 result from TMDB...")
             user_input_tmdb_id_num = "1"
             logging.info(f"[Main] auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+        elif selected_tmdb_results == 1 and os.getenv("auto_select_tmdb_result", "false") == "true":
+            # if there is only 1 result from tmdb, then we can auto select it based on the `auto_select_tmdb_result`` config
+            console.print("Auto selected the #1 result from TMDB...")
+            user_input_tmdb_id_num = "1"
+            logging.info(f"[Main] Auto selecting #1 from tmdb results since `auto_select_tmdb_result` is enabled(TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+        else:
+           # prompt for user input with 'list_of_num' working as a list of valid choices
+            user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
 
         # We take the users (valid) input (or auto selected number) and use it to retrieve the appropriate TMDB ID
         torrent_info["tmdb"] = str(result_dict[user_input_tmdb_id_num])
@@ -1350,36 +1379,36 @@ def get_external_id(id_site, id_value, external_site, content_type):
                 logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
                 imdb_id_request = requests.get(get_imdb_id_from_tmdb_url).json()
                 if imdb_id_request["imdb_id"] is None:
-                    logging.debug(f"[Main] Returning imdb id as ``")
-                    return ""
+                    logging.debug(f"[Main] Returning imdb id as `0`")
+                    return "0"
                 logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['imdb_id']}`")
-                return imdb_id_request["imdb_id"]
+                return imdb_id_request["imdb_id"] if imdb_id_request["imdb_id"] is not None else "0"
             else: # we have tvmaze
                 logging.info(f"[Main] GET Request: {get_imdb_id_from_tvmaze_url}")
                 imdb_id_request = requests.get(get_imdb_id_from_tvmaze_url).json()
                 logging.debug(f"[Main] Returning imdb id as `{imdb_id_request['externals']['imdb']}`")
-                return imdb_id_request['externals']['imdb']
+                return imdb_id_request['externals']['imdb'] if imdb_id_request['externals']['imdb'] is not None else "0"
         elif external_site == "tvmaze": # we need tvmaze id
             # tv maze needs imdb id to search
             if id_site == "imdb":
                 logging.info(f"[Main] GET Request: {get_tvmaze_id_from_imdb_url}")
                 tvmaze_id_request = requests.get(get_tvmaze_id_from_imdb_url).json()
                 logging.debug(f"[Main] Returning tvmaze id as `{tvmaze_id_request['id']}`")
-                return tvmaze_id_request["id"]
+                return tvmaze_id_request["id"] if tvmaze_id_request["id"] is not None else "0"
             else:
                 logging.error(f"[Main] Cannot fetch tvmaze id without imdb id.")
-                logging.debug(f"[Main] Returning tvmaze id as ``")
-                return ""
+                logging.debug(f"[Main] Returning tvmaze id as `0`")
+                return "0"
         else: # we need tmdb id
             logging.info(f"[Main] GET Request: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
             tmdb_id_request = requests.get(get_tmdb_id_from_imdb_url).json()
             for item in tmdb_id_request:
                 if len(tmdb_id_request[item]) == 1:
                     logging.debug(f"[Main] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
-                    return str(tmdb_id_request[item][0]["id"])
+                    return str(tmdb_id_request[item][0]["id"]) if tmdb_id_request[item][0]["id"] is not None else "0"
     except Exception as ex:
         logging.exception(f"[Main] Error while fetching external id. Returning `` as the id")
-        return ""
+        return "0"
 
 
 def search_for_mal_id(content_type, tmdb_id):
@@ -1899,7 +1928,7 @@ def choose_right_tracker_keys():
                         logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
                     tracker_settings[config["translation"][translation_key]] = url
 
-                else:
+                elif translation_key not in ['type', 'source', 'resolution', 'hybrid_type']:
                     logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
                 
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
@@ -2345,7 +2374,8 @@ if discord_url:
 upload_to_trackers = []
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
 
-for tracker in args.trackers:
+logging.info("[Main] Validating the trackers provide by user as command line arguments")
+for tracker in args.trackers if args.trackers is not None else []:
     if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
         # Make sure that an API key is set for that site
         try:
@@ -2357,11 +2387,36 @@ for tracker in args.trackers:
     else:
         logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
 
+
 # Make sure that the user provides at least 1 valid tracker we can upload to
 try:
     # if len(upload_to_trackers) == 0 that means that the user either didn't provide any site at all, the site is not supported, or the API key isn't provided
     if len(upload_to_trackers) < 1:
-        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
+        logging.error("[Main] Validation failed for all trackers provided as command line arguments")
+        
+        if args.all_trackers: # user wants to upload to all the trackers possible
+            tracker_list = acronym_to_tracker.keys()
+            logging.info(f"[Main] User has chosen to upload to add possible trackers: {tracker_list}")
+        else:
+            logging.info("[Main] Attempting check and validate and default trackers configured")
+            tracker_list = os.getenv("default_trackers_list") or ""
+            if len(tracker_list) > 0:
+                tracker_list= [ x.strip() for x in tracker_list.split(',') ]
+        
+        for tracker in tracker_list:
+            if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
+                # Make sure that an API key is set for that site
+                try:
+                    if len(api_keys_dict[(str(tracker).lower()) + "_api_key"]) <= 1:
+                        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
+                    if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
+                except AssertionError as err:
+                    logging.error("[Main] We can't upload to '{}' because that sites API key is not specified".format(tracker))
+            else:
+                logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
+
+        if len(upload_to_trackers) < 1:
+            raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
 except AssertionError as err:  # Log AssertionError in the logfile and quit here
     logging.exception("[Main] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
     raise err

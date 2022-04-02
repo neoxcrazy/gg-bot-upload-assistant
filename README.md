@@ -62,8 +62,8 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>UHDHVN</strong></td>
-            <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
+            <td><strong>STT</strong></td>
+            <td><strong><a href="https://skipthetrailers.xyz/">SkipTheTrailers</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>STC</strong></td>
@@ -194,53 +194,68 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-
-### v2.0.5
-- [ ] Fix existing bugs
-- [ ] Add more bugs to be fixed
+### v2.0.6
 - [ ] Add Support for new platforms
-    - [ ] ReelFliX
-    - [ ] New Platform From STC
-- [ ] Ability to upload to all available trackers (USE WITH CAUTION)
+    - [ ] Anasch
+- [ ] Add support to apply hybrid mapping to multiple fields
 
-### v2.1
-- [ ] Fix existing bugs
-- [ ] Add more bugs to be fixed
-- [ ] Improved Full Disk Support
-    - [ ] Support for Bluray Distributors
-    - [ ] Detect Bluray disk region automatically
+### v2.0.7
+- [ ] Add support for immediate cross-seeding to torrent clients
+- [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
+    - [X] Qbittorrent
+    - [X] Rutorrent
+- [ ] Migrate torrent client feature from v3.0 alpha version
 
 ### v3.0
-- [ ] Fix existing bugs
-- [ ] Add more bugs to be fixed
-- [ ] Proper support for re-upload with autodl irssi
-- [ ] Improved dupe check
-- [X] Modularize existing codebase
-- [X] Support for tmdb/imdb id from mediainfo 
+- [X] Automatic torrent re-uploader
+- [X] Improved dupe check - Phase 1
+- [X] Improved TMDB metadata search
 - [X] Support for communicating with torrent clients
-    - [X] qBittorrent
+    - [X] Qbittorrent
+    - [X] Rutorrent
 - [X] Implement a caching mechanism
-- [ ] Auto upload report dashboard ??
-- [ ] CLI to tag uploads manually
+    - [X] Mongo DB
+    - [X] Redis DB - Half baked (Might be deprecated)
+- [X] GG-Bot Visor for reports and failure recoveries
+- [ ] Support for overriding target tracker through categories
+- [ ] Bug Fixes and Testing
 - [ ] Discord notification for auto uploaded data
 
 ### Backlogs
-- [ ] Add support for various storage mechanism as cache replacement
-    - [ ] MongoDB
-    - [ ] File System
+- [ ] Improved Full Disk Support
+    - [ ] Support for Bluray Distributors
+    - [ ] Detect Bluray disk region automatically
+- [ ] Improved dupe check - Phase 2
 - [ ] Support for communicating with torrent clients
     - [ ] Deluge
-    - [ ] ruTorrent
+    - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] Anasch
     - [ ] Anthelion
     - [ ] MoreThanTV
+    - [ ] ReelFliX
 - [ ] Add support for DVDs
 
 <br>
 
 # Change Log
+
+## **2.0.5**
+    New Trackers
+        * SkipTheTrailers
+
+    New Features
+        * Support for default trackers
+        * Ability to upload to all available trackers (USE WITH CAUTION)
+        * Improved TMDB search results filtering
+    
+    Bug Fixes
+        * Issue#19: Multiple episode naming bug fixed
+        * Issue#20: Uploader crash when handling complete packs from tracker
+        * Issue#23: IMDB Id cannot be obtained from TVMaze
+
+<br>
+
 ## **2.0.4**
 
     New Trackers
