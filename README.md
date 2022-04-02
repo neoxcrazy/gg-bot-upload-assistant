@@ -62,8 +62,8 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://desitorrents.rocks/">DesiTorrents</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>UHDHVN</strong></td>
-            <td><strong><a href="https://uhd-heaven.xyz/">UHD-Heaven</a></strong></td>
+            <td><strong>STT</strong></td>
+            <td><strong><a href="https://skipthetrailers.xyz/">SkipTheTrailers</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>STC</strong></td>
@@ -194,19 +194,17 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-
-### v2.0.5
-- [X] Support for default trackers
-- [X] Add Support for new platforms
-    - [X] SkipTheTrailers
-- [X] Ability to upload to all available trackers (USE WITH CAUTION)
-- [X] Issue#19: Multiple episode naming bug fixed
-- [X] Issue#20: Uploader crash when handling complete packs from tracker
-- [X] Issue#23: IMDB Id cannot be obtained from TVMaze
-
 ### v2.0.6
 - [ ] Add Support for new platforms
     - [ ] Anasch
+- [ ] Add support to apply hybrid mapping to multiple fields
+
+### v2.0.7
+- [ ] Add support for immediate cross-seeding to torrent clients
+- [X] Support for communicating with torrent clients [cross-seeding]
+    - [X] Qbittorrent
+    - [X] Rutorrent
+- [ ] Migrate torrent client feature from v3.0 alpha version
 
 ### v3.0
 - [X] Automatic torrent re-uploader
@@ -241,6 +239,22 @@ docker run --rm -it \
 <br>
 
 # Change Log
+
+## **2.0.5**
+    New Trackers
+        * SkipTheTrailers
+
+    New Features
+        * Support for default trackers
+        * Ability to upload to all available trackers (USE WITH CAUTION)
+    
+    Bug Fixes
+        * Issue#19: Multiple episode naming bug fixed
+        * Issue#20: Uploader crash when handling complete packs from tracker
+        * Issue#23: IMDB Id cannot be obtained from TVMaze
+
+<br>
+
 ## **2.0.4**
 
     New Trackers
