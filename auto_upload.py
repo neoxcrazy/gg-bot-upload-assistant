@@ -1333,13 +1333,18 @@ def search_tmdb_for_id(query_title, year, content_type):
             # The idea is that we can then show the user all valid options they can select
             list_of_num.append(str(i))
 
-        if auto_mode == 'false' and selected_tmdb_results > 1 and (os.getenv("auto_select_tmdb_result") or False):
-            # prompt for user input with 'list_of_num' working as a list of valid choices
-            user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
-        else:
+        if auto_mode == 'true':
             console.print("Auto selected the #1 result from TMDB...")
             user_input_tmdb_id_num = "1"
             logging.info(f"[Main] auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+        elif selected_tmdb_results == 1 and os.getenv("auto_select_tmdb_result", "false") == "true":
+            # if there is only 1 result from tmdb, then we can auto select it based on the `auto_select_tmdb_result`` config
+            console.print("Auto selected the #1 result from TMDB...")
+            user_input_tmdb_id_num = "1"
+            logging.info(f"[Main] Auto selecting #1 from tmdb results since `auto_select_tmdb_result` is enabled(TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+        else:
+           # prompt for user input with 'list_of_num' working as a list of valid choices
+            user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
 
         # We take the users (valid) input (or auto selected number) and use it to retrieve the appropriate TMDB ID
         torrent_info["tmdb"] = str(result_dict[user_input_tmdb_id_num])

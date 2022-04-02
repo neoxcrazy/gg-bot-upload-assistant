@@ -247,6 +247,7 @@ docker run --rm -it \
     New Features
         * Support for default trackers
         * Ability to upload to all available trackers (USE WITH CAUTION)
+        * Improved TMDB search results filtering
     
     Bug Fixes
         * Issue#19: Multiple episode naming bug fixed
