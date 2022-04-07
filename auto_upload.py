@@ -39,6 +39,8 @@ from rich.prompt import Prompt, Confirm
 from images.upload_screenshots import take_upload_screens
 from mediainfo_summary_extractor import prepare_mediainfo_summary
 from parse_bdinfo import parse_bdinfo
+from utilities.custom_user_input import collect_custom_messages_from_user
+
 
 # Method that will search for dupes in trackers.
 from search_for_dupes import search_for_dupes_api
@@ -2660,8 +2662,7 @@ for file in upload_queue:
 
     if auto_mode == "false" and Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
         logging.debug(f'[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
-        from custom_user_input import collect_custom_messages_from_user
-        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(debug=args.debug)
+        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(f'{working_folder}/parameters/custom_text_components.json')
     else:
         logging.debug(f'[Main] User decided not to add custom text to torrent description or running in auto_mode')
 
