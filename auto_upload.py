@@ -39,9 +39,13 @@ from rich.prompt import Prompt, Confirm
 from images.upload_screenshots import take_upload_screens
 from mediainfo_summary_extractor import prepare_mediainfo_summary
 from parse_bdinfo import parse_bdinfo
+from utilities.custom_user_input import collect_custom_messages_from_user
 
+# utility methods
+# Method that will read and accept text components for torrent description
+from utilities.custom_user_input import collect_custom_messages_from_user
 # Method that will search for dupes in trackers.
-from search_for_dupes import search_for_dupes_api
+from utilities.search_for_dupes import search_for_dupes_api
 
 # Used for rich.traceback
 install()
@@ -177,7 +181,8 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
     return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], 
-        imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
+        imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, 
+        tracker_api=temp_tracker_api_key, debug=args.debug, working_folder=working_folder, auto_mode=os.getenv('auto_mode'))
 
 
 def delete_leftover_files():
@@ -2660,8 +2665,7 @@ for file in upload_queue:
 
     if auto_mode == "false" and Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
         logging.debug(f'[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
-        from custom_user_input import collect_custom_messages_from_user
-        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(debug=args.debug)
+        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(f'{working_folder}/parameters/custom_text_components.json')
     else:
         logging.debug(f'[Main] User decided not to add custom text to torrent description or running in auto_mode')
 
