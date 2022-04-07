@@ -38,14 +38,13 @@ from rich.prompt import Prompt, Confirm
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
 from mediainfo_summary_extractor import prepare_mediainfo_summary
-from parse_bdinfo import parse_bdinfo
-from utilities.custom_user_input import collect_custom_messages_from_user
 
 # utility methods
 # Method that will read and accept text components for torrent description
 from utilities.custom_user_input import collect_custom_messages_from_user
 # Method that will search for dupes in trackers.
 from utilities.search_for_dupes import search_for_dupes_api
+from utilities.utils_bdinfo import *
 
 # Used for rich.traceback
 install()
@@ -333,89 +332,15 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
         # First check to see if we are uploading a 'raw bluray disc'
         if args.disc:
-            # Verify that the bdinfo script exists only when executed on bare metal / VM instead of container
-            # The containerized version has bdinfo packed inside.
-            if not os.getenv("IS_CONTAINERIZED") == "true" and not os.path.isfile(bdinfo_script):
-                logging.critical("You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
-                logging.info("Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
-                raise AssertionError(f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
+            # validating presence of bdinfo script for bare metal
+            bdinfo_validate_bdinfo_script_for_bare_metal(bdinfo_script)
+            # validating presence of BDMV/STREAM/
+            bdinfo_validate_presence_of_bdmv_stream(torrent_info["upload_media"])
 
-            # Now that we've "verified" bdinfo is on the system, we can analyze the folder and continue the upload
-            if not os.path.exists(f'{torrent_info["upload_media"]}BDMV/STREAM/'):
-                logging.critical("BD folder not recognized. We can only upload if we detect a '/BDMV/STREAM/' folder")
-                raise AssertionError("Currently unable to upload .iso files or disc/folders that does not contain a '/BDMV/STREAM/' folder")
+            raw_video_file, largest_playlist = bdinfo_get_largest_playlist(bdinfo_script, auto_mode, torrent_info["upload_media"])
 
-            bd_max_size = 0
-            bd_max_file = ""
-            for folder, subfolders, files in os.walk(f'{torrent_info["upload_media"]}BDMV/STREAM/'):
-                # checking the size of each file
-                for bd_file in files:
-                    size = os.stat(os.path.join(folder, bd_file)).st_size
-                    # updating maximum size
-                    if size > bd_max_size:
-                        bd_max_size = size
-                        bd_max_file = os.path.join(folder, bd_file)
-
-            torrent_info["raw_video_file"] = bd_max_file # file with the largest size inside the STEAM folder
-
-            bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, torrent_info["upload_media"], "-l"])).split())).split(' ')
-            all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-
-            dict_of_playlist_length_size = {}
-            dict_of_playlist_info_list = [] # list of dict
-            # Still identifying the largest playlist here...
-            for index, mpls_playlist in enumerate(bdinfo_output_split):
-                if mpls_playlist in all_mpls_playlists:
-                    playlist_details = {}
-                    playlist_details["no"] = bdinfo_output_split[index - 2].replace("\\n", "")
-                    playlist_details["group"] = bdinfo_output_split[index - 1]
-                    playlist_details["file"] = bdinfo_output_split[index]
-                    playlist_details["length"] = bdinfo_output_split[index + 1]
-                    playlist_details["est_bytes"] = bdinfo_output_split[index + 2]
-                    playlist_details["msr_bytes"] = bdinfo_output_split[index + 3]
-                    playlist_details["size"] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-                    dict_of_playlist_info_list.append(playlist_details)
-                    dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-
-            # sorting list based on the `size` key inside the dictionary
-            dict_of_playlist_info_list = sorted(dict_of_playlist_info_list, key=lambda d: [d["size"]], reverse=True)
-            
-            # In auto_mode we just choose the largest playlist
-            if auto_mode == 'false':
-                # here we display the playlists identified ordered in decending order by size
-                # the default choice will be the largest playlist file
-                # user will be given the option to choose any different playlist file
-                bdinfo_list_table = Table(box=box.SQUARE, title='BDInfo Playlists', title_style='bold #be58bf')
-                bdinfo_list_table.add_column("Playlist #", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Group", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Playlist File", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Duration", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Estimated Bytes", justify="center", style='#38ACEC')
-                # bdinfo_list_table.add_column("Measured Bytes", justify="center", style='#38ACEC') # always `-` in the tested BDs
-                
-                for playlist_details in dict_of_playlist_info_list:
-                    bdinfo_list_table.add_row(str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
-                        playlist_details['length'], playlist_details['est_bytes'], end_section=True)
-                
-                console.print("For BluRay disk you need to select which playlist need to be analyzed, by default the largest playlist will be selected\n", style='bold blue')
-                console.print("")
-                console.print(bdinfo_list_table)
-
-                list_of_num = []
-                for i in range(len(dict_of_playlist_info_list)):
-                    i += 1
-                    list_of_num.append(str(i))
-                
-                user_input_playlist_id_num = Prompt.ask("Choose which `Playlist #` to analyze:", choices=list_of_num, default="1")
-                largest_playlist = dict_of_playlist_info_list[int(user_input_playlist_id_num) - 1]["file"]
-                logging.debug(f"Used decided to select the playlist [{largest_playlist}] with Playlist # [{user_input_playlist_id_num}]")
-                torrent_info["largest_playlist"] = largest_playlist
-                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
-            else:
-                largest_playlist_value = max(dict_of_playlist_length_size.values())
-                largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-                torrent_info["largest_playlist"] = largest_playlist
-                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+            torrent_info["raw_video_file"] = raw_video_file
+            torrent_info["largest_playlist"] = largest_playlist
         else:
             for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
                 found = False  # this is used to break out of the double nested loop
@@ -435,7 +360,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.critical(f"The folder {torrent_info['upload_media']} does not contain any video files")
             console.print(f"The folder {torrent_info['upload_media']} does not contain any video files\n\n", style='bold red')
             return "skip_to_next_file"
-            # sys.exit(f"The folder {torrent_info['upload_media']} does not contain any video files")
 
         torrent_info["raw_file_name"] = os.path.basename(os.path.dirname(f"{full_path}/"))  # this is used to isolate the folder name
     else:
@@ -450,7 +374,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         bdinfo_start_time = time.perf_counter()
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
-        torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO handle non-happy paths
+        torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info) # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
@@ -544,34 +469,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     console.line(count=2)
     console.print(codec_result_table, justify='center')
     console.line(count=1)
-
-
-def generate_and_parse_bdinfo():
-    """
-        Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
-        Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
-        and result is saved in `torrent_info` as `bdinfo`
-
-        It also sets the `mediainfo` key in torrent_info
-    """
-    # if largest_playlist is already in torrent_info, then why this computation again???
-    # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-    logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
-    subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
-
-    shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
-    if os.path.isfile("/usr/bin/sed"):
-        sed_path = "/usr/bin/sed"
-    else:
-        sed_path = "/bin/sed"
-    os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {working_folder}/temp_upload/mediainfo.txt")
-    # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
-    # displaying bdinfo to log in debug mode
-    if args.debug:
-        logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
-        write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
-    torrent_info["mediainfo"] = str(working_folder + '/temp_upload/mediainfo.txt') # setting bdinfo as mediainfo for full disk uploads
-    return parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
 
 
 def analyze_video_file(missing_value, media_info):
