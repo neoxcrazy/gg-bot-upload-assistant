@@ -1,25 +1,22 @@
+
 import os
 import sys
 import json
 import logging
+
 from pprint import pformat
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
 console = Console()
-working_folder = os.path.dirname(os.path.realpath(__file__))
-logging.basicConfig(filename=f'{working_folder}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
-def collect_custom_messages_from_user(debug):
-    if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-
+def collect_custom_messages_from_user(custom_text_components_path):
     logging.debug(f"[CustomUserInputs] Starting to collect custom messages from user for torrent description")
     
     is_first = True
     user_custom_texts = []
 
-    custom_text_components = json.load(open(f'{working_folder}/parameters/custom_text_components.json'))
+    custom_text_components = json.load(custom_text_components_path)
     # creating a list of keys [for warning message]
     components_choices = ", ".join(map(lambda component: f'\'{component["key"]}\'', custom_text_components))
     logging.debug(f'[CustomUserInputs] keys configured in the bot :: {components_choices}')

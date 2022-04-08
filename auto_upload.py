@@ -38,10 +38,14 @@ from rich.prompt import Prompt, Confirm
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
 from mediainfo_summary_extractor import prepare_mediainfo_summary
-from parse_bdinfo import parse_bdinfo
 
+# utility methods
+# Method that will read and accept text components for torrent description
+from utilities.custom_user_input import collect_custom_messages_from_user
 # Method that will search for dupes in trackers.
-from search_for_dupes import search_for_dupes_api
+from utilities.search_for_dupes import search_for_dupes_api
+from utilities.utils_miscellaneous import *
+from utilities.utils_bdinfo import *
 
 # Used for rich.traceback
 install()
@@ -177,7 +181,8 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
     return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], 
-        imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, tracker_api=temp_tracker_api_key, debug=args.debug)
+        imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, 
+        tracker_api=temp_tracker_api_key, debug=args.debug, working_folder=working_folder, auto_mode=os.getenv('auto_mode'))
 
 
 def delete_leftover_files():
@@ -328,89 +333,15 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
         # First check to see if we are uploading a 'raw bluray disc'
         if args.disc:
-            # Verify that the bdinfo script exists only when executed on bare metal / VM instead of container
-            # The containerized version has bdinfo packed inside.
-            if not os.getenv("IS_CONTAINERIZED") == "true" and not os.path.isfile(bdinfo_script):
-                logging.critical("You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
-                logging.info("Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
-                raise AssertionError(f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
+            # validating presence of bdinfo script for bare metal
+            bdinfo_validate_bdinfo_script_for_bare_metal(bdinfo_script)
+            # validating presence of BDMV/STREAM/
+            bdinfo_validate_presence_of_bdmv_stream(torrent_info["upload_media"])
 
-            # Now that we've "verified" bdinfo is on the system, we can analyze the folder and continue the upload
-            if not os.path.exists(f'{torrent_info["upload_media"]}BDMV/STREAM/'):
-                logging.critical("BD folder not recognized. We can only upload if we detect a '/BDMV/STREAM/' folder")
-                raise AssertionError("Currently unable to upload .iso files or disc/folders that does not contain a '/BDMV/STREAM/' folder")
+            raw_video_file, largest_playlist = bdinfo_get_largest_playlist(bdinfo_script, auto_mode, torrent_info["upload_media"])
 
-            bd_max_size = 0
-            bd_max_file = ""
-            for folder, subfolders, files in os.walk(f'{torrent_info["upload_media"]}BDMV/STREAM/'):
-                # checking the size of each file
-                for bd_file in files:
-                    size = os.stat(os.path.join(folder, bd_file)).st_size
-                    # updating maximum size
-                    if size > bd_max_size:
-                        bd_max_size = size
-                        bd_max_file = os.path.join(folder, bd_file)
-
-            torrent_info["raw_video_file"] = bd_max_file # file with the largest size inside the STEAM folder
-
-            bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, torrent_info["upload_media"], "-l"])).split())).split(' ')
-            all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
-
-            dict_of_playlist_length_size = {}
-            dict_of_playlist_info_list = [] # list of dict
-            # Still identifying the largest playlist here...
-            for index, mpls_playlist in enumerate(bdinfo_output_split):
-                if mpls_playlist in all_mpls_playlists:
-                    playlist_details = {}
-                    playlist_details["no"] = bdinfo_output_split[index - 2].replace("\\n", "")
-                    playlist_details["group"] = bdinfo_output_split[index - 1]
-                    playlist_details["file"] = bdinfo_output_split[index]
-                    playlist_details["length"] = bdinfo_output_split[index + 1]
-                    playlist_details["est_bytes"] = bdinfo_output_split[index + 2]
-                    playlist_details["msr_bytes"] = bdinfo_output_split[index + 3]
-                    playlist_details["size"] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-                    dict_of_playlist_info_list.append(playlist_details)
-                    dict_of_playlist_length_size[mpls_playlist] = int(str(bdinfo_output_split[index + 2]).replace(",", ""))
-
-            # sorting list based on the `size` key inside the dictionary
-            dict_of_playlist_info_list = sorted(dict_of_playlist_info_list, key=lambda d: [d["size"]], reverse=True)
-            
-            # In auto_mode we just choose the largest playlist
-            if auto_mode == 'false':
-                # here we display the playlists identified ordered in decending order by size
-                # the default choice will be the largest playlist file
-                # user will be given the option to choose any different playlist file
-                bdinfo_list_table = Table(box=box.SQUARE, title='BDInfo Playlists', title_style='bold #be58bf')
-                bdinfo_list_table.add_column("Playlist #", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Group", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Playlist File", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Duration", justify="center", style='#38ACEC')
-                bdinfo_list_table.add_column("Estimated Bytes", justify="center", style='#38ACEC')
-                # bdinfo_list_table.add_column("Measured Bytes", justify="center", style='#38ACEC') # always `-` in the tested BDs
-                
-                for playlist_details in dict_of_playlist_info_list:
-                    bdinfo_list_table.add_row(str(playlist_details['no']), playlist_details['group'], f"[chartreuse1][bold]{str(playlist_details['file'])}[/bold][/chartreuse1]", 
-                        playlist_details['length'], playlist_details['est_bytes'], end_section=True)
-                
-                console.print("For BluRay disk you need to select which playlist need to be analyzed, by default the largest playlist will be selected\n", style='bold blue')
-                console.print("")
-                console.print(bdinfo_list_table)
-
-                list_of_num = []
-                for i in range(len(dict_of_playlist_info_list)):
-                    i += 1
-                    list_of_num.append(str(i))
-                
-                user_input_playlist_id_num = Prompt.ask("Choose which `Playlist #` to analyze:", choices=list_of_num, default="1")
-                largest_playlist = dict_of_playlist_info_list[int(user_input_playlist_id_num) - 1]["file"]
-                logging.debug(f"Used decided to select the playlist [{largest_playlist}] with Playlist # [{user_input_playlist_id_num}]")
-                torrent_info["largest_playlist"] = largest_playlist
-                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
-            else:
-                largest_playlist_value = max(dict_of_playlist_length_size.values())
-                largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-                torrent_info["largest_playlist"] = largest_playlist
-                logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+            torrent_info["raw_video_file"] = raw_video_file
+            torrent_info["largest_playlist"] = largest_playlist
         else:
             for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
                 found = False  # this is used to break out of the double nested loop
@@ -430,7 +361,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.critical(f"The folder {torrent_info['upload_media']} does not contain any video files")
             console.print(f"The folder {torrent_info['upload_media']} does not contain any video files\n\n", style='bold red')
             return "skip_to_next_file"
-            # sys.exit(f"The folder {torrent_info['upload_media']} does not contain any video files")
 
         torrent_info["raw_file_name"] = os.path.basename(os.path.dirname(f"{full_path}/"))  # this is used to isolate the folder name
     else:
@@ -445,7 +375,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         bdinfo_start_time = time.perf_counter()
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
-        torrent_info["bdinfo"] = generate_and_parse_bdinfo() # TODO handle non-happy paths
+        torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info) # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
@@ -539,34 +470,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     console.line(count=2)
     console.print(codec_result_table, justify='center')
     console.line(count=1)
-
-
-def generate_and_parse_bdinfo():
-    """
-        Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
-        Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
-        and result is saved in `torrent_info` as `bdinfo`
-
-        It also sets the `mediainfo` key in torrent_info
-    """
-    # if largest_playlist is already in torrent_info, then why this computation again???
-    # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-    logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
-    subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
-
-    shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', f'{working_folder}/temp_upload/mediainfo.txt')
-    if os.path.isfile("/usr/bin/sed"):
-        sed_path = "/usr/bin/sed"
-    else:
-        sed_path = "/bin/sed"
-    os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {working_folder}/temp_upload/mediainfo.txt")
-    # torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
-    # displaying bdinfo to log in debug mode
-    if args.debug:
-        logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
-        write_file_contents_to_log_as_debug(f'{working_folder}/temp_upload/mediainfo.txt')
-    torrent_info["mediainfo"] = str(working_folder + '/temp_upload/mediainfo.txt') # setting bdinfo as mediainfo for full disk uploads
-    return parse_bdinfo(f'{working_folder}/temp_upload/mediainfo.txt')
 
 
 def analyze_video_file(missing_value, media_info):
@@ -1072,106 +975,24 @@ def identify_miscellaneous_details(guess_it_result):
     logging.debug(f'[MiscellaneousDetails] Trying to identify miscellaneous details for torrent.')
     # ------ Specific Source info ------ #
     if "source_type" not in torrent_info:
-        logging.debug(f'[MiscellaneousDetails] Source type is not available. Trying to identify source type')
-        match_source = re.search(r'(?P<bluray_remux>.*blu(.ray|ray).*remux.*)|'
-                                 r'(?P<bluray_disc>.*blu(.ray|ray)((?!x(264|265)|h.(265|264)|H.(265|264)|H(265|264)).)*$)|'
-                                 r'(?P<webrip>.*web(.rip|rip).*)|'
-                                 r'(?P<webdl>.*web(.dl|dl|).*)|'
-                                 r'(?P<bluray_encode>.*blu(.ray|ray).*|x(264|265)|h.(265|264)|H.(265|264)|H(265|264)|x.(265|264))|'
-                                 r'(?P<dvd>HD(.DVD|DVD)|.*DVD.*)|'
-                                 r'(?P<hdtv>.*HDTV.*)', torrent_info["raw_file_name"], re.IGNORECASE)
-        if match_source is not None:
-            for source_type in ["bluray_disc", "bluray_remux", "bluray_encode", "webdl", "webrip", "dvd", "hdtv"]:
-                if match_source.group(source_type) is not None:
-                    # add it directly to the torrent_info dict
-                    torrent_info["source_type"] = source_type
-
-        # Well firstly if we got this far with auto_mode enabled that means we've somehow figured out the 'parent' source but now can't figure out its 'final form'
-        # If auto_mode is disabled we can prompt the user
-        elif auto_mode == 'false':
-            # Yeah yeah this is just copy/pasted from the original user_input source code, it works though ;)
-            basic_source_to_source_type_dict = {
-                # this dict is used to associate a 'parent' source with one if its possible final forms
-                'bluray': ['disc', 'remux', 'encode'],
-                'web': ['rip', 'dl'],
-                'hdtv': 'hdtv',
-                'dvd': ['disc', 'remux', 'rip']
-            }
-            # Since we already know the 'parent source' from an earlier function we don't need to prompt the user for it twice
-            if str(torrent_info["source"]).lower() in basic_source_to_source_type_dict and isinstance(basic_source_to_source_type_dict[str(torrent_info["source"]).lower()], list):
-                console.print("\nError: Unable to detect this medias 'format'", style='red')
-                console.print(f"\nWe've successfully detected the 'parent source': [bold]{torrent_info['source']}[/bold] but are unable to detect its 'final form'", highlight=False)
-                logging.error(f"We've successfully detected the 'parent source': [bold]{torrent_info['source']}[/bold] but are unable to detect its 'final form'")
-
-                # Now prompt the user
-                specific_source_type = Prompt.ask(f"\nNow select one of the following 'formats' for [green]'{torrent_info['source']}'[/green]: ", 
-                        choices=basic_source_to_source_type_dict[torrent_info["source"]])
-                # The user is given a list of options that are specific to the parent source they choose earlier (e.g.  bluray --> disc, remux, encode )
-                torrent_info["source_type"] = f'{torrent_info["source"]}_{specific_source_type}'
-            else:
-                # Right now only HDTV doesn't have any 'specific' variation so this will only run if HDTV is the source
-                torrent_info["source_type"] = f'{torrent_info["source"]}'
-
-
-        # Well this sucks, we got pretty far this time but since 'auto_mode=true' we can't prompt the user & it probably isn't a great idea to start making assumptions about a media files source,
-        # that seems like a good way to get a warning/ban so instead we'll just quit here and let the user know why
-        else:
-            logging.critical("auto_mode is enabled (no user input) & we can not auto extract the 'source_type'")
-            # let the user know the error/issue
-            console.print("\nCritical error when trying to extract: 'source_type' (more specific version of 'source', think bluray_remux & just bluray) ", style='red bold')
-            console.print("Quitting now..")
-            # and finally exit since this will affect all trackers we try and upload to, so it makes no sense to try the next tracker
-            sys.exit()
-        logging.debug(f'[MiscellaneousDetails] Source type identified as {torrent_info["source_type"]}')
+        torrent_info["source_type"] = miscellaneous_identify_source_type(torrent_info["raw_file_name"], auto_mode, torrent_info["source"])
 
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
-        """
-            First priority is given to guessit
-            If guessit can get the `streaming_service`, then we'll use that
-            Otherwise regex is used to detect the streaming service
-        """
-        # reading stream sources param json.
-        # You can add more streaming platforms to the json file.
-        # The value of the json keys will be used to create the torrent file name. 
-        # the keys are used to match the output from guessit
-        streaming_sources = json.load(open(f'{working_folder}/parameters/streaming_services.json'))
+        # TODO check whether None needs to be set as `web_source`
+        torrent_info["web_source"] = miscellaneous_identify_web_streaming_source(f'{working_folder}/parameters/streaming_services.json', torrent_info["raw_file_name"], guess_it_result)
 
-        web_source = guess_it_result.get('streaming_service', '')
-        guessit_output = streaming_sources.get(web_source)
-        if guessit_output is not None:
-            torrent_info["web_source"] = guessit_output
-            logging.info(f'Used guessit to extract the WEB Source: {guessit_output}')
-        else:
-            source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
-            match_web_source = re.search(source_regex, torrent_info["raw_file_name"].upper())
-            if match_web_source is not None:
-                torrent_info["web_source"] = match_web_source.group().replace('.', '').strip()
-                logging.info(f'Used Regex to extract the WEB Source: {match_web_source.group().replace(".", "").strip()}')
-            else:
-                logging.error("Not able to extract the web source information from REGEX and GUESSIT")
 
     # --- Custom & extra info --- #
     # some torrents have 'extra' info in the title like 'repack', 'DV', 'UHD', 'Atmos', 'remux', etc
     # We simply use regex for this and will add any matches to the dict 'torrent_info', later when building the final title we add any matches (if they exist) into the title
 
     # repacks
-    match_repack = re.search(r'RERIP|REPACK|PROPER|REPACK2|REPACK3', torrent_info["raw_file_name"], re.IGNORECASE)
-    if match_repack is not None:
-        torrent_info["repack"] = match_repack.group()
-        logging.info(f'Used Regex to extract: [bold]{match_repack.group()}[/bold] from the filename')
+    torrent_info["repack"] = miscellaneous_identify_repacks(torrent_info["raw_file_name"])
 
     # --- Bluray disc type --- #
     if torrent_info["source_type"] == "bluray_disc":
-        # This is just based on resolution & size so we just match that info up to the key we create below
-        possible_types = [25, 50, 66, 100]
-        bluray_prefix = 'uhd' if torrent_info["screen_size"] == "2160p" else 'bd'
-        total_size = sum(f.stat().st_size for f in Path(torrent_info["upload_media"]).glob('**/*') if f.is_file())
-
-        for possible_type in possible_types:
-            if total_size < int(possible_type * 1000000000):
-                torrent_info["bluray_disc_type"] = str(f'{bluray_prefix}_{possible_type}')
-                break
+        torrent_info["bluray_disc_type"] = miscellaneous_identify_bluray_disc_type(torrent_info["screen_size"], torrent_info["upload_media"])
 
     # Bluray disc regions
     # Regions are read from new json file
@@ -1205,29 +1026,13 @@ def identify_miscellaneous_details(guess_it_result):
 
     # use regex (sourced and slightly modified from official radarr repo) to find torrent editions (Extended, Criterion, Theatrical, etc)
     # https://github.com/Radarr/Radarr/blob/5799b3dc4724dcc6f5f016e8ce4f57cc1939682b/src/NzbDrone.Core/Parser/Parser.cs#L21
-    try:
-        torrent_editions = re.search(
-            r"((Recut.|Extended.|Ultimate.|Criterion.|International.)?(Director.?s|Collector.?s|Theatrical|Ultimate|Final|Criterion|International(?=(.(Cut|Edition|Version|Collection)))|Extended|Rogue|Special|Despecialized|\d{2,3}(th)?.Anniversary)(.(Cut|Edition|Version|Collection))?(.(Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|Fan.?Edit))?|(Uncensored|Remastered|Unrated|Uncut|IMAX|Fan.?Edit|Edition|Restored|(234)in1))",
-            torrent_info["upload_media"])
-        torrent_info["edition"] = str(torrent_editions.group()).replace(".", " ")
-        logging.info(f"extracted '{torrent_info['edition']}' as the 'edition' for the final torrent name")
-    except AttributeError:
-        logging.error("No custom 'edition' found for this torrent")
+    torrent_info["edition"] = miscellaneous_identify_bluray_edition(torrent_info["upload_media"])
 
     # --------- Fix scene group tags --------- #
-    # Scene releases after they unrared are all lowercase (usually) so we fix the torrent title here (Never rename the actual file)
-    # new groups can be added in the `scene_groups.json`
-    scene_group_capitalization = json.load(open(f'{working_folder}/parameters/scene_groups.json'))
-
     # Whilst most scene group names are just capitalized but occasionally as you can see ^^ some are not (e.g. KOGi)
     # either way we don't want to be capitalizing everything (e.g. we want 'NTb' not 'NTB') so we still need a dict of scene groups and their proper capitalization
     if "release_group" in torrent_info:
-        # compare the release group we extracted to the groups in the dict above ^^
-        if str(torrent_info["release_group"]).lower() in scene_group_capitalization.keys():
-            # replace the "release_group" in torrent_info with the dict value we have
-            torrent_info["release_group"] = scene_group_capitalization[str(torrent_info["release_group"]).lower()]
-            # Also save the fact that this is a scene group for later (we can add a 'scene' tag later to BHD)
-            torrent_info["scene"] = 'true'
+        torrent_info["scene"], torrent_info["release_group"] = miscellaneous_perform_scene_group_capitalization(f'{working_folder}/parameters/scene_groups.json', torrent_info["release_group"])
 
     # --------- SD? --------- #
     res = re.sub("[^0-9]", "", torrent_info["screen_size"])
@@ -1734,130 +1539,6 @@ def choose_right_tracker_keys():
         
     logging.debug(f'The relevant torrent info values for resolution / source identification are {relevant_torrent_info_values}')
 
-
-    def get_hybrid_type(target_val):
-        """
-            Method to get a hybrid type from the source, resolution and type properties of the torrent
-        """
-        logging.debug(f'------------------ Hybrid mapping started ------------------')
-        # getting values for the source, resolution and type properties
-        source = tracker_settings[config["translation"]["source"]]
-        resolution = tracker_settings[config["translation"]["resolution"]]
-        type = tracker_settings[config["translation"]["type"]]
-        logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{type}]')
-
-        for key in config["hybrid_type"]["mapping"]:
-            logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
-            is_valid = None
-            for sub_key, sub_val in config["hybrid_type"]["mapping"][key].items():
-                logging.debug(f'[HybridMapping] The subkey `{sub_key}` from `{sub_val["data_source"]}` need to be one of `{sub_val["values"]}` for the mapping to be accepted.')
-                
-                datasource = tracker_settings if sub_val["data_source"] == "tracker" else torrent_info
-                selected_val = datasource[sub_key]
-                
-                if selected_val is not None:
-                    if len(sub_val["values"]) == 0:
-                        logging.info(f"[HybridMapping] For the subkey `{sub_key}` the values configured `{sub_val['values']}` is empty. Assuming by default as valid and continuing.")
-                        is_valid = True if is_valid is None else is_valid
-                    elif str(selected_val) in sub_val['values']:
-                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
-                        is_valid = True if is_valid is None else is_valid
-                    else:
-                        logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
-                        is_valid = False
-                else:
-                    is_valid = False
-                    logging.fatal(f"[HybridMapping] Invalid configuration provided for hybrid key mapping. Key ::{key}, sub key :: {sub_key}, sub value :: {sub_val}")
-
-            if is_valid:
-                logging.info(f'[HybridMapping] The hybrid key was identified to be {key}')
-                logging.debug(f'------------------ Hybrid mapping Completed ------------------')
-                # is_valid is true 
-                # all the categories match
-                return key
-        
-        logging.debug(f'------------------ Hybrid mapping Completed With ERRORS ------------------')
-        # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
-        logging.critical('[HybridMapping] Unable to find a suitable "hybrid mapping" match for this file')
-        logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed)")
-        console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
-        sys.exit()
-
-    def identify_resolution_source(target_val):
-        # target_val is type (source) or resolution_id (resolution)
-        possible_match_layer_1 = []
-        for key in config["Required"][(config["translation"][target_val])]:
-            # this key is the number provided under the target_val
-            logging.debug(f"[ResolutionSourceMapping] Trying to match `{config['translation'][target_val]}` to configured key `{key}`")
-
-            total_num_of_required_keys = 0
-            total_num_of_acquired_keys = 0
-
-            # If we have a list of options to choose from, each match is saved here
-            total_num_of_optionals_matched = 0
-            optional_keys = []
-
-            for sub_key, sub_val in config["Required"][(config["translation"][target_val])][key].items():
-                # for each sub key and its priority we 
-                logging.debug(f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
-                # Sub-Key Priorities
-                # --------------------- 
-                # 0 = optional
-                # 1 = required
-                # 2 = select from available items in list
-
-                if sub_val == 1:
-                    total_num_of_required_keys += 1
-                    # Now check if the sub_key is in the relevant_torrent_info_values list
-                    if sub_key in str(relevant_torrent_info_values).lower():
-                        total_num_of_acquired_keys += 1
-                        logging.debug(f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
-                elif sub_val == 2:
-                    if sub_key in str(relevant_torrent_info_values).lower():
-                        total_num_of_optionals_matched += 1
-                        logging.debug(f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
-                    optional_keys.append(sub_key)
-
-            logging.debug(f'[ResolutionSourceMapping] Total number of required keys: {total_num_of_required_keys}')
-            logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys: {total_num_of_acquired_keys}')
-            logging.debug(f'[ResolutionSourceMapping] Optional keys: {optional_keys}')
-            logging.debug(f'[ResolutionSourceMapping] Total number of optionals matched: {total_num_of_optionals_matched}')
-
-            if int(total_num_of_required_keys) == int(total_num_of_acquired_keys):
-                if len(optional_keys) > 0:
-                    if int(total_num_of_optionals_matched) > 0:
-                        logging.debug(f'[ResolutionSourceMapping] Some {total_num_of_optionals_matched} of optional keys {optional_keys} were matched and no of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
-                        possible_match_layer_1.append(key)
-                    else:
-                        logging.debug(f'[ResolutionSourceMapping] No optional keys {optional_keys} were matched.')
-                else:
-                    logging.debug(f'[ResolutionSourceMapping] No of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
-                    possible_match_layer_1.append(key)
-                # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately (2160p BD remux requires 'remux', '2160p', 'bluray')
-                # so if we find all those values in optional_keys list then we can break 
-                # knowing that we hit 100% of the required values instead of having to cycle through the "optional" values and select one of them
-                if len(optional_keys) == 0 and key != "other":
-                    break
-
-                if len(optional_keys) >= 2 and int(total_num_of_optionals_matched) == 1:
-                    break
-
-            if len(possible_match_layer_1) >= 2 and "Other" in possible_match_layer_1:
-                possible_match_layer_1.remove("Other")
-
-        # checking whether we were able to get a match in any of the configuration
-        if len(possible_match_layer_1) == 1:
-            val = possible_match_layer_1.pop()
-            logging.debug(f'[ResolutionSourceMapping] Successfully matched one item for `{config["translation"][target_val]}` => `{val}`')
-            return val
-        else:
-            # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
-            logging.critical('[ResolutionSourceMapping] Unable to find a suitable "source" match for this file')
-            logging.error("[ResolutionSourceMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed)")
-            console.print(f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
-            return "STOP"
-
-    
     # Filling in data for all the keys that have mapping/translations
     # Here we iterate over the translation mapping and for each translation key, we check the required and optional items for that value
     # once identified we handle it
@@ -1949,7 +1630,7 @@ def choose_right_tracker_keys():
                         return "STOP"
 
                 if translation_key in ('source', 'resolution'):
-                    return_value = identify_resolution_source(translation_key)
+                    return_value = identify_resolution_source(target_val=translation_key, config=config, relevant_torrent_info_values=relevant_torrent_info_values)
                     if return_value == "STOP":
                         return return_value
                     tracker_settings[config["translation"][translation_key]] = return_value
@@ -1961,7 +1642,8 @@ def choose_right_tracker_keys():
                     # otherwise we mark the present of this hybrid type and do the mapping after all required and optional 
                     # value mapping have been completed.
                     if config["translation"]["source"] in tracker_settings and config["translation"]["resolution"] in tracker_settings and config["translation"]["type"] in tracker_settings:
-                        tracker_settings[config["translation"][translation_key]] = get_hybrid_type(translation_key)
+                        tracker_settings[config["translation"][translation_key]] = get_hybrid_type(target_val=translation_key,
+                            tracker_settings=tracker_settings, config=config, exit_program=True, torrent_info=torrent_info)
                         is_hybrid_translation_needed = False
                     else:
                         is_hybrid_translation_needed = True
@@ -2055,7 +1737,8 @@ def choose_right_tracker_keys():
 
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
-        tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type("hybrid_type")
+        tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type(target_val="hybrid_type",
+            tracker_settings=tracker_settings, config=config, exit_program=False, torrent_info=torrent_info)
 
 
 # ---------------------------------------------------------------------- #
@@ -2660,8 +2343,7 @@ for file in upload_queue:
 
     if auto_mode == "false" and Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
         logging.debug(f'[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
-        from custom_user_input import collect_custom_messages_from_user
-        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(debug=args.debug)
+        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(f'{working_folder}/parameters/custom_text_components.json')
     else:
         logging.debug(f'[Main] User decided not to add custom text to torrent description or running in auto_mode')
 

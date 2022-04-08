@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import requests
+
 from pprint import pformat
 from distutils import util
 from guessit import guessit
@@ -12,8 +13,6 @@ from rich.prompt import Confirm
 from rich.console import Console
 
 console = Console()
-working_folder = os.path.dirname(os.path.realpath(__file__))
-logging.basicConfig(filename=f'{working_folder}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
 def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
@@ -29,7 +28,7 @@ def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
     return result
 
 
-def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_api, debug):
+def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_api, debug, working_folder, auto_mode):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -102,8 +101,14 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # as the name indicates, it decides whether or not the `dupe_check_response` returned from the tracker
     # needs any further parsing.
     logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
-    dupe_check_response = dupe_check_response.json()
-    
+    try:
+        dupe_check_response = dupe_check_response.json()
+    except Exception as ex:
+        logging.exception(f"[DupeCheck] Error while reading response from tracker {search_site} for dupe check. Error {ex}")
+        logging.fatal(f"[DupeCheck] Text data from tracker {search_site} for dupe check {pformat(dupe_check_response_wrapper)}")
+        console.print(f"[bold red]:warning:  Could not parse the dupe check response from tracker [green]{str(config['name']).upper()}[/green], hence skipping this tracker. :warning:[/bold red]\n")
+        return True
+        
     torrent_items = dupe_check_response
     if config["dupes"]["parse_json"]["is_needed"]:
         torrent_items = dupe_check_response[str(config["dupes"]["parse_json"]["top_lvl"])]
@@ -165,6 +170,10 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
         return False
 
+    our_title_guessit = guessit(torrent_info["torrent_title"])
+    logging.debug("::::::::::::::::::::::::::::: OUR GuessIt output result :::::::::::::::::::::::::::::")
+    logging.debug(f'\n{pformat(our_title_guessit)}')
+
     # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #
     logging.debug(f'[DupeCheck] Uploading media properties. Resolution :: {torrent_info["screen_size"]}, Source ::: {torrent_info["source_type"]}')
     logging.debug(f'[DupeCheck] Filtering torrents from tracker that doesn\'t match the above properties')
@@ -173,13 +182,35 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         their_title_guessit = guessit(their_title)
         their_title_type = existing_release_types[their_title]
 
+        logging.debug("::::::::::::::::::::::::::::: THEIR GuessIt output result :::::::::::::::::::::::::::::")
+        logging.debug(f'\n{pformat(their_title_guessit)}')
+
         # This next if statement does 2 things:
         #   1. If the torrent title from the API request doesn't have the same resolution as the file being uploaded we pop (remove) it from the dict "existing_release_types"
         #   2. If the API torrent title source type (e.g. bluray_encode) is not the same as the local file then we again pop it from the "existing_release_types" dict
         if ("screen_size" not in their_title_guessit or their_title_guessit["screen_size"] != torrent_info["screen_size"]) or their_title_type != torrent_info["source_type"]:
             existing_releases_count[their_title_type] -= 1
             existing_release_types.pop(their_title)
+            continue # if an item has been removed from the list at any point then there is no need to apply further checks
 
+        logging.debug(f'[DupeCheck] Uploading media properties ==> Audio Channels :: {torrent_info["audio_channels"]}, Audio Codec ::: {torrent_info["audio_codec"]}')
+        # if audio channels is not present in their titile then we cannot eliminate it.
+        if "audio_channels" in their_title_guessit and their_title_guessit["audio_channels"] != our_title_guessit["audio_channels"]:
+            # there is a mismatch in the audio channels, we can mark that as a possible dupe
+            their_channels = their_title_guessit["audio_channels"]
+            our_channels = their_title_guessit["audio_channels"]
+            if int(our_channels[0]) > int(their_channels[0]): # 5.1 and 2.0 => comparing the channels
+                # if we have more channels than their release, then we can treat that as not a dupe.
+                existing_releases_count[their_title_type] -= 1
+                existing_release_types.pop(their_title)
+                continue
+
+        # elimination conditiaon
+        #   If resolution doesn't match then we can remove items
+        #   If audio codec doesn't match then we need to compare the audio channels. If our channel is better then we can remove item from list
+        #       If 2.0 is already on tracker then we can upload 5.1 or 7.1 channels as these torrents will trump the lower channel releases
+        #   # TODO add support for hdr and DV versions as well
+        # TODO implement this after comparing with lots of titles and samples
     logging.info(msg=f'[DupeCheck] After applying resolution & "source_type" filter: {existing_releases_count}')
 
 
