@@ -46,6 +46,7 @@ from utilities.custom_user_input import collect_custom_messages_from_user
 from utilities.search_for_dupes import search_for_dupes_api
 from utilities.utils_miscellaneous import *
 from utilities.utils_bdinfo import *
+from utilities.utils import *
 
 # Used for rich.traceback
 install()
@@ -70,30 +71,14 @@ load_dotenv(f'{working_folder}/config.env')
 # Getting the keys present in the config.env.sample
 # These keys are then used to compare with the env variable keys provided during runtime.
 # Presently we just displays any missing keys, in the future do something more useful with this information
-sample_env_keys = dotenv_values(f'{working_folder}/config.env.sample').keys()
-
-# validating env file with expected keys from sample file
-for key in sample_env_keys:
-    if os.getenv(key) is None:
-        console.print(f"Outdated config.env file. Variable [red][bold]{key}[/bold][/red] is missing.", style="blue")
+validate_env_file(f'{working_folder}/config.env.sample')
 
 # Used to correctly select json file
 # the value in this dictionay must correspond to the file name of the site template
 acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
 
-# Now assign some of the values we get from 'config.env' to global variables we use later
-api_keys = json.load(open(f'./parameters/tracker/api_keys.json'))
-api_keys_dict = dict()
-for i in range (0, len(api_keys)):
-    api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper())
-
-# Make sure the TMDB API is provided [Mandatory Property]
-try:
-    if len(api_keys_dict['tmdb_api_key']) == 0:
-        raise AssertionError("TMDB API key is required")
-except AssertionError as err:  # Log AssertionError in the logfile and quit here
-    logging.exception("TMDB API Key is required")
-    raise err
+# the `prepare_tracker_api_keys_dict` prepares the api_keys_dict and also does mandatory property validations
+api_keys_dict = prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
 
 # Import 'auto_mode' status
 if str(os.getenv('auto_mode')).lower() not in ['true', 'false']:
@@ -240,16 +225,10 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_want_torrent_info = ['release_group', 'episode_title']
     keys_we_need_torrent_info = ['screen_size', 'source', 'audio_channels']
 
-    if args.type:
-        if args.type[0] in ('tv', 'movie'):
-            torrent_info["type"] = 'episode' if args.type[0] == 'tv' else 'movie'
-            logging.info(f"Using user provided type {torrent_info['type']}")
-        else:
-            logging.error(f'User has provided invalid media type as argument {args.type[0]}. Type will be detected dynamically!')
-            keys_we_need_torrent_info.append('type')
+    if has_user_provided_type(args.type):
+        torrent_info["type"] = torrent_info["type"] = 'episode' if args.type[0] == 'tv' else 'movie'
     else:
-        logging.info("Type not provided by user. Type will be detected dynamically!")
-        keys_we_need_torrent_info.append('type')    
+        keys_we_need_torrent_info.append('type')  
 
     keys_we_need_but_missing_torrent_info = []
     # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
@@ -1425,90 +1404,6 @@ def calculate_piece_size(size):
     return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
-def generate_dot_torrent(media, announce, source, callback=None):
-    """
-        media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
-    """
-    logging.info("[DotTorrentGeneration] Creating the .torrent file now")
-    logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
-    logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
-
-    if len(glob.glob(working_folder + "/temp_upload/*.torrent")) == 0:
-        # we need to actually generate a torrent file "from scratch"
-        logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
-        if args.use_mktorrent:
-            print("Using mktorrent to generate the torrent")
-            logging.info("[DotTorrentGeneration] Using MkTorrent to generate the torrent")
-            """
-            mktorrent options
-                -v => Be verbose.
-                -p => Set the private flag.
-                -a => Specify the full announce URLs.  Additional -a adds backup trackers.
-                -o => Set the path and filename of the created file.  Default is <name>.torrent.
-                -c => Add a comment to the metainfo.
-                -s => Add source string embedded in infohash.
-                
-                -e *.txt,*.jpg,*.png,*.nfo,*.svf,*.rar,*.screens,*.sfv # TODO to be added when supported mktorrent is available in alpine
-            current version of mktorrent pulled from alpine package doesn't have the -e flag.
-            Once an updated version is available, the flag can be added
-            """
-            if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
-            else:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_info['torrent_title']}.torrent\" \"{media}\"")
-            logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
-        else:
-            print("Using python torf to generate the torrent")
-            torrent = Torrent(media,
-                              trackers=announce,
-                              source=source,
-                              comment="Torrent created by GG-Bot Upload Assistant",
-                              created_by="GG-Bot Upload Assistant",
-                              exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens","*.sfv"],
-                              private=True,
-                              creation_date=datetime.datetime.now())
-            torrent.piece_size=calculate_piece_size(torrent.size)
-            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
-            logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
-            torrent.generate(callback=callback)
-            torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
-            torrent.verify_filesize(media)
-            # Save the path to .torrent file in torrent_settings
-            torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_info["torrent_title"]}.torrent'
-            logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_info["torrent_title"] + ".torrent"))
-    else:
-        print("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
-        logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
-
-        # just choose whichever, doesn't really matter since we replace the same info anyways
-        edit_torrent = Torrent.read(glob.glob(working_folder + '/temp_upload/*.torrent')[0])
-
-        if len(announce) == 1:
-            logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
-            logging.debug(f"[DotTorrentGeneration] Removing announce-list if present in existing torrent.")
-            edit_torrent.metainfo.pop('announce-list', "")
-        else:
-            logging.debug(f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
-            edit_torrent.metainfo.pop('announce-list', "")
-            edit_torrent.metainfo['announce-list'] = list()
-            for announce_url in announce[1:]:
-                logging.debug(f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
-                announce_list = list()
-                announce_list.append(announce_url)
-                edit_torrent.metainfo['announce-list'].append(announce_list)
-            logging.debug(f"[DotTorrentGeneration] Final announce-list in torrent metadata {edit_torrent.metainfo['announce-list']}")
-
-        edit_torrent.metainfo['announce'] = announce[0]
-        edit_torrent.metainfo['info']['source'] = source
-        # Edit the previous .torrent and save it as a new copy
-        Torrent.copy(edit_torrent).write(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
-
-    if os.path.isfile(f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'):
-        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
-    else:
-        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent')
-
-
 # ---------------------------------------------------------------------- #
 #                  Set correct tracker API Key/Values                    #
 # ---------------------------------------------------------------------- #
@@ -2056,55 +1951,7 @@ if discord_url:
 # Verify we support the tracker specified
 upload_to_trackers = []
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
-
-logging.info("[Main] Validating the trackers provide by user as command line arguments")
-for tracker in args.trackers if args.trackers is not None else []:
-    if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
-        # Make sure that an API key is set for that site
-        try:
-            if len(api_keys_dict[(str(tracker).lower()) + "_api_key"]) <= 1:
-                raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
-            if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
-        except AssertionError as err:
-            logging.error("[Main] We can't upload to '{}' because that sites API key is not specified".format(tracker))
-    else:
-        logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
-
-
-# Make sure that the user provides at least 1 valid tracker we can upload to
-try:
-    # if len(upload_to_trackers) == 0 that means that the user either didn't provide any site at all, the site is not supported, or the API key isn't provided
-    if len(upload_to_trackers) < 1:
-        logging.error("[Main] Validation failed for all trackers provided as command line arguments")
-        
-        if args.all_trackers: # user wants to upload to all the trackers possible
-            tracker_list = acronym_to_tracker.keys()
-            logging.info(f"[Main] User has chosen to upload to add possible trackers: {tracker_list}")
-        else:
-            logging.info("[Main] Attempting check and validate and default trackers configured")
-            tracker_list = os.getenv("default_trackers_list") or ""
-            if len(tracker_list) > 0:
-                tracker_list= [ x.strip() for x in tracker_list.split(',') ]
-        
-        for tracker in tracker_list:
-            if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
-                # Make sure that an API key is set for that site
-                try:
-                    if len(api_keys_dict[(str(tracker).lower()) + "_api_key"]) <= 1:
-                        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
-                    if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
-                except AssertionError as err:
-                    logging.error("[Main] We can't upload to '{}' because that sites API key is not specified".format(tracker))
-            else:
-                logging.error("[Main] We can't upload to '{}' because that site is not supported".format(tracker))
-
-        if len(upload_to_trackers) < 1:
-            raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
-except AssertionError as err:  # Log AssertionError in the logfile and quit here
-    logging.exception("[Main] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
-    raise err
-
-logging.debug(f"[Main] Trackers selected by bot: {upload_to_trackers}")
+upload_to_trackers = get_and_validate_configured_trackers(args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
 
 # Show the user what sites we will upload to
 console.line(count=2)
@@ -2195,52 +2042,14 @@ for file in upload_queue:
     # File we're uploading
     console.print(f'Uploading File/Folder: [bold][blue]{file}[/blue][/bold]')
 
-    # If the path the user specified is a folder with .rar files in it then we unpack the video file & set the torrent_info key equal to the extracted video file
-    if os.path.isdir(file):
-        logging.debug(f"[Main] User wants to upload a folder: {file}")
-        # Set the 'upload_media' right away, if we end up extracting from a rar archive we will just overwriting it with the .mkv we extracted
-        torrent_info["upload_media"] = file
-
-        # Now we check to see if the dir contains rar files
-        rar_file = glob.glob(f"{os.path.join(file, '')}*rar")
-        if rar_file:
-            logging.info(f"[Main] '{file}' is a .rar archive, extracting now")
-            logging.info(f"[Main] rar file: {rar_file[0]}")
-
-            # Now verify that unrar is installed
-            unrar_sys_package = '/usr/bin/unrar'
-            if os.path.isfile(unrar_sys_package):
-                logging.info("[Main] Found 'unrar' system package, Using it to extract the video file now")
-
-                # run the system package unrar and save the extracted file to its parent dir
-                subprocess.run([unrar_sys_package, 'e', rar_file[0], file])
-                logging.debug(f"[Main] Successfully extracted file : {rar_file[0]}")
-
-                # This is how we identify which file we just extracted (Last modified)
-                list_of_files = glob.glob(f"{os.path.join(file, '')}*")
-                latest_file = max(list_of_files, key=os.path.getctime)
-
-                # Overwrite the value for 'upload_media' with the path to the video file we just extracted
-                torrent_info["upload_media"] = latest_file
-                logging.debug(f"[Main] Using the extracted {latest_file} for further processing")
-
-            # If the user doesn't have unrar installed then we let them know here and move on to the next file (if exists)
-            else:
-                console.print('unrar is not installed, Unable to extract the rar archinve\n', style='bold red')
-                logging.critical('[Main] `unrar` is not installed, Unable to extract rar archive')
-                logging.info('[Main] Perhaps first try "sudo apt-get install unrar" then run this script again')
-                continue  # Skip this entire 'file upload' & move onto the next (if exists)
-    else:
-        torrent_info["upload_media"] = file
-        logging.info(f'[Main] Uploading the following file: {file}')
+    rar_file_validation_response = check_for_dir_and_extract_rars(file)
+    if not rar_file_validation_response[0]:
+        # Skip this entire 'file upload' & move onto the next (if exists)
+        continue
+    torrent_info["upload_media"] = rar_file_validation_response[1]
 
     # Performing guessit on the rawfile name and reusing the result instead of calling guessit over and over again
-    guessit_start_time = time.perf_counter()
-    guess_it_result = guessit(torrent_info["upload_media"])
-    guessit_end_time = time.perf_counter()
-    logging.debug(f'[Main] Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
-    logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
-    logging.debug(f'\n{pformat(guess_it_result)}')
+    guess_it_result = perform_guessit_on_filename(torrent_info["upload_media"])
     
     # -------- Basic info --------
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
@@ -2420,97 +2229,17 @@ for file in upload_queue:
         bbcode_line_break = config['bbcode_line_break']
 
         # -------- Add custom descriptions to description.txt --------
-        if "custom_user_inputs" in torrent_info:
-            # If the user is uploading to multiple sites we don't want to keep appending to the same description.txt file so remove it each time and write clean bbcode to it
-            #  (Note, this doesn't delete bbcode_images.txt so you aren't uploading the same images multiple times)
-            if os.path.isfile(f'{working_folder}/temp_upload/description.txt'):
-                os.remove(f'{working_folder}/temp_upload/description.txt')
-
-            # we need to make sure that the tracker supports custom description for torrents. 
-            # If tracker supports custom descriptions, the the tracker config will have the `description_components` key.
-            if "description_components" in config:
-                logging.debug(f'[CustomUserInputs] User has provided custom inputs for torrent description')
-                # here we iterate through all the custom inputs provided by the user
-                # then we check whether this component is supported by the target tracker. If tracker supports it then the `key` will be present in the tracker config.
-                with open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
-                    description_components = config["description_components"]
-                    logging.debug(f'[CustomUserInputs] Custom Message components configured for tracker {tracker} are {pformat(description_components)}')
-                    for custom_user_input in torrent_info["custom_user_inputs"]:
-                        # getting the component type
-                        logging.debug(f'[CustomUserInputs] Custom input data {pformat(custom_user_input)}')
-                        if custom_user_input["key"] not in description_components:
-                            logging.debug(f'[CustomUserInputs] This type of component is not supported by the tracker. Writing input to description as plain text')
-                            # the provided component is not present in the trackers list. hence we adds this to the description directly (plain text)
-                            description.write(custom_user_input["value"])
-                        else:
-                            # provided component is present in the tracker list, so first we'll format the content to be added to the tracker template
-                            input_wrapper_type = description_components[custom_user_input["key"]]
-                            logging.debug(f'[CustomUserInputs] Component wrapper :: `{input_wrapper_type}`')
-                            formatted_value = custom_user_input["value"].replace("\\n", bbcode_line_break)
-                            # next we need to check whether the text component has any title
-                            if "title" in custom_user_input and custom_user_input["title"] is not None:
-                                logging.debug(f'[CustomUserInputs] User has provided a title for this component')
-                                # if user has provided title, next we'll make sure that the tracker supports title for the component.
-                                if "TITLE_PLACEHOLDER" in input_wrapper_type:
-                                    logging.debug(f'[CustomUserInputs] Adding title [{custom_user_input["title"].strip()}] to this component')
-                                    input_wrapper_type = input_wrapper_type.replace("TITLE_PLACEHOLDER", custom_user_input["title"].strip())
-                                else:
-                                    logging.debug(f'[CustomUserInputs] Title is not supported for this component {custom_user_input["key"]} in this tracker {tracker}. Skipping title placement')
-                            # in cases where tracker supports title and user hasn't provided any title, we'll just remove the title placeholder
-                            # note that the = is intentional. since title would be [spoiler=TITILE]. we need to remove =TITLE
-                            # if title has already been repalced the below statement won't do anything
-                            input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
-
-                            if args.debug: # just for debugging purposes
-                                if "][" in input_wrapper_type:
-                                    logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
-                                logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
-
-                            final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
-                            description.write(final_formatted_data)
-                            logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
-
-                        description.write(bbcode_line_break)
-            else: # else for "description_components" in config
-                logging.debug(f"[Main] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
-                
+        write_cutsom_user_inputs_to_description(torrent_info=torrent_info, 
+            description_file_path=f'{working_folder}/temp_upload/description.txt', config=config, 
+            tracker=tracker, bbcode_line_break=bbcode_line_break)
 
         # -------- Add bbcode screenshots to description.txt --------
-        if "bbcode_images" in torrent_info and not ("url_images" in config["translation"] or "url_images" in config["translation"]):
-            # Screenshots will be added to description only if no custom screenshot payload method is provided.
-            # Possible payload mechanisms for screenshot are 1. bbcode, 2. url, 3. post data
-            # TODO implement proper screenshot payload mechanism. [under technical_jargons?????]
-            #
-            # if custom_user_inputs is already present in torrent info, then the delete operation would have already be done
-            # so we just need to append screenshots to the description.txt
-            if "custom_user_inputs" not in torrent_info and os.path.isfile(f'{working_folder}/temp_upload/description.txt'):
-                os.remove(f'{working_folder}/temp_upload/description.txt')
+        add_bbcode_images_to_description(torrent_info=torrent_info, config=config, 
+            description_file_path=f'{working_folder}/temp_upload/description.txt', bbcode_line_break=bbcode_line_break)
 
-            # Now open up the correct files and format all the bbcode/tags below
-            with open(torrent_info["bbcode_images"], 'r') as bbcode, open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
-                # First add the [center] tags, "Screenshots" header, Size tags etc etc. This only needs to be written once which is why its outside of the 'for loop' below
-                description.write(f'{bbcode_line_break}[center] ---------------------- [size=22]Screenshots[/size] ---------------------- {bbcode_line_break}{bbcode_line_break}')
-                # Now write in the actual screenshot bbcode
-                for line in bbcode:
-                    description.write(line)
-                description.write("[/center]")
-
-        # TODO what will happen if custom_user_inputs and bbcode_images are not present
-        # will then open throw some errors???
-        with open(f'{working_folder}/temp_upload/description.txt', 'a') as description:
-            # Finally append the entire thing with some shameless self promotion ;) and some line breaks
-            if os.getenv("uploader_signature") is not None and len(os.getenv("uploader_signature")) > 0:
-                logging.debug(f'[Main] User has provided custom uploader signature to use.')
-                # the user has provided a custom signature to be used. hence we'll use that.
-                uploader_signature = os.getenv("uploader_signature")
-                logging.debug(f'[Main] User provided signature :: {uploader_signature}')
-                if not uploader_signature.startswith("[center]") and not uploader_signature.endswith("[/center]"):
-                    uploader_signature = f'[center]{uploader_signature}[/center]'
-                uploader_signature = f'{uploader_signature}{bbcode_line_break}[center]Powered by GG-BOT Upload Assistant[/center]'
-                description.write(f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
-            else:
-                logging.debug(f'[Main] User has not provided any custom uploader signature to use. Using default signature')
-                description.write(f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
+        # -------- Add custom uploader signature to description.txt --------
+        write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/description.txt',
+            tracker=tracker, bbcode_line_break=bbcode_line_break)
 
         # Add the finished file to the 'torrent_info' dict
         torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
@@ -2544,6 +2273,10 @@ for file in upload_queue:
             media=torrent_info["upload_media"],
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
             source=config["source"],
+            working_folder=working_folder,
+            use_mktorrent=args.use_mktorrent,
+            tracker=tracker,
+            torrent_title=torrent_info["torrent_title"],
             callback=generate_callback
         )
 
