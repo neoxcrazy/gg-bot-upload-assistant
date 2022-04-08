@@ -37,7 +37,6 @@ from rich.prompt import Prompt, Confirm
 
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from images.upload_screenshots import take_upload_screens
-from mediainfo_summary_extractor import prepare_mediainfo_summary
 
 # utility methods
 # Method that will read and accept text components for torrent description
@@ -45,7 +44,10 @@ from utilities.custom_user_input import collect_custom_messages_from_user
 # Method that will search for dupes in trackers.
 from utilities.search_for_dupes import search_for_dupes_api
 from utilities.utils_miscellaneous import *
+from utilities.utils_translation import *
+from utilities.utils_metadata import *
 from utilities.utils_bdinfo import *
+from utilities.utils_basic import *
 from utilities.utils import *
 
 # Used for rich.traceback
@@ -256,47 +258,21 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
         torrent_info["release_group"] = torrent_info["release_group"][2:]
     
-    # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
-    # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
+
     if "type" not in torrent_info:
         raise AssertionError("'type' is not set in the guessit output, something is seriously wrong with this filename")
+
+    # ------------ Format Season & Episode (Goal is 'S01E01' type format) ------------ #
+    # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
     if torrent_info["type"] == "episode":  # guessit uses 'episode' for all tv related content (including seasons)
-        # Set a default value for season and episode
-        torrent_info["season_number"] = "0"
-        torrent_info["episode_number"] = "0"
-        torrent_info["complete_season"] = "0"
-        torrent_info["individual_episodes"] = "0"
+        s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes = basic_get_episode_basic_details(guess_it_result)
+        torrent_info["s00e00"] = s00e00
+        torrent_info["season_number"] = season_number
+        torrent_info["episode_number"] = episode_number
+        torrent_info["complete_season"] = complete_season
+        torrent_info["individual_episodes"] = individual_episodes
+        torrent_info["daily_episodes"] = daily_episodes
 
-        if 'season' not in guess_it_result:
-            logging.error("could not detect the 'season' using guessit")
-            if 'date' in guess_it_result:  # we can replace the S**E** format with the daily episodes date
-                daily_episode_date = str(guess_it_result["date"])
-                logging.info(f'detected a daily episode, using the date ({daily_episode_date}) instead of S**E**')
-                torrent_info["s00e00"] = daily_episode_date
-            else:
-                logging.critical("Could not detect Season or date (daily episode) so we can not upload this")
-                sys.exit(console.print("\ncould not detect the 'season' or 'date' (daily episode). Cannot upload this.. quitting now\n", style="bold red"))
-        else:
-            # This else is for when we have a season number, so we can immediately assign it to the torrent_info dict
-            torrent_info["season_number"] = int(guess_it_result["season"])
-            # check if we have an episode number
-            if 'episode' in guess_it_result:
-                if type(guess_it_result["episode"]) is list:
-                    torrent_info["episode_number"] = int(guess_it_result["episode"][0])
-                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
-                    for episode in guess_it_result["episode"]:
-                        torrent_info["s00e00"] = f'{torrent_info["s00e00"]}E{episode:02d}'
-                else:
-                    torrent_info["episode_number"] = int(guess_it_result["episode"])
-                    torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}E{torrent_info["episode_number"]:02d}'
-                torrent_info["individual_episodes"] = "1"
-            else:
-                # if we don't have an episode number we will just use the season number
-                torrent_info["s00e00"] = f'S{torrent_info["season_number"]:02d}'
-                # marking this as full season
-                torrent_info["complete_season"] = "1"
-
-            
     # ------------ If uploading folder, select video file from within folder ------------ #
     # First make sure we have the path to the actual video file saved in the torrent_info dict
     # for example someone might want to upload a folder full of episodes, we need to select at least 1 episode to use pymediainfo/ffprobe on
@@ -322,19 +298,9 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info["raw_video_file"] = raw_video_file
             torrent_info["largest_playlist"] = largest_playlist
         else:
-            for individual_file in sorted(glob.glob(f"{torrent_info['upload_media']}/*")):
-                found = False  # this is used to break out of the double nested loop
-                logging.info(f"Checking to see if {individual_file} is a video file")
-                if os.path.isfile(individual_file):
-                    file_info = MediaInfo.parse(individual_file)
-                    for track in file_info.tracks:
-                        if track.track_type == "Video":
-                            torrent_info["raw_video_file"] = individual_file
-                            logging.info(f"Using {individual_file} for bdinfo tests")
-                            found = True
-                            break
-                    if found:
-                        break
+            raw_video_file = basic_get_raw_video_file(torrent_info['upload_media'])
+            if raw_video_file is not None:
+                torrent_info["raw_video_file"] = raw_video_file
 
         if 'raw_video_file' not in torrent_info:
             logging.critical(f"The folder {torrent_info['upload_media']} does not contain any video files")
@@ -383,12 +349,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # parsing mediainfo, this will be reused for further processing.
     # only when the required data is mediainfo, this will be computed again, but as `text` format to write to file.
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
-    logging.debug(f"Mediainfo will parse the file: {parse_me}")
-    
-    meddiainfo_start_time = time.perf_counter()
-    media_info_result = MediaInfo.parse(parse_me)
-    meddiainfo_end_time = time.perf_counter()
-    logging.debug(f"Time taken for mediainfo to parse the file {parse_me} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+    media_info_result = basic_get_mediainfo(parse_me)
     
     if args.disc:
         # for full disk uploads the bdinfo summary itself will be set as the `mediainfo_summary`
@@ -397,11 +358,18 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             bdInfo_summary = summary.read()
             torrent_info["mediainfo_summary"] = bdInfo_summary
     else:
-        meddiainfo_start_time = time.perf_counter()
-        torrent_info["mediainfo_summary"] = prepare_mediainfo_summary(media_info_result.to_data())
-        meddiainfo_end_time = time.perf_counter()
-        logging.debug(f"Time taken for mediainfo summary generation :: {(meddiainfo_end_time - meddiainfo_start_time)}")
-        logging.debug(f'Generated MediaInfo summary :: \n {pformat(torrent_info["mediainfo_summary"])}')
+        # certain release groups will add IMDB, TMDB and TVDB id in the general section of mediainfo. If one such id is present then we can use it and 
+        # consider it the same as being provided by the user (no need to search)
+        # PS: We don't use the tvdb id obtained here. (Might be deprecated)
+        mediainfo_summary, tmdb, imdb, tvdb = basic_get_mediainfo_summary(media_info_result.to_data())
+        torrent_info["mediainfo_summary"] = mediainfo_summary
+        if tmdb != "0":
+            tmdb = tmdb[tmdb.find("/") + 1:] if tmdb.find("/") >= 0 else tmdb # we will get movie/12345 or tv/12345 => we only need 12345 part.
+            args.tmdb = [tmdb]
+            logging.info(f"[Main] Obtained TMDB Id from mediainfo summary. Proceeding with {args.tmdb}")
+        if imdb != "0":
+            args.imdb = [imdb]
+            logging.info(f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {args.imdb}")
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
@@ -471,476 +439,48 @@ def analyze_video_file(missing_value, media_info):
     
     # ------------ Save mediainfo to txt ------------ #
     if missing_value == "mediainfo":
-        logging.info("Generating mediainfo.txt")
-
-        # If its not a bluray disc we can get mediainfo, otherwise we need BDInfo
-        if "largest_playlist" not in torrent_info:
-            # We'll remove the full file path for privacy reasons and only show the file (or folder + file) path in the "Complete name" of media_info_output
-            if 'raw_video_file' in torrent_info:
-                essential_path = f"{torrent_info['raw_file_name']}/{os.path.basename(torrent_info['raw_video_file'])}"
-            else:
-                essential_path = f"{os.path.basename(torrent_info['upload_media'])}"
-            # depending on if the user is uploading a folder or file we need for format it correctly so we replace the entire path with just media file/folder name
-            logging.info(f"Using the following path in mediainfo.txt: {essential_path}")
-
-            media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me, essential_path)
-            save_location = str(working_folder + '/temp_upload/mediainfo.txt')
-            logging.info(f'Saving mediainfo to: {save_location}')
-            logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
-            logging.debug(f'\n{media_info_output}')
-
-            with open(save_location, 'w+') as f:
-                f.write(media_info_output)
-            # now save the mediainfo txt file location to the dict
-            # torrent_info["mediainfo"] = save_location
-            return save_location
-
-    def quit_log_reason(reason):
-        logging.critical(f"auto_mode is enabled (no user input) & we can not auto extract the {missing_value}")
-        logging.critical(f"Exit Reason: {reason}")
-        # let the user know the error/issue
-        console.print(f"\nCritical error when trying to extract: {missing_value}", style='red bold')
-        console.print(f"Exit Reason: {reason}")
-        # and finally exit since this will affect all trackers we try and upload to, so it makes no sense to try the next tracker
-        sys.exit()
-
-    # !!! [ Block tests/probes start now ] !!!
+        return basic_get_missing_mediainfo(torrent_info, parse_me, working_folder)
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
-        # for disc uploads / currently only bluray is supported so we can use that
-        # TODO update this to handle DVDs in the future
-        if args.disc and torrent_info["bdinfo"] is not None:
-            if "screen_size" in torrent_info and torrent_info["screen_size"] == "2160p":
-                torrent_info['uhd'] = 'UHD'
-            torrent_info["source_type"] = "bluray_disc"
-            return "bluray"
-        # Well shit, this is a problem and I can't think of a good way to consistently & automatically get the right result
-        # if auto_mode is set to false we can ask the user but if auto_mode is set to true then we'll just need to quit since we can't upload without it
-        if auto_mode == 'false':
-            console.print(f"Can't auto extract the [bold]{missing_value}[/bold] from the filename, you'll need to manually specify it", style='red', highlight=False)
-
-            basic_source_to_source_type_dict = {
-                # this dict is used to associate a 'parent' source with one if its possible final forms
-                'bluray': ['disc', 'remux', 'encode'],
-                'web': ['rip', 'dl'],
-                'hdtv': 'hdtv',
-                'dvd': ['disc', 'remux', 'rip']
-            }
-
-            # First get a basic source into the torrent_info dict, we'll prompt the user for a more specific source next (if needed, e.g. 'bluray' could mean 'remux', 'disc', or 'encode')
-            user_input_source = Prompt.ask("Input one of the following: ", choices=["bluray", "web", "hdtv", "dvd"])
-            torrent_info["source"] = user_input_source
-            # Since the parent source isn't the filename we know that the 'final form' definitely won't be so we don't return the 'parent source' yet
-            # We instead prompt the user again to figure out if its a remux, encode, webdl, rip, etc etc
-            # Once we figure all that out we can return the 'parent source'
-
-            # Now that we have the basic source we can prompt for a more specific source
-            if isinstance(basic_source_to_source_type_dict[torrent_info["source"]], list):
-                specific_source_type = Prompt.ask(f"\nNow select one of the following 'formats' for [green]'{user_input_source}'[/green]: ",
-                    choices=basic_source_to_source_type_dict[torrent_info["source"]])
-                # The user is given a list of options that are specific to the parent source they choose earlier (e.g.  bluray --> disc, remux, encode )
-                torrent_info["source_type"] = f'{user_input_source}_{specific_source_type}'
-            else:
-                # Right now only HDTV doesn't have any 'specific' variation so this will only run if HDTV is the source
-                torrent_info["source_type"] = f'{user_input_source}'
-
-            # Now that we've got all the source related info, we can return the 'parent source' and move on
-            return user_input_source
-
-        else: # shit
-            quit_log_reason(reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source")
+        source, source_type, user_input_source = basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
+        torrent_info["source"] = source
+        torrent_info["source_type"] = source_type
+        return user_input_source
 
     # ---------------- Video Resolution ---------------- #
     if missing_value == "screen_size":
-        width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160"}
-
-        if args.disc and torrent_info["bdinfo"] is not None:
-            logging.info(f"`screen_size` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['resolution']}")
-            return torrent_info["bdinfo"]["video"][0]["resolution"]
-
-        # First we use attempt to use "width" since its almost always constant (Groups like to crop black bars so "height" is always changing)
-        elif str(media_info_video_track.width) != "None":
-            track_width = str(media_info_video_track.width)
-            if track_width in width_to_height_dict:
-                height = width_to_height_dict[track_width]
-                logging.info(f"Used pymediainfo 'track.width' to identify a resolution of: {str(height)}p")
-                return f"{str(height)}p"
-
-        # If "Width" somehow fails its unlikely that "Height" will work but might as well try
-        elif str(media_info_video_track.height) != "None":
-            logging.info(f"Used pymediainfo 'track.height' to identify a resolution of: {str(media_info_video_track.height)}p")
-            return f"{str(media_info_video_track.height)}p"
-
-        # User input as a last resort
-        else:
-            # If auto_mode is enabled we can prompt the user for input
-            if auto_mode == 'false':
-                while True:
-                    screen_size_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g. 720p, 1080p, 2160p) ')
-                    if len(str(screen_size_input)) < 2:
-                        logging.error(f'User enterted an invalid input `{str(screen_size_input)}` for {missing_value}. Attempting to read again.')
-                        console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
-                    else:
-                        logging.info(f"Used user_input to identify the {missing_value}: {str(screen_size_input)}")
-                        return str(screen_size_input)
-
-            # If we don't have the resolution we can't upload this media since all trackers require the resolution in the upload form
-            quit_log_reason(reason="Resolution not in filename, and we can't extract it using pymediainfo. Upload form requires the Resolution")
+        return basic_get_missing_screen_size(torrent_info, args.disc, media_info_video_track, auto_mode, missing_value)
 
     # ---------------- Audio Channels ---------------- #
     if missing_value == "audio_channels":
-
-        if args.disc and torrent_info["bdinfo"] is not None:
-            # Here we iterate over all the audio track identified and returns the largest channel.
-            # 7.1 > 5.1 > 2.0 
-            # presently the subwoofer channel is not considered
-            # if 2.1 and 2.0 tracks are present and we encounter 2.0 first followed by 2.1,
-            # we return 2.0 only. 
-            # # TODO check whether subwoofer or even atmos channels needs to be considered
-            audio_channel = None
-            for audio_track in torrent_info['bdinfo']['audio']:
-                if audio_channel is None:
-                    audio_channel = audio_track["channels"]
-                elif int(audio_track["channels"][0:1]) > int(audio_channel[0:1]):
-                    audio_channel = audio_track["channels"]
-            logging.info(f"`audio_channels` identifed from bdinfo as {audio_channel}")
-            return audio_channel
-
-        # First try detecting the 'audio_channels' using regex
-        elif "raw_file_name" in torrent_info:
-            # First split the filename by '-' & '.'
-            file_name_split = re.sub(r'[-.]', ' ', str(torrent_info["raw_file_name"]))
-            # Now search for the audio channels
-            re_extract_channels = re.search(r'\s[0-9]\s[0-9]\s', file_name_split)
-            if re_extract_channels is not None:
-                # Because this isn't something I've tested extensively I'll only consider it a valid match if its a super common channel layout (e.g.  7.1  |  5.1  |  2.0  etc)
-                re_extract_channels = re_extract_channels.group().split()
-                mid_pos = len(re_extract_channels) // 2
-                # joining and construction using single line
-                possible_audio_channels = str(' '.join(re_extract_channels[:mid_pos] + ["."] + re_extract_channels[mid_pos:]).replace(" ", ""))
-                # Now check if the regex match is in a list of common channel layouts
-                if possible_audio_channels in ['1.0', '2.0', '5.1', '7.1']:
-                    # It is! So return the regex match and skip over the ffprobe process below
-                    logging.info(f"Used regex to identify audio channels: {possible_audio_channels}")
-                    return possible_audio_channels
-
-        # If the regex failed ^^ (Likely) then we use ffprobe to try and auto detect the channels
-        audio_info_probe = FFprobe(inputs={parse_me: None}, 
-            global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']).run(stdout=subprocess.PIPE)
-
-        audio_info = json.loads(audio_info_probe[0].decode('utf-8'))
-        for stream in audio_info["streams"]:
-
-            if "channel_layout" in stream:  # make sure 'channel_layout' exists first (on some amzn webdls it doesn't)
-                # convert the words 'mono, stereo, quad' to work with regex below
-                ffmpy_channel_layout_translation = {'mono': '1.0', 'stereo': '2.0', 'quad': '4.0'}
-                if str(stream["channel_layout"]) in ffmpy_channel_layout_translation.keys():
-                    stream["channel_layout"] = ffmpy_channel_layout_translation[stream["channel_layout"]]
-
-                # Make sure what we got back from the ffprobe search fits into the audio_channels 'format' (num.num)
-                audio_channel_layout = re.search(r'\d\.\d', str(stream["channel_layout"]).replace("(side)", ""))
-                if audio_channel_layout is not None:
-                    audio_channels_ff = str(audio_channel_layout.group())
-                    logging.info(f"Used ffmpy.ffprobe to identify audio channels: {audio_channels_ff}")
-                    return audio_channels_ff
-
-        # Another thing we can try is pymediainfo and count the 'Channel layout' then subtract 1 depending on if 'LFE' is one of them
-        if media_info_audio_track.channel_layout is not None:
-            channel_total = str(media_info_audio_track.channel_layout).split(" ")
-            if 'LFE' in channel_total:
-                audio_channels_pymedia = f'{int(len(channel_total)) - 1}.1'
-            else:
-                audio_channels_pymedia = f'{int(len(channel_total))}.0'
-
-            logging.info(f"Used pymediainfo to identify audio channels: {audio_channels_pymedia}")
-            return audio_channels_pymedia
-
-        # If no audio_channels have been extracted yet then we try user_input next
-        if auto_mode == 'false':
-            while True:
-                audio_channel_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  5.1 | 2.0 | 7.1  )')
-                if len(str(audio_channel_input)) < 2:
-                    logging.error(f'User enterted an invalid input `{str(audio_channel_input)}` for {missing_value}. Attempting to read again.')
-                    console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
-                else:
-                    logging.info(f"Used user_input to identify {missing_value}: {audio_channel_input}")
-                    return str(audio_channel_input)
-
-        # -- ! This runs if auto_mode == true !
-        # We could technically upload without the audio channels in the filename, check to see what the user wants
-        if str(os.getenv('force_auto_upload')).lower() == 'true':  # This means we will still force an upload without the audio_channels
-            logging.info("force_auto_upload=true so we'll upload without the audio_channels in the filename")
-            return ""
-
-        # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
-        # Exit the script now
-        quit_log_reason(reason="Audio_Channels are not in the filename, and we can't extract it using regex or ffprobe. force_auto_upload=false so we quit now")
+        return basic_get_missing_audio_channels(torrent_info, args.disc, auto_mode, parse_me, media_info_audio_track, missing_value)
     
     # ---------------- Audio Codec ---------------- #
     if missing_value == "audio_codec":
-
-        # We store some common audio code translations in this dict
-        audio_codec_dict = json.load(open(f'{working_folder}/parameters/audio_codecs.json'))
-
-        if args.disc and torrent_info["bdinfo"] is not None:
-            # here we populate the audio_codec and atmos information from bdinfo
-            for audio_track in torrent_info['bdinfo']['audio']:
-                if "atmos" in audio_track and len(audio_track["atmos"]) != 0:
-                    logging.info(f"`atmos` identifed from bdinfo as {audio_track['atmos']}")
-                    torrent_info["atmos"] = "Atmos"
-                    break
-
-            logging.info(f"`audio_codec` identifed from bdinfo as {torrent_info['bdinfo']['audio'][0]['codec']}")
-            for key in audio_codec_dict.keys():
-                if str(torrent_info["bdinfo"]["audio"][0]["codec"].strip()) == key:
-                    logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]}')
-                    return audio_codec_dict[torrent_info["bdinfo"]["audio"][0]["codec"].strip()]
-            logging.error(f"Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {torrent_info['bdinfo']['audio'][0]['codec']}")
-
-        # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
-        elif "audio_codec" in torrent_info:
-            logging.debug(f"audio_codec is present in the torrent info [{torrent_info['audio_codec']}]. Trying to match it with audio_codec_dict")
-            for key in audio_codec_dict.keys():
-                if str(torrent_info["audio_codec"]) == key:
-                    logging.info(f'Used (audio_codec_dict + GuessIt) to identify the audio codec: {audio_codec_dict[torrent_info["audio_codec"]]}')
-                    return audio_codec_dict[torrent_info["audio_codec"]]
-
-        # This regex is mainly for bluray_discs
-        # TODO rewrite this to be more inclusive of other audio codecs
-        bluray_disc_audio_codec_regex = re.search(r'(?P<TrueHD>TrueHD)|(?P<DTSHDMA>DTS-HD.MA)', torrent_info["raw_file_name"].replace(".", " "), re.IGNORECASE)
-        if bluray_disc_audio_codec_regex is not None:
-            for audio_codec in ["TrueHD", "DTSHDMA"]:
-                # Yeah I've kinda given up here, this is mainly to avoid mediainfo running on full bluray discs since TrueHD is really just AC3 which historically I assumed was Dolby Digital...
-                #  Don't really wanna deal with that ^^ so we try to match the 2 most popular Bluray Disc audio codecs (DTS-HD.MA & TrueHD) and move on
-                if bluray_disc_audio_codec_regex.group(audio_codec) is not None:
-                    if audio_codec == "DTSHDMA": 
-                        audio_codec = "DTS-HD MA"
-                    logging.info(f'Used regex to identify the audio codec: {audio_codec}')
-                    return audio_codec
-
-        # Now we try to identify the audio_codec using pymediainfo
-        if media_info_audio_track is not None:
-            logging.debug(f'Audio track info from mediainfo\n {pformat(media_info_audio_track.to_data())}')
-            if media_info_audio_track.codec_id is not None:
-                # The release "La.La.Land.2016.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv" when using media_info_audio_track.codec shows the codec as AC3 not EAC3..
-                # so well try to use media_info_audio_track.codec_id first
-                audio_codec = media_info_audio_track.codec_id
-            elif media_info_audio_track.codec is not None:
-                # On rare occasion *.codec is not available and we need to use *.format
-                audio_codec = media_info_audio_track.codec
-            elif media_info_audio_track.format is not None:
-                # Only use *.format if *.codec is unavailable
-                audio_codec = media_info_audio_track.format
-            # Set audio_codec equal to None if neither of those three ^^ exist and we'll move onto user input
-            else:
-                audio_codec = None
-        else:
-            audio_codec = None
-
-        # If we got something from pymediainfo we can try to analyze it now
-        if audio_codec:
-            if "AAC" in audio_codec:
-                # AAC gets its own 'if' statement because 'audio_codec' can return something like 'AAC LC-SBR' or 'AAC-HE/LC'
-                # Its unnecessary for a torrent title and we only need the "AAC" part
-                logging.info(f'Used pymediainfo to identify the audio codec: {audio_codec}')
-                return "AAC"
-            
-            if "FLAC" in audio_codec:
-                # This is similar to the AAC situation right above ^^, on a recent upload I got the value "A_FLAC" which can be shortened to 'FLAC'
-                logging.info(f'Used pymediainfo to identify the audio codec: FLAC')
-                return "FLAC"
-
-            if "DTS" in audio_codec:
-                # DTS audio is a bit "special" and has a few possible profiles so we deal with that here
-                # We'll first try to extract it all via regex, should that fail we can use ffprobe
-                match_dts_audio = re.search(r'DTS(-HD(.MA.)|-ES.|(.[xX].|[xX].)|(.HD.|HD.)|)', torrent_info["raw_file_name"].replace(" ", "."), re.IGNORECASE)
-                if match_dts_audio is not None:
-                    # Some releases have DTS-X-RELEASE_GROUP, in this case we only need DTS-X
-                    return_value =str(match_dts_audio.group()).upper().replace(".", " ").strip()
-                    if return_value.endswith("-"):
-                        return_value = return_value[:len(return_value)-1]
-                    
-                    logging.info(f'Used (pymediainfo + regex) to identify the audio codec: {return_value}')
-                    if return_value in audio_codec_dict.keys():
-                        # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
-                        logging.info(f'Used (pymediainfo + regex + audio_codec_dict) to identify the audio codec: {audio_codec_dict[return_value]}')
-                        return audio_codec_dict[return_value]
-                    return return_value
-
-                # If the regex failed we can try ffprobe
-                audio_info_probe = FFprobe( inputs={parse_me: None}, 
-                    global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']).run(stdout=subprocess.PIPE)
-                audio_info = json.loads(audio_info_probe[0].decode('utf-8'))
-
-                for stream in audio_info["streams"]:
-                    logging.info(f'Used ffprobe to identify the audio codec: {stream["profile"]}')
-                    return stream["profile"]
-            
-            logging.debug(f"Pymediainfo extracted audio_codec as {audio_codec}")
-            
-            if audio_codec in audio_codec_dict.keys():
-                # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
-                logging.info(f'Used (pymediainfo + audio_codec_dict) to identify the audio codec: {audio_codec_dict[audio_codec]}')
-                return audio_codec_dict[audio_codec]
-
-        # If the audio_codec has not been extracted yet then we try user_input
-        if auto_mode == 'false':
-            while True:
-                audio_codec_input = Prompt.ask(f'\n[red]We could not auto detect the {missing_value}[/red], [bold]Please input it now[/bold]: (e.g.  DTS | DDP | FLAC | TrueHD | Opus  )')
-                if len(str(audio_codec_input)) < 2:
-                    logging.error(f'User enterted an invalid input `{str(audio_codec_input)}` for {missing_value}. Attempting to read again.')
-                    console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
-                else:
-                    logging.info(f"Used user_input to identify the {missing_value}: {audio_codec_input}")
-                    return str(audio_codec_input)
-
-        # -- ! This runs if auto_mode == true !
-        # We could technically upload without the audio codec in the filename, check to see what the user wants
-        if str(os.getenv('force_auto_upload')).lower() == 'true':  # This means we will still force an upload without the audio_codec
-            logging.info("force_auto_upload=true so we'll upload without the audio_codec in the torrent title")
-            return ""
-
-        # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
-        # Exit the script now
-        quit_log_reason(reason="Could not detect audio_codec via regex, pymediainfo, & ffprobe. force_auto_upload=false so we quit now")
+        audio_codec, atmos =  basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=args.disc, auto_mode=auto_mode, 
+            audio_codec_file_path=f'{working_folder}/parameters/audio_codecs.json',
+            media_info_audio_track=media_info_audio_track, parse_me=parse_me,
+            missing_value=missing_value)
+        
+        if atmos is not None:
+            torrent_info["atmos"] = atmos
+        if audio_codec is not None:
+            return audio_codec
 
     # ---------------- Video Codec ---------------- #
     # I'm pretty confident that a video_codec will be selected automatically each time, unless mediainfo fails catastrophically we should always
     # have a codec we can return. User input isn't needed here
-
     if missing_value == "video_codec":
-        """
-            along with video_codec extraction the HDR format and DV is also updated from here.
-            Steps:
-            get Color primaries from MediaInfo
-            if it is one of "BT.2020", "REC.2020" then
-                if HDR10 is present in HDR Format then 
-                    HDR = HDR
-                if HDR10+ is present in HDR Format then 
-                    HDR = HDR10+
-                confirm the HDRFormat doesn't exist in the media info 
-                check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
-                    HDR = PQ10 
-                get transfer_characteristics_Original from media info
-                if HLG is present in that then 
-                    HDR = HLG
-                else if "BT.2020 (10-bit)" is present then 
-                    HDR = WCG
-            
-            if Dolby Vision is present in HDR Format then mark present of DV
-                
-        """
-        if args.disc and torrent_info["bdinfo"] is not None: 
-            # for full disks here we identify the video_codec, hdr and dv informations
-            for index, video_track in enumerate(torrent_info['bdinfo']['video']):
-                if "dv_hdr" in video_track and len(video_track["dv_hdr"]) != 0 :
-                    # so hdr or DV is present in this track. next we need to identify which one it is
-                    logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
-                    if "DOLBY" in video_track["dv_hdr"].upper() or "DOLBY VISION" in video_track["dv_hdr"].upper():
-                        torrent_info["dv"] = "DV"
-                    else: 
-                        torrent_info["hdr"] = video_track["dv_hdr"].strip()
-                        if "HDR10+" in torrent_info["hdr"]:
-                            torrent_info["hdr"] = "HDR10+"
-                        elif "HDR10" in torrent_info["hdr"]:
-                            torrent_info["hdr"] = "HDR"
-                        logging.debug(f'Adding proper HDR Format `{torrent_info["hdr"]}` to torrent info')
-                            
-                        
-            logging.info(f"`video_codec` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['codec']}")
-            return torrent_info["bdinfo"]["video"][0]["codec"] # video codec is taken from the first track
-            
-        try:
-            logging.debug(f"Logging video track atrtibutes used to detect HDR type")
-            logging.debug(f"Video track info from mediainfo \n {pformat(media_info_video_track.to_data())}")
-            color_primaries = media_info_video_track.color_primaries
-            if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
-                hdr_format = f"{media_info_video_track.hdr_format}, {media_info_video_track.hdr_format_version}, {media_info_video_track.hdr_format_compatibility}"
-                if "HDR10" in hdr_format:
-                    torrent_info["hdr"] = "HDR"
-                
-                if "HDR10+" in hdr_format:
-                    torrent_info["hdr"] = "HDR10+"
-                elif media_info_video_track.hdr_format is None and "PQ" in (media_info_video_track.transfer_characteristics, media_info_video_track.transfer_characteristics_original):
-                    torrent_info["hdr"] = "PQ10"
-                
-                if media_info_video_track.transfer_characteristics_original is not None and "HLG" in media_info_video_track.transfer_characteristics_original:
-                    torrent_info["hdr"] = "HLG"
-                elif media_info_video_track.transfer_characteristics_original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_original:
-                    torrent_info["hdr"] = "WCG"
-        except Exception as e:
-            logging.exception(f"Error occured while trying to parse HDR information from mediainfo.")
-        
-        if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
-            torrent_info["dv"] = "DV"
-
-        # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
-        filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'
-                                               r'(?P<H265>H(.265|265))|'
-                                               r'(?P<H264>H(.264|264))|'
-                                               r'(?P<x265>x265)|(?P<x264>x264)|'
-                                               r'(?P<MPEG2>MPEG(-2|2))|'
-                                               r'(?P<VC1>VC(-1|1))', torrent_info["raw_file_name"], re.IGNORECASE)
-        regex_video_codec = None
-        if filename_video_codec_regex is not None:
-            rename_codec = {'VC1': 'VC-1', 'MPEG2': 'MPEG-2', 'H264': 'H.264', 'H265': 'H.265'}
-
-            for video_codec in ["HEVC", "AVC", "H265", "H264", "x265", "x264", "MPEG2", "VC1"]:
-                if filename_video_codec_regex.group(video_codec) is not None:
-                    # Now check to see if the 'codec' is in the rename_codec dict we created earlier
-                    if video_codec in rename_codec.keys():
-                        regex_video_codec = rename_codec[video_codec]
-                    else:
-                        # if this executes its AVC/HEVC or x265/x264
-                        regex_video_codec = video_codec
-                    # return regex_video_codec
-        # If the regex didn't work and the code has reached this point, we will now try pymediainfo
-
-        # If video codec is HEVC then depending on the specific source (web, bluray, etc) we might need to format that differently
-        if "HEVC" in media_info_video_track.format:
-            if media_info_video_track.writing_library is not None:
-                pymediainfo_video_codec = 'x265'
-            # Possible video_codecs now are either H.265 or HEVC
-            # If the source is WEB I think we should use H.265 & leave HEVC for bluray discs/remuxs (encodes would fall under x265)
-            elif "source" in torrent_info and torrent_info["source"] == "Web":
-                pymediainfo_video_codec = 'H.265'
-            # for everything else we can just default to 'HEVC' since it'll technically be accurate no matter what
-            else:
-                logging.info(f"Defaulting video_codec as HEVC because writing library is missing and source is {torrent_info['source']}")
-                pymediainfo_video_codec = 'HEVC'
-
-        # Now check and assign AVC based codecs
-        elif "AVC" in media_info_video_track.format:
-            if media_info_video_track.writing_library is not None:
-                pymediainfo_video_codec = 'x264'
-            # Possible video_codecs now are either H.264 or AVC
-            # If the source is WEB we should use H.264 & leave AVC for bluray discs/remuxs (encodes would fall under x265)
-            elif "source" in torrent_info and torrent_info["source"] == "Web":
-                pymediainfo_video_codec = 'H.264'
-            # for everything else we can just default to 'AVC' since it'll technically be accurate no matter what
-            else:
-                logging.info(f"Defaulting video_codec as AVC because writing library is missing and source is {torrent_info['source']}")
-                pymediainfo_video_codec = 'AVC'
-        # For anything else we'll just use whatever pymediainfo returned for 'format'
-        else:
-            pymediainfo_video_codec = media_info_video_track.format
-
-        # Log it!
-        logging.info(f"Regex identified the video_codec as: {regex_video_codec}")
-        logging.info(f"Pymediainfo identified the video_codec as: {pymediainfo_video_codec}")
-        if regex_video_codec == pymediainfo_video_codec:
-            logging.debug(f"Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] matches")
-            return regex_video_codec
-
-        logging.error(f"Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] doesn't match!!")
-        logging.info(f"If `--force_pymediainfo` or `-fpm` is provided as argument, PyMediaInfo video_codec will be used, else regex extracted video_codec will be used")
-        if args.force_pymediainfo:
-            return pymediainfo_video_codec
-
-        return regex_video_codec
-    # TODO write more block/tests here as we come across issues
-    # !!! [ Block tests/probes end here ] !!!
+        dv, hdr, video_codec = basic_get_missing_video_codec(torrent_info=torrent_info,
+            is_disc=args.disc, auto_mode=auto_mode,
+            media_info_video_track=media_info_video_track, force_pymediainfo=args.force_pymediainfo
+        )
+        if dv is not None:
+            torrent_info["dv"] = dv
+        if hdr is not None:
+            torrent_info["hdr"] = hdr
+        return video_codec
 
 
 def identify_miscellaneous_details(guess_it_result):
