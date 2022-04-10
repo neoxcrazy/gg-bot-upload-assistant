@@ -43,7 +43,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
             if search_tmdb_request.ok:
                 if len(search_tmdb_request.json()["results"]) == 0:
                     logging.critical("[MetadataUtils] No results found on TMDB using the title '{}' and the year '{}'".format(query_title, year))
-                    if (int(os.getenv("tmdb_result_auto_select_threshold")) or 1) >= 0:
+                    if int(os.getenv("tmdb_result_auto_select_threshold", 1)) >= 0:
                         return {
                             "tmdb": "0",
                             "imdb": "0",
@@ -53,7 +53,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
                     else:
                         sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
             else:
-                if (int(os.getenv("tmdb_result_auto_select_threshold")) or 1) >= 0:
+                if int(os.getenv("tmdb_result_auto_select_threshold", 1)) >= 0:
                     return {
                         "tmdb": "0",
                         "imdb": "0",
@@ -165,7 +165,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
         if auto_mode == 'false' and selected_tmdb_results > 1 and (os.getenv("auto_select_tmdb_result") or False):
             # prompt for user input with 'list_of_num' working as a list of valid choices
             user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
-        elif selected_tmdb_results <= (int(os.getenv("tmdb_result_auto_select_threshold")) or 1) or (os.getenv("tmdb_result_auto_select_threshold") or 1) == 0:
+        elif selected_tmdb_results <= int(os.getenv("tmdb_result_auto_select_threshold", 1)) or int(os.getenv("tmdb_result_auto_select_threshold", 1)) == 0:
             # if user configured `tmdb_result_auto_select_threshold` as 0, then we can proceed
             # or
             # selected_tmdb_results must be less than or equal to the threshold configured,

@@ -321,7 +321,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
         torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
-        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info) # TODO handle non-happy paths
+        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info, args.debug) # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
@@ -443,10 +443,10 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
-        source, source_type, user_input_source = basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
+        source, source_type = basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
         torrent_info["source"] = source
         torrent_info["source_type"] = source_type
-        return user_input_source
+        return source
 
     # ---------------- Video Resolution ---------------- #
     if missing_value == "screen_size":
@@ -620,7 +620,7 @@ def format_title(json_config):
         temp_load_torrent_info = tracker_torrent_name_style.replace("{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info else ""
+            generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info and torrent_info[item] is not None else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
         for key, value in generate_format_string.items():

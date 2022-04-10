@@ -381,8 +381,7 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
     if is_disc and torrent_info["bdinfo"] is not None:
         if "screen_size" in torrent_info and torrent_info["screen_size"] == "2160p":
             torrent_info['uhd'] = 'UHD'
-        torrent_info["source_type"] = "bluray_disc"
-        return "bluray"
+        return "bluray", "bluray_disc"
     
     # Well shit, this is a problem and I can't think of a good way to consistently & automatically get the right result
     # if auto_mode is set to false we can ask the user but if auto_mode is set to true then we'll just need to quit since we can't upload without it
@@ -397,24 +396,23 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
             'dvd': ['disc', 'remux', 'rip']
         }
         # First get a basic source into the torrent_info dict, we'll prompt the user for a more specific source next (if needed, e.g. 'bluray' could mean 'remux', 'disc', or 'encode')
-        user_input_source = Prompt.ask("Input one of the following: ", choices=["bluray", "web", "hdtv", "dvd"])
-        source = user_input_source
+        source = Prompt.ask("Input one of the following: ", choices=["bluray", "web", "hdtv", "dvd"])
         # Since the parent source isn't the filename we know that the 'final form' definitely won't be so we don't return the 'parent source' yet
         # We instead prompt the user again to figure out if its a remux, encode, webdl, rip, etc etc
         # Once we figure all that out we can return the 'parent source'
 
         # Now that we have the basic source we can prompt for a more specific source
         if isinstance(basic_source_to_source_type_dict[source], list):
-            specific_source_type = Prompt.ask(f"\nNow select one of the following 'formats' for [green]'{user_input_source}'[/green]: ",
+            specific_source_type = Prompt.ask(f"\nNow select one of the following 'formats' for [green]'{source}'[/green]: ",
                 choices=basic_source_to_source_type_dict[source])
             # The user is given a list of options that are specific to the parent source they choose earlier (e.g.  bluray --> disc, remux, encode )
-            source_type = f'{user_input_source}_{specific_source_type}'
+            source_type = f'{source}_{specific_source_type}'
         else:
             # Right now only HDTV doesn't have any 'specific' variation so this will only run if HDTV is the source
-            source_type = f'{user_input_source}'
+            source_type = f'{source}'
 
         # Now that we've got all the source related info, we can return the 'parent source' and move on
-        return source, source_type, user_input_source
+        return source, source_type
     else:# shit
         quit_log_reason(reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source", missing_value=missing_value)
 
