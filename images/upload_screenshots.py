@@ -196,8 +196,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
                 imgbox_asyncio_upload[1], 
                 imgbox_asyncio_upload[2], 
                 imgbox_asyncio_upload[3],
-                imgbox_asyncio_upload[4],
-                imgbox_asyncio_upload[5]
+                imgbox_asyncio_upload[4]
             ]
 
         # # Python 3.7+ version

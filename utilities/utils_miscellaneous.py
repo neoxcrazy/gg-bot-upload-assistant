@@ -1,7 +1,11 @@
 
 import re
+import sys
 import json
 import logging
+
+from pathlib import Path
+from rich.prompt import Prompt, Confirm
 
 
 def miscellaneous_perform_scene_group_capitalization(scene_groups_path, release_group):

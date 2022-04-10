@@ -1,7 +1,15 @@
 import os
+import re
+import shutil
 import logging
 import subprocess
-import logging
+
+from rich import box
+from rich.table import Table
+from rich.console import Console
+from rich.prompt import Prompt, Confirm
+
+console = Console()
 
 from utilities.utils import write_file_contents_to_log_as_debug
 
@@ -160,7 +168,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
         return bd_max_file, largest_playlist
 
 
-def bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info):
+def bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info, debug):
     """
         Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
         Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
@@ -180,7 +188,7 @@ def bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info
         sed_path = "/bin/sed"
     os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {torrent_info['mediainfo']}")
     # displaying bdinfo to log in debug mode
-    if args.debug:
+    if debug:
         logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(torrent_info["mediainfo"])
     return parse_bdinfo(torrent_info["mediainfo"])
