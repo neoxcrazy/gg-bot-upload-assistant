@@ -13,6 +13,7 @@ import shutil
 import logging
 import argparse
 import subprocess
+import datetime
 from pprint import pformat
 from pathlib import Path
 
@@ -83,8 +84,9 @@ api_keys_dict = prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/pa
 
 # Import 'auto_mode' status
 if str(os.getenv('auto_mode')).lower() not in ['true', 'false']:
-    logging.error('[Main] `auto_mode` is not set to `true/false` in `config.env`. Defaulting to `false`')
-auto_mode = str(os.getenv('auto_mode', 'false')).lower()
+    logging.critical('auto_mode is not set to true/false in config.env')
+    raise AssertionError("set 'auto_mode' equal to true/false in config.env")
+auto_mode = str(os.getenv('auto_mode')).lower()
 
 # import discord webhook url (if exists)
 if len(os.getenv('DISCORD_WEBHOOK')) != 0:
@@ -92,7 +94,6 @@ if len(os.getenv('DISCORD_WEBHOOK')) != 0:
 else:
     discord_url = None
 
-# BHD Live/Draft
 is_live_on_site = str(os.getenv('live')).lower()
 
 # Setup args
@@ -139,6 +140,16 @@ internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin 
 args = parser.parse_args()
 
 
+def write_file_contents_to_log_as_debug(file_path):
+    """
+        Method reads and writes the contents of the provided `file_path` to the log as debug lines.
+        note that the method doesn't check for debug mode or not, those checks needs to be done by the caller
+    """
+    with open(file_path, 'r') as file_contents:
+        lines = file_contents.readlines()
+        [ logging.debug(line.replace('\\n','').strip()) for line in lines ]
+
+
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     """
         Method to check for any duplicate torrents in the tracker.
@@ -159,6 +170,27 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()], 
         imdb=torrent_info["imdb"], tmdb=torrent_info["tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info, 
         tracker_api=temp_tracker_api_key, debug=args.debug, working_folder=working_folder, auto_mode=os.getenv('auto_mode'))
+
+
+def delete_leftover_files():
+    """
+        Used to remove temporary files (mediainfo.txt, description.txt, screenshots) from the previous upload
+        Func is called at the start of each run to make sure there are no mix up with wrong screenshots being uploaded etc.
+
+        Not much significance when using the containerized solution, however if the `temp_upload` folder in container
+        is mapped to a docker volume / host path, then clearing would be best. Hence keeping this method.
+    """
+    for old_temp_data in ["/temp_upload/", "/images/screenshots/"]:
+        # We need these folders to store things like screenshots, .torrent & description files.
+        # So create them now if they don't exist
+        try:
+            os.mkdir(f"{working_folder}{old_temp_data}")
+        except FileExistsError:
+            # If they do already exist then we need to remove any old data from them
+            files = glob.glob(f'{working_folder}{old_temp_data}*')
+            for f in files:
+                os.remove(f)
+            logging.info("Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
 
 
 def identify_type_and_basic_info(full_path, guess_it_result):
@@ -523,7 +555,7 @@ def identify_miscellaneous_details(guess_it_result):
 
     # --------- SD? --------- #
     res = re.sub("[^0-9]", "", torrent_info["screen_size"])
-    if int(res) < 720:
+    if int(res) <= 720:
         torrent_info["sd"] = 1
 
 
@@ -606,7 +638,7 @@ def format_title(json_config):
             for key, val in torrent_title_translation.items():
                 formatted_title = formatted_title.replace(key, val)
 
-        logging.info(f"[Main] Torrent title after formatting and translations: {formatted_title}")
+        logging.info(f"Torrent title after formatting and translations: {formatted_title}")
         # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings" 
         # which is used to store the payload for the actual POST upload request
         torrent_info["torrent_title"] = str(formatted_title[1:])
@@ -633,6 +665,42 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     # Print New Line on Complete
     if iteration == total:
         print()
+
+
+def calculate_piece_size(size):
+    """
+    Return the piece size for a total torrent size of ``size`` bytes
+
+    For torrents up to 1 GiB, the maximum number of pieces is 1024 which
+    means the maximum piece size is 1 MiB.  With increasing torrent size
+    both the number of pieces and the maximum piece size are gradually
+    increased up to 10,240 pieces of 8 MiB.  For torrents larger than 80 GiB
+    the piece size is :attr:`piece_size_max` with as many pieces as
+    necessary.
+
+    It is safe to override this method to implement a custom algorithm.
+
+    :return: calculated piece size
+    """
+    if size <= 2**30:          # 1 GiB / 1024 pieces = 1 MiB max
+        pieces = size / 1024
+    elif size <= 4 * 2**30:    # 4 GiB / 2048 pieces = 2 MiB max
+        pieces = size / 2048
+    elif size <= 6 * 2**30:    # 6 GiB / 3072 pieces = 2 MiB max
+        pieces = size / 3072
+    elif size <= 8 * 2**30:    # 8 GiB / 2048 pieces = 4 MiB max
+        pieces = size / 2048
+    elif size <= 16 * 2**30:   # 16 GiB / 2048 pieces = 8 MiB max
+        pieces = size / 2048
+    elif size <= 32 * 2**30:   # 32 GiB / 2048 pieces = 16 MiB max
+        pieces = size / 2048
+    elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
+        pieces = size / 4096
+    elif size > 64 * 2**30:
+        pieces = size / 10240
+    # Math is magic!
+    # piece_size_max :: 16 * 1024 * 1024 => 16MB
+    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
 # ---------------------------------------------------------------------- #
@@ -735,7 +803,7 @@ def choose_right_tracker_keys():
                         logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
                     tracker_settings[config["translation"][translation_key]] = url
 
-                 else:
+                elif translation_key not in ['type', 'source', 'resolution', 'hybrid_type']:
                     logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
                 
                 # Set the category ID, this could be easily hardcoded in (1=movie & 2=tv) but I chose to use JSON data just in case a future tracker switches this up
@@ -843,13 +911,13 @@ def choose_right_tracker_keys():
                     else:
                         logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                         tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
-                        continue
+                        break
                 elif translation_key == "bdinfo":
                     logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
                         logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                         tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
-                        continue
+                        break
                     else:
                         logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
@@ -1180,6 +1248,7 @@ if discord_url:
     requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content={starting_new_upload}')
 
 # Verify we support the tracker specified
+upload_to_trackers = []
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
 upload_to_trackers = get_and_validate_configured_trackers(args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
 
@@ -1213,22 +1282,23 @@ if auto_mode == "false":
 #  get triggered, then it will quit the entire script instead of just moving on to the next file in the list 'upload_queue'
 
 # ---------- Batch mode prep ---------- #
-if args.batch:
-    if len(args.path) > 1:
-        logging.critical("[Main] The arg '-batch' can not be run with multiple '-path' args")
-        logging.info("[Main] The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
-        console.print("You can not use the arg [deep_sky_blue1]-batch[/deep_sky_blue1] while supplying multiple [deep_sky_blue1]-path[/deep_sky_blue1] args\n", style='bright_red')
-        console.print("Exiting...\n", style='bright_red bold')
-        sys.exit()
-    elif not os.path.isdir(args.path[0]):
-        # Since args.path is required now, we don't need to check if len(args.path) == 0 since that's impossible
-        # instead we check to see if its a folder, if not then
-        logging.critical("[Main]  The arg '-batch' can not be run an a single video file")
-        logging.info("[Main]  The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
-        console.print("We can not [deep_sky_blue1]-batch[/deep_sky_blue1] upload a single video file, [deep_sky_blue1]-batch[/deep_sky_blue1] is supposed to be used on a "
-            "single folder containing multiple files you want to individually upload\n", style='bright_red')
-        console.print("Exiting...\n", style='bright_red bold')
-        sys.exit()
+if args.batch and len(args.path) > 1:
+    logging.critical("[Main] The arg '-batch' can not be run with multiple '-path' args")
+    logging.info("[Main] The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
+    console.print("You can not use the arg [deep_sky_blue1]-batch[/deep_sky_blue1] while supplying multiple [deep_sky_blue1]-path[/deep_sky_blue1] args\n", style='bright_red')
+    console.print("Exiting...\n", style='bright_red bold')
+    sys.exit()
+
+
+elif args.batch and not os.path.isdir(args.path[0]):
+    # Since args.path is required now, we don't need to check if len(args.path) == 0 since that's impossible
+    # instead we check to see if its a folder, if not then
+    logging.critical("[Main]  The arg '-batch' can not be run an a single video file")
+    logging.info("[Main]  The arg '-batch' should be used to upload all the files in 1 folder that you specify with the '-path' arg")
+    console.print("We can not [deep_sky_blue1]-batch[/deep_sky_blue1] upload a single video file, [deep_sky_blue1]-batch[/deep_sky_blue1] is supposed to be used on a "
+        "single folder containing multiple files you want to individually upload\n", style='bright_red')
+    console.print("Exiting...\n", style='bright_red bold')
+    sys.exit()
 
 # all files we upload (even if its 1) get added to this list
 upload_queue = []
@@ -1260,7 +1330,7 @@ logging.debug(f"[Main] Upload queue: {upload_queue}")
 # Now for each file we've been supplied (batch more or just the user manually specifying multiple files) we create a loop here that uploads each of them until none are left
 for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
-    delete_leftover_files(working_folder)
+    delete_leftover_files()
     torrent_info.clear()
 
     # TODO these are some hardcoded values to be handled at a later point in time
@@ -1475,7 +1545,7 @@ for file in upload_queue:
             description_file_path=f'{working_folder}/temp_upload/description.txt', config=config, 
             tracker=tracker, bbcode_line_break=bbcode_line_break)
 
-        # -------- Add bbcode images to description.txt --------
+        # -------- Add bbcode screenshots to description.txt --------
         add_bbcode_images_to_description(torrent_info=torrent_info, config=config, 
             description_file_path=f'{working_folder}/temp_upload/description.txt', bbcode_line_break=bbcode_line_break)
 

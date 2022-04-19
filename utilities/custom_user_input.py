@@ -1,3 +1,4 @@
+
 import os
 import sys
 import json
@@ -9,14 +10,13 @@ from rich.prompt import Prompt, Confirm
 
 console = Console()
 
-
 def collect_custom_messages_from_user(custom_text_components_path):
     logging.debug(f"[CustomUserInputs] Starting to collect custom messages from user for torrent description")
     
     is_first = True
     user_custom_texts = []
 
-    custom_text_components = json.load(open(custom_text_components_path))
+    custom_text_components = json.load(custom_text_components_path)
     # creating a list of keys [for warning message]
     components_choices = ", ".join(map(lambda component: f'\'{component["key"]}\'', custom_text_components))
     logging.debug(f'[CustomUserInputs] keys configured in the bot :: {components_choices}')
