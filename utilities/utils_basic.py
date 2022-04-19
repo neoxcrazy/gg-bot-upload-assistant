@@ -417,7 +417,6 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
         quit_log_reason(reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source", missing_value=missing_value)
 
 
-
 def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
     logging.info("[BasicUtils] Generating mediainfo.txt")
     # If its not a bluray disc we can get mediainfo, otherwise we need BDInfo

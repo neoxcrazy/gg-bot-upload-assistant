@@ -200,6 +200,8 @@ docker run --rm -it \
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [X] Refactoring code in anticipation to v3.0 release
 - [X] Improved dupe check with HDR Support
+- [X] Dynamic piece size calculation for mktorrent
+- [X] Issue#25: Unhashable list error when uploading tv shows
 - [X] Issue#26: NBL dupe check issue
 
 ### v2.0.7
