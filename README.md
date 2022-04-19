@@ -198,7 +198,12 @@ docker run --rm -it \
 - [ ] Add Support for new platforms
     - [ ] Anasch
 - [ ] Add support to apply hybrid mapping to multiple fields
-- [ ] Refactoring code in anticipation to v3.0 release
+- [X] Refactoring code in anticipation to v3.0 release
+- [X] Improved dupe check with HDR Support
+- [X] Dynamic piece size calculation for mktorrent
+- [X] Issue#25: Unhashable list error when uploading tv shows
+- [X] Issue#26: NBL dupe check issue
+- [X] Issue#28: 720p contents being tagged as SD for UNIT3D trackers
 
 ### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients
