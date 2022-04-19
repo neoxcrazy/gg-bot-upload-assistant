@@ -8,6 +8,7 @@ from pprint import pformat
 from distutils import util
 from guessit import guessit
 from fuzzywuzzy import fuzz
+
 from rich.table import Table
 from rich.prompt import Confirm
 from rich.console import Console
@@ -76,33 +77,43 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             url_dupe_payload[config["dupes"]["technical_jargons"]["auth_payload_key"]] = tracker_api
 
         if str(config["dupes"]["technical_jargons"]["payload_type"]) == "JSON":
-            dupe_check_response = requests.request("POST", url_dupe_search, json=url_dupe_payload, headers=headers)
+            dupe_check_response_wrapper = requests.request("POST", url_dupe_search, json=url_dupe_payload, headers=headers)
         else:
-            dupe_check_response = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
+            dupe_check_response_wrapper = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
     else: # GET request (BLU & ACM)
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
-        dupe_check_response = requests.request("GET", url_dupe_search, headers=headers)
+        try:
+            dupe_check_response_wrapper = requests.request("GET", url_dupe_search, headers=headers)
+        except Exception as ex:
+            console.print(f"[bold red]:warning: Dupe check request to tracker [green]{str(config['name']).upper()}[/green], failed. Hence skipping this tracker. :warning:[/bold red]\n")
+            logging.exception(f"[DupeCheck] Request to  {search_site} for dupe check Failed. Error {ex}")
+            logging.info(f"[DupeCheck] Skipping upload to tracker since the dupe check request failed. The tracker might not be responding, hence skipping upload.")
+            return True
         
     logging.info(msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["technical_jargons"]["request_method"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
     
-    if dupe_check_response.status_code != 200:
-        logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_response.status_code}")
-        logging.error(f"[DupeCheck] payload response from {search_site} {dupe_check_response.json()}")
+    if dupe_check_response_wrapper.status_code != 200:
+        logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_response_wrapper.status_code}")
+        logging.error(f"[DupeCheck] payload response from {search_site} {dupe_check_response_wrapper.json()}")
         logging.info(f"[DupeCheck] Dupe check for {search_site} failed, assuming no dupes and continuing upload")
         return False
 
     # Now that we have the response from tracker(X) we can parse the json and try to identify dupes
     existing_release_types = {}  # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
-    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0}  # We also log the num each type shows up on site
+    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0, 'hdr': 0, "dv": 0} 
     single_episode_upload_with_season_pack_available = False
+    # to handle torrents with HDR and DV, we keep a separate dictionary to keep tracker of hdr. non-hdr and dv releases
+    # the reason to go for a separate map is because in `existing_release_types` the keys are torrent titles and that is not possible for hdr based filtering
+    # note that for hdr filtering we are not bothered about the different formats (PQ10, HDR, HLG etc), Since its rare to see a show release in multiple formats.
+    hdr_format_types = { 'hdr': [],'dv_hdr': [], 'dv': [], 'normal': []}
 
     # adding support for speedapp. Speedapp just returns the torrents as a json array.
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
-    # as the name indicates, it decides whether or not the `dupe_check_response` returned from the tracker
+    # as the name indicates, it decides whether or not the `dupe_check_response_wrapper` returned from the tracker
     # needs any further parsing.
     logging.debug(f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
     try:
-        dupe_check_response = dupe_check_response.json()
+        dupe_check_response = dupe_check_response_wrapper.json()
     except Exception as ex:
         logging.exception(f"[DupeCheck] Error while reading response from tracker {search_site} for dupe check. Error {ex}")
         logging.fatal(f"[DupeCheck] Text data from tracker {search_site} for dupe check {pformat(dupe_check_response_wrapper)}")
@@ -156,12 +167,32 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         # DVD
         if all(x in torrent_title_split for x in ['dvd']):
             existing_release_types[torrent_title] = "dvd"
+        
+        # HDR
+        if any(x in torrent_title_split for x in ['hdr', 'hdr10', 'hdr10+', 'hdr10plus', 'pq10', 'hlg', 'wcg']):
+            hdr_format_types['hdr'].append(torrent_title)
+        
+        # DV
+        if any(x in torrent_title_split for x in ['dv', 'dovi', 'dolbyvision']):
+            hdr_format_types['dv'].append(torrent_title)
+        
+        # Non-HDR
+        if all(x not in torrent_title_split for x in ['dv', 'dovi', 'dolbyvision', 'hdr', 'hdr10', 'hdr10+', 'hdr10plus', 'pq10', 'hlg', 'wcg']):
+            hdr_format_types['normal'].append(torrent_title)
+        
+        # DV HDR
+        if any(x in torrent_title_split for x in ['dv', 'dovi', 'dolbyvision']) and any(x in torrent_title_split for x in ['hdr', 'hdr10', 'hdr10+', 'hdr10plus', 'pq10', 'hlg', 'wcg']):
+            hdr_format_types['dv_hdr'].append(torrent_title)
+
 
     logging.debug(f'[DupeCheck] Existing release types identified from tracker {search_site} are {existing_release_types}')
+    logging.debug(f'[DupeCheck] Existing release types based on hdr formats identified from tracker {search_site} are {hdr_format_types}')
 
     # This just updates a dict with the number of a particular "type" of release exists on site (e.g. "2 bluray_encodes" or "1 bluray_remux" etc)
     for onsite_quality_type in existing_release_types.values():
         existing_releases_count[onsite_quality_type] += 1
+    for hdr_format in hdr_format_types.keys():
+        existing_releases_count[hdr_format] = len(hdr_format_types[hdr_format])
     logging.info(msg=f'[DupeCheck] Results from initial dupe query (all resolution): {existing_releases_count}')
 
     # If we get no matches when searching via IMDB ID that means this content hasn't been upload in any format, no possibility for dupes
@@ -170,13 +201,32 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
         return False
 
+    our_format = "normal"
+    if "dv" in torrent_info:
+        our_format = "dv_hdr" if "hdr" in torrent_info else "dv"
+    elif "hdr" in torrent_info:
+        our_format = "hdr"
+
+    logging.info(f'[DupeCheck] Eliminating releases based on HDR Format. We are tring to upload: `{our_format}`. All other formats will be ignored.')
+    for item in hdr_format_types.keys():
+        if item != our_format:
+            for their_title in hdr_format_types[item]:
+                if their_title in existing_release_types:
+                    their_title_type = existing_release_types[their_title]
+                    existing_releases_count[their_title_type] -= 1
+                    existing_release_types.pop(their_title)
+            existing_releases_count[item] = 0
+            hdr_format_types[item] = []
+            
+    logging.info(msg=f'[DupeCheck] After applying "HDR Format" filter: {existing_releases_count}')
+
     our_title_guessit = guessit(torrent_info["torrent_title"])
     logging.debug("::::::::::::::::::::::::::::: OUR GuessIt output result :::::::::::::::::::::::::::::")
     logging.debug(f'\n{pformat(our_title_guessit)}')
 
-    # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #
-    logging.debug(f'[DupeCheck] Uploading media properties. Resolution :: {torrent_info["screen_size"]}, Source ::: {torrent_info["source_type"]}')
+    logging.debug(f'[DupeCheck] Uploading media properties ==> Resolution :: {torrent_info["screen_size"]}, Source ::: {torrent_info["source_type"]}')
     logging.debug(f'[DupeCheck] Filtering torrents from tracker that doesn\'t match the above properties')
+    # --------------- Filter the existing_release_types dict to only include correct res & source_type --------------- #
     for their_title in list(existing_release_types.keys()):  # we wrap the dict keys in a "list()" so we can modify (pop) keys from it while the loop is running below
         # use guessit to get details about the release
         their_title_guessit = guessit(their_title)
@@ -204,14 +254,14 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 existing_releases_count[their_title_type] -= 1
                 existing_release_types.pop(their_title)
                 continue
-
+        
         # elimination conditiaon
         #   If resolution doesn't match then we can remove items
         #   If audio codec doesn't match then we need to compare the audio channels. If our channel is better then we can remove item from list
         #       If 2.0 is already on tracker then we can upload 5.1 or 7.1 channels as these torrents will trump the lower channel releases
         #   # TODO add support for hdr and DV versions as well
         # TODO implement this after comparing with lots of titles and samples
-    logging.info(msg=f'[DupeCheck] After applying resolution & "source_type" filter: {existing_releases_count}')
+    logging.info(msg=f'[DupeCheck] After applying "resolution", "source_type", "audio_channels" filter: {existing_releases_count}')
 
 
     # Movies (mostly blurays) are usually a bit more flexible with dupe/trump rules due to editions, regions, etc
@@ -246,7 +296,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 continue
 
             # at this point we've filtered out all the different resolutions/types/seasons
-            #  so now we check each remaining title to see if its a season pack or individual episode
+            # so now we check each remaining title to see if its a season pack or individual episode
             # endswith case added below to prevent failures when dealing with complete packs on trackers.
             # for most cases the first check of startswith itself will return true to get the season.
             extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num) or x.endswith(season_num), re.split("[.\s]", existing_release_types_key)))[0]
@@ -258,7 +308,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 # check to see if that's ^^ happening, if it is then we will log it and if 'auto_mode' is enabled we also cancel the upload
                 # if 'auto_mode=false' then we prompt the user & let them decide
                 if not is_full_season:
-                    if bool(util.strtobool(os.getenv('auto_mode'))):
+                    if bool(util.strtobool(auto_mode)):
                         # possible_dupe_with_percentage_dict[existing_release_types_key] = 100
                         logging.critical(msg=f'[DupeCheck] Canceling upload to {search_site} because uploading a full season pack is already available: {existing_release_types_key}')
                         return True
@@ -341,7 +391,9 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         # 
         # Also if `single_episode_upload_with_season_pack_available`, then we mark the release as dupe
         # TODO Should season packs be tagged as 100% dupe???
-        if not max_dupe_percentage_exceeded or single_episode_upload_with_season_pack_available:
+        if single_episode_upload_with_season_pack_available:
+            max_dupe_percentage_exceeded = True
+        elif not max_dupe_percentage_exceeded:
             max_dupe_percentage_exceeded = mark_as_dupe
         is_dupes_present = True
 
@@ -360,15 +412,15 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             # If auto_mode is enabled then return true in all cases
             # If user chooses Yes / y => then we return False indicating that there are no dupes and processing can continue
             # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
-            return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nIgnore and continue upload?"))
+            return True if bool(util.strtobool(auto_mode)) else not bool(Confirm.ask("\nIgnore and continue upload?"))
         else:
             # If auto_mode is enabled then return true in all cases
             # If user chooses Yes / y => then we return False indicating that there are no dupes and processing can continue
             # If user chooses no / n => then we return True indicating that there are possible duplicates and stop the upload for the tracker
-            return True if bool(util.strtobool(os.getenv('auto_mode'))) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
+            return True if bool(util.strtobool(auto_mode)) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
         if is_dupes_present:
-            console.print(f"\n\n[bold red] :warning: Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
+            console.print(f"\n\n   [bold red] :warning: Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
             console.print(possible_dupes_table)
             console.line(count=2)
             console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")
