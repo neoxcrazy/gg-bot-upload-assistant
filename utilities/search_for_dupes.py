@@ -82,7 +82,13 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             dupe_check_response_wrapper = requests.request("POST", url_dupe_search, data=url_dupe_payload, headers=headers)
     else: # GET request (BLU & ACM)
         url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
-        dupe_check_response_wrapper = requests.request("GET", url_dupe_search, headers=headers)
+        try:
+            dupe_check_response_wrapper = requests.request("GET", url_dupe_search, headers=headers)
+        except Exception as ex:
+            console.print(f"[bold red]:warning: Dupe check request to tracker [green]{str(config['name']).upper()}[/green], failed. Hence skipping this tracker. :warning:[/bold red]\n")
+            logging.exception(f"[DupeCheck] Request to  {search_site} for dupe check Failed. Error {ex}")
+            logging.info(f"[DupeCheck] Skipping upload to tracker since the dupe check request failed. The tracker might not be responding, hence skipping upload.")
+            return True
         
     logging.info(msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["technical_jargons"]["request_method"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
     
