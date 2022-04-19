@@ -198,7 +198,9 @@ docker run --rm -it \
 - [ ] Add Support for new platforms
     - [ ] Anasch
 - [ ] Add support to apply hybrid mapping to multiple fields
-- [ ] Refactoring code in anticipation to v3.0 release
+- [X] Refactoring code in anticipation to v3.0 release
+- [X] Improved dupe check with HDR Support
+- [X] Issue#26: NBL dupe check issue
 
 ### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients
