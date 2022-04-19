@@ -8,6 +8,7 @@ import logging
 import subprocess
 
 from torf import Torrent
+from pathlib import Path
 from ffmpy import FFprobe
 from pprint import pformat
 from guessit import guessit
@@ -107,12 +108,9 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             current version of mktorrent pulled from alpine package doesn't have the -e flag.
             Once an updated version is available, the flag can be added
             """
-            # here we are creating a torrent instance from torf (even though user want to use pytorf), to get the total size of the torrent.
-            # this size information is then used to determine the piece size to be used.
-            torrent = Torrent(media, trackers="http://ggbot.com", exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens","*.sfv"],
-                              private=True, creation_date=datetime.now())
-            piece_size = get_piece_size_for_mktorrent(torrent.size)
-            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
+            torrent_size = sum(f.stat().st_size for f in Path(media).glob('**/*') if f.is_file()) if os.path.isdir(media) else os.path.getsize(media)
+            piece_size = get_piece_size_for_mktorrent(torrent_size)
+            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
             if len(announce) == 1:
                 os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
