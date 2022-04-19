@@ -203,6 +203,7 @@ docker run --rm -it \
 - [X] Dynamic piece size calculation for mktorrent
 - [X] Issue#25: Unhashable list error when uploading tv shows
 - [X] Issue#26: NBL dupe check issue
+- [X] Issue#28: 720p contents being tagged as SD for UNIT3D trackers
 
 ### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients
