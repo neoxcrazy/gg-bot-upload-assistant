@@ -66,7 +66,7 @@ def miscellaneous_identify_web_streaming_source(streaming_services, raw_file_nam
     streaming_sources = json.load(open(streaming_services))
     web_source = guess_it_result.get('streaming_service', '')
 
-    if type(streaming_sources) is list:
+    if type(web_source) is list:
         logging.info(f"[MiscellaneousUtils] GuessIt identified multiple streaming services [{web_source}]. Proceeding with the first in the list.")
         web_source = web_source[0]
     guessit_output = streaming_sources.get(web_source)
