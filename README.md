@@ -204,6 +204,7 @@ docker run --rm -it \
 - [X] Issue#25: Unhashable list error when uploading tv shows
 - [X] Issue#26: NBL dupe check issue
 - [X] Issue#28: 720p contents being tagged as SD for UNIT3D trackers
+- [X] Issue:30: Application crash while making TMDB API Call
 
 ### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients

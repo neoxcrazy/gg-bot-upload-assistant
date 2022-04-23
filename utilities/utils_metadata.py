@@ -323,7 +323,12 @@ def metadata_compare_tmdb_data_local(torrent_info):
     # We should only need 1 API request, so do that here
     get_media_info_url = f"https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key={os.getenv('TMDB_API_KEY')}"
 
-    get_media_info = requests.get(get_media_info_url).json()
+    try:
+        get_media_info = requests.get(get_media_info_url).json()
+    except Exception:
+        logging.exception(f'[MetadataUtils] Failed to get TVDB and MAL id from TMDB.')
+        return title, year, tvdb, mal
+    
     logging.info(f"[MetadataUtils] GET Request: https://api.themoviedb.org/3/{content_type}/{torrent_info['tmdb']}?api_key=<REDACTED>")
 
     # Check the genres for 'Animation', if we get a hit we should check for a MAL ID just in case
