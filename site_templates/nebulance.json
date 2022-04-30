@@ -117,7 +117,7 @@
 
         "strip_text": true,
 
-        "payload": "{\"jsonrpc\": \"2.0\",\"id\": 1,\"method\": \"getTorrents\",\"params\": [\"<api_key>\",{\"tvmaze\": <tvmaze>},10,0]}",
+        "payload": "{\"jsonrpc\": \"2.0\",\"id\": 1,\"method\": \"getTorrents\",\"params\": [\"<api_key>\",{\"tvmaze\": <tvmaze>},0,0]}",
         
         "parse_json": {
             "is_needed": true,
