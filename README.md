@@ -194,13 +194,11 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-### v2.0.6
+### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
+    - [ ] Anthelion
 - [ ] Add support to apply hybrid mapping to multiple fields
-- [ ] Refactoring code in anticipation to v3.0 release
-
-### v2.0.7
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
     - [X] Qbittorrent
@@ -240,6 +238,19 @@ docker run --rm -it \
 <br>
 
 # Change Log
+
+## **2.0.6**
+    New Features
+        * Refactoring code in anticipation to v3.0 release
+        * Improved dupe check with HDR Support
+        * Dynamic piece size calculation for mktorrent
+        
+    Bug Fixes
+        * Issue#25: Unhashable list error when uploading tv shows
+        * Issue#26: NBL dupe check issue
+        * Issue#28: 720p contents being tagged as SD for UNIT3D trackers
+        * Issue#30: Application crash while making TMDB API Call
+        * Issue#31: Uploads to BIT-HDTV failing
 
 ## **2.0.5**
     New Trackers

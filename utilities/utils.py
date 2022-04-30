@@ -8,6 +8,7 @@ import logging
 import subprocess
 
 from torf import Torrent
+from pathlib import Path
 from ffmpy import FFprobe
 from pprint import pformat
 from guessit import guessit
@@ -17,6 +18,30 @@ from rich.console import Console
 from pymediainfo import MediaInfo
 
 console = Console()
+
+
+def get_piece_size_for_mktorrent(size):
+    """
+        2^19 = 524 288 = 512 KiB for filesizes between 512 MiB - 1024 MiB
+        2^20 = 1 048 576 = 1024 KiB for filesizes between 1 GiB - 2 GiB
+        2^21 = 2 097 152 = 2048 KiB for filesizes between 2 GiB - 4 GiB
+        2^22 = 4 194 304 = 4096 KiB for filesizes between 4 GiB - 8 GiB
+        2^23 = 8 388 608 = 8192 KiB for filesizes between 8 GiB - 16 GiB
+        2^24 = 16 777 216 = 16384 KiB for filesizes between 16 GiB - 512 GiB This is the max you should ever have to use.
+        2^25 = 33 554 432 = 32768 KiB (note that utorrent versions before 3.x CANNOT load torrents with this or higher piece-size)
+    """
+    if size <= 2**30:           # < 1024 MiB
+        return 19
+    elif size <= 2 * 2**30:     # 1 GiB - 2 GiB
+        return 20
+    elif size <= 4 * 2**30:     # 2 GiB - 4 GiB
+        return 21
+    elif size <= 8 * 2**30:     # 4 GiB - 8 GiB
+        return 22
+    elif size <= 16 * 2**30:    # 8 GiB - 16 GiB
+        return 23
+    else:                       # anything > 16 GiB
+        return 24    
 
 
 def calculate_piece_size(size):
@@ -82,10 +107,14 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             current version of mktorrent pulled from alpine package doesn't have the -e flag.
             Once an updated version is available, the flag can be added
             """
+            torrent_size = sum(f.stat().st_size for f in Path(media).glob('**/*') if f.is_file()) if os.path.isdir(media) else os.path.getsize(media)
+            piece_size = get_piece_size_for_mktorrent(torrent_size)
+            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
+            logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
             if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
             else:
-                os.system(f"mktorrent -v -p -l 23 -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
             logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
             # torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_title}.torrent'
         else:
