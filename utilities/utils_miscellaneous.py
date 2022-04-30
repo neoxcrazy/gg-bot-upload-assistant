@@ -1,3 +1,4 @@
+
 import re
 import sys
 import json
@@ -64,7 +65,6 @@ def miscellaneous_identify_web_streaming_source(streaming_services, raw_file_nam
     # The value of the json keys will be used to create the torrent file name.  
     # the keys are used to match the output from guessit
     streaming_sources = json.load(open(streaming_services))
-    web_source = guess_it_result.get('streaming_service', '')
 
     if type(web_source) is list:
         logging.info(f"[MiscellaneousUtils] GuessIt identified multiple streaming services [{web_source}]. Proceeding with the first in the list.")
