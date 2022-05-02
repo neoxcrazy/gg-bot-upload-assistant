@@ -339,14 +339,15 @@ def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me,
     
 
 def basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track, auto_mode, missing_value):
-    width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160"}
+    width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160", "692": "480", "1024" : "576"}
+    logging.debug(f"[BasicUtils] Attempting to identify the resolution")
 
     if is_disc and torrent_info["bdinfo"] is not None:
         logging.info(f"[BasicUtils] `screen_size` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['resolution']}")
         return torrent_info["bdinfo"]["video"][0]["resolution"]
     
     # First we use attempt to use "width" since its almost always constant (Groups like to crop black bars so "height" is always changing)
-    elif str(media_info_video_track.width) != "None":
+    if str(media_info_video_track.width) != "None":
         track_width = str(media_info_video_track.width)
         if track_width in width_to_height_dict:
             height = width_to_height_dict[track_width]
@@ -354,7 +355,7 @@ def basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track,
             return f"{str(height)}p"
     
     # If "Width" somehow fails its unlikely that "Height" will work but might as well try
-    elif str(media_info_video_track.height) != "None":
+    if str(media_info_video_track.height) != "None":
         logging.info(f"[BasicUtils] Used pymediainfo 'track.height' to identify a resolution of: {str(media_info_video_track.height)}p")
         return f"{str(media_info_video_track.height)}p"
     

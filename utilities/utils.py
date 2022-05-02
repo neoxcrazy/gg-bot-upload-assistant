@@ -102,6 +102,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
                 -o => Set the path and filename of the created file.  Default is <name>.torrent.
                 -c => Add a comment to the metainfo.
                 -s => Add source string embedded in infohash.
+                -l => piece size (potency of 2)
                 
                 -e *.txt,*.jpg,*.png,*.nfo,*.svf,*.rar,*.screens,*.sfv # TODO to be added when supported mktorrent is available in alpine
             current version of mktorrent pulled from alpine package doesn't have the -e flag.
@@ -116,7 +117,6 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             else:
                 os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
             logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
-            # torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_title}.torrent'
         else:
             print("Using python torf to generate the torrent")
             torrent = Torrent(media,
@@ -133,8 +133,6 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             torrent.generate(callback=callback)
             torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
             torrent.verify_filesize(media)
-            # Save the path to .torrent file in torrent_settings
-            # torrent_info["dot_torrent"] = f'{working_folder}/temp_upload/{torrent_title}.torrent'
             logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
     else:
         print("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
