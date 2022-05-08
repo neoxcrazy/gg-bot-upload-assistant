@@ -7,7 +7,7 @@ from rich.console import Console
 console = Console()
 
 
-def identify_resolution_source(target_val, config, relevant_torrent_info_values):
+def identify_resolution_source(target_val, config, relevant_torrent_info_values, torrent_info):
     # target_val is type (source) or resolution_id (resolution)
     possible_match_layer_1 = []
     for key in config["Required"][(config["translation"][target_val])]:

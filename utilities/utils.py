@@ -167,7 +167,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
 
 
-def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break):
+def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break, debug=False):
     # -------- Add custom descriptions to description.txt --------
     if "custom_user_inputs" in torrent_info:
         # If the user is uploading to multiple sites we don't want to keep appending to the same description.txt file so remove it each time and write clean bbcode to it
@@ -210,7 +210,7 @@ def write_cutsom_user_inputs_to_description(torrent_info, description_file_path,
                         # if title has already been repalced the below statement won't do anything
                         input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
 
-                        if args.debug: # just for debugging purposes
+                        if debug: # just for debugging purposes
                             if "][" in input_wrapper_type:
                                 logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
                             logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
