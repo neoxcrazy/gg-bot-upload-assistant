@@ -64,8 +64,9 @@ RUN \
 
 COPY . .
 RUN \
-  chmod +x auto_upload.py && \
-  echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
+  	rm auto_reupload.py && \
+  	chmod +x auto_upload.py && \
+  	echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
     chmod +x /usr/bin/bdinfocli
 
 VOLUME /data /temp_upload
