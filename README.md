@@ -214,7 +214,6 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
-    - [X] Redis DB - Half baked (Might be deprecated)
 - [X] GG-Bot Visor for reports and failure recoveries
 - [ ] Support for overriding target tracker through categories
 - [ ] Bug Fixes and Testing
@@ -232,6 +231,7 @@ docker run --rm -it \
 - [ ] Add Support for new platforms
     - [ ] Anthelion
     - [ ] MoreThanTV
+    - [ ] GreatPosterWall
     - [ ] ReelFliX
 - [ ] Add support for DVDs
 
@@ -243,7 +243,9 @@ docker run --rm -it \
     New Features
         * Refactoring code in anticipation to v3.0 release
         * Improved dupe check with HDR Support
+        * Improved dupe check with support for REPACKS and PROPER
         * Dynamic piece size calculation for mktorrent
+        * Implemented a Skip Screenshots feature 
         
     Bug Fixes
         * Issue#25: Unhashable list error when uploading tv shows
