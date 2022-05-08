@@ -13,6 +13,8 @@ from rich.table import Table
 from rich.prompt import Confirm
 from rich.console import Console
 
+from utilities.utils_miscellaneous import miscellaneous_identify_repacks
+
 
 console = Console()
 
@@ -36,6 +38,9 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
 
     with open(f'{working_folder}/site_templates/{search_site}.json', "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
+    
+    is_repack_or_proper = torrent_info["repack"]
+    logging.info(f"[DupeCheck] We curently are tying to upload a '{is_repack_or_proper}'. Non '{is_repack_or_proper}' release will be ignored during dupe check")
     
     imdb = imdb.replace('tt', '') if config["dupes"]["strip_text"] == True else imdb
     url_dupe_payload = None  # this is here just for the log, its not technically needed
@@ -107,13 +112,17 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     
     if dupe_check_response_wrapper.status_code != 200:
         logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_response_wrapper.status_code}")
-        logging.error(f"[DupeCheck] payload response from {search_site} {dupe_check_response_wrapper.json()}")
+        logging.error(f"[DupeCheck] payload response from {search_site} {pformat(dupe_check_response_wrapper)}")
         logging.info(f"[DupeCheck] Dupe check for {search_site} failed, assuming no dupes and continuing upload")
         return False
 
     # Now that we have the response from tracker(X) we can parse the json and try to identify dupes
     existing_release_types = {}  # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
     existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0, 'hdr': 0, "dv": 0}  # We also log the num each type shows up on site
+    # this list will have the list of titles that are 100% dupes.
+    # if we are trying to upload a single episode and a season pack already exist, then the season pack is 100% dupe
+    # similarly if a repack or a proper release is already on tracker, then thats 100% dupe
+    cent_percent_dupes = {}
     single_episode_upload_with_season_pack_available = False
     # to handle torrents with HDR and DV, we keep a separate dictionary to keep tracker of hdr. non-hdr and dv releases
     # the reason to go for a separate map is because in `existing_release_types` the keys are torrent titles and that is not possible for hdr based filtering
@@ -219,7 +228,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     elif "hdr" in torrent_info:
         our_format = "hdr"
 
-    logging.info(f'[DupeCheck] Eliminating releases based on HDR Format. We are tring to upload: `{our_format}`. All other formats will be ignored.')
+    logging.info(f'[DupeCheck] Eliminating releases based on HDR Format. We are tring to upload: "{our_format}". All other formats will be ignored.')
     for item in hdr_format_types.keys():
         if item != our_format:
             for their_title in hdr_format_types[item]:
@@ -271,9 +280,86 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         #   If resolution doesn't match then we can remove items
         #   If audio codec doesn't match then we need to compare the audio channels. If our channel is better then we can remove item from list
         #       If 2.0 is already on tracker then we can upload 5.1 or 7.1 channels as these torrents will trump the lower channel releases
-        #   # TODO add support for hdr and DV versions as well
         # TODO implement this after comparing with lots of titles and samples
     logging.info(msg=f'[DupeCheck] After applying "resolution", "source_type"," audio_channels" filter: {existing_releases_count}')
+
+    # next we are going to consider repack during dupe check.
+    # 1. If we have a repack, 
+    #   1.a then non-repack releases on tracker is not conisdered for dupe check
+    #   1.b if there is a repack, then we need to do further checks. 
+    #       1.b.a If and tracker torrent both are same (REPACK and REPACK) then thats a dupe. 
+    #       1.b.b If its different, we check whether the repacks are REPACK, RERIP or PROPER. (a simple starts with should do the trick)
+    #           1.b.b.a If ours and theirs are different then we will consider their release as a dupe (being pessimistic). 
+    #                   We cannot say with certainty that that a RERIP is better than REPACK.
+    #       1.b.c Next we check whether our_repack and their_repack ends with a digit (REPACK1, REPACK2 etc)
+    #           1.b.c.a If we have a higher number than that on tracker, then can proceed to upload, and remove their from possible dupe
+    #           1.b.c.b If we have a lower number then we cannot upload
+    #           1.b.c.c The case when both are same will be handled in step 1.b.a
+    # 2. If we don't have a repack, 
+    #   2.a and there are repacks on tracker then, we CANNOT upload our torrent
+    #   2.b if there are no repacks on tracker, then we need to consider then for dupe check
+    logging.info(f"[DupeCheck] We curently are tying to upload a repack type: '{is_repack_or_proper}'. Trying to eliminate releases based on repack/proper.")
+    for onsite_title in list(existing_release_types.keys()):
+        their_is_repack_or_proper = miscellaneous_identify_repacks(onsite_title)
+        # if we have a reapck
+        if is_repack_or_proper is not None:
+            if their_is_repack_or_proper is None: # 1.a
+                logging.debug(f"[DupeCheck] On site release '{onsite_title}' is not proper or repack. Hence not considering this as a dupe.")
+                existing_releases_count[existing_release_types[onsite_title]] -= 1
+                existing_release_types.pop(onsite_title)
+            elif their_is_repack_or_proper == is_repack_or_proper: # 1.b.a
+                logging.debug(f"[DupeCheck] Repack/Proper match found for on site release '{onsite_title}'")
+            else:
+                # check for RERIP, PROPER and REPACK, then compare the digits at the end if present
+                # we just check whether the first 5 characters are the same. if same then we'll continue with other check
+                # otherwise we mark this as 100% dupe
+                if their_is_repack_or_proper[:5] != is_repack_or_proper[:5]:
+                    logging.debug(f"[DupeCheck] {their_is_repack_or_proper} found on tracker '{onsite_title}'. We want to upload '{is_repack_or_proper}'. This is 100% a dupe")
+                    cent_percent_dupes[onsite_title] = f"{their_is_repack_or_proper} already exits"
+                logging.info(f"[DupeCheck] We got a repack/proper from on site release '{onsite_title}' as '{their_is_repack_or_proper}'. But it doesn't match with our format of '{is_repack_or_proper}'")
+                # now lets check for REPACK2, 3 4 etc
+                # if the string ends in digits their_repack_end_digit and repack_end_digit will be a Match object, or None otherwise.
+                their_repack_end_digit = re.search(r'\d+$', their_is_repack_or_proper)
+                repack_end_digit = re.search(r'\d+$', is_repack_or_proper)
+                if repack_end_digit is not None: # we have REPACK? => where ? could be any integer
+                    if their_repack_end_digit is not None:
+                        # they have REPACK? => where ? could be any integer
+                        # eg: we have 
+                        #   Bosch.Legacy.S01E04.1080p.REPACK2.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv
+                        # while they have
+                        #   Bosch.Legacy.S01E04.1080p.REPACK3.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv
+                        # since we both have numerical repacks lets compare the digits. If we have a higher number then we can upload. else we cannot
+                        if int(repack_end_digit.group()) > int(their_repack_end_digit.group()): # 1.b.c.a
+                            # we have higher repack
+                            logging.debug(f"[DupeCheck] On site release '{onsite_title}' is older proper or repack. Hence not considering this as a dupe.")
+                            existing_releases_count[existing_release_types[onsite_title]] -= 1
+                            existing_release_types.pop(onsite_title)
+                        else: # 1.b.c.b
+                            logging.debug(f"[DupeCheck] Possible higher repack/proper found on tracker '{onsite_title}'. This is a possible dupe")
+                    else: # 1.b.c.a
+                        logging.debug(f"[DupeCheck] On site release '{onsite_title}' is not latest proper or repack. Hence not considering this as a dupe.")
+                        existing_releases_count[existing_release_types[onsite_title]] -= 1
+                        existing_release_types.pop(onsite_title)
+                elif their_repack_end_digit is not None: # they have a number in repack and we don't
+                    # they have REPACK? => where ? could be any integer
+                    # since they have a possible updated repack, their is not point in uploading our version
+                    # eg: we have 
+                    #   Bosch.Legacy.S01E04.1080p.REPACK.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv
+                    # while they have
+                    #   Bosch.Legacy.S01E04.1080p.REPACK2.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv
+                    logging.debug(f"[DupeCheck] Possible higher repack/proper found on tracker '{onsite_title}'. This is 100% a dupe")
+                    cent_percent_dupes[onsite_title] = "Latest repack/proper release"
+                    # once 100% dupe marking is enabled, this case can also be handled similarly
+                else: 
+                    # no digits for both parties. Ideally this case should not be happenning as it will be hanlded in previous cases.
+                    # thus we just log this and continue
+                    logging.debug(f"[DupeCheck] Well this shouldn't be happening. => Our: '{is_repack_or_proper}'  =>  Their: '{their_is_repack_or_proper}'")
+        else: # we don't have a repack
+            if their_is_repack_or_proper is not None: # 2.b no repack. Consider for dupe check
+                logging.debug(f"[DupeCheck] Repack / proper already exists on tracker '{onsite_title}'. This is 100% a dupe")
+                cent_percent_dupes[onsite_title] = "Repack/proper already exists"
+
+    logging.info(msg=f'[DupeCheck] After applying "REPACK/PROPER" filter: {existing_releases_count}')
 
     # Movies (mostly blurays) are usually a bit more flexible with dupe/trump rules due to editions, regions, etc
     # TV Shows (mostly web) are usually only allowed 1 "version" onsite & we also need to consider individual episode uploads when a season pack exists etc
@@ -313,8 +399,6 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num) or x.endswith(season_num), re.split("[.\s]", existing_release_types_key)))[0]
             if len(extracted_season_episode_from_title) == 3:
                 logging.info(msg=f'[DupeCheck] Found a season pack for {season_num} on {search_site}')
-                # TODO maybe mark the season pack as a 100% dupe or consider expanding dupe Table to allow for error messages to inform the user
-
                 # If a full season pack is onsite then in almost all cases individual episodes from that season are not allowed to be uploaded anymore
                 # check to see if that's ^^ happening, if it is then we will log it and if 'auto_mode' is enabled we also cancel the upload
                 # if 'auto_mode=false' then we prompt the user & let them decide
@@ -323,11 +407,11 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                         # possible_dupe_with_percentage_dict[existing_release_types_key] = 100
                         logging.critical(msg=f'[DupeCheck] Canceling upload to {search_site} because uploading a full season pack is already available: {existing_release_types_key}')
                         return True
-                    
                     logging.error("[DupeCheck] Marking existence of season pack for single episode upload.")
                     # marking this case when user is trying to upload a single episode when a season pack already exists on the tracker.
                     # when this flag is enabled, we'll show all the season packs in a table and prompt the user to decide whether or not to upload the torrent.
                     single_episode_upload_with_season_pack_available = True
+                    cent_percent_dupes[existing_release_types_key] = "Season pack available"
 
             # now we just need to make sure the episode we're trying to upload is not already on site
             if not single_episode_upload_with_season_pack_available:
@@ -381,13 +465,18 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     possible_dupes_table.add_column(f"Exceeds Max % ({os.getenv('acceptable_similarity_percentage')}%)", justify="left")
     possible_dupes_table.add_column(f"Possible Dupes ({str(config['name']).upper()})", justify="left")
     possible_dupes_table.add_column("Similarity %", justify="center")
+    possible_dupes_table.add_column("Dupe Reason", justify="center")
 
     max_dupe_percentage_exceeded = False
     is_dupes_present = False
     logging.debug(f"[DupeCheck] Existing release types that are dupes: {existing_release_types}")
     for possible_dupe_title in existing_release_types.keys():
         # If we get a match then run further checks
-        possible_dupe_with_percentage_dict[possible_dupe_title] = fuzzy_similarity(our_title=torrent_info["torrent_title"], check_against_title=possible_dupe_title)
+        if possible_dupe_title in cent_percent_dupes:
+            possible_dupe_with_percentage_dict[possible_dupe_title] = 100
+        else:
+            possible_dupe_with_percentage_dict[possible_dupe_title] = fuzzy_similarity(our_title=torrent_info["torrent_title"], check_against_title=possible_dupe_title)
+
 
     for possible_dupe in sorted(possible_dupe_with_percentage_dict, key=possible_dupe_with_percentage_dict.get, reverse=True):
         mark_as_dupe = bool(possible_dupe_with_percentage_dict[possible_dupe] >= int(os.getenv('acceptable_similarity_percentage')))
@@ -395,17 +484,18 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         mark_as_dupe_percentage_difference_raw_num = possible_dupe_with_percentage_dict[possible_dupe] - int(os.getenv('acceptable_similarity_percentage'))
         mark_as_dupe_percentage_difference = f'{"+" if mark_as_dupe_percentage_difference_raw_num >= 0 else "-"}{abs(mark_as_dupe_percentage_difference_raw_num)}%'
 
-        possible_dupes_table.add_row(f'[{mark_as_dupe_color}]{mark_as_dupe}[/{mark_as_dupe_color}] ({mark_as_dupe_percentage_difference})', possible_dupe, f'{str(possible_dupe_with_percentage_dict[possible_dupe])}%')
+        possible_dupes_table.add_row(f'[{mark_as_dupe_color}]{mark_as_dupe}[/{mark_as_dupe_color}] ({mark_as_dupe_percentage_difference})', 
+            possible_dupe, f'{str(possible_dupe_with_percentage_dict[possible_dupe])}%', cent_percent_dupes[possible_dupe] if possible_dupe in cent_percent_dupes else "---")
 
         # because we want to show the user every possible dupe (not just the ones that exceed the max percentage) 
         # we just mark an outside var True & finish the for loop that adds the table rows
         # 
         # Also if `single_episode_upload_with_season_pack_available`, then we mark the release as dupe
-        # TODO Should season packs be tagged as 100% dupe???
         if single_episode_upload_with_season_pack_available:
             max_dupe_percentage_exceeded = True
         elif not max_dupe_percentage_exceeded:
             max_dupe_percentage_exceeded = mark_as_dupe
+        is_dupes_present = True
 
     if max_dupe_percentage_exceeded:
         console.print(f"\n\n[bold red on white] :warning: Detected possible dupe! :warning: [/bold red on white]")
@@ -430,7 +520,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             return True if bool(util.strtobool(auto_mode)) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
         if is_dupes_present:
-            console.print(f"\n\n    [bold red] :warning: Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
+            console.print(f"\n\n    [bold red] :warning:  Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
             console.print(possible_dupes_table)
             console.line(count=2)
             console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")

@@ -46,9 +46,9 @@ def miscellaneous_identify_bluray_disc_type(screen_size, upload_media):
 
 
 def miscellaneous_identify_repacks(raw_file_name):
-    match_repack = re.search(r'RERIP|REPACK|PROPER|REPACK2|REPACK3|REPACK4', raw_file_name, re.IGNORECASE)
+    match_repack = re.search(r'RERIP|PROPER2|PROPER3|PROPER4|PROPER|REPACK2|REPACK3|REPACK4|REPACK', raw_file_name, re.IGNORECASE)
     if match_repack is not None:
-        logging.info(f'[MiscellaneousUtils] Used Regex to extract: [bold]{match_repack.group()}[/bold] from the filename')
+        logging.info(f'[MiscellaneousUtils] Used Regex to extract: "{match_repack.group()}" from the filename')
         return match_repack.group()
     return None
 
@@ -109,7 +109,9 @@ def miscellaneous_identify_source_type(raw_file_name, auto_mode, source):
             'bluray': ['disc', 'remux', 'encode'],
             'web': ['rip', 'dl'],
             'hdtv': 'hdtv',
-            'dvd': ['disc', 'remux', 'rip']
+            'dvd': ['disc', 'remux', 'rip'],
+            'pdtv': 'pdtv',
+            'sdtv': 'sdtv'
         }
         # Since we already know the 'parent source' from an earlier function we don't need to prompt the user for it twice
         if str(source).lower() in basic_source_to_source_type_dict and isinstance(basic_source_to_source_type_dict[str(source).lower()], list):

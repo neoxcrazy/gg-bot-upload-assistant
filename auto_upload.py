@@ -123,6 +123,7 @@ uncommon_args.add_argument('-nfo', nargs=1, help="Use this to provide the path t
 uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for debugging. Writes debug lines to log file")
 uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
 uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
+uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true', help="Skip screenshot generation and upload for a run (overrides config.env)")
 
 uncommon_args.add_argument('-3d', action='store_true', help="Mark the upload as 3D content")
 uncommon_args.add_argument('-foreign', action='store_true', help="Mark the upload as foreign content [Non-English]")
@@ -210,6 +211,12 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         else:
             keys_we_need_but_missing_torrent_info.append(basic_key)
  
+    # Deal with PDTV & SDTV sources
+    if torrent_info["source"] == 'Digital TV':
+        torrent_info["source"] = 'PDTV'
+    elif torrent_info["source"] == 'TV':
+        torrent_info["source"] = 'SDTV'
+
     # As guessit evolves and adds more info we can easily support whatever they add
     # and insert it into our main torrent_info dict
     logging.debug(f"Attempting to detect the following keys from guessit :: {keys_we_want_torrent_info}")
@@ -755,7 +762,7 @@ def choose_right_tracker_keys():
                         console.print(f'\nThis "Category" ([bold]{torrent_info["type"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
                         return "STOP"
 
-                if translation_key in ('source', 'resolution'):
+                if translation_key in ('source', 'resolution', 'resolution_id'):
                     return_value = identify_resolution_source(target_val=translation_key, config=config, relevant_torrent_info_values=relevant_torrent_info_values)
                     if return_value == "STOP":
                         return return_value
@@ -1408,7 +1415,7 @@ for file in upload_queue:
 
         console.line(count=2)
         console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
-
+        logging.debug(f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
         dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
         # If dupes are present and user decided to stop upload, for single tracker uploads we stop operation immediately
         # True == dupe_found
@@ -1427,7 +1434,7 @@ for file in upload_queue:
     # Call function to actually take screenshots & upload them (different file)
     take_upload_screens(duration=torrent_info["duration"],
         upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-        torrent_title_import=torrent_info["title"], base_path=working_folder, discord_url=discord_url)
+        torrent_title_import=torrent_info["title"], base_path=working_folder, discord_url=discord_url, skip_screenshots=args.skip_screenshots)
 
     if os.path.exists(f'{working_folder}/temp_upload/bbcode_images.txt'):
         torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/bbcode_images.txt'
@@ -1474,7 +1481,7 @@ for file in upload_queue:
         # -------- Add custom descriptions to description.txt --------
         write_cutsom_user_inputs_to_description(torrent_info=torrent_info, 
             description_file_path=f'{working_folder}/temp_upload/description.txt', config=config, 
-            tracker=tracker, bbcode_line_break=bbcode_line_break)
+            tracker=tracker, bbcode_line_break=bbcode_line_break, debug=args.debug)
 
         # -------- Add bbcode images to description.txt --------
         add_bbcode_images_to_description(torrent_info=torrent_info, config=config, 
@@ -1495,6 +1502,7 @@ for file in upload_queue:
         if os.getenv('check_dupes') == 'true' and len(upload_to_trackers) > 1:
             console.line(count=2)
             console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
+            logging.debug(f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
             # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
             dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
             # True == dupe_found

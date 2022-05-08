@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import base64
 import asyncio
@@ -209,7 +210,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         logging.fatal(f'[Screenshots] Invalid imagehost {img_host}. Cannot upload screenshots.')
 
 
-def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, discord_url):
+def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, discord_url, skip_screenshots=False):
     logging.basicConfig(filename=f'{base_path}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
     
     console.line(count=2)
@@ -220,12 +221,18 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     load_dotenv(f"{base_path}config.env")
     num_of_screenshots = os.getenv("num_of_screenshots")
 
+    logging.info(f"[Screenshots] Sanitizing the torrent title `{torrent_title_import}` since this is from TMDB")
+    torrent_title_import = re.escape(torrent_title_import.replace(" ", '').replace("\\", '').replace("/", ''))
     logging.info(f"[Screenshots] Using {upload_media_import} to generate screenshots")
+    logging.info(f'[Screenshots] Screenshots will be save with prefix {torrent_title_import}')
     console.print(f'\nTaking [chartreuse1]{str(num_of_screenshots)}[/chartreuse1] screenshots', style="Bold Blue")
 
     enabled_img_hosts_list = []
-     # ---------------------- check if 'num_of_screenshots=0' or not set ---------------------- #
-    if num_of_screenshots == "0" or not bool(num_of_screenshots):
+    if skip_screenshots:
+        logging.info("[Screenshots] User has provided the `skip_screenshots` argument. Hence continuing without screenshots.")
+        console.print(f'\nUser provided the argument `[red]skip_screenshots[/red]`. Overriding screenshot configurations in config.env', style='bold green')
+    # ---------------------- check if 'num_of_screenshots=0' or not set ---------------------- #
+    elif num_of_screenshots == "0" or not bool(num_of_screenshots):
         logging.error(f'[Screenshots] num_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, continuing without screenshots.')
         console.print(f'\nnum_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, \n', style='bold red')
     else:

@@ -182,7 +182,11 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
         if media_info_audio_track.codec_id is not None:
             # The release "La.La.Land.2016.1080p.UHD.BluRay.DDP7.1.HDR.x265-NCmt.mkv" when using media_info_audio_track.codec shows the codec as AC3 not EAC3..
             # so well try to use media_info_audio_track.codec_id first
-            audio_codec = media_info_audio_track.codec_id
+            # Damn, another file has "mp4a-40-2" under codec_id. Pretty sure that's just standard AAC so we'll just use that
+            if media_info_audio_track.codec_id == "mp4a-40-2":
+                audio_codec = "AAC"
+            else:
+                audio_codec = media_info_audio_track.codec_id
         elif media_info_audio_track.codec is not None:
             # On rare occasion *.codec is not available and we need to use *.format
             audio_codec = media_info_audio_track.codec
@@ -394,10 +398,12 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
             'bluray': ['disc', 'remux', 'encode'],
             'web': ['rip', 'dl'],
             'hdtv': 'hdtv',
-            'dvd': ['disc', 'remux', 'rip']
+            'dvd': ['disc', 'remux', 'rip'],
+            'pdtv': 'pdtv',
+            'sdtv': 'sdtv'
         }
         # First get a basic source into the torrent_info dict, we'll prompt the user for a more specific source next (if needed, e.g. 'bluray' could mean 'remux', 'disc', or 'encode')
-        source = Prompt.ask("Input one of the following: ", choices=["bluray", "web", "hdtv", "dvd"])
+        source = Prompt.ask("Input one of the following: ", choices=["bluray", "web", "hdtv", "dvd", "pdtv", "sdtv"])
         # Since the parent source isn't the filename we know that the 'final form' definitely won't be so we don't return the 'parent source' yet
         # We instead prompt the user again to figure out if its a remux, encode, webdl, rip, etc etc
         # Once we figure all that out we can return the 'parent source'

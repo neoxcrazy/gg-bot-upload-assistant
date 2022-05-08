@@ -17,6 +17,7 @@ bdinfo*.txt
 tvmaze.py
 dev_comments.txt
 /dev_comments
+/reuploader_envs
 /_ignore
 /POC/
 /env-files-samples/docker-compose.yml
