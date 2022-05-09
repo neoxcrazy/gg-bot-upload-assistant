@@ -763,7 +763,7 @@ def choose_right_tracker_keys():
                         return "STOP"
 
                 if translation_key in ('source', 'resolution', 'resolution_id'):
-                    return_value = identify_resolution_source(target_val=translation_key, config=config, relevant_torrent_info_values=relevant_torrent_info_values)
+                    return_value = identify_resolution_source(target_val=translation_key, config=config, relevant_torrent_info_values=relevant_torrent_info_values, torrent_info=torrent_info)
                     if return_value == "STOP":
                         return return_value
                     tracker_settings[config["translation"][translation_key]] = return_value
