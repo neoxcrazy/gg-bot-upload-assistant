@@ -1,0 +1,63 @@
+# Docker compose for GG-Bot Auto Uploader
+# please note that this compose file cannot be used with GG-Bot Upload Assistant
+# ------------------------------------
+# To use this compose file, you'll need to create the following file in the location where you have this compose file 
+# and provide values for the following variables (samples for all these files are available in the env-files-samples folder)
+#
+# .env file           -> variables for docker-compose
+# .mongo-express.env  -> mongo-express environment variables
+# .qbittorrent.env    -> qbittorrent related environment variables
+# .rutorrent.env      -> rutorrent related environment variables
+# reupload.config.env -> gg-bot reuploader configurations
+#
+version: "3.5"
+services:
+  mongo:
+    image: mongo:${MONGO_VERSION}
+    hostname: mongo
+    restart: unless-stopped
+    volumes:
+      - ${BASE_PATH}/apps/mongo:/data/db
+  # Optional. Mongo Express can be commented out
+  mongo-express: 
+    image: mongo-express:${MONGO_EXPRESS_VERSION}
+    hostname: mongo-express
+    restart: unless-stopped
+    env_file:
+      - .mongo-express.env
+    ports:
+      - ${MONGO_EXPRESS_EXPOSE_PORT}:8081
+    depends_on:
+      - mongo
+  rutorrent:
+    image: romancin/rutorrent:${RUTORRENT_VERSION}
+    hostname: rutorrent
+    restart: unless-stopped
+    env_file:
+      - .rutorrent.env
+    volumes:
+      - ${BASE_PATH}/apps/rutorrent/config:/config
+      - ${BASE_PATH}/downloads:/downloads
+    ports:
+      - ${RUTORRENT_WEBUI_PORT}:80
+      - ${RUTORRENT_EXTRA_PORTS}:51415-51415
+  gg-bot-auto-uploader:
+    image: noobmaster669/gg-bot-uploader:${GG_BOT_REUPLOADER_VERSION}
+    restart: unless-stopped
+    hostname: gg-bot-reuploader
+    # change the below volume mapping according to your torrent client
+    volumes:
+      - ${BASE_PATH}/data/downloads:/downloads
+    env_file:
+      - reupload.config.env
+    # based on your configuration the gg-bot-auto-uploader will depend on either mongo or redis
+    # if using mongo comment out redis, and vice-versa
+    depends_on:
+      - mongo
+      - rutorrent
+    # provide the list of trackers to upload to here
+    # TODO see how this can be taken from the .env file
+    command: [
+      "-t", "<TRACKERS>", "<OPTIONAL_ARGUMENTS>"
+    ]
+  
