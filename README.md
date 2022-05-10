@@ -92,9 +92,13 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>Gazelle</strong></td>
+            <td rowspan="2"><strong>Gazelle</strong></td>
             <td><strong>NBL</strong></td>
             <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>ANT</strong></td>
+            <td><strong><a href="https://anthelion.me">Anthelion</a></strong></td>
         </tr>
     </tbody>
 </table>
