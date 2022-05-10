@@ -42,7 +42,9 @@
     "Required": {
         "file_input": "file",
         "tmdbid": "string",
+        "imdbid" : "string",
         "name":"string",
+        "screenshots": "string",
 
         "category": {
             "0": "movie"
@@ -90,9 +92,7 @@
     "Optional": {
         "bdinfo": "string",
         "mediainfo": "string",
-        "anonymous": "string",
-        "imdbid" : "string",
-        "screenshots": "file|string|array"
+        "anonymous": "string"
     },
 
     "Default":{
@@ -115,7 +115,7 @@
             "top_lvl": "item",
             "torrent_name": "title",
             "combine_fields": true,
-            "fields": [ "title", "year", "media", "resolution", "flags", "audioFormat", "codec", "releaseGroup" ]
+            "fields": [ "title", "year", "resolution", "media", "flags", "audioFormat", "codec", "releaseGroup" ]
         },
 
         "different_cuts": "1",
