@@ -59,7 +59,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         else:
             logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {search_site}.')
     elif config["dupes"]["technical_jargons"]["authentication_mode"] == "COOKIE":
-        logging.fatal(f'[DupeCheck] Cookie based authentication is not supported as for now.')
+        logging.fatal(f'[DupeCheck] Cookie based authentication is not supported yet.')
 
     if str(config["dupes"]["technical_jargons"]["request_method"]) == "POST": # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
@@ -99,7 +99,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 logging.info(f"[DupeCheck] Skipping upload to tracker since the dupe check request failed. The tracker might not be responding, hence skipping upload.")
                 return True
     else: # GET request (BLU & ACM)
-        url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb)
+        url_dupe_search = str(config["dupes"]["url_format"]).format(search_url=str(config["torrents_search"]).format(api_key=tracker_api), title=torrent_info["title"], imdb=imdb, tmdb=tmdb)
         try:
             dupe_check_response_wrapper = requests.request("GET", url_dupe_search, headers=headers)
         except Exception as ex:
@@ -127,7 +127,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # to handle torrents with HDR and DV, we keep a separate dictionary to keep tracker of hdr. non-hdr and dv releases
     # the reason to go for a separate map is because in `existing_release_types` the keys are torrent titles and that is not possible for hdr based filtering
     # note that for hdr filtering we are not bothered about the different formats (PQ10, HDR, HLG etc), Since its rare to see a show release in multiple formats.
-    hdr_format_types = { 'hdr': [],'dv_hdr': [], 'dv': [], 'normal': []}
+    hdr_format_types = { 'hdr': [], 'dv_hdr': [], 'dv': [], 'normal': []}
 
     # adding support for speedapp. Speedapp just returns the torrents as a json array.
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
@@ -158,7 +158,28 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         
         torrent_name_key = config["dupes"]["parse_json"]["torrent_name"] if "torrent_name" in config["dupes"]["parse_json"] else "name"
         torrent_title = str(torrent_details[torrent_name_key])
-        torrent_title_split = re.split('[.\s]', torrent_title.replace("-", " ").lower())
+        # certain trackers (NOT ANTHELION) won't give the details as one field. In such cases, we can combine the data from multiple fields to create the torrent name ourselves
+        # If the configured fields are not present then, we'll log the errors and then just skip it.
+        if "combine_fields" in config["dupes"]["parse_json"] and config["dupes"]["parse_json"]["combine_fields"] is True:
+            if "fields" in config["dupes"]["parse_json"]:
+                torrent_title = ""
+                for field in config["dupes"]["parse_json"]["fields"]:
+                    if field not in torrent_details:
+                        logging.error(f'[DupeCheck] Combine field `{field}` is not present in the obtained torrent details response')
+                        continue
+
+                    if type(torrent_details[field]) is list:
+                        for field_data in torrent_details[field]:
+                            if str(field_data) in ["Commentary"]: # well we don't need these components in the torrent title
+                                continue
+                            torrent_title = f'{torrent_title} {str(field_data)}'
+                    else:
+                        torrent_title = f'{torrent_title} {str(torrent_details[field])}'
+            else:
+                # well thats a bummer, you want to combine fields, but haven't given any fields.
+                # so we just continue with the `torrent_name_key` that we have constructed till now.
+                pass
+        torrent_title_split = re.split('[.\s]', torrent_title.lower().replace("blu-ray", "bluray").replace("-", " "))
         torrent_title_upper_split = re.split('[.\s]', torrent_title.replace("-", " "))
 
         logging.debug(f'[DupeCheck] Dupe check torrent title obtained from tracker {search_site} is {torrent_title}')

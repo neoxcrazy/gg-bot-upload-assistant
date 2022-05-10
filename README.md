@@ -1,5 +1,7 @@
 # **GG-BOT Upload Assistant**
-GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases.
+GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
+
+![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
 
 <br>
 
@@ -90,9 +92,13 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://www.bit-hdtv.com">BIT-HDTV</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>Gazelle</strong></td>
+            <td rowspan="2"><strong>Gazelle</strong></td>
             <td><strong>NBL</strong></td>
             <td><strong><a href="https://nebulance.io">Nebulance</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td><strong>ANT</strong></td>
+            <td><strong><a href="https://anthelion.me">Anthelion</a></strong></td>
         </tr>
     </tbody>
 </table>
@@ -197,7 +203,6 @@ docker run --rm -it \
 ### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
-    - [ ] Anthelion
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
@@ -233,6 +238,8 @@ docker run --rm -it \
     - [ ] MoreThanTV
     - [ ] GreatPosterWall
     - [ ] ReelFliX
+    - [ ] GreatPosterWall
+    - [ ] Swarmazon
 - [ ] Add support for DVDs
 
 <br>
@@ -240,6 +247,9 @@ docker run --rm -it \
 # Change Log
 
 ## **2.0.6**
+    New Trackers
+        * Anthelion
+    
     New Features
         * Refactoring code in anticipation to v3.0 release
         * Improved dupe check with HDR Support
