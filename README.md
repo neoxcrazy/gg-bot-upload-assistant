@@ -203,7 +203,6 @@ docker run --rm -it \
 ### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
-    - [ ] Anthelion
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
@@ -239,6 +238,8 @@ docker run --rm -it \
     - [ ] Anthelion
     - [ ] MoreThanTV
     - [ ] ReelFliX
+    - [ ] GreatPosterWall
+    - [ ] Swarmazon
 - [ ] Add support for DVDs
 
 <br>
@@ -246,6 +247,9 @@ docker run --rm -it \
 # Change Log
 
 ## **2.0.6**
+    New Trackers
+        * Anthelion
+    
     New Features
         * Refactoring code in anticipation to v3.0 release
         * Improved dupe check with HDR Support
