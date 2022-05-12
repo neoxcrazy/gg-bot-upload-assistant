@@ -203,6 +203,7 @@ docker run --rm -it \
 ### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
+- [ ] Implement a restart/resume feature for uploads.
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
@@ -234,10 +235,7 @@ docker run --rm -it \
     - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] Anthelion
     - [ ] MoreThanTV
-    - [ ] GreatPosterWall
-    - [ ] ReelFliX
     - [ ] GreatPosterWall
     - [ ] Swarmazon
 - [ ] Add support for DVDs
@@ -249,6 +247,7 @@ docker run --rm -it \
 ## **2.0.6**
     New Trackers
         * Anthelion
+        * ReelFlix
     
     New Features
         * Refactoring code in anticipation to v3.0 release
