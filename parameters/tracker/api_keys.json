@@ -15,5 +15,6 @@
     "stc_api_key",
     "stt_api_key",
     "bhdtv_api_key",
-    "nbl_api_key"
+    "nbl_api_key",
+    "rf_api_key"
 ]

@@ -3,5 +3,8 @@ Dockerfile
 README.md
 *.mkv
 *.mp4
+*.log
 .coverage
-bdinfo*.txt
+Dockerfile.aarch64
+Dockerfile.armhf
+Dockerfile.disk
