@@ -127,6 +127,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # to handle torrents with HDR and DV, we keep a separate dictionary to keep tracker of hdr. non-hdr and dv releases
     # the reason to go for a separate map is because in `existing_release_types` the keys are torrent titles and that is not possible for hdr based filtering
     # note that for hdr filtering we are not bothered about the different formats (PQ10, HDR, HLG etc), Since its rare to see a show release in multiple formats.
+    # although not impossible. (moonknight had PQ10 and HDR versions)
     hdr_format_types = { 'hdr': [], 'dv_hdr': [], 'dv': [], 'normal': []}
 
     # adding support for speedapp. Speedapp just returns the torrents as a json array.
