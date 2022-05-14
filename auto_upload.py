@@ -124,6 +124,7 @@ uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for 
 uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
 uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
 uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true', help="Skip screenshot generation and upload for a run (overrides config.env)")
+uncommon_args.add_argument('-r', '--resume', action='store_true', help="Resume previously unfinished upload.")
 
 uncommon_args.add_argument('-3d', action='store_true', help="Mark the upload as 3D content")
 uncommon_args.add_argument('-foreign', action='store_true', help="Mark the upload as foreign content [Non-English]")
@@ -210,12 +211,6 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             torrent_info[basic_key] = str(guess_it_result[basic_key])
         else:
             keys_we_need_but_missing_torrent_info.append(basic_key)
- 
-    # Deal with PDTV & SDTV sources
-    if torrent_info["source"] == 'Digital TV':
-        torrent_info["source"] = 'PDTV'
-    elif torrent_info["source"] == 'TV':
-        torrent_info["source"] = 'SDTV'
 
     # As guessit evolves and adds more info we can easily support whatever they add
     # and insert it into our main torrent_info dict
@@ -223,6 +218,13 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     for wanted_key in keys_we_want_torrent_info:
         if wanted_key in guess_it_result:
             torrent_info[wanted_key] = str(guess_it_result[wanted_key])
+
+    # Deal with PDTV & SDTV sources
+    if "source" in torrent_info:
+        if torrent_info["source"] == 'Digital TV':
+            torrent_info["source"] = 'PDTV'
+        elif torrent_info["source"] == 'TV':
+            torrent_info["source"] = 'SDTV'
 
     # setting NOGROUP as group if the release_group cannot be identified from guessit
     if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None ) is None :
@@ -295,7 +297,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         bdinfo_start_time = time.perf_counter()
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
-        torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+        torrent_info["mediainfo"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
         torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info, args.debug) # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
@@ -329,7 +331,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     if args.disc:
         # for full disk uploads the bdinfo summary itself will be set as the `mediainfo_summary`
         logging.info("[Main] Full Disk Upload. Setting bdinfo summary as mediainfo summary")
-        with open(f'{working_folder}/temp_upload/mediainfo.txt', 'r') as summary:
+        with open(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt', 'r') as summary:
             bdInfo_summary = summary.read()
             torrent_info["mediainfo_summary"] = bdInfo_summary
     else:
@@ -695,7 +697,7 @@ def choose_right_tracker_keys():
                         tracker_settings[config["translation"][translation_key]] = torrent_info[translation_key]
                     # Make sure you select the right .torrent file
                     if translation_key == "dot_torrent":
-                        tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'
+                        tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent'
                 
                 # The reason why we keep this elif statement here is because the conditional right above is also technically a "string"
                 # but its easier to keep mediainfo and description in text files until we need them so we have that small exception for them
@@ -1150,6 +1152,7 @@ if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_F
 user_supplied_paths = args.path
 
 # Verify the script is in "auto_mode" and if needed map rtorrent download path to system path
+# TODO remove the reupload argument once GG-BOT Auto ReUploader is released and instant seeding is migrated to GG-BOT Upload Assistant
 if args.reupload:
     logging.info('[Main] Reuploading a match from autodl')
 
@@ -1216,9 +1219,8 @@ if auto_mode == "false":
 # The user has confirmed what sites to upload to at this point (or auto_mode is set to true)
 # Get media file details now, check to see if we are running in "batch mode"
 
-# TODO an issue with batch mode currently is that we have a lot of "assert" & sys.exit statements during the prep work we do for each upload, if one of these "assert/quit" statements
-#  get triggered, then it will quit the entire script instead of just moving on to the next file in the list 'upload_queue'
-
+# TODO an issue with batch mode currently is that we have a lot of "assert" & sys.exit statements during the prep work we do for each upload, 
+# if one of these "assert/quit" statements get triggered, then it will quit the entire script instead of just moving on to the next file in the list 'upload_queue'
 # ---------- Batch mode prep ---------- #
 if args.batch:
     if len(args.path) > 1:
@@ -1268,8 +1270,9 @@ logging.debug(f"[Main] Upload queue: {upload_queue}")
 # Now for each file we've been supplied (batch more or just the user manually specifying multiple files) we create a loop here that uploads each of them until none are left
 for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
-    delete_leftover_files(working_folder)
     torrent_info.clear()
+    # the working_folder will container a hash value with succeeding /
+    torrent_info["working_folder"] = delete_leftover_files(working_folder, resume=args.resume, file=file)
 
     # TODO these are some hardcoded values to be handled at a later point in time
     # setting this to 0 is fine. But need to add support for these eventually.
@@ -1425,7 +1428,10 @@ for file in upload_queue:
             if discord_url:  # Send discord notification if enabled
                 requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
                         data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
-            sys.exit(console.print("\nOK, quitting now..\n", style="bold red", highlight=False))
+            if args.auto_mode:
+                continue
+            else:
+                sys.exit(console.print("\nOK, quitting now..\n", style="bold red", highlight=False))
 
     # -------- Take / Upload Screenshots --------
     media_info_duration = MediaInfo.parse(torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]).tracks[1]
@@ -1434,22 +1440,22 @@ for file in upload_queue:
     # Call function to actually take screenshots & upload them (different file)
     take_upload_screens(duration=torrent_info["duration"],
         upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-        torrent_title_import=torrent_info["title"], base_path=working_folder, discord_url=discord_url, skip_screenshots=args.skip_screenshots)
+        torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], discord_url=discord_url, skip_screenshots=args.skip_screenshots)
 
-    if os.path.exists(f'{working_folder}/temp_upload/bbcode_images.txt'):
-        torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/bbcode_images.txt'
+    if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'):
+        torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'
 
-    if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'):
-        torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'
+    if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'):
+        torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'
 
-    if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'):
-        torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'
+    if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'):
+        torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'
     
-    if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
-         torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
+    if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'):
+         torrent_info["url_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'
 
-    if os.path.exists(f'{working_folder}/temp_upload/image_paths.txt'):
-         torrent_info["data_images"] = f'{working_folder}/temp_upload/image_paths.txt'
+    if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'):
+         torrent_info["data_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'
 
     # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
     logging.info("[Main] Now starting tracker specific tasks")
@@ -1480,19 +1486,19 @@ for file in upload_queue:
 
         # -------- Add custom descriptions to description.txt --------
         write_cutsom_user_inputs_to_description(torrent_info=torrent_info, 
-            description_file_path=f'{working_folder}/temp_upload/description.txt', config=config, 
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', config=config, 
             tracker=tracker, bbcode_line_break=bbcode_line_break, debug=args.debug)
 
         # -------- Add bbcode images to description.txt --------
         add_bbcode_images_to_description(torrent_info=torrent_info, config=config, 
-            description_file_path=f'{working_folder}/temp_upload/description.txt', bbcode_line_break=bbcode_line_break)
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', bbcode_line_break=bbcode_line_break)
 
         # -------- Add custom uploader signature to description.txt --------
-        write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/description.txt',
+        write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
             tracker=tracker, bbcode_line_break=bbcode_line_break)
 
         # Add the finished file to the 'torrent_info' dict
-        torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
+        torrent_info["description"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt'
 
         # -------- Check for Dupes Multiple Trackers --------
         # when the user has configured multiple trackers to upload to
@@ -1525,6 +1531,7 @@ for file in upload_queue:
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
             source=config["source"],
             working_folder=working_folder,
+            hash_prefix=torrent_info["working_folder"],
             use_mktorrent=args.use_mktorrent,
             tracker=tracker,
             torrent_title=torrent_info["torrent_title"],
@@ -1577,7 +1584,7 @@ for file in upload_queue:
                     sub_folder = sub_folder + torrent_info["type"] + "/"
                     os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
                 # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
-                list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/*.torrent")
+                list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
                     logging.debug(f'[Main] Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')

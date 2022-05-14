@@ -437,7 +437,7 @@ def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
         # depending on if the user is uploading a folder or file we need for format it correctly so we replace the entire path with just media file/folder name
         logging.info(f"[BasicUtils] Using the following path in mediainfo.txt: {essential_path}")
         media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me, essential_path)
-        save_location = str(working_folder + '/temp_upload/mediainfo.txt')
+        save_location = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
         logging.info(f'[BasicUtils] Saving mediainfo to: {save_location}')
         logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
         logging.debug(f'\n{media_info_output}')

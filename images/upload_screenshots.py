@@ -7,13 +7,16 @@ import logging
 import requests
 import pyimgbox
 import ptpimg_uploader
-from datetime import datetime
+
 from rich import box
 from rich.table import Table
-from rich.console import Console
 from rich.progress import track
-from dotenv import load_dotenv
+from rich.console import Console
+
 from ffmpy import FFmpeg
+from pathlib import Path
+from datetime import datetime
+from dotenv import load_dotenv
 from imgurpython import ImgurClient
 
 # For more control over rich terminal content, import and construct a Console object.
@@ -210,7 +213,7 @@ def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path)
         logging.fatal(f'[Screenshots] Invalid imagehost {img_host}. Cannot upload screenshots.')
 
 
-def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, discord_url, skip_screenshots=False):
+def take_upload_screens(duration, upload_media_import, torrent_title_import, base_path, hash_prefix, discord_url, skip_screenshots=False):
     logging.basicConfig(filename=f'{base_path}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
     
     console.line(count=2)
@@ -260,7 +263,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     # -------------------------- Check if any img_hosts are still in the 'enabled_img_hosts_list' list -------------------------- #
     # if no image_hosts are left then we show the user an error that we will continue the upload with screenshots & return back to auto_upload.py
     if not bool(enabled_img_hosts_list):
-        with open(f"{base_path}/temp_upload/bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
+        with open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/{hash_prefix}url_images.txt", "a") as append_url_txt:
             no_images.write("[b][color=#FF0000][size=22]None[/size][/color][/b]")
             append_url_txt.write("No Screenshots Available")
             append_url_txt.close()
@@ -277,14 +280,17 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     for ss_timestamp in track(get_ss_range(duration=duration, num_of_screenshots=num_of_screenshots), description="Taking screenshots.."):
         # Save the ss_ts to the 'ss_timestamps_list' list
         ss_timestamps_list.append(ss_timestamp)
-        screenshots_to_upload_list.append(f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
+        screenshots_to_upload_list.append(f'{base_path}/images/screenshots/{hash_prefix}{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
         # Now with each of those timestamps we can take a screenshot and update the progress bar
         # `-itsoffset -2` added for Frame accurate screenshot
-        FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} -itsoffset -2'}, 
-            outputs={f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
-        image_data_paths.append(f'{base_path}/images/screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
+        if not Path(f'{base_path}/images/screenshots/{hash_prefix}{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png').is_file():
+            FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} -itsoffset -2'}, 
+                outputs={f'{base_path}/images/screenshots/{hash_prefix}{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
+        else:
+            logging.info(f"[Screenshots] Continuing upload existing screenshot: {torrent_title_import} - ({ss_timestamp.replace(':', '.')}).png")
+        image_data_paths.append(f'{base_path}/images/screenshots/{hash_prefix}{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
 
-    with open(f"{base_path}/temp_upload/image_paths.txt", "w") as image_paths_txt:
+    with open(f"{base_path}/temp_upload/{hash_prefix}image_paths.txt", "w") as image_paths_txt:
         logging.debug(f"[Screenshots] Writing image data paths to `image_paths.txt`")
         for image_path in image_data_paths:
             image_paths_txt.write(f"{image_path}\n")
@@ -305,7 +311,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
             if upload_image:
                 logging.debug(f"[Screenshots] Response from image host: {upload_image}")
-                with open(f"{base_path}/temp_upload/bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/bbcode_images_thumb_nothumb.txt", "a") as append_bbcode_thumb_nothumb_txt, open(f"{base_path}/temp_upload/url_images.txt", "a") as append_url_txt:
+                with open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images_thumb_nothumb.txt", "a") as append_bbcode_thumb_nothumb_txt, open(f"{base_path}/temp_upload/{hash_prefix}url_images.txt", "a") as append_url_txt:
                     append_bbcode_txt.write(f"{upload_image[1]} ")
                     append_bbcode_nothumb_txt.write(f"{upload_image[2]} ")
                     append_bbcode_thumb_nothumb_txt.write(f"{upload_image[3]} ")

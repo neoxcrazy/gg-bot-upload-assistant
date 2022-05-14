@@ -4,6 +4,8 @@ import json
 import glob
 import math
 import time
+import shutil
+import hashlib
 import logging
 import subprocess
 
@@ -18,6 +20,12 @@ from rich.console import Console
 from pymediainfo import MediaInfo
 
 console = Console()
+
+
+def get_hash(string):
+    hashed = hashlib.new('sha256')
+    hashed.update(string.encode())
+    return hashed.hexdigest()
 
 
 def get_piece_size_for_mktorrent(size):
@@ -80,7 +88,7 @@ def calculate_piece_size(size):
     return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
-def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None):
+def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None, hash_prefix=""):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """
@@ -88,7 +96,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
     logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
     logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
 
-    if len(glob.glob(working_folder + "/temp_upload/*.torrent")) == 0:
+    if len(glob.glob(f"{working_folder}/temp_upload/{hash_prefix}*.torrent")) == 0:
         # we need to actually generate a torrent file "from scratch"
         logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if use_mktorrent:
@@ -113,9 +121,9 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
             if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
             else:
-                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
             logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
         else:
             print("Using python torf to generate the torrent")
@@ -131,7 +139,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
             torrent.generate(callback=callback)
-            torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+            torrent.write(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
             torrent.verify_filesize(media)
             logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
     else:
@@ -139,7 +147,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
-        edit_torrent = Torrent.read(glob.glob(working_folder + '/temp_upload/*.torrent')[0])
+        edit_torrent = Torrent.read(glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
 
         if len(announce) == 1:
             logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
@@ -159,12 +167,12 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         edit_torrent.metainfo['announce'] = announce[0]
         edit_torrent.metainfo['info']['source'] = source
         # Edit the previous .torrent and save it as a new copy
-        Torrent.copy(edit_torrent).write(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+        Torrent.copy(edit_torrent).write(filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
 
-    if os.path.isfile(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent'):
-        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+    if os.path.isfile(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent'):
+        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
     else:
-        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
 
 
 def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break, debug=False):
@@ -277,7 +285,7 @@ def has_user_provided_type(user_type):
         return False
 
 
-def delete_leftover_files(working_folder):
+def delete_leftover_files(working_folder, resume=False, file=None):
     """
         Used to remove temporary files (mediainfo.txt, description.txt, screenshots) from the previous upload
         Func is called at the start of each run to make sure there are no mix up with wrong screenshots being uploaded etc.
@@ -285,17 +293,33 @@ def delete_leftover_files(working_folder):
         Not much significance when using the containerized solution, however if the `temp_upload` folder in container
         is mapped to a docker volume / host path, then clearing would be best. Hence keeping this method.
     """
-    for old_temp_data in ["/temp_upload/", "/images/screenshots/"]:
+    for old_temp_data in ["/images/screenshots/", "/temp_upload/"]:
         # We need these folders to store things like screenshots, .torrent & description files.
         # So create them now if they don't exist
-        try:
-            os.mkdir(f"{working_folder}{old_temp_data}")
-        except FileExistsError:
+        if Path(f"{working_folder}{old_temp_data}").is_dir():
+            # this means that the directory exists
             # If they do already exist then we need to remove any old data from them
-            files = glob.glob(f'{working_folder}{old_temp_data}*')
-            for f in files:
-                os.remove(f)
-            logging.info("[Utils] Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
+            if resume:
+                logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}{old_temp_data}")
+            else:
+                files = glob.glob(f'{working_folder}{old_temp_data}*')
+                for f in files:
+                    if os.path.isfile(f):
+                        os.remove(f)
+                    else:
+                        shutil.rmtree(f)
+                logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}{old_temp_data}")
+        else:
+            os.mkdir(f"{working_folder}{old_temp_data}")
+    if file is not None:
+        hash = get_hash(file)
+        if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
+            os.mkdir(f"{working_folder}/temp_upload/{hash}")
+        if not Path(f"{working_folder}/images/screenshots/{hash}").is_dir():
+            os.mkdir(f"{working_folder}/images/screenshots/{hash}")
+        logging.info(f"[Utils] Created subfolder {hash} for file {file}")
+        return f"{hash}/"
+    return ""
 
 
 def write_file_contents_to_log_as_debug(file_path):
@@ -333,7 +357,7 @@ def check_for_dir_and_extract_rars(file_path):
         I case of any errors, status will be false and the upload of that file can be skipped
     """
     # If the path the user specified is a folder with .rar files in it then we unpack the video file & set the torrent_info key equal to the extracted video file
-    if os.path.isdir(file_path):
+    if Path(file_path).is_dir():
         logging.info(f"[Utils] User wants to upload a folder: {file_path}")
 
         # Now we check to see if the dir contains rar files
