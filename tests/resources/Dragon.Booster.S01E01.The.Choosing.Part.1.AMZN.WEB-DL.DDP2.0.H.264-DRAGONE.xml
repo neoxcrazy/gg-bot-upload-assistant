@@ -25,8 +25,8 @@
 <Bit_rate_mode>Constant</Bit_rate_mode>
 <Bit_rate>1 230 kb/s</Bit_rate>
 <Nominal_bit_rate>2 000 kb/s</Nominal_bit_rate>
-<Width>720 pixels</Width>
-<Height>384 pixels</Height>
+<Width>720</Width>
+<Height>384</Height>
 <Display_aspect_ratio>1.85:1</Display_aspect_ratio>
 <Original_display_aspect_ratio>1.85:1</Original_display_aspect_ratio>
 <Frame_rate_mode>Constant</Frame_rate_mode>

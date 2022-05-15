@@ -553,7 +553,7 @@ def prepare_mediainfo_summary(media_info_result):
             video["Bit Depth"] = get(_this="other_bit_depth", _or="bit_depth", _from=track)
             video["Language"] = get(_this="other_language", _or="language", _from=track)
             video["Aspect Ratio"] = get(_this="other_display_aspect_ratio", _or="display_aspect_ratio", _from=track)
-            video["Resolution"] = f'{track["sampled_width"]}x{track["sampled_height"]}'
+            video["Resolution"] = f'{get(_this="sampled_width", _or="width", _from=track)}x{get(_this="sampled_height", _or="height", _from=track)}'
             mediainfo_summary["Video"].append(video)
         elif track["track_type"] == "Audio":
             audio = dict()

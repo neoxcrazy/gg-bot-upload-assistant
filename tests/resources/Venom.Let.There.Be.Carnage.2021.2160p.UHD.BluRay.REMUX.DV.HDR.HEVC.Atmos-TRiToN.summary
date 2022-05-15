@@ -1,0 +1,40 @@
+---(GENERAL)----
+Container......: Matroska
+Size...........: 43.3 GiB
+Duration.......: 1 h 37 min
+Bit Rate.......: 63.7 Mb/s
+Frame Rate.....: 
+tmdb...........: movie/580489
+imdb...........: tt7097896
+tvdb...........: 0
+
+----(VIDEO)-----
+Codec..........: HEVC
+Bit Rate.......: 58.0 Mb/s
+Frame Rate.....: 23.976 (24000/1001) FPS
+Bit Depth......: 10 bits
+Language.......: English
+Aspect Ratio...: 16:9
+Resolution.....: 3840x2160
+
+----(AUDIO)-----
+Format.........: Dolby TrueHD with Dolby Atmos
+Channels.......: 8 channels
+Sampling Rate..: 48.0 kHz
+Compression....: Lossless
+Language.......: Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz / 4291 kbps / 24-bit
+Bit Rate.......: 4 291 kb/s
+Bit Rate Mode..: Variable
+
+----(AUDIO)-----
+Format.........: Dolby Digital
+Channels.......: 6 channels
+Sampling Rate..: 48.0 kHz
+Compression....: Lossy
+Language.......: Compatibility Track / Dolby Digital Audio / 5.1 / 48 kHz / 640 kbps
+Bit Rate.......: 640 kb/s
+Bit Rate Mode..: Constant
+
+--(SUBTITLES)---
+Format.........: PGS
+Language.......: , SDH, , Cantonese, Mandarin Simplified, Mandarin Traditional, , , , , , , , , , , , Brazilian, Iberian, , , , , Latin American, , 

@@ -24,8 +24,8 @@
 <Codec_ID>V_MPEGH/ISO/HEVC</Codec_ID>
 <Duration>58 min 0 s</Duration>
 <Bit_rate>18.5 Mb/s</Bit_rate>
-<Width>3 840 pixels</Width>
-<Height>2 160 pixels</Height>
+<Width>3840</Width>
+<Height>2160</Height>
 <Display_aspect_ratio>16:9</Display_aspect_ratio>
 <Frame_rate_mode>Constant</Frame_rate_mode>
 <Frame_rate>25.000 FPS</Frame_rate>

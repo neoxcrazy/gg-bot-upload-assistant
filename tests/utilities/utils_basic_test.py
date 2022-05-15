@@ -2,6 +2,7 @@ import pytest
 import datetime
 
 from pathlib import Path
+from pprint import pformat
 from pymediainfo import MediaInfo
 from utilities.utils_basic import *
 
@@ -51,7 +52,16 @@ def __get_torrent_info(bdinfo, raw_file_name, source):
 
 
 def __get_media_info_video_track(raw_file_name):
-    return MediaInfo(open(raw_file_name, encoding="utf-8").read()).tracks[1]
+    return MediaInfo(__get_file_contents(raw_file_name)).tracks[1]
+
+
+def __get_media_info_data(raw_file_name):
+    return MediaInfo(__get_file_contents(raw_file_name)).to_data()
+
+
+def __get_file_contents(raw_file_name):
+    return open(raw_file_name, encoding="utf-8").read()
+
 
 """
     Mediainfo Available
@@ -174,3 +184,63 @@ def __get_media_info_video_track(raw_file_name):
 )
 def test_basic_get_missing_video_codec(torrent_info, is_disc, media_info_video_track, force_pymediainfo, expected):
     assert basic_get_missing_video_codec(torrent_info, is_disc, "false", media_info_video_track, force_pymediainfo) == expected
+
+
+@pytest.mark.parametrize(
+    ("torrent_info", "is_disc", "media_info_video_track", "expected"),
+    # TODO add test for 480p, 1080i etc
+    [
+        pytest.param(
+            __get_torrent_info(None, "Venom.Let.There.Be.Carnage.2021.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.Atmos-TRiToN.mkv", None),
+            False, # is_disc
+            __get_media_info_video_track(f"{working_folder}/tests/resources/Venom.Let.There.Be.Carnage.2021.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.Atmos-TRiToN.xml"), 
+            "2160p" , id="resolution_2160p"
+        ),
+        pytest.param(
+            __get_torrent_info(None, "Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.mkv", None), 
+            False, # is_disc
+            __get_media_info_video_track(f"{working_folder}/tests/resources/Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.xml"), 
+            "1080p", id="resolution_1080p"
+        ),
+        pytest.param(
+            __get_torrent_info(None, "Dragon.Booster.S01E01.The.Choosing.Part.1.AMZN.WEB-DL.DDP2.0.H.264-DRAGONE.mkv", None), 
+            False, # is_disc
+            __get_media_info_video_track(f"{working_folder}/tests/resources/Dragon.Booster.S01E01.The.Choosing.Part.1.AMZN.WEB-DL.DDP2.0.H.264-DRAGONE.xml"), 
+            "576p", id="resolution_576p"
+        ),
+    ]
+)
+def test_basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track, expected):
+    assert basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track, "false", "screen_size") == expected
+
+
+@pytest.mark.parametrize(
+    ("media_info_result", "expected"),
+    [
+        pytest.param(
+            __get_media_info_data(f"{working_folder}/tests/resources/Dragon.Booster.S01E01.The.Choosing.Part.1.AMZN.WEB-DL.DDP2.0.H.264-DRAGONE.xml"),
+            (__get_file_contents(f"{working_folder}/tests/resources/Dragon.Booster.S01E01.The.Choosing.Part.1.AMZN.WEB-DL.DDP2.0.H.264-DRAGONE.summary"), "0", "0", "0"),
+            id="summary_without_id"
+        ),
+        pytest.param(
+            __get_media_info_data(f"{working_folder}/tests/resources/Venom.Let.There.Be.Carnage.2021.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.Atmos-TRiToN.xml"),
+            (__get_file_contents(f"{working_folder}/tests/resources/Venom.Let.There.Be.Carnage.2021.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.Atmos-TRiToN.summary"), "movie/580489", "tt7097896", "0"),
+            id="summary_with_imdb_tmdb_movie"
+        ),
+        pytest.param(
+            __get_media_info_data(f"{working_folder}/tests/resources/Peaky.Blinders.S06E01.Black.Day.2160p.iP.WEB-DL.DDP5.1.HLG.H.265-FLUX.xml"),
+            (__get_file_contents(f"{working_folder}/tests/resources/Peaky.Blinders.S06E01.Black.Day.2160p.iP.WEB-DL.DDP5.1.HLG.H.265-FLUX.summary"), "tv/60574", "tt2442560", "0"),
+            id="summary_with_imdb_tmdb_tv"
+        ),
+        pytest.param(
+            __get_media_info_data(f"{working_folder}/tests/resources/The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.xml"),
+            (__get_file_contents(f"{working_folder}/tests/resources/The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.summary"), "tv/93812", "tt2235759", "369301"),
+            id="summary_with_imdb_tmdb__tvdb"
+        ),
+    ]
+)
+def test_basic_get_mediainfo_summary(media_info_result, expected):
+    summary, t, i, tv = basic_get_mediainfo_summary(media_info_result)
+    with open(f"{working_folder}/tests/resources/The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.summary", 'w') as file:
+        file.write(summary)
+    assert basic_get_mediainfo_summary(media_info_result) == expected
