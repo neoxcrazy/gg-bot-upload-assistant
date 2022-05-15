@@ -19,19 +19,6 @@ from utilities.utils_miscellaneous import miscellaneous_identify_repacks
 console = Console()
 
 
-def replace_item_in_list(source_list, item_to_replace, list_to_replace_with):
-    """
-        Method to place an item in a list with another list
-    """
-    result = []
-    for i in source_list:
-        if i == item_to_replace:
-            result.extend(list_to_replace_with)
-        else:
-            result.append(i)
-    return result
-
-
 def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_api, debug, working_folder, auto_mode):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
