@@ -2,8 +2,8 @@ variables:
   DOCKER_IMAGE: "docker:stable"
   DD_API_KEY: $DD_API_KEY
   DD_INSIDE_CI: "true"
-  DD_HOSTNAME: "none"
-  DD_AGENT_HOST: "datadog-agent"
+  DD_HOSTNAME: "ddogagent"
+  DD_AGENT_HOST: "ddogagent"
 
 include:
 - template: Security/Secret-Detection.gitlab-ci.yml
