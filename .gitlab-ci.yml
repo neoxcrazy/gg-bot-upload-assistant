@@ -19,7 +19,7 @@ unit-test:
   script:
     - pip install -r requirements_test.txt
     - pip freeze > requirements_test.txt
-    - python -m pytest --cov-report=html --cov=./ .
+    - python -m pytest -v --cov-report=html --cov=./ .
   artifacts:
     paths:
       - coverage

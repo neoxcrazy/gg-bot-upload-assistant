@@ -67,12 +67,12 @@ def calculate_piece_size(size):
 
     :return: calculated piece size
     """
-    if size <= 2**30:          # 1 GiB / 1024 pieces = 1 MiB max
+    if size <= 1 * 2**30:      # 1 GiB / 1024 pieces = 1 MiB max
+        pieces = size / 1024
+    elif size <= 2 * 2**30:    # 2 GiB / 2048 pieces = 2 MiB max
         pieces = size / 1024
     elif size <= 4 * 2**30:    # 4 GiB / 2048 pieces = 2 MiB max
-        pieces = size / 2048
-    elif size <= 6 * 2**30:    # 6 GiB / 3072 pieces = 2 MiB max
-        pieces = size / 3072
+        pieces = size / 1024
     elif size <= 8 * 2**30:    # 8 GiB / 2048 pieces = 4 MiB max
         pieces = size / 2048
     elif size <= 16 * 2**30:   # 16 GiB / 2048 pieces = 8 MiB max
@@ -81,6 +81,8 @@ def calculate_piece_size(size):
         pieces = size / 2048
     elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
         pieces = size / 4096
+    elif size <= 128 * 2**30:  # 128 GiB / 4096 pieces = 16 MiB max
+        pieces = size / 8192
     elif size > 64 * 2**30:
         pieces = size / 10240
     # Math is magic!
