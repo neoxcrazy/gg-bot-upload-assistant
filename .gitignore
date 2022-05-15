@@ -26,6 +26,7 @@ dev_comments.txt
 __pycache__/
 *.py[cod]
 *$py.class
+/coverage
 
 # C extensions
 *.so
