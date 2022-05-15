@@ -33,11 +33,14 @@ def miscellaneous_identify_bluray_edition(upload_media):
     return None
 
     
-def miscellaneous_identify_bluray_disc_type(screen_size, upload_media):
+def miscellaneous_identify_bluray_disc_type(screen_size, upload_media, test_size=None):
     # This is just based on resolution & size so we just match that info up to the key we create below
     possible_types = [25, 50, 66, 100]
     bluray_prefix = 'uhd' if screen_size == "2160p" else 'bd'
-    total_size = sum(f.stat().st_size for f in Path(upload_media).glob('**/*') if f.is_file())
+    if test_size is not None:
+        total_size = test_size
+    else:
+        total_size = sum(f.stat().st_size for f in Path(upload_media).glob('**/*') if f.is_file())
 
     for possible_type in possible_types:
         if total_size < int(possible_type * 1000000000):
