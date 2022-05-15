@@ -4,7 +4,6 @@
 *.mkv
 *.mp4
 *.torrent
-/images/screenshots
 /temp_upload
 rtorrent_on_complete_reupload.sh
 config.env

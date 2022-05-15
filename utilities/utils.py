@@ -293,30 +293,30 @@ def delete_leftover_files(working_folder, resume=False, file=None):
         Not much significance when using the containerized solution, however if the `temp_upload` folder in container
         is mapped to a docker volume / host path, then clearing would be best. Hence keeping this method.
     """
-    for old_temp_data in ["/images/screenshots/", "/temp_upload/"]:
-        # We need these folders to store things like screenshots, .torrent & description files.
-        # So create them now if they don't exist
-        if Path(f"{working_folder}{old_temp_data}").is_dir():
-            # this means that the directory exists
-            # If they do already exist then we need to remove any old data from them
-            if resume:
-                logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}{old_temp_data}")
-            else:
-                files = glob.glob(f'{working_folder}{old_temp_data}*')
-                for f in files:
-                    if os.path.isfile(f):
-                        os.remove(f)
-                    else:
-                        shutil.rmtree(f)
-                logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}{old_temp_data}")
+    # We need these folders to store things like screenshots, .torrent & description files.
+    # So create them now if they don't exist
+    if Path(f"{working_folder}/temp_upload/").is_dir():
+        # this means that the directory exists
+        # If they do already exist then we need to remove any old data from them
+        if resume:
+            logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}/temp_upload/")
         else:
-            os.mkdir(f"{working_folder}{old_temp_data}")
+            files = glob.glob(f'{working_folder}/temp_upload/*')
+            for f in files:
+                if os.path.isfile(f):
+                    os.remove(f)
+                else:
+                    shutil.rmtree(f)
+            logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}/temp_upload/")
+    else:
+        os.mkdir(f"{working_folder}/temp_upload/")
+
     if file is not None:
         hash = get_hash(file)
         if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
             os.mkdir(f"{working_folder}/temp_upload/{hash}")
-        if not Path(f"{working_folder}/images/screenshots/{hash}").is_dir():
-            os.mkdir(f"{working_folder}/images/screenshots/{hash}")
+        if not Path(f"{working_folder}/temp_upload/{hash}/screenshots/").is_dir():
+            os.mkdir(f"{working_folder}/temp_upload/{hash}/screenshots/")
         logging.info(f"[Utils] Created subfolder {hash} for file {file}")
         return f"{hash}/"
     return ""
