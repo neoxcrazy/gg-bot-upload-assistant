@@ -101,6 +101,7 @@ def test_miscellaneous_identify_repacks(input, expected):
         pytest.param("", {"streaming_service": ['Disney', 'CTV']}, "DSNP"),
         pytest.param("Conversations.with.Friends.S01E01.2160p.HULU.WEB-DL.DDP.5.1.HEVC-MiON", {"streaming_service": ""}, "HULU"),
         pytest.param("Conversations.with.Friends.S01E01.2160p.HULU.WEB-DL.DDP.5.1.HEVC-MiON", {}, "HULU"),
+        pytest.param("Conversations.with.Friends.S01E01.2160p.WEB-DL.DDP.5.1.HEVC-MiON", {}, None),
         pytest.param("Conversations with Friends S01E01 2160p HULU WEB-DL DDP 5.1 HEVC-MiON", {}, "HULU"),
     ]
 )
