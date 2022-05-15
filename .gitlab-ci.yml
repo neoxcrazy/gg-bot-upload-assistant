@@ -1,5 +1,9 @@
 variables:
   DOCKER_IMAGE: "docker:stable"
+  DD_API_KEY: $DD_API_KEY
+  DD_INSIDE_CI: "true"
+  DD_HOSTNAME: "none"
+  DD_AGENT_HOST: "datadog-agent"
 
 include:
 - template: Security/Secret-Detection.gitlab-ci.yml
@@ -13,13 +17,20 @@ stages:
 sast:
   stage: test
 
+test:
+  services:
+    - name: datadog/agent:latest
+  script:
+    - make test
+
 unit-test:
   stage: test
   image: python:3.8.13
   script:
+    - pip install -U ddtrace
     - pip install -r requirements_test.txt
     - pip freeze > requirements_test.txt
-    - python -m pytest -v --cov-report=html --cov=./ .
+    - DD_ENV=ci DD_SERVICE=gg-bot-upload-assistant python -m pytest --ddtrace -v --cov-report=html --cov=./ .
   artifacts:
     paths:
       - coverage
