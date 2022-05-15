@@ -77,6 +77,7 @@ def test_miscellaneous_identify_bluray_disc_type(screen_size, test_size, expecte
     (
         pytest.param("The.Man.Who.Killed.Don.Quixote.2018.RERIP.720p.BluRay.x264.AC3-DEEP.mkv", "RERIP", id="rerip_1"),
         pytest.param("What.1972.RERiP.1080p.BluRay.x264-RRH.mkv", "RERiP", id="rerip_2"),
+        pytest.param("What.1972.1080p.BluRay.x264-RRH.mkv", None, id="no_repack"),
         pytest.param("The.Northman.2022.REPACK.2160p.MA.WEB-DL.DDP5.1.Atmos.DV.HEVC-MZABI.mk", "REPACK", id="repack"),
         pytest.param("TC.2000.1993.REPACK2.1080p.BluRay.REMUX.AVC.FLAC.2.0-ATELiER.mkv", "REPACK2", id="repack2"),
         pytest.param("TC.2000.1993.REPACK3.1080p.BluRay.REMUX.AVC.FLAC.2.0-ATELiER.mkv", "REPACK3", id="repack3"),
