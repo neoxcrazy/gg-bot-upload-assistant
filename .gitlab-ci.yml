@@ -26,7 +26,7 @@ unit-test:
     - pip install -U ddtrace
     - pip install -r requirements_test.txt
     - pip freeze > requirements_test.txt
-    - DD_ENV=ci DD_SERVICE=gg-bot-upload-assistant python -m pytest --ddtrace -v --cov-report=html --cov=./ .
+    - DD_TRACE_AGENT_URL=http://localhost:8126 DD_ENV=ci DD_SERVICE=gg-bot-upload-assistant  python -m pytest --ddtrace -v --cov-report=html --cov=./ .
   artifacts:
     paths:
       - coverage
