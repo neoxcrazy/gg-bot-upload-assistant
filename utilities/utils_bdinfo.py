@@ -230,8 +230,10 @@ def parse_bdinfo(bdinfo_location):
     bdinfo = dict()
     bdinfo['video'] = list()
     bdinfo['audio'] = list()
+    print(bdinfo_location)
     with open(bdinfo_location, 'r') as file_contents:
         lines = file_contents.readlines()
+        print(lines)
         for line in lines:
             line = line.strip()
             line = line.replace("*", "").strip() if line.startswith("*") else line
