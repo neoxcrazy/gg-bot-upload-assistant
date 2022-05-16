@@ -89,15 +89,46 @@ def __get_expected_bd_info(file_name):
 
 
 @pytest.mark.parametrize(
-    ("torrent_info", "expected"),
+    ("torrent_info", "expected", "debug"),
     [
-        (__get_torrent_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"), __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED")),
-        (__get_torrent_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"), __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME")),
-        (__get_torrent_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"), __get_expected_bd_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc")),
-        (__get_torrent_info("PIRATES_1_CURSE_OF_BLACK_PEARL"), __get_expected_bd_info("PIRATES_1_CURSE_OF_BLACK_PEARL")),
-        (__get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"))
+        pytest.param(
+            __get_torrent_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"), 
+            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            False, # debug
+            id="bd_info_1"
+        ),
+        pytest.param(
+            __get_torrent_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"), 
+            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            False, # debug
+            id="bd_info_2"
+        ),
+        pytest.param(
+            __get_torrent_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"), 
+            __get_expected_bd_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            False, # debug
+            id="bd_info_3"
+        ),
+        pytest.param(
+            __get_torrent_info("PIRATES_1_CURSE_OF_BLACK_PEARL"), 
+            __get_expected_bd_info("PIRATES_1_CURSE_OF_BLACK_PEARL"),
+            False, # debug
+            id="bd_info_4"
+        ),
+        pytest.param(
+            __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
+            __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            False, # debug
+            id="bd_info_5"
+        ),
+        pytest.param(
+            __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
+            __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            True, # debug
+            id="bd_info_5"
+        )
     ]
 )
-def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, mocker):
+def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, debug, mocker):
     mocker.patch("subprocess.run", return_value=None)
-    assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, False) == expected
+    assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, debug) == expected

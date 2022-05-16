@@ -5,6 +5,7 @@
 *.mp4
 *.torrent
 /temp_upload
+/tests/resources/bdinfo/working_folder/*
 rtorrent_on_complete_reupload.sh
 config.env
 reupload.config.env
