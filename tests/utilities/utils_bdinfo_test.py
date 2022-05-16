@@ -79,6 +79,8 @@ def __get_torrent_info(file_name):
     p.mkdir(parents=True, exist_ok=True)
 
     shutil.copy(source, destination)
+    with open(destination, 'r') as file_contents:
+        print(file_contents.readlines())
     return torrent_info
 
 
