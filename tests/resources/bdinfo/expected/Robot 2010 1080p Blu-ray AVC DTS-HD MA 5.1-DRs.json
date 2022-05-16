@@ -1,0 +1,35 @@
+{
+    "video": [
+        {
+            "codec": "AVC",
+            "bitrate": "27985 kbps",
+            "resolution": "1080p",
+            "fps": "23.976 fps",
+            "aspect_ratio": "16:9",
+            "profile": "High Profile 4.1"
+        }
+    ],
+    "audio": [
+        {
+            "language": "Hindi",
+            "codec": "DTS-HD Master Audio",
+            "channels": "5.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "4099 kbps",
+            "bit_depth": "24-bit"
+        },
+        {
+            "language": "Hindi",
+            "codec": "Dolby Digital Audio",
+            "channels": "5.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "640 kbps",
+            "bit_depth": "DN -31dB"
+        }
+    ],
+    "title": "ROBOT",
+    "label": "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs",
+    "size": 42.96958874259144,
+    "playlist": "00003.MPLS",
+    "length": "2:56:59"
+}
