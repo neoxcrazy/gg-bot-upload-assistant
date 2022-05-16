@@ -6,6 +6,7 @@ from pathlib import Path
 from pytest_mock import mocker
 from utilities.utils_bdinfo import *
 
+
 """
     HOW IS THIS TESTS SETUP?
     ----------------------------------------------
@@ -201,3 +202,71 @@ def test_bdinfo_get_largest_playlist_manual_mode(input, user_choice, mocker):
     mocker.patch("subprocess.check_output", return_value=input[1])
     mocker.patch("rich.prompt.Prompt.ask", return_value=user_choice)
     assert bdinfo_get_largest_playlist(None, "false", input[0]) == ('', input[2])
+
+
+@pytest.mark.parametrize(
+    ("bdinfo", "expected"),
+    [
+        pytest.param(
+            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            "2.0",
+            id="bdinfo_audio_channels_2_0"
+        ),
+        pytest.param(
+            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            "7.1",
+            id="bdinfo_audio_channels_7_1"
+        ),
+        pytest.param(
+            __get_expected_bd_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            "5.1",
+            id="bdinfo_audio_channels_5_1"
+        )
+    ]
+)
+def test_bdinfo_get_audio_channels_from_bdinfo(bdinfo, expected):
+    assert bdinfo_get_audio_channels_from_bdinfo(bdinfo) == expected
+
+
+@pytest.mark.parametrize(
+    ("bdinfo", "expected"),
+    [
+        pytest.param(
+            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            (None, "DTS-HD MA"),
+            id="bdinfo_audio_codec_dtshdma"
+        ),
+        pytest.param(
+            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            ("Atmos", "TrueHD"),
+            id="bdinfo_audio_codec_truehd_atmos"
+        )
+    ]
+)
+def test_bdinfo_get_audio_codec_from_bdinfo(bdinfo, expected):
+    assert bdinfo_get_audio_codec_from_bdinfo(bdinfo, json.load(open(f'{working_folder}/parameters/audio_codecs.json'))) == expected
+
+
+@pytest.mark.parametrize(
+    ("bdinfo", "expected"),
+    [
+        # TODO: Add tests for HDR10+ and DV
+        pytest.param(
+            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            (None, None, "AVC"),
+            id="bdinfo_video_codec_avc"
+        ),
+        pytest.param(
+            __get_expected_bd_info("PIRATES_1_CURSE_OF_BLACK_PEARL"),
+            (None, "HDR", "HEVC"),
+            id="bdinfo_video_codec_"
+        ),
+        pytest.param(
+            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            (None, "HDR", "HEVC"),
+            id="bdinfo_video_codec_"
+        )
+    ]
+)
+def test_bdinfo_get_video_codec_from_bdinfo(bdinfo, expected):
+    assert bdinfo_get_video_codec_from_bdinfo(bdinfo) == expected
