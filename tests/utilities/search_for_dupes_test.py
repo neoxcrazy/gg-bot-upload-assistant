@@ -55,7 +55,7 @@ def stop_server():
     server.shutdown()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def run_around_tests():
     source = f'{working_folder}/tests/resources/dupes/imaginary.json'
     destination = f'{working_folder}/site_templates/imaginary.json'
@@ -69,21 +69,20 @@ def run_around_tests():
 
 
 def __fetch_dupe_check_test_data():
-    sample_data = json.load(open(f'{working_folder}/tests/resources/dupes/data.json'))
+    sample_data = json.load(open(f'{working_folder}/tests/resources/dupes/test_data.json'))
     test_cases = []
 
     for case in sample_data:
-        test_cases.append(pytest.param(case["imdb"], case["tmdb"], case["tvmaze"], case["torrent_info"], case["expected"], id=case["name"]))
+        test_cases.append(pytest.param(case["imdb"], case["tmdb"], case["tvmaze"], case["auto_mode"], case["torrent_info"], case["expected"], id=case["name"]))
 
     return test_cases
     
 
-@pytest.mark.parametrize( ( "imdb", "tmdb", "tvmaze", "torrent_info", "expected" ), __fetch_dupe_check_test_data() )
-def test_search_for_dupes_api(imdb, tmdb, tvmaze, torrent_info, expected, mocker):
+@pytest.mark.parametrize( ( "imdb", "tmdb", "tvmaze", "auto_mode", "torrent_info", "expected" ), __fetch_dupe_check_test_data() )
+def test_search_for_dupes_api(imdb, tmdb, tvmaze, auto_mode, torrent_info, expected, mocker):
     # hardcoding 
     #   `debug` to False 
-    #   `auto_mode` to true
     #   `search_site` to imaginary
     #   `tracker_api` to TRACKER_API_DUMMY
     mocker.patch("os.getenv", return_value=80)
-    assert search_for_dupes_api("imaginary", imdb, tmdb, tvmaze, torrent_info, "TRACKER_API_DUMMY", False, working_folder, "true") == expected
+    assert search_for_dupes_api("imaginary", imdb, tmdb, tvmaze, torrent_info, "TRACKER_API_DUMMY", auto_mode, working_folder, "true") == expected

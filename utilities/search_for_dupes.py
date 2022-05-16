@@ -150,9 +150,9 @@ def _fill_hdr_format_types(hdr_format_types, torrent_title, torrent_title_split)
 
 def _get_our_hdr_format(torrent_info):
     our_format = "normal"
-    if "dv" in torrent_info:
-        our_format = "dv_hdr" if "hdr" in torrent_info else "dv"
-    elif "hdr" in torrent_info:
+    if "dv" in torrent_info and torrent_info["dv"] is not None:
+        our_format = "dv_hdr" if "hdr" in torrent_info and torrent_info["hdr"] is not None else "dv"
+    elif "hdr" in torrent_info and torrent_info["hdr"] is not None:
         our_format = "hdr"
     return our_format
 
@@ -495,7 +495,8 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             season_num = str(torrent_info["s00e00"])[:-3]
             episode_num  = str(torrent_info["s00e00"])[3:]
         logging.info(msg=f'[DupeCheck] Filtering out results that are not from the same season being uploaded ({season_num})')
-        
+        logging.debug(f'[DupeCheck] We have extracted the following from `torrent_info`. season_num: "{season_num}" and episode_num: "{episode_num}"')
+
         # Loop through the results & discard everything that is not from the correct season
         number_of_discarded_seasons = 0
         for existing_release_types_key in list(existing_release_types.keys()): # process of elimination
@@ -507,9 +508,10 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
                 continue
 
             # at this point we've filtered out all the different resolutions/types/seasons
-            #  so now we check each remaining title to see if its a season pack or individual episode
+            # so now we check each remaining title to see if its a season pack or individual episode
             # endswith case added below to prevent failures when dealing with complete packs on trackers.
             # for most cases the first check of startswith itself will return true to get the season.
+            logging.debug(f'[DupeCheck] Checking each remaining title to see if its a season pack or individual episode')
             extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num) or x.endswith(season_num), re.split("[.\s]", existing_release_types_key)))[0]
             if len(extracted_season_episode_from_title) == 3:
                 logging.info(msg=f'[DupeCheck] Found a season pack for {season_num} on {search_site}')

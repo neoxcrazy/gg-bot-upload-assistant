@@ -1,0 +1,67 @@
+[
+    {
+        "name": "dupe_tv_episode_1080p_web_dl",
+        "imdb": "0898266",
+        "tmdb": "1418",
+        "tvmaze": "66",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": null,
+            "type": "tv",
+            "title": "The Big Bang Theory S05E01 1080p AMZN WEB-DL DD+ 5.1 H.265-SiGMA",
+            "torrent_title": "The.Big.Bang.Theory.S05E01.The.Skank.Reflex.Analysis.1080p.AMZN.WEB-DL.DDP5.1.H265-SiGMA.mkv",
+            "screen_size": "1080p",
+            "source_type": "webdl",
+            "audio_channels": "5.1",
+            "audio_codec": "DD+",
+            "year": null,
+            "s00e00": "S05E01",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": true
+    },
+    {
+        "name": "dupe_tv_season_1080p_web_dl",
+        "imdb": "0898266",
+        "tmdb": "1418",
+        "tvmaze": "66",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": null,
+            "type": "tv",
+            "title": "The Big Bang Theory S05 1080p AMZN WEB-DL DD+ 5.1 H.265-SiGMA",
+            "torrent_title": "The.Big.Bang.Theory.S05E01.The.Skank.Reflex.Analysis.1080p.AMZN.WEB-DL.DDP5.1.H265-SiGMA.mkv",
+            "screen_size": "1080p",
+            "source_type": "webdl",
+            "audio_channels": "5.1",
+            "audio_codec": "DD+",
+            "year": null,
+            "s00e00": "S05",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": true
+    },
+    {
+        "name": "dupe_movie_4k_remux",
+        "imdb": "10872600",
+        "tmdb": "634649",
+        "tvmaze": "0",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": null,
+            "type": "movie",
+            "title": "Spider-Man: No Way Home 2021 2160p UHD BluRay REMUX DV HDR HEVC TrueHD 7.1 Atmos-FraMeSToR",
+            "torrent_title": "Spider-Man.No.Way.Home.2021.UHD.BluRay.2160p.TrueHD.Atmos.7.1.DV.HEVC.REMUX-FraMeSToR.mkv",
+            "screen_size": "2160p",
+            "source_type": "bluray_remux",
+            "audio_channels": "7.1",
+            "audio_codec": "TrueHD",
+            "year": "2021",
+            "dv": "DV",
+            "hdr": "HDR"
+        },
+        "expected": true
+    }
+]
