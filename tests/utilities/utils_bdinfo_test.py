@@ -70,6 +70,7 @@ def __get_torrent_info(file_name):
     torrent_info["mediainfo"] = f'{working_folder}{bdinfo_working_folder}{file_name}/mediainfo.txt'
     torrent_info["largest_playlist"] = meta_data["largest_playlist"]
     torrent_info["raw_file_name"] = meta_data["raw_file_name"]
+    torrent_info["file_name"] = meta_data["file_name"]
     torrent_info["raw_video_file"] = meta_data["raw_video_file"]
     
     source = f'{working_folder}{bdinfo_summary}{file_name}.txt'
@@ -79,8 +80,7 @@ def __get_torrent_info(file_name):
     p.mkdir(parents=True, exist_ok=True)
 
     shutil.copy(source, destination)
-    with open(destination, 'r') as file_contents:
-        print(file_contents.readlines())
+    
     return torrent_info
 
 
@@ -100,4 +100,9 @@ def __get_expected_bd_info(file_name):
 )
 def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, mocker):
     mocker.patch("subprocess.run", return_value=None)
+
+    destination = f'{working_folder}{bdinfo_working_folder}{torrent_info["file_name"]}/BDINFO.{torrent_info["raw_file_name"]}.txt'
+    with open(destination, 'r') as file_contents:
+        print(file_contents.readlines())
+        
     assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, False) == expected
