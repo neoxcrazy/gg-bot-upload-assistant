@@ -87,9 +87,9 @@ def __get_expected_bd_info(file_name):
     return json.load(open(f'{working_folder}{bdinfo_metadata_expected}{file_name}.json'))
 
 
-def __get_data_for_largest_playlist(file_name):
+def __get_data_for_largest_playlist(file_name, override=None):
     data = json.load(open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
-    return f'{working_folder}{bdinfo_working_folder}{file_name}/', data["bdinfo_output_split"], data["largest_playlist"]
+    return f'{working_folder}{bdinfo_working_folder}{file_name}/', data["bdinfo_output_split"], data["largest_playlist"] if override is None else override
 
 
 @pytest.mark.parametrize(
@@ -166,3 +166,38 @@ def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, debug, mocker)
 def test_bdinfo_get_largest_playlist(input, mocker):
     mocker.patch("subprocess.check_output", return_value=input[1])
     assert bdinfo_get_largest_playlist(None, "true", input[0]) == ('', input[2])
+
+@pytest.mark.parametrize(
+    ("input", "user_choice"),
+    [
+        pytest.param(
+            __get_data_for_largest_playlist("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME", "00380.MPLS"),
+            3,
+            id="largest_playlist_manual_mode_2"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            1,
+            id="largest_playlist_manual_mode_3"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("PIRATES_1_CURSE_OF_BLACK_PEARL", "01309.MPLS"),
+            3,
+            id="largest_playlist_manual_mode_4"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            1,
+            id="largest_playlist_manual_mode_5"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED", "00004.MPLS"),
+            2,
+            id="largest_playlist_manual_mode_override_user"
+        ),
+    ]
+)
+def test_bdinfo_get_largest_playlist_manual_mode(input, user_choice, mocker):
+    mocker.patch("subprocess.check_output", return_value=input[1])
+    mocker.patch("rich.prompt.Prompt.ask", return_value=user_choice)
+    assert bdinfo_get_largest_playlist(None, "false", input[0]) == ('', input[2])
