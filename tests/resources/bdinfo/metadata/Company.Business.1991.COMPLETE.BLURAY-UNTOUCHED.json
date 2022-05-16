@@ -2,5 +2,5 @@
     "raw_video_file": "/data/downloads/FullDisk/Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED/BDMV/STREAM/00002.m2ts",
     "raw_file_name": "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED",
     "largest_playlist": "00002.MPLS",
-    "bdinfo_output_split": "[\"b'Please\", 'wait', 'while', 'we', 'scan', 'the', 'disc...\\\\n#', 'Group', 'Playlist', 'File', 'Length', 'Estimated', 'Bytes', 'Measured', 'Bytes', '\\\\n\\\\n1', '1', '00002.MPLS', '01:37:59', '29,579,618,304', '-', '\\\\n2', '2', '00004.MPLS', '00:21:07', '4,215,441,408', '-', '\\\\n3', '3', '00001.MPLS', '00:02:27', '488,503,296', '-', '\\\\n4', '4', '00003.MPLS', '00:01:55', '525,723,648', '-', '\\\\n5', '5', '00000.MPLS', '00:00:30', '11,870,208', '-', \"\\\\n'\"]"
+    "bdinfo_output_split": "b'Please wait while we scan the disc...\n# Group Playlist File Length Estimated Bytes Measured Bytes \n\n1 1 00002.MPLS 01:37:59 29,579,618,304 - \n2 2 00004.MPLS 00:21:07 4,215,441,408 - \n3 3 00001.MPLS 00:02:27 488,503,296 - \n4 4 00003.MPLS 00:01:55 525,723,648 - \n5 5 00000.MPLS 00:00:30 11,870,208 - \n'"
 }

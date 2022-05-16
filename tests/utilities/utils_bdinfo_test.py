@@ -80,12 +80,16 @@ def __get_torrent_info(file_name):
     p.mkdir(parents=True, exist_ok=True)
 
     shutil.copy(source, destination)
-    
     return torrent_info
 
 
 def __get_expected_bd_info(file_name):
     return json.load(open(f'{working_folder}{bdinfo_metadata_expected}{file_name}.json'))
+
+
+def __get_data_for_largest_playlist(file_name):
+    data = json.load(open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
+    return f'{working_folder}{bdinfo_working_folder}{file_name}/', data["bdinfo_output_split"], data["largest_playlist"]
 
 
 @pytest.mark.parametrize(
@@ -121,14 +125,44 @@ def __get_expected_bd_info(file_name):
             False, # debug
             id="bd_info_5"
         ),
-        pytest.param(
-            __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
-            __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
-            True, # debug
-            id="bd_info_5"
-        )
+        # pytest.param(
+        #     __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
+        #     __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+        #     True, # debug
+        #     id="bd_info_5_debug"
+        # )
     ]
 )
 def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, debug, mocker):
     mocker.patch("subprocess.run", return_value=None)
     assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, debug) == expected
+
+
+@pytest.mark.parametrize(
+    ("input"),
+    [
+        pytest.param(
+            __get_data_for_largest_playlist("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            id="largest_playlist_1"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            id="largest_playlist_2"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            id="largest_playlist_3"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("PIRATES_1_CURSE_OF_BLACK_PEARL"),
+            id="largest_playlist_4"
+        ),
+        pytest.param(
+            __get_data_for_largest_playlist("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            id="largest_playlist_5"
+        ),
+    ]
+)
+def test_bdinfo_get_largest_playlist(input, mocker):
+    mocker.patch("subprocess.check_output", return_value=input[1])
+    assert bdinfo_get_largest_playlist(None, "true", input[0]) == ('', input[2])
