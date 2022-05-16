@@ -1,0 +1,17 @@
+
+QUICK SUMMARY:
+
+Disc Label: Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED
+Disc Size: 34,823,271,388 bytes
+Protection: AACS
+Playlist: 00002.MPLS
+Size: 29,579,618,304 bytes
+Length: 1:37:59.540
+Total Bitrate: 40.25 Mbps
+Video: MPEG-4 AVC Video / 34754 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
+Audio: German / DTS-HD Master Audio / 2.0 / 48 kHz /  1564 kbps / 16-bit (DTS Core: 2.0 / 48 kHz /  1509 kbps / 16-bit)
+Audio: English / DTS-HD Master Audio / 2.0 / 48 kHz /  1668 kbps / 16-bit (DTS Core: 2.0 / 48 kHz /  1509 kbps / 16-bit)
+Subtitle: German / 16.021 kbps
+Subtitle: English / 18.062 kbps
+
+<---- END FORUMS PASTE ---->

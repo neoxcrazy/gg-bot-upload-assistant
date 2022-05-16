@@ -1,0 +1,17 @@
+
+QUICK SUMMARY:
+
+Disc Title: Hardware
+Disc Label: Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc
+Disc Size: 42,971,126,887 bytes
+Protection: AACS
+Playlist: 00003.MPLS
+Size: 18,404,370,432 bytes
+Length: 1:33:53.461
+Total Bitrate: 26.14 Mbps
+Video: MPEG-4 AVC Video / 23994 kbps / 1080p / 23.976 fps / 16:9 / High Profile 4.1
+Audio: English / Dolby Digital Audio / 5.1 / 48 kHz /   448 kbps / DN -27dB
+Audio: English / Dolby Digital Audio / 2.0 / 48 kHz /   256 kbps / DN -27dB
+Audio: English / Dolby Digital Audio / 2.0 / 48 kHz /   192 kbps / DN -27dB
+
+<---- END FORUMS PASTE ---->

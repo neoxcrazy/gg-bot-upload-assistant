@@ -1,0 +1,45 @@
+
+QUICK SUMMARY:
+
+Disc Title: Don't Breathe 2 - 4K Ultra HD
+Disc Label: Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMMER
+Disc Size: 56,686,185,102 bytes
+Protection: AACS2
+Playlist: 00001.MPLS
+Size: 54,294,134,784 bytes
+Length: 1:38:14.888
+Total Bitrate: 73.68 Mbps
+Video: MPEG-H HEVC Video / 57867 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
+Audio: English / Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz /  4174 kbps / 24-bit (AC3 Embedded: 5.1 / 48 kHz /   640 kbps / DN -31dB)
+Audio: English / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
+Audio: Hindi / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
+Audio: Polish / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
+Audio: Spanish / DTS-HD Master Audio / 5.1 / 48 kHz /  2234 kbps / 16-bit (DTS Core: 5.1 / 48 kHz /  1509 kbps / 16-bit)
+Audio: Tamil / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
+Audio: Telugu / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
+Audio: English / Dolby Digital Audio / 2.0 / 48 kHz /   192 kbps / DN -31dB
+Audio: English / Dolby Digital Audio / 2.0 / 48 kHz /   192 kbps / DN -31dB
+Subtitle: English / 8.750 kbps
+Subtitle: English / 13.764 kbps
+Subtitle: Arabic / 5.802 kbps
+Subtitle: Bulgarian / 8.517 kbps
+Subtitle: Croatian / 8.216 kbps
+Subtitle: Czech / 8.174 kbps
+Subtitle: Greek / 9.221 kbps
+Subtitle: Hebrew / 6.839 kbps
+Subtitle: Hungarian / 9.157 kbps
+Subtitle: Icelandic / 8.762 kbps
+Subtitle: Polish / 7.960 kbps
+Subtitle: Portuguese / 8.951 kbps
+Subtitle: Romanian / 8.706 kbps
+Subtitle: Serbian / 8.583 kbps
+Subtitle: Slovak / 7.759 kbps
+Subtitle: Slovenian / 7.576 kbps
+Subtitle: Spanish / 8.940 kbps
+Subtitle: Turkish / 9.013 kbps
+Subtitle: English / 32.401 kbps
+Subtitle: Spanish / 29.056 kbps
+Subtitle: English / 52.669 kbps
+Subtitle: Spanish / 57.085 kbps
+
+<---- END FORUMS PASTE ---->

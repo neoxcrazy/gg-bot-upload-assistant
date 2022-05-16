@@ -1,0 +1,37 @@
+
+QUICK SUMMARY:
+
+Disc Title: Pirates of the Caribbean: The Curse of the Black Pearl - Ultra HD™
+Disc Label: PIRATES_1_CURSE_OF_BLACK_PEARL
+Disc Size: 64,987,547,038 bytes
+Protection: AACS2
+Playlist: 00800.MPLS
+Size: 63,866,038,272 bytes
+Length: 2:23:09.247
+Total Bitrate: 59.48 Mbps
+Video: MPEG-H HEVC Video / 45389 kbps / 2160p / 23.976 fps / 16:9 / Main 10 @ Level 5.1 @ High / 10 bits / HDR10 / BT.2020
+Audio: English / Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz /  4115 kbps / 24-bit (AC3 Embedded: 5.1-EX / 48 kHz /   640 kbps / DN -27dB)
+Audio: English / Dolby Digital Audio / 2.0 / 48 kHz /   320 kbps / DN -24dB
+Audio: French / Dolby Digital Plus Audio / 7.1 / 48 kHz /  1024 kbps / DN -27dB (AC3 Embedded: 5.1 / 48 kHz /   576 kbps / DN -27dB)
+Audio: French / Dolby Digital EX Audio / 5.1-EX / 48 kHz /   640 kbps / DN -27dB
+Audio: Spanish / Dolby Digital Plus Audio / 7.1 / 48 kHz /  1024 kbps / DN -27dB (AC3 Embedded: 5.1 / 48 kHz /   576 kbps / DN -27dB)
+Audio: German / Dolby Digital Plus Audio / 7.1 / 48 kHz /  1024 kbps / DN -27dB (AC3 Embedded: 5.1 / 48 kHz /   576 kbps / DN -27dB)
+Audio: Japanese / Dolby Digital Plus Audio / 7.1 / 48 kHz /  1024 kbps / DN -27dB (AC3 Embedded: 5.1 / 48 kHz /   576 kbps / DN -27dB)
+Subtitle: English / 32.670 kbps
+Subtitle: French / 25.789 kbps
+Subtitle: French / 31.225 kbps
+Subtitle: Spanish / 29.751 kbps
+Subtitle: German / 27.476 kbps
+Subtitle: Japanese / 21.192 kbps
+Subtitle: Dutch / 22.944 kbps
+Subtitle: Danish / 27.902 kbps
+Subtitle: Finnish / 29.656 kbps
+Subtitle: Norwegian / 24.080 kbps
+Subtitle: Swedish / 25.228 kbps
+Subtitle: French / 0.060 kbps
+Subtitle: French / 0.064 kbps
+Subtitle: Spanish / 0.099 kbps
+Subtitle: German / 0.038 kbps
+Subtitle: Japanese / 0.042 kbps
+
+<---- END FORUMS PASTE ---->

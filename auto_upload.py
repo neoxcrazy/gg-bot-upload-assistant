@@ -298,7 +298,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
         console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
         torrent_info["mediainfo"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
-        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info, args.debug) # TODO handle non-happy paths
+        torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, torrent_info, args.debug) # TODO handle non-happy paths
         logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
