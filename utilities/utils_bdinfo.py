@@ -182,7 +182,14 @@ def bdinfo_generate_and_parse_bdinfo(bdinfo_script, torrent_info, debug):
     logging.debug(f"[BDInfoUtils] `largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
     subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
 
+    with open(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', 'r') as file_contents:
+        print(file_contents.readlines())
+    
     shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', torrent_info["mediainfo"])
+
+    with open(torrent_info["mediainfo"], 'r') as file_contents:
+        print(file_contents.readlines())
+
     if os.path.isfile("/usr/bin/sed"):
         sed_path = "/usr/bin/sed"
     else:
