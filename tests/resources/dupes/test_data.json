@@ -1,22 +1,22 @@
 [
     {
-        "name": "dupe_movie_repack_exists_high_repack_upload",
-        "imdb": "9032400",
-        "tmdb": "524434",
-        "tvmaze": "0",
+        "name": "dupe_tv_repack_no_exist_repack_upload",
+        "imdb": "4687892",
+        "tmdb": "66869",
+        "tvmaze": "2518",
         "auto_mode": "true",
         "torrent_info": {
-            "repack": "REPACK2",
-            "type": "movie",
-            "title": "Eternals 2021 REPACK2 2160p iT WEB-DL DD+ 5.1 Atmos HDR H.265-EVO",
-            "torrent_title": "Eternals.2021.REPACK2.2160p.WEB-DL.DDP5.1.Atmos.HDR.HEVC-EVO.mkv",
-            "screen_size": "2160p",
-            "source_type": "webdl",
-            "audio_channels": "5.0",
+            "repack": "REPACK",
+            "type": "tv",
+            "title": "Good Girls Revolt S01 REPACK 1080p WEBRip DD+ 5.1 x264-DEFLATE",
+            "torrent_title": "Good.Girls.Revolt.S01E01.REPACK.1080p.WEBRip.X264-DEFLATE.mkv",
+            "screen_size": "1080p",
+            "source_type": "webrip",
+            "audio_channels": "5.1",
             "audio_codec": "DD+",
-            "year": "2021",
+            "year": null,
             "dv": null,
-            "hdr": "HDR"
+            "hdr": null
         },
         "expected": false
     },

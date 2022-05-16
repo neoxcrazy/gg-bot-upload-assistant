@@ -384,7 +384,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         logging.debug(f'[DupeCheck] Checking media properties ==> Audio Channels :: {their_title_guessit["audio_channels"] if "audio_channels" in their_title_guessit else None}')
 
         # if audio channels is not present in their titile then we cannot eliminate it.
-        if "audio_channels" in their_title_guessit and their_title_guessit["audio_channels"] != our_title_guessit["audio_channels"]:
+        if "audio_channels" in their_title_guessit and their_title_guessit["audio_channels"] != torrent_info["audio_channels"]:
             # there is a mismatch in the audio channels, we can mark that as a possible dupe
             their_channels = their_title_guessit["audio_channels"]
             our_channels = torrent_info["audio_channels"]
