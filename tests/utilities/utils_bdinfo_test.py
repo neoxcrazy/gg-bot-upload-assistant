@@ -100,5 +100,4 @@ def __get_expected_bd_info(file_name):
 )
 def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, mocker):
     mocker.patch("subprocess.run", return_value=None)
-
     assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, False) == expected
