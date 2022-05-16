@@ -13,5 +13,3 @@ Audio: German / DTS-HD Master Audio / 2.0 / 48 kHz /  1564 kbps / 16-bit (DTS Co
 Audio: English / DTS-HD Master Audio / 2.0 / 48 kHz /  1668 kbps / 16-bit (DTS Core: 2.0 / 48 kHz /  1509 kbps / 16-bit)
 Subtitle: German / 16.021 kbps
 Subtitle: English / 18.062 kbps
-
-<---- END FORUMS PASTE ---->

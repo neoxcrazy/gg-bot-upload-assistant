@@ -41,5 +41,3 @@ Subtitle: English / 32.401 kbps
 Subtitle: Spanish / 29.056 kbps
 Subtitle: English / 52.669 kbps
 Subtitle: Spanish / 57.085 kbps
-
-<---- END FORUMS PASTE ---->

@@ -13,5 +13,3 @@ Video: MPEG-4 AVC Video / 27985 kbps / 1080p / 23.976 fps / 16:9 / High Profile 
 Audio: Hindi / DTS-HD Master Audio / 5.1 / 48 kHz /  4099 kbps / 24-bit (DTS Core: 5.1 / 48 kHz /  1509 kbps / 24-bit)
 Audio: Hindi / Dolby Digital Audio / 5.1 / 48 kHz /   640 kbps / DN -31dB
 Subtitle: English / 13.929 kbps
-
-<---- END FORUMS PASTE ---->

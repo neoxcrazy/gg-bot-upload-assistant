@@ -33,5 +33,3 @@ Subtitle: French / 0.064 kbps
 Subtitle: Spanish / 0.099 kbps
 Subtitle: German / 0.038 kbps
 Subtitle: Japanese / 0.042 kbps
-
-<---- END FORUMS PASTE ---->
