@@ -75,9 +75,7 @@ def __get_file_contents(raw_file_name):
         PQ10 -> H.265
         HDR10+ -> H.265
         HLG -> H.265
-
-    Missing:
-        "WCG__H.265"
+        WCG -> HEVC
 """
 @pytest.mark.parametrize(
     ("torrent_info", "is_disc", "media_info_video_track", "force_pymediainfo", "expected"),
@@ -180,6 +178,13 @@ def __get_file_contents(raw_file_name):
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}Venom.Let.There.Be.Carnage.2021.2160p.UHD.BluRay.REMUX.DV.HDR.HEVC.Atmos-TRiToN.xml"), 
             False, # force pymediainfo
             ("DV", "HDR", "HEVC"), id="DV_HDR10_H.265"
+        ),
+        pytest.param(
+            __get_torrent_info(None, "Ran.4K.Remastered.1985.2160p.HDR.UHD-TV.HEVC.AAC-DDR.mkv", "BluRay"), 
+            False, # is_disc
+            __get_media_info_video_track(f"{working_folder}{mediainfo_xml}Ran.4K.Remastered.1985.2160p.HDR.UHD-TV.HEVC.AAC-DDR.xml"), 
+            False, # force pymediainfo
+            (None, "WCG", "HEVC"), id="WCG_HEVC"
         ),
     ]
 )

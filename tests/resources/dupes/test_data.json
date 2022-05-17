@@ -1,6 +1,95 @@
 [
     {
+        "name": "dupe_tv_repack2_exist_repack3_upload_header_based",
+        "site_template": "header_based",
+        "imdb": "0081318",
+        "tmdb": "24920",
+        "tvmaze": "0",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": "REPACK3",
+            "type": "movie",
+            "title": "City of the Living Dead AKA Gates of Hell 1980 REPACK3 1080p 35mm BluRay REMUX AVC DTS-HD MA 1.0-GSeye",
+            "torrent_title": "City.of.the.Living.Dead.1980.REPACK3.1080p.35mm.BluRay.REMUX.AVC.DTS-HD.MA.1.0-GSeye.mkv",
+            "screen_size": "1080p",
+            "source_type": "bluray_remux",
+            "audio_channels": "1.0",
+            "audio_codec": "DTS-HD MA",
+            "year": "1980",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": false
+    },
+    {
+        "name": "dupe_tv_repack2_exist_proper_upload_token_based",
+        "site_template": "token_based",
+        "imdb": "0081318",
+        "tmdb": "24920",
+        "tvmaze": "0",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": "PROPER",
+            "type": "movie",
+            "title": "City of the Living Dead AKA Gates of Hell 1980 PROPER 1080p 35mm BluRay REMUX AVC DTS-HD MA 1.0-GSeye",
+            "torrent_title": "City.of.the.Living.Dead.1980.PROPER.1080p.35mm.BluRay.REMUX.AVC.DTS-HD.MA.1.0-GSeye.mkv",
+            "screen_size": "1080p",
+            "source_type": "bluray_remux",
+            "audio_channels": "1.0",
+            "audio_codec": "DTS-HD MA",
+            "year": "1980",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": true
+    },
+    {
+        "name": "dupe_tv_repack2_exist_repack_upload_header_based",
+        "site_template": "header_based",
+        "imdb": "0081318",
+        "tmdb": "24920",
+        "tvmaze": "0",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": "REPACK",
+            "type": "movie",
+            "title": "City of the Living Dead AKA Gates of Hell 1980 REPACK 1080p 35mm BluRay REMUX AVC DTS-HD MA 1.0-GSeye",
+            "torrent_title": "City.of.the.Living.Dead.1980.REPACK.1080p.35mm.BluRay.REMUX.AVC.DTS-HD.MA.1.0-GSeye.mkv",
+            "screen_size": "1080p",
+            "source_type": "bluray_remux",
+            "audio_channels": "1.0",
+            "audio_codec": "DTS-HD MA",
+            "year": "1980",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": true
+    },
+    {
+        "name": "dupe_tv_repack2_exist_repack_upload_token_based",
+        "site_template": "token_based",
+        "imdb": "0081318",
+        "tmdb": "24920",
+        "tvmaze": "0",
+        "auto_mode": "true",
+        "torrent_info": {
+            "repack": "REPACK",
+            "type": "movie",
+            "title": "City of the Living Dead AKA Gates of Hell 1980 REPACK 1080p 35mm BluRay REMUX AVC DTS-HD MA 1.0-GSeye",
+            "torrent_title": "City.of.the.Living.Dead.1980.REPACK.1080p.35mm.BluRay.REMUX.AVC.DTS-HD.MA.1.0-GSeye.mkv",
+            "screen_size": "1080p",
+            "source_type": "bluray_remux",
+            "audio_channels": "1.0",
+            "audio_codec": "DTS-HD MA",
+            "year": "1980",
+            "dv": null,
+            "hdr": null
+        },
+        "expected": true
+    },
+    {
         "name": "dupe_tv_repack_no_exist_repack_upload",
+        "site_template": "api_key_based",
         "imdb": "4687892",
         "tmdb": "66869",
         "tvmaze": "2518",
@@ -22,6 +111,7 @@
     },
     {
         "name": "dupe_movie_repack_exists_non_repack_upload",
+        "site_template": "api_key_based",
         "imdb": "9032400",
         "tmdb": "524434",
         "tvmaze": "0",
@@ -43,6 +133,7 @@
     },
     {
         "name": "dupe_tv_episode_1080p_web_dl_lower_channel",
+        "site_template": "api_key_based",
         "imdb": "0898266",
         "tmdb": "1418",
         "tvmaze": "66",
@@ -65,6 +156,7 @@
     },
     {
         "name": "dupe_tv_episode_1080p_web_dl_higher_channel",
+        "site_template": "api_key_based",
         "imdb": "0898266",
         "tmdb": "1418",
         "tvmaze": "66",
@@ -87,6 +179,7 @@
     },
     {
         "name": "dupe_tv_episode_1080p_web_dl",
+        "site_template": "api_key_based",
         "imdb": "0898266",
         "tmdb": "1418",
         "tvmaze": "66",
@@ -109,6 +202,7 @@
     },
     {
         "name": "dupe_tv_season_1080p_web_dl",
+        "site_template": "api_key_based",
         "imdb": "0898266",
         "tmdb": "1418",
         "tvmaze": "66",
@@ -131,6 +225,7 @@
     },
     {
         "name": "dupe_movie_4k_remux",
+        "site_template": "api_key_based",
         "imdb": "10872600",
         "tmdb": "634649",
         "tvmaze": "0",

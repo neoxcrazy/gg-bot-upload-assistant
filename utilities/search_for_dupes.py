@@ -19,7 +19,7 @@ from utilities.utils_miscellaneous import miscellaneous_identify_repacks
 console = Console()
 
 
-def _get_headers(technical_jargons):
+def _get_headers(technical_jargons, search_site, tracker_api):
     if technical_jargons["authentication_mode"] == "API_KEY":
         return None
     
@@ -207,7 +207,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     url_dupe_payload = None  # this is here just for the log, its not technically needed
 
     # multiple authentication modes
-    headers = _get_headers(config["dupes"]["technical_jargons"])
+    headers = _get_headers(config["dupes"]["technical_jargons"], search_site, tracker_api)
 
     if str(config["dupes"]["technical_jargons"]["request_method"]) == "POST": # POST request (BHD)
         url_dupe_search = str(config["torrents_search"]).format(api_key=tracker_api)
@@ -249,7 +249,8 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             url=url_dupe_search, 
             method="GET", 
             search_site=search_site, 
-            site_name=str(config['name']).upper()
+            site_name=str(config['name']).upper(),
+            headers=headers
         )
         if dupe_check_result == True:
             return True # being pessimistic and assuming dupes exist in tracker
