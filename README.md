@@ -207,7 +207,7 @@ docker run --rm -it \
 ### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
-- [ ] Implement a restart/resume feature for uploads.
+- [X] Implement a restart/resume feature for uploads.
 - [X] Refactor dupe check logic and hdr bug fix
 - [X] Add unit tests to the code - phase 1
 - [X] CICD for automated tests
