@@ -241,7 +241,7 @@ docker run --rm -it \
     - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] MoreThanTV
+    - [ ] MoreThanTV9
     - [ ] GreatPosterWall
     - [ ] Swarmazon
 - [ ] Add support for DVDs
