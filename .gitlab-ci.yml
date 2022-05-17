@@ -36,8 +36,9 @@ unit-test:
     # - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     # - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     - pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
-    - coverage xml
-  coverage: '/TOTAL.*\s([.\d]+)%/'
+    # - coverage xml -o reports/coverage_1.xml
+    - sed -i 's|" filename="|" filename="src/|g' coverage/coverage.xml
+  # coverage: '/TOTAL.*\s([.\d]+)%/'
   artifacts:
     reports:
       coverage_report:
