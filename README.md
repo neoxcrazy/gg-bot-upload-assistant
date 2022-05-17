@@ -236,7 +236,6 @@ docker run --rm -it \
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
-- [ ] Improved dupe check - Phase 2
 - [ ] Support for communicating with torrent clients
     - [ ] Deluge
     - [ ] Transmission
