@@ -41,9 +41,8 @@ unit-test:
   # coverage: '/TOTAL.*\s([.\d]+)%/'
   artifacts:
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/coverage.xml
+      cobertura:
+        - coverage/coverage.xml
     paths:
       - coverage
     expire_in: 30 days
