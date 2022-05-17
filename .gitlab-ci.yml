@@ -35,8 +35,8 @@ unit-test:
     # - python -m pytest -vv --cov-report=html --cov=./ .
     # - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     # - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
-    - pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
-    # - coverage report
+    - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
+    - coverage report
     # - coverage xml
   coverage: '/TOTAL.*\s([.\d]+)%/'
   artifacts:
