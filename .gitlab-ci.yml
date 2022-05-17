@@ -46,6 +46,7 @@ unit-test:
         path: coverage/coverage.xml
     paths:
       - coverage
+      - coverage/coverage.xml
     expire_in: 30 days
 
 
