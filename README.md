@@ -208,6 +208,9 @@ docker run --rm -it \
 - [ ] Add Support for new platforms
     - [ ] Anasch
 - [ ] Implement a restart/resume feature for uploads.
+- [X] Refactor dupe check logic and hdr bug fix
+- [X] Add unit tests to the code - phase 1
+- [X] CICD for automated tests
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
