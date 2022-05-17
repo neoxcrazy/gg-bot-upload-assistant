@@ -1,0 +1,8 @@
+{
+    "upload_media": "/data/downloads/FullDisk/Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs/",
+    "raw_video_file": "/data/downloads/FullDisk/Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs/BDMV/STREAM/00003.m2ts",
+    "raw_file_name": "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs",
+    "largest_playlist": "00003.MPLS",
+    "mediainfo": "/app/temp_upload/c7c95f338790ebdc1be6df838af0a56e74d4000ab7c428cdd132bffb400c42f0/mediainfo.txt",
+    "bdinfo_output_split": "b'Please wait while we scan the disc...\n# Group Playlist File Length Estimated Bytes Measured Bytes \n\n1 1 00003.MPLS 02:56:59 45,854,263,296 - \n2 1 01003.MPLS 02:56:59 45,854,263,296 - \n3 2 00002.MPLS 00:00:45 180,129,792 - \n4 2 01002.MPLS 00:00:45 180,129,792 - \n'"
+}

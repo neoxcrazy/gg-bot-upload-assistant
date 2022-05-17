@@ -27,32 +27,7 @@ def quit_log_reason(reason, missing_value):
     sys.exit() # TODO handle this somehow for the re uploader without stopping the program
 
 
-def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_video_track, force_pymediainfo):
-    """
-        along with video_codec extraction the HDR format and DV is also updated from here.
-        Steps:
-        get Color primaries from MediaInfo
-        if it is one of "BT.2020", "REC.2020" then
-            if HDR10 is present in HDR Format then 
-                HDR = HDR
-            if HDR10+ is present in HDR Format then 
-                HDR = HDR10+
-            confirm the HDRFormat doesn't exist in the media info 
-            check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
-                HDR = PQ10 
-            get transfer_characteristics_Original from media info
-            if HLG is present in that then 
-                HDR = HLG
-            else if "BT.2020 (10-bit)" is present then 
-                HDR = WCG
-        
-        if Dolby Vision is present in HDR Format then mark present of DV 
-
-        Return value (dv, hdr, video_codec)
-    """
-    if is_disc and torrent_info["bdinfo"] is not None: 
-        return bdinfo_get_video_codec_from_bdinfo(torrent_info["bdinfo"])
-
+def _get_dv_hdr(media_info_video_track):
     hdr = None
     dv = None
     try:
@@ -78,6 +53,36 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
     
     if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
         dv = "DV"
+    return dv, hdr
+
+
+def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_video_track, force_pymediainfo):
+    """
+        along with video_codec extraction the HDR format and DV is also updated from here.
+        Steps:
+        get Color primaries from MediaInfo
+        if it is one of "BT.2020", "REC.2020" then
+            if HDR10 is present in HDR Format then 
+                HDR = HDR
+            if HDR10+ is present in HDR Format then 
+                HDR = HDR10+
+            confirm the HDRFormat doesn't exist in the media info 
+            check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
+                HDR = PQ10 
+            get transfer_characteristics_Original from media info
+            if HLG is present in that then 
+                HDR = HLG
+            else if "BT.2020 (10-bit)" is present then 
+                HDR = WCG
+        
+        if Dolby Vision is present in HDR Format then mark present of DV 
+
+        Return value (dv, hdr, video_codec)
+    """
+    if is_disc and torrent_info["bdinfo"] is not None: 
+        return bdinfo_get_video_codec_from_bdinfo(torrent_info["bdinfo"])
+   
+    dv, hdr = _get_dv_hdr(media_info_video_track)
 
     # First try to use our own Regex to extract it, if that fails then we can ues ffprobe/mediainfo
     filename_video_codec_regex = re.search(r'(?P<HEVC>HEVC)|(?P<AVC>AVC)|'
@@ -424,7 +429,6 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
         quit_log_reason(reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source", missing_value=missing_value)
 
 
-
 def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
     logging.info("[BasicUtils] Generating mediainfo.txt")
     # If its not a bluray disc we can get mediainfo, otherwise we need BDInfo
@@ -437,7 +441,7 @@ def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
         # depending on if the user is uploading a folder or file we need for format it correctly so we replace the entire path with just media file/folder name
         logging.info(f"[BasicUtils] Using the following path in mediainfo.txt: {essential_path}")
         media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me, essential_path)
-        save_location = str(working_folder + '/temp_upload/mediainfo.txt')
+        save_location = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
         logging.info(f'[BasicUtils] Saving mediainfo to: {save_location}')
         logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
         logging.debug(f'\n{media_info_output}')
@@ -516,7 +520,7 @@ def basic_get_episode_basic_details(guess_it_result):
             s00e00 = f'S{season_number:02d}'
             # marking this as full season
             complete_season = "1"
-    return s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes
+    return s00e00, str(season_number), str(episode_number), complete_season, individual_episodes, daily_episodes
 
 
 def get(_this, _or, _from, _default = ""):
@@ -549,7 +553,7 @@ def prepare_mediainfo_summary(media_info_result):
             video["Bit Depth"] = get(_this="other_bit_depth", _or="bit_depth", _from=track)
             video["Language"] = get(_this="other_language", _or="language", _from=track)
             video["Aspect Ratio"] = get(_this="other_display_aspect_ratio", _or="display_aspect_ratio", _from=track)
-            video["Resolution"] = f'{track["sampled_width"]}x{track["sampled_height"]}'
+            video["Resolution"] = f'{get(_this="sampled_width", _or="width", _from=track)}x{get(_this="sampled_height", _or="height", _from=track)}'
             mediainfo_summary["Video"].append(video)
         elif track["track_type"] == "Audio":
             audio = dict()

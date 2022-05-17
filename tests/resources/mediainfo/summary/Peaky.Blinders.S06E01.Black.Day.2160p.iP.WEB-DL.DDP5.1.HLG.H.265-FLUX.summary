@@ -1,0 +1,31 @@
+---(GENERAL)----
+Container......: Matroska
+Size...........: 7.74 GiB
+Duration.......: 58 min 4 s
+Bit Rate.......: 19.1 Mb/s
+Frame Rate.....: 
+tmdb...........: tv/60574
+imdb...........: tt2442560
+tvdb...........: 0
+
+----(VIDEO)-----
+Codec..........: HEVC
+Bit Rate.......: 18.5 Mb/s
+Frame Rate.....: 25.000 FPS
+Bit Depth......: 10 bits
+Language.......: 
+Aspect Ratio...: 16:9
+Resolution.....: 3840x2160
+
+----(AUDIO)-----
+Format.........: Dolby Digital Plus
+Channels.......: 6 channels
+Sampling Rate..: 48.0 kHz
+Compression....: Lossy
+Language.......: 
+Bit Rate.......: 640 kb/s
+Bit Rate Mode..: Constant
+
+--(SUBTITLES)---
+Format.........: UTF-8
+Language.......: , SDH, 

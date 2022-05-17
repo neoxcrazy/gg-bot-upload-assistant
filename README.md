@@ -207,7 +207,10 @@ docker run --rm -it \
 ### v2.0.7
 - [ ] Add Support for new platforms
     - [ ] Anasch
-- [ ] Implement a restart/resume feature for uploads.
+- [X] Implement a restart/resume feature for uploads.
+- [X] Refactor dupe check logic and hdr bug fix
+- [X] Add unit tests to the code - phase 1
+- [X] CICD for automated tests
 - [ ] Add support to apply hybrid mapping to multiple fields
 - [ ] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
@@ -233,13 +236,12 @@ docker run --rm -it \
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
-- [ ] Improved dupe check - Phase 2
 - [ ] Support for communicating with torrent clients
     - [ ] Deluge
     - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] MoreThanTV
+    - [ ] MoreThanTV9
     - [ ] GreatPosterWall
     - [ ] Swarmazon
 - [ ] Add support for DVDs

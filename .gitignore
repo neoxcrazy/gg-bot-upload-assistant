@@ -4,8 +4,8 @@
 *.mkv
 *.mp4
 *.torrent
-/images/screenshots
 /temp_upload
+/tests/resources/bdinfo/working_folder/*
 rtorrent_on_complete_reupload.sh
 config.env
 reupload.config.env
@@ -27,6 +27,7 @@ dev_comments.txt
 __pycache__/
 *.py[cod]
 *$py.class
+/coverage
 
 # C extensions
 *.so

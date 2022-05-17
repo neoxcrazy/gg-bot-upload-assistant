@@ -13,6 +13,33 @@ stages:
 sast:
   stage: test
 
+unit-test:
+  stage: test
+  image: python:3.8.13
+  services:
+    - name: datadog/agent:latest
+      alias: ddogagent
+  variables:
+    DD_API_KEY: $DD_API_KEY
+    DD_INSIDE_CI: "true"
+    DD_HOSTNAME: "ddogagent"
+    DD_AGENT_HOST: "ddogagent"
+    DD_TRACE_AGENT_URL: "http://ddogagent:8126"
+    DD_ENV: "ci"
+    DD_SERVICE: "gg-bot-upload-assistant"
+    DD_TRACE_DEBUG: "true"
+  script:
+    - pip install -U ddtrace
+    - pip install -r requirements_test.txt
+    - pip freeze > requirements_test.txt
+    # - python -m pytest -vv --cov-report=html --cov=./ .
+    - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov=./ .
+  artifacts:
+    paths:
+      - coverage
+    expire_in: 30 days
+
+
 # Image ID: registry.gitlab.com/noobmaster669/gg-bot-upload-assistant:{TAG}
 # Image Description: Normal Docker Image build and stored in GitLab Container Registry
 # Build Conditions: On all branches and tags
@@ -49,7 +76,7 @@ gitlab-docker-image:
       echo "Publishing Image to Gitlab Container Registry: '$CI_REGISTRY_IMAGE${tag}"
     - docker push "$CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_BRANCH || $CI_COMMIT_TAG' # runs on every branch and every tags
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"'  # runs for every tags and master branch
       exists:
         - Dockerfile
         

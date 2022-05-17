@@ -41,7 +41,7 @@ def bdinfo_get_video_codec_from_bdinfo(bdinfo):
     for index, video_track in enumerate(bdinfo['video']):
         if "dv_hdr" in video_track and len(video_track["dv_hdr"]) != 0 :
             # so hdr or DV is present in this track. next we need to identify which one it is
-            logging.debug(f"Detected {video_track['dv_hdr']} from bdinfo in track {index}")
+            logging.debug(f"[BDInfoUtils] Detected {video_track['dv_hdr']} from bdinfo in track {index}")
             if "DOLBY" in video_track["dv_hdr"].upper() or "DOLBY VISION" in video_track["dv_hdr"].upper():
                 dv = "DV"
             else:
@@ -50,8 +50,8 @@ def bdinfo_get_video_codec_from_bdinfo(bdinfo):
                     hdr = "HDR10+"
                 elif "HDR10" in hdr:
                     hdr = "HDR"
-                logging.debug(f'Adding proper HDR Format `{hdr}` to torrent info')
-    logging.info(f"`video_codec` identifed from bdinfo as {bdinfo['video'][0]['codec']}")
+                logging.debug(f'[BDInfoUtils] Adding proper HDR Format `{hdr}` to torrent info')
+    logging.info(f"[BDInfoUtils] `video_codec` identifed from bdinfo as {bdinfo['video'][0]['codec']}")
     return dv, hdr, bdinfo["video"][0]["codec"] # video codec is taken from the first track
             
 
@@ -65,16 +65,16 @@ def bdinfo_get_audio_codec_from_bdinfo(bdinfo, audio_codec_dict):
     atmos = None
     for audio_track in bdinfo['audio']:
         if "atmos" in audio_track and len(audio_track["atmos"]) != 0:
-            logging.info(f"`atmos` identifed from bdinfo as {audio_track['atmos']}")
+            logging.info(f"[BDInfoUtils] `atmos` identifed from bdinfo as {audio_track['atmos']}")
             atmos = "Atmos"
             break
 
-    logging.info(f"`audio_codec` identifed from bdinfo as {bdinfo['audio'][0]['codec']}")
+    logging.info(f"[BDInfoUtils] `audio_codec` identifed from bdinfo as {bdinfo['audio'][0]['codec']}")
     for key in audio_codec_dict.keys():
         if str(bdinfo["audio"][0]["codec"].strip()) == key:
-            logging.info(f'Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[bdinfo["audio"][0]["codec"].strip()]}')
+            logging.info(f'[BDInfoUtils] Used (audio_codec_dict + BDInfo) to identify the audio codec: {audio_codec_dict[bdinfo["audio"][0]["codec"].strip()]}')
             return atmos, audio_codec_dict[bdinfo["audio"][0]["codec"].strip()]
-    logging.error(f"Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {bdinfo['audio'][0]['codec']}")
+    logging.error(f"[BDInfoUtils] Failed to identify audio_codec from audio_codec_dict + BDInfo. Audio Codec from BDInfo {bdinfo['audio'][0]['codec']}")
     return None, None
 
 
@@ -91,7 +91,7 @@ def bdinfo_get_audio_channels_from_bdinfo(bdinfo):
             audio_channel = audio_track["channels"]
         elif int(audio_track["channels"][0:1]) > int(audio_channel[0:1]):
             audio_channel = audio_track["channels"]
-    logging.info(f"`audio_channels` identifed from bdinfo as {audio_channel}")
+    logging.info(f"[BDInfoUtils] `audio_channels` identifed from bdinfo as {audio_channel}")
     return audio_channel
 
 
@@ -109,6 +109,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
                 bd_max_file = os.path.join(folder, bd_file)
     
     bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, upload_media, "-l"])).split())).split(' ')
+    logging.debug(f"[BDInfoUtils] BDInfo output split from of list command: ---{bdinfo_output_split}--- ")
     all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
     dict_of_playlist_length_size = {}
@@ -158,17 +159,17 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
         
         user_input_playlist_id_num = Prompt.ask("Choose which `Playlist #` to analyze:", choices=list_of_num, default="1")
         largest_playlist = dict_of_playlist_info_list[int(user_input_playlist_id_num) - 1]["file"]
-        logging.debug(f"Used decided to select the playlist [{largest_playlist}] with Playlist # [{user_input_playlist_id_num}]")
-        logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+        logging.debug(f"[BDInfoUtils] Used decided to select the playlist [{largest_playlist}] with Playlist # [{user_input_playlist_id_num}]")
+        logging.info(f"[BDInfoUtils] Largest playlist obtained from bluray disc: {largest_playlist}")
         return bd_max_file, largest_playlist
     else:
         largest_playlist_value = max(dict_of_playlist_length_size.values())
         largest_playlist = list(dict_of_playlist_length_size.keys())[list(dict_of_playlist_length_size.values()).index(largest_playlist_value)]
-        logging.info(f"Largest playlist obtained from bluray disc: {largest_playlist}")
+        logging.info(f"[BDInfoUtils] Largest playlist obtained from bluray disc: {largest_playlist}")
         return bd_max_file, largest_playlist
 
 
-def bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info, debug):
+def bdinfo_generate_and_parse_bdinfo(bdinfo_script, torrent_info, debug):
     """
         Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
         Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
@@ -178,18 +179,19 @@ def bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info
     """
     # if largest_playlist is already in torrent_info, then why this computation again???
     # Get the BDInfo, parse & save it all into a file called mediainfo.txt (filename doesn't really matter, it gets uploaded to the same place anyways)
-    logging.debug(f"`largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
+    logging.debug(f"[BDInfoUtils] `largest_playlist` and `upload_media` from torrent_info :: {torrent_info['largest_playlist']} --- {torrent_info['upload_media']}")
     subprocess.run([bdinfo_script, torrent_info["upload_media"], "--mpls=" + torrent_info['largest_playlist']])
 
     shutil.move(f'{torrent_info["upload_media"]}BDINFO.{torrent_info["raw_file_name"]}.txt', torrent_info["mediainfo"])
-    if os.path.isfile("/usr/bin/sed"):
-        sed_path = "/usr/bin/sed"
-    else:
-        sed_path = "/bin/sed"
-    os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {torrent_info['mediainfo']}")
+    # TODO remove the below sed part
+    # if os.path.isfile("/usr/bin/sed"):
+    #     sed_path = "/usr/bin/sed"
+    # else:
+    #     sed_path = "/bin/sed"
+    # os.system(f"{sed_path} -i '0,/<---- END FORUMS PASTE ---->/d' {torrent_info['mediainfo']}")
     # displaying bdinfo to log in debug mode
     if debug:
-        logging.debug("::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
+        logging.debug("[BDInfoUtils] ::::::::::::::::::::::::::::: Dumping the BDInfo Quick Summary :::::::::::::::::::::::::::::")
         write_file_contents_to_log_as_debug(torrent_info["mediainfo"])
     return parse_bdinfo(torrent_info["mediainfo"])
 

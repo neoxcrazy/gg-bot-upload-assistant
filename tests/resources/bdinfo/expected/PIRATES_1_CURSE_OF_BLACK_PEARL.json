@@ -1,0 +1,79 @@
+{
+    "video": [
+        {
+            "codec": "HEVC",
+            "bitrate": "45389 kbps",
+            "resolution": "2160p",
+            "fps": "23.976 fps",
+            "aspect_ratio": "16:9",
+            "profile": "Main 10 @ Level 5.1 @ High",
+            "bit_depth": "10 bits",
+            "dv_hdr": "HDR10",
+            "color": "BT.2020"
+        }
+    ],
+    "audio": [
+        {
+            "language": "English",
+            "atmos": "Atmos Audio",
+            "codec": "Dolby TrueHD",
+            "channels": "7.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "4115 kbps",
+            "bit_depth": "24-bit"
+        },
+        {
+            "language": "English",
+            "codec": "Dolby Digital Audio",
+            "channels": "2.0",
+            "sample_rate": "48 kHz",
+            "bitrate": "320 kbps",
+            "bit_depth": "DN -24dB"
+        },
+        {
+            "language": "French",
+            "codec": "Dolby Digital Plus Audio",
+            "channels": "7.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "1024 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "French",
+            "codec": "Dolby Digital EX Audio",
+            "channels": "5.1-EX",
+            "sample_rate": "48 kHz",
+            "bitrate": "640 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "Spanish",
+            "codec": "Dolby Digital Plus Audio",
+            "channels": "7.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "1024 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "German",
+            "codec": "Dolby Digital Plus Audio",
+            "channels": "7.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "1024 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "Japanese",
+            "codec": "Dolby Digital Plus Audio",
+            "channels": "7.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "1024 kbps",
+            "bit_depth": "DN -27dB"
+        }
+    ],
+    "title": "Pirates of the Caribbean: The Curse of the Black Pearl - Ultra HD\u2122",
+    "label": "PIRATES_1_CURSE_OF_BLACK_PEARL",
+    "size": 60.524369625374675,
+    "playlist": "00800.MPLS",
+    "length": "2:23:09"
+}

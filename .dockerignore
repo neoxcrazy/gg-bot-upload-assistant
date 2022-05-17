@@ -8,3 +8,5 @@ README.md
 Dockerfile.aarch64
 Dockerfile.armhf
 Dockerfile.disk
+/tests/*
+.coveragerc

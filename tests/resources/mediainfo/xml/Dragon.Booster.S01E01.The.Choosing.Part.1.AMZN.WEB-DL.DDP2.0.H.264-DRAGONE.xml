@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Mediainfo version="21.03">
+<File>
+<track type="General">
+<Unique_ID>199000651276403987431470463709222978412 (0x95B6219E7CD34C8862E48277B32EC36C)</Unique_ID>
+<Complete_name>Dragon.Booster.S01E01.The.Choosing.Part.1.AMZN.WEB-DL.DDP2.0.H.264-DRAGONE.mkv</Complete_name>
+<Format>Matroska</Format>
+<Format_version>Version 4</Format_version>
+<File_size>215 MiB</File_size>
+<Duration>20 min 37 s</Duration>
+<Overall_bit_rate>1 456 kb/s</Overall_bit_rate>
+<Writing_application>mkvmerge v31.0.0 (&apos;Dolores In A Shoestand&apos;) 64-bit</Writing_application>
+<Writing_library>libebml v1.3.6 + libmatroska v1.4.9</Writing_library>
+</track>
+<track type="Video">
+<ID>1</ID>
+<Format>AVC</Format>
+<Format_Info>Advanced Video Codec</Format_Info>
+<Format_profile>Main@L3</Format_profile>
+<Format_settings>CABAC / 4 Ref Frames</Format_settings>
+<Format_settings__CABAC>Yes</Format_settings__CABAC>
+<Format_settings__Reference_frames>4 frames</Format_settings__Reference_frames>
+<Codec_ID>V_MPEG4/ISO/AVC</Codec_ID>
+<Duration>20 min 37 s</Duration>
+<Bit_rate_mode>Constant</Bit_rate_mode>
+<Bit_rate>1 230 kb/s</Bit_rate>
+<Nominal_bit_rate>2 000 kb/s</Nominal_bit_rate>
+<Width>720</Width>
+<Height>384</Height>
+<Display_aspect_ratio>1.85:1</Display_aspect_ratio>
+<Original_display_aspect_ratio>1.85:1</Original_display_aspect_ratio>
+<Frame_rate_mode>Constant</Frame_rate_mode>
+<Frame_rate>25.000 FPS</Frame_rate>
+<Color_space>YUV</Color_space>
+<Chroma_subsampling>4:2:0</Chroma_subsampling>
+<Bit_depth>8 bits</Bit_depth>
+<Scan_type>Progressive</Scan_type>
+<Bits__Pixel_Frame_>0.178</Bits__Pixel_Frame_>
+<Stream_size>182 MiB (84%)</Stream_size>
+<Default>Yes</Default>
+<Forced>No</Forced>
+<Color_range>Limited</Color_range>
+<Color_primaries>BT.709</Color_primaries>
+<Transfer_characteristics>BT.709</Transfer_characteristics>
+<Matrix_coefficients>BT.709</Matrix_coefficients>
+</track>
+<track type="Audio">
+<ID>2</ID>
+<Format>E-AC-3</Format>
+<Format_Info>Enhanced AC-3</Format_Info>
+<Commercial_name>Dolby Digital Plus</Commercial_name>
+<Codec_ID>A_EAC3</Codec_ID>
+<Duration>20 min 37 s</Duration>
+<Bit_rate_mode>Constant</Bit_rate_mode>
+<Bit_rate>224 kb/s</Bit_rate>
+<Channel_s_>2 channels</Channel_s_>
+<Channel_layout>L R</Channel_layout>
+<Sampling_rate>48.0 kHz</Sampling_rate>
+<Frame_rate>31.250 FPS (1536 SPF)</Frame_rate>
+<Compression_mode>Lossy</Compression_mode>
+<Stream_size>33.1 MiB (15%)</Stream_size>
+<Language>English</Language>
+<Service_kind>Complete Main</Service_kind>
+<Default>Yes</Default>
+<Forced>No</Forced>
+</track>
+<track type="Text">
+<ID>3</ID>
+<Format>UTF-8</Format>
+<Codec_ID>S_TEXT/UTF8</Codec_ID>
+<Codec_ID_Info>UTF-8 Plain Text</Codec_ID_Info>
+<Duration>20 min 25 s</Duration>
+<Bit_rate>60 b/s</Bit_rate>
+<Count_of_elements>379</Count_of_elements>
+<Stream_size>9.03 KiB (0%)</Stream_size>
+<Title>SDH</Title>
+<Language>English</Language>
+<Default>No</Default>
+<Forced>No</Forced>
+</track>
+</File>
+</Mediainfo>

@@ -1,0 +1,43 @@
+{
+    "video": [
+        {
+            "codec": "AVC",
+            "bitrate": "23994 kbps",
+            "resolution": "1080p",
+            "fps": "23.976 fps",
+            "aspect_ratio": "16:9",
+            "profile": "High Profile 4.1"
+        }
+    ],
+    "audio": [
+        {
+            "language": "English",
+            "codec": "Dolby Digital Audio",
+            "channels": "5.1",
+            "sample_rate": "48 kHz",
+            "bitrate": "448 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "English",
+            "codec": "Dolby Digital Audio",
+            "channels": "2.0",
+            "sample_rate": "48 kHz",
+            "bitrate": "256 kbps",
+            "bit_depth": "DN -27dB"
+        },
+        {
+            "language": "English",
+            "codec": "Dolby Digital Audio",
+            "channels": "2.0",
+            "sample_rate": "48 kHz",
+            "bitrate": "192 kbps",
+            "bit_depth": "DN -27dB"
+        }
+    ],
+    "title": "Hardware",
+    "label": "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc",
+    "size": 40.01998052652925,
+    "playlist": "00003.MPLS",
+    "length": "1:33:53"
+}
