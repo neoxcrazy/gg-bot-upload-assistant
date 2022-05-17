@@ -33,8 +33,16 @@ unit-test:
     - pip install -r requirements_test.txt
     - pip freeze > requirements_test.txt
     # - python -m pytest -vv --cov-report=html --cov=./ .
-    - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov=./ .
+    # - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
+    - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
+    - coverage report
+    - coverage xml
+  coverage: '/TOTAL.*\s([.\d]+)%/'
   artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/coverage.xml
     paths:
       - coverage
     expire_in: 30 days
