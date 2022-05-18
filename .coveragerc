@@ -1,6 +1,9 @@
 [html]
 directory = coverage
 
+[xml]
+output = coverage/coverage.xml
+
 [report]
 exclude_lines = 
     if __name__ == .__main__.:
