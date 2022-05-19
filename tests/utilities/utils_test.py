@@ -143,6 +143,9 @@ def test_has_user_provided_type(input, expected):
     assert has_user_provided_type(input) == expected
 
 
+# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------ Tests For Cross Seeding -----------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------
 """
     ___________________________________________________________________________________________________________________________
 
@@ -352,6 +355,10 @@ def test_client_upload_movie_file_relative(mocker):
     assert perform_post_processing(torrent_info, mock_client, working_folder, tracker) == expected
 
 
+# ------------------------------------------------------------------------------------------------------------------
+# ------------------------------------ Tests For Watch Folder ------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------
+
 def __watch_folder_no_type_side_effect(param, default=None):
     if param =="enable_post_processing":
         return True
@@ -400,7 +407,6 @@ def __watch_folder_type_side_effect(param, default=None):
         return True
     else:
         return __watch_folder_no_type_side_effect(param, default)
-
 
 """
     Cases for WATCH_FOLDER
