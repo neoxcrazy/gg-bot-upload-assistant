@@ -210,13 +210,15 @@ docker run --rm -it \
 - [X] Implement a restart/resume feature for uploads.
 - [X] Refactor dupe check logic and hdr bug fix
 - [X] Add unit tests to the code - phase 1
+- [X] Add unit tests to the code - phase 2
 - [X] CICD for automated tests
 - [ ] Add support to apply hybrid mapping to multiple fields
-- [ ] Add support for immediate cross-seeding to torrent clients
+- [X] Improved watch folder movement post-processing
+- [X] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
     - [X] Qbittorrent
     - [X] Rutorrent
-- [ ] Migrate torrent client feature from v3.0 alpha version
+- [X] Migrate torrent client feature from v3.0 alpha version
 
 ### v3.0
 - [X] Automatic torrent re-uploader
