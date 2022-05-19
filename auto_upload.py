@@ -1151,40 +1151,6 @@ if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_F
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path
 
-# Verify the script is in "auto_mode" and if needed map rtorrent download path to system path
-# TODO remove the reupload argument once GG-BOT Auto ReUploader is released and instant seeding is migrated to GG-BOT Upload Assistant
-if args.reupload:
-    logging.info('[Main] Reuploading a match from autodl')
-
-    # Firstly remove the underscore separator from the trackers the user provided in the autodl filter & make replace args.trackers with it
-    args.trackers = str(args.trackers[0]).split('_')
-
-    # set auto_mode equal to True for this upload (if its not already)
-    # since we are reuploading autodl matches its probably safe to say this is all automated & no one will be available to approve or interact with any prompt
-    if auto_mode == 'false':
-        logging.info('[Main] Temporarily switching "auto_mode" to "true" for this autodl reupload')
-        auto_mode = 'true'
-
-    if str(os.getenv('translation_needed')).lower() == 'true':
-        # Currently it is only possible for 1 path to be based from autodl but just in case & for futureproofing we will treat it as a list of multiple paths
-        logging.info('[Main] Translating paths... ("translation_needed" flag set to True in config.env) ')
-
-        # Just in case the user didn't end the path with a forward slash...
-        host_path = f"{os.getenv('host_path')}/".replace('//', '/')
-        remote_path = f"{os.getenv('remote_path')}/".replace('//', '/')
-
-        # Now we replace the remote (rtorrent) path with the system one
-        for path in user_supplied_paths:
-            translated_path = str(path).replace(remote_path, host_path)
-
-            # Remove the old path from the list & add the new one in its place
-            user_supplied_paths.remove(path)
-            user_supplied_paths.append(translated_path)
-
-            # And finally log the changes
-            logging.info(f'[Main] rtorrent path: {path}')
-            logging.info(f'[Main] Translated path: {translated_path}')
-
 # If a user has supplied a discord webhook URL we can send updates to that channel
 if discord_url:
     requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content={starting_new_upload}')
@@ -1287,7 +1253,6 @@ for file in upload_queue:
         # Skip this entire 'file upload' & move onto the next (if exists)
         continue
     torrent_info["upload_media"] = rar_file_validation_response[1]
-
     # Performing guessit on the rawfile name and reusing the result instead of calling guessit over and over again
     guess_it_result = perform_guessit_on_filename(torrent_info["upload_media"])
     
@@ -1525,9 +1490,16 @@ for file in upload_queue:
 
         # -------- Generate .torrent file --------
         console.print(f'\n[bold]Generating .torrent file for [chartreuse1]{tracker}[/chartreuse1][/bold]')
+        logging.debug(f'[Main] Torrent info just before dot torrent creation. \n {pformat(torrent_info)}')
+        # If the type is a movie, then we only include the `raw_video_file` for torrent file creation.
+        # If type is an episode, then we'll create torrent file for the the `upload_media` which could be an single episode or a season folder
+        if torrent_info["type"] == "movie" and "raw_video_file" in torrent_info:
+            torrent_media = torrent_info["raw_video_file"]
+        else:
+            torrent_media = torrent_info["upload_media"]
 
         generate_dot_torrent(
-            media=torrent_info["upload_media"],
+            media=torrent_media,
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
             source=config["source"],
             working_folder=working_folder,
@@ -1564,48 +1536,7 @@ for file in upload_queue:
         console.print(tracker_settings_table, justify="center")
 
     # -------- Post Processing --------
-    # After we upload the media we can move the .torrent & media files to a place the user specifies
-    # This isn't tracker specific so its outside of that ^^ 'for loop'
-
-    move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
-    logging.debug(f"[Main] Move locations configured by user :: {move_locations}")
-
-    for move_location_key, move_location_value in move_locations.items():
-        # If the user supplied a path & it exists we proceed
-        if len(move_location_value) == 0:
-            logging.debug(f'[Main] Move location not configured for {move_location_key}')
-            continue
-        if os.path.exists(move_location_value):
-            logging.info(f"[Main] The move path {move_location_value} exists")
-
-            if move_location_key == 'torrent':
-                sub_folder = "/"
-                if os.getenv("enable_type_base_move") == "true":
-                    sub_folder = sub_folder + torrent_info["type"] + "/"
-                    os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
-                # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
-                list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}*.torrent")
-                for dot_torrent_file in list_dot_torrent_files:
-                    # Move each .torrent file we find into the directory the user specified
-                    logging.debug(f'[Main] Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
-                    try:
-                        shutil.copy(dot_torrent_file, move_locations["torrent"] + sub_folder)
-                    except Exception as e:
-                        logging.exception(f'[Main] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
-
-            # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
-            if move_location_key == 'media':
-                if str(f"{Path(torrent_info['upload_media']).parent}/") == move_location_value:
-                    console.print(f'\nError, {torrent_info["upload_media"]} is already in the move location you specified: "{move_location_value}"\n', style="red", highlight=False)
-                    logging.error(f"[Main] {torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
-                else:
-                    logging.info(f"[Main] Moving {torrent_info['upload_media']} to {move_location_value}")
-                    try:
-                        shutil.move(torrent_info["upload_media"], move_location_value)
-                    except Exception as e:
-                        logging.exception(f"[Main] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
-        else:
-            logging.error(f"[Main] Move path doesn't exist for {move_location_key} as {move_location_value}")
+    perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
 
     # Torrent Info
     console.print("\n\n")
