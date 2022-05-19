@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from pathlib import Path
@@ -22,10 +23,11 @@ def clean_up(pth):
     pth.rmdir()
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def run_around_tests():
     # temp working folder inside tests
     folder = f"{working_folder}{temp_working_dir}"
+    # /tests/working_folder
 
     if Path(folder).is_dir():
         clean_up(folder)
@@ -37,9 +39,11 @@ def run_around_tests():
     
     for dot_torrent in ["test1.torrent", "test2.torrent"]:
         fp = open(f"{folder}/torrent/{dot_torrent}", 'x')
+        logging.info(f"Creating file: {folder}/torrent/{dot_torrent}")
         fp.close()
     
     fp = open(f"{folder}/media/file.mkv", 'x')
+    logging.info(f"Creating file: {folder}/media/file.mkv")
     fp.close()
 
     yield
@@ -362,10 +366,31 @@ def __watch_folder_no_type_side_effect(param, default=None):
     else:
         return default
 
+# moving media with type based movement
+def __watch_folder_media_type_side_effect(param, default=None):
+    if param == "dot_torrent_move_location":
+        return ""
+    else:
+        return __watch_folder_type_side_effect(param, default)
 
+# moving media
+def __watch_folder_media_no_type_side_effect(param, default=None):
+    if param == "dot_torrent_move_location":
+        return ""
+    else:
+        return __watch_folder_no_type_side_effect(param, default)
+
+# moving torrent with type based movement
 def __watch_folder_torrent_type_side_effect(param, default=None):
     if param == "media_move_location":
-        return default
+        return ""
+    else:
+        return __watch_folder_type_side_effect(param, default)
+
+# moving torrent
+def __watch_folder_torrent_no_type_side_effect(param, default=None):
+    if param == "media_move_location":
+        return ""
     else:
         return __watch_folder_no_type_side_effect(param, default)
 
@@ -377,7 +402,17 @@ def __watch_folder_type_side_effect(param, default=None):
         return __watch_folder_no_type_side_effect(param, default)
 
 
-def test_watch_folder_both_relative_input_no_type_happy(mocker):
+"""
+    Cases for WATCH_FOLDER
+    1. Move media and torrent
+    2. Move media and torrent with type based movement
+    3. Move media
+    4. Move media with type based movement
+    5. Move torrent 
+    6. Move torrent with type based movement
+"""
+# moving torrent and media
+def test_watch_folder_torrent_media(mocker):
     torrent_info = {}
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = "WORKING_FOLDER"
@@ -396,7 +431,7 @@ def test_watch_folder_both_relative_input_no_type_happy(mocker):
     original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
     original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
     original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
-    
+
     assert original_media_path.is_file() == False
     assert original_torrent_1_path.is_file() == False
     assert original_torrent_2_path.is_file() == False
@@ -405,36 +440,8 @@ def test_watch_folder_both_relative_input_no_type_happy(mocker):
     assert moved_torrent_1_path.is_file() == True
     assert moved_torrent_2_path.is_file() == True
 
-
-    torrent_info = {}
-    torrent_info["type"] = "movie"
-    torrent_info["working_folder"] = "WORKING_FOLDER"
-    torrent_info["upload_media"] = "tests/working_folder/media/file.mkv"
-    tracker = "TRACKER"
-
-    mocker.patch("os.getenv", side_effect=__watch_folder_torrent_type_side_effect)
-    mocker.patch("glob.glob", return_value=[f"{working_folder}{temp_working_dir}/torrent/test1.torrent", f"{working_folder}{temp_working_dir}/torrent/test2.torrent"])
-
-    perform_post_processing(torrent_info, None, working_folder, tracker)
-
-    moved_media_path = Path(f"{working_folder}{temp_working_dir}/move/media/file.mkv")
-    moved_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test1.torrent")
-    moved_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test2.torrent")
-
-    original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
-    original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
-    original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
-    
-    assert original_media_path.is_file() == True
-    assert original_torrent_1_path.is_file() == False
-    assert original_torrent_2_path.is_file() == False
-
-    assert moved_media_path.is_file() == False
-    assert moved_torrent_1_path.is_file() == True
-    assert moved_torrent_2_path.is_file() == True
-
-
-def test_watch_folder_both_relative_input_type_happy(mocker):
+# moving torrent and media with type based movement
+def test_watch_folder_torrent_media_type(mocker):
     torrent_info = {}
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = "WORKING_FOLDER"
@@ -461,4 +468,120 @@ def test_watch_folder_both_relative_input_type_happy(mocker):
     assert moved_torrent_1_path.is_file() == True
     assert moved_torrent_2_path.is_file() == True
     assert moved_media_path.is_file() == True
+
+# moving torrent
+def test_watch_folder_torrent(mocker):
+    torrent_info = {}
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = "WORKING_FOLDER"
+    torrent_info["upload_media"] = "tests/working_folder/media/file.mkv"
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__watch_folder_torrent_no_type_side_effect)
+    mocker.patch("glob.glob", return_value=[f"{working_folder}{temp_working_dir}/torrent/test1.torrent", f"{working_folder}{temp_working_dir}/torrent/test2.torrent"])
+
+    perform_post_processing(torrent_info, None, working_folder, tracker)
+
+    moved_media_path = Path(f"{working_folder}{temp_working_dir}/move/media/file.mkv")
+    moved_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test1.torrent")
+    moved_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test2.torrent")
+
+    original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
+    original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
+    original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
+
+    assert original_media_path.is_file() == True
+    assert original_torrent_1_path.is_file() == False
+    assert original_torrent_2_path.is_file() == False
+ 
+    assert moved_media_path.is_file() == False
+    assert moved_torrent_1_path.is_file() == True
+    assert moved_torrent_2_path.is_file() == True
+
+# moving torrent with type based movement
+def test_watch_folder_torrent_relative_input_type_happy(mocker):
+    torrent_info = {}
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = "WORKING_FOLDER"
+    torrent_info["upload_media"] = "tests/working_folder/media/file.mkv"
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__watch_folder_torrent_type_side_effect)
+    mocker.patch("glob.glob", return_value=[f"{working_folder}{temp_working_dir}/torrent/test1.torrent", f"{working_folder}{temp_working_dir}/torrent/test2.torrent"])
+
+    perform_post_processing(torrent_info, None, working_folder, tracker)
+
+    moved_media_path = Path(f"{working_folder}{temp_working_dir}/move/media/file.mkv")
+    moved_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/movie/test1.torrent")
+    moved_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/movie/test2.torrent")
+
+    original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
+    original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
+    original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
+
+    assert original_media_path.is_file() == True
+    assert original_torrent_1_path.is_file() == False
+    assert original_torrent_2_path.is_file() == False
+
+    assert moved_media_path.is_file() == False
+    assert moved_torrent_1_path.is_file() == True
+    assert moved_torrent_2_path.is_file() == True
+
+# moving media
+def test_watch_folder_torrent(mocker):
+    torrent_info = {}
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = "WORKING_FOLDER"
+    torrent_info["upload_media"] = "tests/working_folder/media/file.mkv"
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__watch_folder_media_no_type_side_effect)
+    mocker.patch("glob.glob", return_value=[f"{working_folder}{temp_working_dir}/torrent/test1.torrent", f"{working_folder}{temp_working_dir}/torrent/test2.torrent"])
+
+    perform_post_processing(torrent_info, None, working_folder, tracker)
+
+    moved_media_path = Path(f"{working_folder}{temp_working_dir}/move/media/file.mkv")
+    moved_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test1.torrent")
+    moved_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test2.torrent")
+
+    original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
+    original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
+    original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
+
+    assert original_media_path.is_file() == False
+    assert original_torrent_1_path.is_file() == True
+    assert original_torrent_2_path.is_file() == True
+ 
+    assert moved_media_path.is_file() == True
+    assert moved_torrent_1_path.is_file() == False
+    assert moved_torrent_2_path.is_file() == False
+
+# moving media with type based movement
+def test_watch_folder_torrent_relative_input_type_happy(mocker):
+    torrent_info = {}
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = "WORKING_FOLDER"
+    torrent_info["upload_media"] = "tests/working_folder/media/file.mkv"
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__watch_folder_media_type_side_effect)
+    mocker.patch("glob.glob", return_value=[f"{working_folder}{temp_working_dir}/torrent/test1.torrent", f"{working_folder}{temp_working_dir}/torrent/test2.torrent"])
+
+    perform_post_processing(torrent_info, None, working_folder, tracker)
+
+    moved_media_path = Path(f"{working_folder}{temp_working_dir}/move/media/movie/file.mkv")
+    moved_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test1.torrent")
+    moved_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/move/torrent/test2.torrent")
+
+    original_media_path = Path(f"{working_folder}{temp_working_dir}/media/file.mkv")
+    original_torrent_1_path = Path(f"{working_folder}{temp_working_dir}/torrent/test1.torrent")
+    original_torrent_2_path = Path(f"{working_folder}{temp_working_dir}/torrent/test2.torrent")
+
+    assert original_media_path.is_file() == False
+    assert original_torrent_1_path.is_file() == True
+    assert original_torrent_2_path.is_file() == True
+
+    assert moved_media_path.is_file() == True
+    assert moved_torrent_1_path.is_file() == False
+    assert moved_torrent_2_path.is_file() == False
 

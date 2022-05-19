@@ -522,48 +522,54 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
 
 def _post_mode_watch_folder(torrent_info, working_folder):
     move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
-    logging.debug(f"[Main] Move locations configured by user :: {move_locations}")
+    logging.debug(f"[Utils] Move locations configured by user :: {move_locations}")
 
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed
         if len(move_location_value) == 0:
-            logging.debug(f'[Main] Move location not configured for {move_location_key}')
+            logging.debug(f'[Utils] Move location not configured for {move_location_key}')
             continue
         if os.path.exists(move_location_value):
-            logging.info(f"[Main] The move path {move_location_value} exists")
+            logging.info(f"[Utils] The move path {move_location_value} exists")
 
             if move_location_key == 'torrent':
                 sub_folder = "/"
                 if os.getenv("enable_type_base_move", False) != False:
                     sub_folder = sub_folder + torrent_info["type"] + "/"
-                    os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
+                    # os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
+                    if os.path.exists(f"{move_locations['torrent']}{sub_folder}"):
+                        logging.info(f"[Utils] Sub location '{move_locations['torrent']}{sub_folder}' exists.")
+                    else:
+                        logging.info(f"[Utils] Creating Sub location '{move_locations['torrent']}{sub_folder}'.")
+                        Path(f"{move_locations['torrent']}{sub_folder}").mkdir(parents=True, exist_ok=True)
                 # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
                 list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}*.torrent")
                 for dot_torrent_file in list_dot_torrent_files:
                     # Move each .torrent file we find into the directory the user specified
-                    logging.debug(f'[Main] Moving {dot_torrent_file} to {move_locations["torrent"] + sub_folder}')
+                    logging.debug(f'[Utils] Moving {dot_torrent_file} to {move_locations["torrent"]}{sub_folder}')
                     try:
-                        shutil.move(dot_torrent_file, move_locations["torrent"] + sub_folder)
+                        shutil.move(dot_torrent_file, f'{move_locations["torrent"]}{sub_folder}')
                     except Exception as e:
-                        logging.exception(f'[Main] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
+                        logging.exception(f'[Utils] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
                 if str(f"{Path(torrent_info['upload_media']).parent}/") == move_location_value:
                     console.print(f'\nError, {torrent_info["upload_media"]} is already in the move location you specified: "{move_location_value}"\n', style="red", highlight=False)
-                    logging.error(f"[Main] {torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
+                    logging.error(f"[Utils] {torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
                 else:
                     sub_folder = "/"
                     if os.getenv("enable_type_base_move", False) != False:
                         sub_folder = sub_folder + torrent_info["type"] + "/"
-                        os.makedirs(os.path.dirname(move_location_value + sub_folder), exist_ok=True)
-                    logging.info(f"[Main] Moving {torrent_info['upload_media']} to {move_location_value + sub_folder}")
+                        move_location_value = move_location_value + sub_folder
+                        os.makedirs(os.path.dirname(move_location_value), exist_ok=True)
+                    logging.info(f"[Utils] Moving {torrent_info['upload_media']} to {move_location_value }")
                     try:
-                        shutil.move(torrent_info["upload_media"], move_location_value + sub_folder)
+                        shutil.move(torrent_info["upload_media"], move_location_value)
                     except Exception as e:
-                        logging.exception(f"[Main] Cannot copy media {torrent_info['upload_media']} to location {move_location_value + sub_folder}")
+                        logging.exception(f"[Utils] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
         else:
-            logging.error(f"[Main] Move path doesn't exist for {move_location_key} as {move_location_value}")
+            logging.error(f"[Utils] Move path doesn't exist for {move_location_key} as {move_location_value}")
 
 
 def perform_post_processing(torrent_info, torrent_client, working_folder, tracker):
