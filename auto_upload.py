@@ -1095,6 +1095,7 @@ def upload_to_site(upload_to, tracker_api_key):
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #  **START** This is the first code that executes when we run the script, we log that info and we start a timer so we can keep track of total script runtime **START** #
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 script_start_time = time.perf_counter()
 starting_new_upload = f" {'-' * 24} Starting new upload {'-' * 24} "
 
@@ -1147,6 +1148,8 @@ if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_F
     console.print("2. Use a FAT variant of my image that supports Full Disk Uploads [Recommended]")
     console.print("[bold red on white] ---------------------------- :warning: Unsupported Operation :warning: ---------------------------- [/bold red on white]")
     sys.exit(console.print("\nQuiting upload process since Full Disk uploads are not allowed in this image.\n", style="bold red", highlight=False))
+
+torrent_client = get_torrent_client_if_needed()
 
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path

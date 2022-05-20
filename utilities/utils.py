@@ -19,6 +19,9 @@ from dotenv import dotenv_values
 from rich.console import Console
 from pymediainfo import MediaInfo
 
+from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
+
+
 console = Console()
 
 
@@ -570,6 +573,19 @@ def _post_mode_watch_folder(torrent_info, working_folder):
                         logging.exception(f"[Utils] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
         else:
             logging.error(f"[Utils] Move path doesn't exist for {move_location_key} as {move_location_value}")
+
+
+def get_torrent_client_if_needed():
+    if os.getenv("enable_post_processing", False) and os.getenv("post_processing_mode", "") == "CROSS_SEED":
+        # getting an instance of the torrent client factory
+        torrent_client_factory = TorrentClientFactory()
+        # creating the torrent client using the factory based on the users configuration
+        torrent_client = torrent_client_factory.create(Clients[os.getenv('client')])
+        # checking whether the torrent client connection has been created successfully or not
+        torrent_client.hello()
+        return torrent_client
+    else:
+        return None
 
 
 def perform_post_processing(torrent_info, torrent_client, working_folder, tracker):
