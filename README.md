@@ -1,6 +1,10 @@
 # **GG-BOT Upload Assistant**
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
+
+> Please refer to the readme in `dev` branch to see updated roadmaps and new features.
+
+
 ![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
 
 <br>
@@ -275,6 +279,7 @@ docker run --rm -it \
         * Issue#30: Application crash while making TMDB API Call
         * Issue#31: Uploads to BIT-HDTV failing
 
+<br>
 ## **2.0.5**
     New Trackers
         * SkipTheTrailers
