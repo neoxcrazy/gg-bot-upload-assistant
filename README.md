@@ -19,6 +19,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 * Packed as a docker container. (No need to install any additional tools)
 * Automatically move .torrent and media to specified folders after upload
 * Customizable uploader signature for torrent descriptions
+* Automatic upload to torrent client: Immediate cross-seeding
 
 <br>
 
@@ -150,15 +151,22 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 <!-- Basic setup -->
 # Basic setup
 ## Bare Metal / VM:
-1. Clone / download this repository
-2. Install necessary packages ```pip3 install -r requirements.txt```
-3. Rename `config.env.sample` to `config.env`
-4. Fill out the required values in `config.env`
-5. Ensure you have [mediainfo](https://mediaarea.net/en/MediaInfo/Download/Ubuntu) & [ffmpeg](https://ffmpeg.org/download.html) installed on your system
-6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
-7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
-8. Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
+1. Clone / download this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
+> It is recommended to checkout a tag and use it instead of using as the master branch, as there is a possibility for master branch to have bug / error / conflicts during merges.<br>
+> Checkout a tag using the command `git checkout tags/<TAG>` 
+> <br>Eg: `git checkout tags/2.0`
+2. Install necessary packages ```pip install -r requirements.txt```
+3. Grand execute permission for user. `chmod u+x auto_upload.py`
+4. Rename `config.env.sample` to `config.env`
+5. Fill out the required values in `config.env`
+> Ensure that you have optional dependencies installed. <br>
+> - [MediaInfo](https://mediaarea.net/en/MediaInfo/Download/Ubuntu)
+> - [FFmpeg](https://ffmpeg.org/download.html)
+> - [mktorrent](https://github.com/pobrn/mktorrent): Use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
+6. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
+> Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
 
+> Please see Bare Metal Installation and Upgrade Wiki for details instructions.
 ## Docker:
 1. Create new folder / dir [`mkdir GGBotUploader`]
 2. Enter into the new directory [`cd GGBotUploader`]
@@ -184,13 +192,7 @@ docker run --rm -it \
     * ```chmod u+x auto_upload.py```
     * run script using ```./auto_upload.py -t etc -p /path/to/file/autocompletes.now```
     * NOTE: This is applicable only when you use the upload assistant on bare metal. Everyhting is taken care of in the docker version.
-4. A folder called ``temp_upload`` will be created which will store the files:
-    * `*.torrent`
-    * `mediainfo.txt` 
-    * `url_images.txt`
-    * `description.txt`
-    * `image_paths.txt`
-5. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
+4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
 
 <br>
 
