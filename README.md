@@ -205,8 +205,6 @@ docker run --rm -it \
 
 # Roadmap
 ### v2.0.7
-- [ ] Add Support for new platforms
-    - [ ] Anasch
 - [X] Implement a restart/resume feature for uploads.
 - [X] Refactor dupe check logic and hdr bug fix
 - [X] Add unit tests to the code - phase 1
@@ -229,12 +227,15 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
-- [X] GG-Bot Visor for reports and failure recoveries
+- [ ] EPIC: GG-Bot Visor for reports and failure recoveries
 - [ ] Support for overriding target tracker through categories
-- [ ] Bug Fixes and Testing
+- [X] Bug Fixes and Testing Phase 1
+- [ ] Bug Fixes and Testing Phase 2
 - [ ] Discord notification for auto uploaded data
 
 ### Backlogs
+- [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader
+- [ ] EPIC: Refactor GG-BOT Admin to handle GG-BOT Auto ReUploader
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
@@ -243,6 +244,7 @@ docker run --rm -it \
     - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
+    - [ ] Anasch
     - [ ] MoreThanTV
     - [ ] GreatPosterWall
     - [ ] Swarmazon

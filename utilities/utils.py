@@ -492,9 +492,8 @@ def _get_client_translated_path(torrent_info):
         logging.info(f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_path, client_path)}')
 
         # Now we replace the remote path with the system one
-        return torrent_info["upload_media"].replace(uploader_path, client_path)
-    else:
-        return torrent_info["upload_media"]
+        torrent_info["upload_media"] = torrent_info["upload_media"].replace(uploader_path, client_path)
+    return f'{torrent_info["upload_media"]}/'.replace('//', '/')
 
 
 def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker):
@@ -506,16 +505,16 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
     logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
     console.print("Starting Post Processing....")
     console.print(f"File Path: {torrent_info['upload_media']}")
-    # console.print(f"Client Save Path: {torrent_info['client_path']}")
-
-    if "raw_video_file" in torrent_info:
+    console.print(f"Client Save Path: {torrent_info['client_path']}")
+    
+    if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
         logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
         save_path = torrent_info["client_path"]
     else:
         save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
 
     res = torrent_client.upload_torrent(
-        torrent=f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent', 
+        torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', 
         save_path=save_path, 
         use_auto_torrent_management=False, 
         is_skip_checking=True
