@@ -1,5 +1,8 @@
 FROM alpine:3.14
 
+ENV IS_CONTAINERIZED=true
+ENV IS_FULL_DISK_SUPPORTED=false
+
 RUN \
  echo "**** install build packages ****" && \
  apk add --no-cache --virtual=build-dependencies \
