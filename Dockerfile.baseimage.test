@@ -98,11 +98,13 @@ RUN set -eux; \
 		| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 		| xargs -rt apk add --no-network --virtual .python-rundeps \
 	; \
-	apk del --no-network .build-deps; \
+	apk del --no-network .build-deps;
+
+RUN apk add --no-cache --upgrade unrar; \
 	\
-	apk add --no-cache --upgrade unrar; \
-	\
-	python3 --version
+	apk add --no-cache --virtual=build-dependencies g++;
+	
+RUN python3 --version
 
 # make some useful symlinks that are expected to exist ("/usr/local/bin/python" and friends)
 RUN set -eux; \
