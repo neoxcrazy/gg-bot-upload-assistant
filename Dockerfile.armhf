@@ -1,24 +1,9 @@
 FROM arm32v7/alpine:3.14
 
+WORKDIR /app
+
 ENV IS_CONTAINERIZED=true
 ENV IS_FULL_DISK_SUPPORTED=false
-
-RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
-	g++ \
-	py3-pip \
-	python3-dev
-RUN \
- echo "**** install runtime packages ****" && \
- apk add --no-cache --upgrade \
-	ffmpeg \
-	mediainfo \
-	python3 \
-	mktorrent \
-	unrar
-
-WORKDIR /app
 
 # add local files
 COPY requirements.txt .

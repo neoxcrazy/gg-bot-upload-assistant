@@ -1,19 +1,4 @@
-FROM alpine:3.14
-
-RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
-	g++ \
-	py3-pip \
-	python3-dev
-RUN \
- echo "**** install runtime packages ****" && \
- apk add --no-cache --upgrade \
-	ffmpeg \
-	mediainfo \
-	python3 \
-	mktorrent \
-	unrar
+FROM noobmaster669/gg-bot-base:latest
 
 WORKDIR /app
 

@@ -1,4 +1,4 @@
-FROM alpine:3.14
+FROM arm32v7/alpine:3.14
 
 RUN \
  echo "**** install build packages ****" && \

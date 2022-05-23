@@ -8,5 +8,9 @@ README.md
 Dockerfile.aarch64
 Dockerfile.armhf
 Dockerfile.disk
+Dockerfile.baseimage
 /tests/*
 .coveragerc
+*.mkv
+*.mp4
+/files/*
