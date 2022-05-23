@@ -673,9 +673,9 @@ def test_check_for_dir_and_extract_rars_non_rar_folder():
     assert check_for_dir_and_extract_rars(file_path) == (True, file_path)
 
 
-# def test_check_for_dir_and_extract_rars_rar_folder():
-#     file_path = "tests/working_folder/rar/"
-#     assert check_for_dir_and_extract_rars(file_path) == (True, "tests/working_folder/rar/something.mkv")
+def test_check_for_dir_and_extract_rars_rar_folder():
+    file_path = "tests/working_folder/rar/"
+    assert check_for_dir_and_extract_rars(file_path) == (True, "tests/working_folder/rar/something.mkv")
 
 
 def test_check_for_dir_and_extract_rars_no_rar_installed(mocker):
