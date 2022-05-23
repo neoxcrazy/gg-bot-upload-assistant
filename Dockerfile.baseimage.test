@@ -1,17 +1,7 @@
-FROM alpine:3.14
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
-	g++ \
-	py3-pip \
-	python3-dev \
-	cmake
-RUN \
- echo "**** install runtime packages ****" && \
- apk add --no-cache --upgrade \
-	ffmpeg \
-	mediainfo \
-	python3 \
-	mktorrent \
-	unrar
+	apt update && \
+	apt install -y python3-pip ffmpeg mediainfo python3 mktorrent unrar
