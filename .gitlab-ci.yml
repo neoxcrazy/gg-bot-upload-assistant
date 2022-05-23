@@ -68,6 +68,7 @@ gitlab-docker-image:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":latest"
@@ -111,6 +112,7 @@ gitlab-fulldisk-docker-image:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.disk ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":FullDisk-latest"
@@ -154,6 +156,7 @@ docker-hub-image:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":latest"
@@ -197,6 +200,7 @@ docker-hub-image-aarch64:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.aarch64 ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":aarch64-latest"
@@ -240,6 +244,7 @@ docker-hub-image-armhf:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.armhf ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":arm32v7-latest"
@@ -283,6 +288,7 @@ docker-hub-fulldisk-image:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.disk ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":FullDisk-latest"
@@ -323,6 +329,7 @@ gg-bot-base-image:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.baseimage ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":latest"
@@ -359,6 +366,7 @@ gg-bot-base-image-aarch64:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":aarch64-latest"
@@ -395,6 +403,7 @@ gg-bot-base-image-armhf:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.baseimage.armhf ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":armhf-latest"
@@ -431,6 +440,7 @@ gg-bot-base-image-test:
   before_script:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
+    - mv Dockerfiles/Dockerfile.baseimage.test ./
     - |
       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
         tag=":test-latest"
