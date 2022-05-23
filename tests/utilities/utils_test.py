@@ -1,4 +1,5 @@
 import os
+import shutil
 import pytest
 
 from pathlib import Path
@@ -11,6 +12,8 @@ from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
 
 working_folder = Path(__file__).resolve().parent.parent.parent
 temp_working_dir = "/tests/working_folder"
+rar_file_source = "/tests/resources/rar/data.rar"
+rar_file_target = f"{temp_working_dir}/rar/data.rar"
 
 
 def clean_up(pth):
@@ -36,6 +39,7 @@ def run_around_tests():
         Path(f"{folder}/media").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/move/torrent").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/move/media").mkdir(parents=True, exist_ok=True) # media folder
+        Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True) # rar folder
     
     for dot_torrent in ["test1.torrent", "test2.torrent"]:
         fp = open(f"{folder}/torrent/{dot_torrent}", 'x')
@@ -45,6 +49,8 @@ def run_around_tests():
     fp = open(f"{folder}/media/file.mkv", 'x')
     logging.info(f"Creating file: {folder}/media/file.mkv")
     fp.close()
+
+    shutil.copy(f"{working_folder}{rar_file_source}", f"{working_folder}{rar_file_target}")
 
     yield
 
@@ -656,3 +662,17 @@ def test_watch_folder_torrent_relative_input_type_happy(mocker):
     assert moved_torrent_1_path.is_file() == False
     assert moved_torrent_2_path.is_file() == False
 
+
+def test_check_for_dir_and_extract_rars_file():
+    file_path = "tests/working_folder/rar/data.rar"
+    assert check_for_dir_and_extract_rars(file_path) == (True, file_path)
+
+
+def test_check_for_dir_and_extract_rars_non_rar_folder():
+    file_path = "tests/working_folder/media/"
+    assert check_for_dir_and_extract_rars(file_path) == (True, file_path)
+
+
+def test_check_for_dir_and_extract_rars_rar_folder():
+    file_path = "tests/working_folder/rar/"
+    assert check_for_dir_and_extract_rars(file_path) == (True, "tests/working_folder/rar/something.mkv")

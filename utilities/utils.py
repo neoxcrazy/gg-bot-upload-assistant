@@ -377,11 +377,11 @@ def check_for_dir_and_extract_rars(file_path):
                 logging.info("[Utils] Found 'unrar' system package, Using it to extract the video file now")
                 
                 # run the system package unrar and save the extracted file to its parent dir
-                subprocess.run([unrar_sys_package, 'e', rar_file[0], file])
+                subprocess.run([unrar_sys_package, 'e', rar_file[0], file_path])
                 logging.debug(f"[Utils] Successfully extracted file : {rar_file[0]}")
 
                 # This is how we identify which file we just extracted (Last modified)
-                list_of_files = glob.glob(f"{os.path.join(file, '')}*")
+                list_of_files = glob.glob(f"{os.path.join(file_path, '')}*")
                 latest_file = max(list_of_files, key=os.path.getctime)
 
                 logging.info(f"[Utils] Using the extracted {latest_file} for further processing")
