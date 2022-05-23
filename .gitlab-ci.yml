@@ -8,6 +8,7 @@ include:
 
 stages:
 - test
+- setup
 - build
 
 sast:
@@ -29,6 +30,7 @@ unit-test:
     DD_SERVICE: "gg-bot-upload-assistant"
     DD_TRACE_DEBUG: "true"
   script:
+    - apt install unrar
     - pip install -r requirements_test.txt
     - pip freeze > requirements_test.txt
     # - python -m pytest -vv --cov-report=html --cov=./ .
@@ -303,3 +305,42 @@ docker-hub-fulldisk-image:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
         - Dockerfile.disk
+
+
+
+
+gitlab-gg-bot-base-image:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage

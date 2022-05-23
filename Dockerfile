@@ -1,8 +1,5 @@
 FROM alpine:3.14
 
-ENV IS_CONTAINERIZED=true
-ENV IS_FULL_DISK_SUPPORTED=false
-
 RUN \
  echo "**** install build packages ****" && \
  apk add --no-cache --virtual=build-dependencies \
@@ -19,6 +16,9 @@ RUN \
 	unrar
 
 WORKDIR /app
+
+ENV IS_CONTAINERIZED=true
+ENV IS_FULL_DISK_SUPPORTED=false
 
 # add local files
 COPY requirements.txt .
