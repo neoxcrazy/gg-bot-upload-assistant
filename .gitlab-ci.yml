@@ -16,7 +16,7 @@ sast:
 
 unit-test:
   stage: test
-  image: noobmaster669/gg-bot-base:latest
+  image: noobmaster669/gg-bot-base:test-latest
   services:
     - name: datadog/agent:latest
       alias: ddogagent
@@ -415,3 +415,39 @@ gg-bot-base-image-armhf:
   only:
     changes:
       - Dockerfile.baseimage.armhf
+  
+gg-bot-base-image-test:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":test-latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'test-latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":test-$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":test-$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.test .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage.test
