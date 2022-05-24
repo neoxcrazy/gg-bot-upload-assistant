@@ -1,4 +1,4 @@
-unit-test2:
+unit-test-new:
   stage: test
   image: noobmaster669/gg-bot-base:test-latest
   services:
