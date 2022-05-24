@@ -4,6 +4,7 @@ variables:
 include:
 - template: Security/Secret-Detection.gitlab-ci.yml
 - template: Security/SAST.gitlab-ci.yml
+- template: cicd/.gitlab-ci-unit-test.yml
 
 
 stages:
@@ -14,6 +15,12 @@ stages:
 sast:
   stage: test
 
+
+# ********************************************** #
+# ********************************************** #
+#                Unit Tests GG-BOT               #
+# ********************************************** #
+# ********************************************** #
 unit-test:
   stage: test
   image: noobmaster669/gg-bot-base:test-latest
@@ -49,6 +56,12 @@ unit-test:
       - coverage/coverage.xml
     expire_in: 30 days
 
+
+# ********************************************** #
+# ********************************************** #
+#                GG-BOT Uploaders                #
+# ********************************************** #
+# ********************************************** #
 
 # Image ID: registry.gitlab.com/noobmaster669/gg-bot-upload-assistant:{TAG}
 # Image Description: Normal Docker Image build and stored in GitLab Container Registry
@@ -92,8 +105,6 @@ gitlab-docker-image:
         - Dockerfile
         
 
-
-
 # Image ID: registry.gitlab.com/noobmaster669/gg-bot-upload-assistant:FullDisk-{TAG}
 # Image Description: Normal Docker Image build and stored in GitLab Container Registry
 # Build Conditions: On all branches and tags
@@ -134,8 +145,6 @@ gitlab-fulldisk-docker-image:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
         - Dockerfile.disk
-
-
 
 
 # Image ID: noobmaster669/gg-bot-uploader:{TAG}
@@ -180,8 +189,6 @@ docker-hub-image:
         - Dockerfile
 
 
-
-
 # Image ID: noobmaster669/gg-bot-uploader:aarch64-{TAG}
 # Image Description: arm32v7 Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
@@ -222,8 +229,6 @@ docker-hub-image-aarch64:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
         - Dockerfile.aarch64
-
-
 
 
 # Image ID: noobmaster669/gg-bot-uploader:arm32v7-{TAG}
@@ -268,8 +273,6 @@ docker-hub-image-armhf:
         - Dockerfile.armhf
 
 
-
-
 # Image ID: noobmaster669/gg-bot-uploader:FullDisk-{TAG}
 # Image Description: Normal Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
@@ -311,9 +314,17 @@ docker-hub-fulldisk-image:
       exists:
         - Dockerfile.disk
 
+# ********************************************** #
+# ********************************************** #
+#             Base Images For GG-BOT             #
+# ********************************************** #
+# ********************************************** #
 
 
-# Building base images for GG-BOT
+#
+# -------------- noobmaster669/gg-bot-base:latest
+# This is the base image for GG-BOT Upload Assistant
+#
 gg-bot-base-image:
   stage: setup
   image:
@@ -351,6 +362,11 @@ gg-bot-base-image:
     changes:
       - Dockerfile.baseimage
 
+
+#
+# -------------- noobmaster669/gg-bot-base:aarch64-latest
+# This is the base image for GG-BOT Upload Assistant aarch64 flavour
+#
 gg-bot-base-image-aarch64:
   stage: setup
   image:
@@ -388,6 +404,11 @@ gg-bot-base-image-aarch64:
     changes:
       - Dockerfile.baseimage.aarch64
 
+
+#
+# -------------- noobmaster669/gg-bot-base:armhf-latest
+# This is the base image for GG-BOT Upload Assistant armhf flavour
+#
 gg-bot-base-image-armhf:
   stage: setup
   image:
@@ -424,7 +445,12 @@ gg-bot-base-image-armhf:
   only:
     changes:
       - Dockerfile.baseimage.armhf
-  
+
+
+#
+# -------------- noobmaster669/gg-bot-base:test-latest
+# This is the base image for running GG-BOT uploaders unit tests.
+#
 gg-bot-base-image-test:
   stage: setup
   image:
