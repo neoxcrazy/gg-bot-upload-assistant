@@ -1,0 +1,171 @@
+# ********************************************** #
+# ********************************************** #
+#             Base Images For GG-BOT             #
+# ********************************************** #
+# ********************************************** #
+
+#
+# -------------- noobmaster669/gg-bot-base:latest
+# This is the base image for GG-BOT Upload Assistant
+#
+gg-bot-base:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage ./
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage
+
+#
+# -------------- noobmaster669/gg-bot-base:aarch64-latest
+# This is the base image for GG-BOT Upload Assistant aarch64 flavour
+#
+gg-bot-base-aarch64:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":aarch64-latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'aarch64-latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":aarch64-$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":aarch64-$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.aarch64 .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage.aarch64
+
+  
+#
+# -------------- noobmaster669/gg-bot-base:armhf-latest
+# This is the base image for GG-BOT Upload Assistant armhf flavour
+#
+gg-bot-base-armhf:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.armhf ./
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":armhf-latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'armhf-latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":armhf-$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":armhf-$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.armhf .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage.armhf
+
+
+#
+# -------------- noobmaster669/gg-bot-base:test-latest
+# This is the base image for running GG-BOT uploaders unit tests.
+#
+gg-bot-base-test:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.test ./
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=":test-latest"
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'test-latest'"
+      elif [[ $CI_COMMIT_TAG ]]; then
+        tag=":test-$CI_COMMIT_TAG"
+        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
+      else
+        tag=":test-$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - |
+      echo "Building Image 'gg-bot-base${tag}"
+    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.test .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
+    - docker push "gg-bot-base${tag}"
+  only:
+    changes:
+      - Dockerfile.baseimage.test
