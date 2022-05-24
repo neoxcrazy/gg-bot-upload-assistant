@@ -13,6 +13,5 @@ stages:
 - setup
 - build
 
-
 sast:
   stage: test

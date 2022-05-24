@@ -1,74 +1,19 @@
-FROM alpine:3.15 AS GIT_CLONER
+FROM gg-bot-base:disk-latest AS GIT_CLONER
 
-RUN apk fix
-RUN apk --update add git git-lfs less openssh && \
-    git lfs install && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /var/cache/apk/*
-
-RUN mkdir /clone
-WORKDIR  /clone
-RUN git clone https://github.com/zoffline/BDInfoCLI-ng.git
-
-FROM ubuntu:20.04
-
-ENV MONO_VERSION 6.12.0.122
-ENV DEBIAN_FRONTEND=noninteractive
-ENV IS_CONTAINERIZED=true
-ENV IS_FULL_DISK_SUPPORTED=true
-
-RUN \
-	apt update && \
-	apt install -y gnupg ca-certificates && \
-	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && \
-	echo "deb https://download.mono-project.com/repo/ubuntu stable-focal/snapshots/$MONO_VERSION main" | tee /etc/apt/sources.list.d/mono-official-stable.list
-
-RUN \
-	apt update && \
-	apt-get install -y mono-runtime && \
-	rm -rf /var/lib/apt/lists/* /tmp/*
-
-RUN \
-	apt-get update && \
-	apt-get install -y --no-install-recommends tzdata
-
-RUN \
-	apt update && \
-	apt-get install -y binutils curl mono-devel ca-certificates-mono fsharp mono-vbnc nuget referenceassemblies-pcl && \
-	rm -rf /var/lib/apt/lists/* /tmp/*
-
-RUN mkdir -p /usr/src/app/source /usr/src/app/build
-WORKDIR /usr/src/app/source
-
-COPY --from=GIT_CLONER /clone/BDInfoCLI-ng/ .
-RUN nuget restore -NonInteractive
-RUN xbuild /property:Configuration=Release /property:OutDir=/usr/src/app/build/
-WORKDIR /usr/src/app/build
-
-RUN \
-	apt update && \
-	apt install -y python3-pip ffmpeg mediainfo python3 mktorrent unrar
-RUN mkdir /app
 WORKDIR /app
 
-# RUN \
-# 	apt update && \
-# 	apt install -y nano
-
-COPY requirements.txt .
-
+# add local files
+COPY requirements/requirements.txt .
 RUN \
   echo "**** install pip packages ****" && \
   pip install -r requirements.txt && \
   pip freeze > requirements.txt
 
 COPY . .
-RUN \
-  	rm auto_reupload.py && \
-  	chmod +x auto_upload.py && \
-  	echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
-    chmod +x /usr/bin/bdinfocli
+RUN rm -r requirements/
+RUN rm auto_reupload.py && chmod +x auto_upload.py
 
+# ports and volumes
 VOLUME /data /temp_upload
 
 ENTRYPOINT [ "python3", "auto_upload.py"]
