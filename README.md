@@ -223,6 +223,8 @@ docker run --rm -it \
     - [X] Qbittorrent
     - [X] Rutorrent
 - [X] Migrate torrent client feature from v3.0 alpha version
+- [X] Refactor and optimize build times for CICD pipelines
+    - [X] Introduce GG-BOT base images for faster builds 
 
 ### v3.0
 - [X] Automatic torrent re-uploader
