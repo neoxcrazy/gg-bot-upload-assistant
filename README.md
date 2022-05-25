@@ -4,6 +4,8 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 
 > Please refer to the readme in `dev` branch to see updated roadmaps and new features.
 
+> If you do not wish to use the docker version of the application, its recommended to checkout and use tags instead of branches for stability reasons.
+
 
 ![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
 
@@ -24,6 +26,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 * Automatically move .torrent and media to specified folders after upload
 * Customizable uploader signature for torrent descriptions
 * Automatic upload to torrent client: Immediate cross-seeding
+* Auto Re-Uploader flavour for uploading gods
 
 <br>
 
@@ -153,50 +156,47 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 <br>
 
 <!-- Basic setup -->
-# Basic setup
+# Basic setup for Upload Assistant
 ## Bare Metal / VM:
-1. Clone / download this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
+1. Clone this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
 > It is recommended to checkout a tag and use it instead of using as the master branch, as there is a possibility for master branch to have bug / error / conflicts during merges.<br>
 > Checkout a tag using the command `git checkout tags/<TAG>` 
-> <br>Eg: `git checkout tags/2.0`
+2. Checkout a release tag/version that you wish to use `git checkout tags/2.0`
 2. Install necessary packages ```pip install -r requirements.txt```
 3. Grand execute permission for user. `chmod u+x auto_upload.py`
-4. Rename `config.env.sample` to `config.env`
+4. Copy `config.env` from `samples/assistant` folder to cloned project root.
 5. Fill out the required values in `config.env`
 > Ensure that you have optional dependencies installed. <br>
 > - [MediaInfo](https://mediaarea.net/en/MediaInfo/Download/Ubuntu)
 > - [FFmpeg](https://ffmpeg.org/download.html)
+> - [unrar]
 > - [mktorrent](https://github.com/pobrn/mktorrent): Use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
 6. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
-> Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
-
+> Run command template ```python3 auto_upload.py -t <TRACKERS> -p "<FILE_OR_FOLDER_TO_BE_UPLOADED>" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]``
 > Please see Bare Metal Installation and Upgrade Wiki for details instructions.
-## Docker:
-1. Create new folder / dir [`mkdir GGBotUploader`]
-2. Enter into the new directory [`cd GGBotUploader`]
-3. Pull GG-Bot-Uploader docker image ``` docker pull noobmaster669/gg-bot-uploader:latest``` (See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags)
-4. Download `config.env.sample` to the folder GGBotUploader
-5. Rename `config.env.sample` to `config.env`
-6. Fill out the required values in `config.env`
-7. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
+
+<br>
+
+## Docker (recommended):
+1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`] 
+2. Download `samples/assistant/config.env` to the newly created folder (`GGBotUploader`)
+3. Fill out the required values in `config.env`
+5. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
 ```
 docker run --rm -it \
     -v <PATH_TO_YOUR_MEDIA>:/data \
     --env-file config.env \
     noobmaster669/gg-bot-uploader -t ATH TSP -p "/data/<YOUR_FILE_FOLDER>"
 ```
+> See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags
 
 <br /> 
 
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
-3. If you're trying to pass in a file as an arg, you may find autocomplete isn't working. Do this to fix it
-    * (What I mean by autocomplete is when you double hit *Tab*, and the filename/folder gets automatically filled in)
-    * ```chmod u+x auto_upload.py```
-    * run script using ```./auto_upload.py -t etc -p /path/to/file/autocompletes.now```
-    * NOTE: This is applicable only when you use the upload assistant on bare metal. Everyhting is taken care of in the docker version.
-4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
+3. When providing multiple database (TMDB, IMDB, TVMAZE ) ids via optional arguments, uploader uses the ids with priority **`IMDB > TMDB > TVMAZE`**
+4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`** 
 
 <br>
 
@@ -213,6 +213,7 @@ docker run --rm -it \
 ### v2.0.7
 - [X] Implement a restart/resume feature for uploads.
 - [X] Refactor dupe check logic and hdr bug fix
+- [X] Refactor screenshots code
 - [X] Add unit tests to the code - phase 1
 - [X] Add unit tests to the code - phase 2
 - [X] CICD for automated tests
@@ -261,6 +262,30 @@ docker run --rm -it \
 <br>
 
 # Change Log
+
+## **2.0.7 | UNRELEASED | SUBJECTED TO CHANGE**
+    New Trackers
+        * None
+    
+    New Features
+        * Ability to resume / reuse assets from previous uploads
+        * Improved watch folder movement during post-processing
+        * Support for immediate corss-seeding to torrent clients
+        * Support for communicating with torrent clients [ immediate-cross-seeding ]
+            * Qbittorrent
+            * Rutorrent
+        * Migrated torrent client feature from v3.0 alpha version
+    
+    Underhood Changes
+        * Refactored dupe check logic
+        * Refactored screenshots and image upload logic
+        * Add unit tests to existing code
+        * Add unit tests to the cicd pipeline
+        * Refactored cicd for better performance and faster builds
+        * Introded pre-built base images for cicd improvements
+        
+    Bug Fixes
+        * Issue#33: Dupe check error when dealing with DV HDR release
 
 ## **2.0.6**
     New Trackers
