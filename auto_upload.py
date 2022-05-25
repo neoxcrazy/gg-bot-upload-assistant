@@ -34,14 +34,12 @@ from rich.prompt import Prompt, Confirm
 
 # Search for **START** to get to the execution entry point of the upload assistant.
 
-# This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
-from images.upload_screenshots import take_upload_screens
-
 # utility methods
 # Method that will read and accept text components for torrent description
 from utilities.custom_user_input import collect_custom_messages_from_user
-# Method that will search for dupes in trackers.
-from utilities.search_for_dupes import search_for_dupes_api
+# This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
+from utilities.utils_screenshots import take_upload_screens
+from utilities.utils_dupes import search_for_dupes_api # Method that will search for dupes in trackers.
 from utilities.utils_miscellaneous import *
 from utilities.utils_translation import *
 from utilities.utils_metadata import *

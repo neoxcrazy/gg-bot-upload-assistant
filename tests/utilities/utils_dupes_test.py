@@ -8,7 +8,7 @@ from pytest_mock import mocker
 from werkzeug.serving import make_server
 from flask import Flask, jsonify, request, abort
 
-from utilities.search_for_dupes import *
+from utilities.utils_dupes import *
 
 
 working_folder = Path(__file__).resolve().parent.parent.parent

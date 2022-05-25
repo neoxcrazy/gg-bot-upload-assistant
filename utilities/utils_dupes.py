@@ -157,7 +157,7 @@ def _get_our_hdr_format(torrent_info):
     return our_format
 
 
-def fuzzy_similarity(our_title, check_against_title, release_title, release_year, release_screen_size):
+def _fuzzy_similarity(our_title, check_against_title, release_title, release_year, release_screen_size):
     check_against_title_original = check_against_title
     # We will remove things like the title & year from the comparison stings since we know they will be exact matches anyways
 
@@ -555,7 +555,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         if possible_dupe_title in cent_percent_dupes:
             possible_dupe_with_percentage_dict[possible_dupe_title] = 100
         else:
-            possible_dupe_with_percentage_dict[possible_dupe_title] = fuzzy_similarity(
+            possible_dupe_with_percentage_dict[possible_dupe_title] = _fuzzy_similarity(
                 our_title=torrent_info["torrent_title"], 
                 check_against_title=possible_dupe_title, 
                 release_title=torrent_info["title"],
