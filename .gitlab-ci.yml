@@ -4,7 +4,6 @@ variables:
 include:
 - template: Security/Secret-Detection.gitlab-ci.yml
 - template: Security/SAST.gitlab-ci.yml
-- template: Jobs/Code-Quality.gitlab-ci.yml
 - local: cicd/.gitlab-ci-base-images.yml
 - local: cicd/.gitlab-ci-unit-test.yml
 - local: cicd/.gitlab-ci-uploaders.yml
