@@ -11,6 +11,7 @@
 /.vscode
 bdinfo*.txt
 /config.env
+reupload.config.env
 /dev_comments
 /_ignore
 /POC/
