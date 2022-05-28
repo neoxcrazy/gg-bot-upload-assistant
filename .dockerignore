@@ -12,6 +12,5 @@ README.md
 /Dockerfiles
 Dockerfile*
 /cicd
-/requirements
 /samples
 /tests
