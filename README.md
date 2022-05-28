@@ -226,6 +226,7 @@ docker run --rm -it \
 - [X] Migrate torrent client feature from v3.0 alpha version
 - [X] Refactor and optimize build times for CICD pipelines
     - [X] Introduce GG-BOT base images for faster builds 
+- [X] Issue#10: Prevent unnecessary folders from being added in movie uploads
 - [X] Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
 - [X] Issue#33: Dupe check error when dealing with DV HDR release
 - [X] Issue#34: Cross-Seeding uploading torrents for failed uploads
@@ -289,6 +290,7 @@ docker run --rm -it \
         * Introded pre-built base images for cicd improvements
         
     Bug Fixes
+        * Issue#10: Prevent unnecessary folders from being added in movie uploads
         * Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
         * Issue#33: Dupe check error when dealing with DV HDR release
         * Issue#34: Cross-Seeding uploading torrents for failed uploads
