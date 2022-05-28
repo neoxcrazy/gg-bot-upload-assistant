@@ -501,7 +501,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
     # or should this be done at the start?? Just becase torrent client connection cannot be established
     # doesn't mean that we cannot do the upload. Maybe show a warning at the start that cross-seeding is enabled and 
     # client is not or misconfigured ???
-    if torrent_info[f"{tracker}_upload_status"] == True: # we perform cross-seeding only if tracker upload was successful
+    if f"{tracker}_upload_status" in torrent_info and torrent_info[f"{tracker}_upload_status"] == True: # we perform cross-seeding only if tracker upload was successful
         logging.info(f"[Utils] Attempting to upload dot torrent to configured torrent client.")
         logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
         console.print("Starting Post Processing....")
