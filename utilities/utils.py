@@ -501,30 +501,33 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
     # or should this be done at the start?? Just becase torrent client connection cannot be established
     # doesn't mean that we cannot do the upload. Maybe show a warning at the start that cross-seeding is enabled and 
     # client is not or misconfigured ???
-    logging.info(f"[Utils] Attempting to upload dot torrent to configured torrent client.")
-    logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
-    console.print("Starting Post Processing....")
-    console.print(f"File Path: {torrent_info['upload_media']}")
-    console.print(f"Client Save Path: {torrent_info['client_path']}")
-    
-    if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
-        logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
-        save_path = torrent_info["client_path"]
-    else:
-        save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
+    if torrent_info[f"{tracker}_upload_status"] == True: # we perform cross-seeding only if tracker upload was successful
+        logging.info(f"[Utils] Attempting to upload dot torrent to configured torrent client.")
+        logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
+        console.print("Starting Post Processing....")
+        console.print(f"File Path: {torrent_info['upload_media']}")
+        console.print(f"Client Save Path: {torrent_info['client_path']}")
+        
+        if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
+            logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
+            save_path = torrent_info["client_path"]
+        else:
+            save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
 
-    res = torrent_client.upload_torrent(
-        torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', 
-        save_path=save_path, 
-        use_auto_torrent_management=False, 
-        is_skip_checking=True
-    )
-    return res if res is not None else True
+        res = torrent_client.upload_torrent(
+            torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', 
+            save_path=save_path, 
+            use_auto_torrent_management=False, 
+            is_skip_checking=True
+        )
+        return res if res is not None else True
+    return False
 
 
 def _post_mode_watch_folder(torrent_info, working_folder):
     move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
     logging.debug(f"[Utils] Move locations configured by user :: {move_locations}")
+    torrent_info["post_processing_complete"] = True
 
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed

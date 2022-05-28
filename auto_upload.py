@@ -1004,7 +1004,7 @@ def upload_to_site(upload_to, tracker_api_key):
         if continue_upload != "y":
             console.print(f"\nCanceling upload to [bright_red]{upload_to}[/bright_red]")
             logging.error(f"[TrackerUpload] User chose to cancel the upload to {tracker}")
-            return
+            return False
 
     logging.fatal("[TrackerUpload] URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
 
@@ -1031,6 +1031,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+                return True
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
@@ -1039,6 +1040,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+                return True
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
@@ -1047,6 +1049,7 @@ def upload_to_site(upload_to, tracker_api_key):
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+                return True
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
@@ -1055,12 +1058,14 @@ def upload_to_site(upload_to, tracker_api_key):
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
+                return True
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
         else:
             console.print('Upload to tracker failed.', style='bold red')
             logging.critical("[TrackerUpload] Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
+        return False
     
     elif response.status_code == 404:
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
@@ -1088,6 +1093,7 @@ def upload_to_site(upload_to, tracker_api_key):
         console.print(f'[bold]HTTP response status code: [red]{response.status_code}[/red][/bold]')
         console.print("The status code isn't [green]200[/green] so something failed, upload may have failed")
         logging.error('[TrackerUpload] Status code is not 200, upload might have failed')
+    return False
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -1523,7 +1529,7 @@ for file in upload_queue:
         # 1.0 everything we do in this for loop isn't persistent, its specific to each site that you upload to
         # 1.1 things like screenshots, TMDB/IMDB ID's can & are reused for each site you upload to
         # 2.0 we take all the info we generated outside of this loop (mediainfo, description, etc) and combine it with tracker specific info and upload it all now
-        upload_to_site(upload_to=tracker, tracker_api_key=temp_tracker_api_key)
+        torrent_info[f"{tracker}_upload_status"] = upload_to_site(upload_to=tracker, tracker_api_key=temp_tracker_api_key)
 
         # Tracker Settings
         console.print("\n\n")
@@ -1537,7 +1543,11 @@ for file in upload_queue:
         console.print(tracker_settings_table, justify="center")
 
     # -------- Post Processing --------
-    perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
+    torrent_info["post_processing_complete"] = False
+    for tracker in upload_to_trackers:
+        if torrent_info["post_processing_complete"] == True:
+            break # this flag is used for watch folder post processing. we need to move only once
+        perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
 
     # Torrent Info
     console.print("\n\n")

@@ -243,6 +243,7 @@ def test_invalid_processing_mode(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -259,6 +260,7 @@ def test_no_client_upload(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -275,6 +277,7 @@ def test_client_upload_movie_folder_with_translation_sad_path(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -291,6 +294,7 @@ def test_client_upload_tv_season_with_translation(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Arcane.S01.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES/Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Arcane.S01.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES/"
     torrent_info["torrent_title"] = "Arcane S01 1080p NF WEB-DL DD+ 5.1 HDR HEVC-TEPES"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "tv"
     torrent_info["working_folder"] = ""
     torrent_info["complete_season"] = "1"
@@ -316,6 +320,7 @@ def test_client_upload_tv_episode_with_translation(mocker):
     torrent_info["raw_file_name"] = "Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Arcane.S01.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES/Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.mkv"
     torrent_info["torrent_title"] = "Arcane S01E01 1080p NF WEB-DL DD+ 5.1 HDR HEVC-TEPES"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "tv"
     torrent_info["working_folder"] = ""
     torrent_info["complete_season"] = "0"
@@ -342,6 +347,7 @@ def test_client_upload_movie_folder_with_translation(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -365,6 +371,7 @@ def test_client_upload_movie_folder(mocker):
     torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -382,11 +389,30 @@ def test_client_upload_movie_folder(mocker):
     assert perform_post_processing(torrent_info, mock_client, working_folder, tracker) == expected
         
 
+def test_client_upload_movie_folder_torrent_upload_failed(mocker):
+    torrent_info = {}
+    torrent_info["raw_file_name"] = "Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA"
+    torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
+    torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
+    torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = False
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = ""
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mock_client = mocker.patch('modules.torrent_client.TorrentClient')
+    mock_client.upload_torrent = __mock_upload_torrent
+   
+    assert perform_post_processing(torrent_info, mock_client, working_folder, tracker) == False
+
+
 def test_client_upload_movie_file(mocker):
     torrent_info = {}
     torrent_info["raw_file_name"] = "Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
@@ -409,6 +435,7 @@ def test_client_upload_movie_file_relative(mocker):
     torrent_info["raw_file_name"] = "Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["upload_media"] = "files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
     torrent_info["torrent_title"] = "Varathan 2018 1080p BluRay REMUX AVC DTS-HD MA 5.1-FAFDA"
+    torrent_info[f"TRACKER_upload_status"] = True
     torrent_info["type"] = "movie"
     torrent_info["working_folder"] = ""
     tracker = "TRACKER"
