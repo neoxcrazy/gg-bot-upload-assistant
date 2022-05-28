@@ -10,7 +10,7 @@ README.md
 *.mp4
 /files/*
 /Dockerfiles
-Dockerfile*
 /cicd
 /samples
 /tests
+pytest.ini
