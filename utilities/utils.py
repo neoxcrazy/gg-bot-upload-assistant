@@ -578,7 +578,7 @@ def _post_mode_watch_folder(torrent_info, working_folder):
 
 
 def get_torrent_client_if_needed():
-    if os.getenv("enable_post_processing", False) and os.getenv("post_processing_mode", "") == "CROSS_SEED":
+    if os.getenv("enable_post_processing", False) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
         # getting an instance of the torrent client factory
         torrent_client_factory = TorrentClientFactory()
         # creating the torrent client using the factory based on the users configuration

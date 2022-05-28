@@ -226,6 +226,7 @@ docker run --rm -it \
 - [X] Migrate torrent client feature from v3.0 alpha version
 - [X] Refactor and optimize build times for CICD pipelines
     - [X] Introduce GG-BOT base images for faster builds 
+- [X] Issue#35: HEVC codec being used for web releases
 
 ### v3.0
 - [X] Automatic torrent re-uploader
@@ -286,6 +287,7 @@ docker run --rm -it \
         
     Bug Fixes
         * Issue#33: Dupe check error when dealing with DV HDR release
+        * Issue#35: HEVC codec being used for web releases
 
 ## **2.0.6**
     New Trackers

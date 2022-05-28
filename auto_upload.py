@@ -36,8 +36,8 @@ from rich.prompt import Prompt, Confirm
 
 # utility methods
 # Method that will read and accept text components for torrent description
-from utilities.custom_user_input import collect_custom_messages_from_user
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
+from utilities.utils_user_input import collect_custom_messages_from_user
 from utilities.utils_screenshots import take_upload_screens
 from utilities.utils_dupes import search_for_dupes_api # Method that will search for dupes in trackers.
 from utilities.utils_miscellaneous import *
