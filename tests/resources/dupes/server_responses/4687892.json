@@ -1,0 +1,109 @@
+{
+    "data": [
+        {
+            "type": "torrent",
+            "id": "98223",
+            "attributes": {
+                "poster": "https://image.tmdb.org/t/p/w92/nNsEg2qlCZcmonqAdhxJEq9DSka.jpg",
+                "name": "Good Girls Revolt S01E01 Original Cut REPACK 1080p AMZN WEB-DL DD+ 5.1 H.264-monkee",
+                "release_year": "2015",
+                "category": "TV Show",
+                "type": "WEB-DL",
+                "resolution": "1080p",
+                "media_info": "General\r\nUnique ID                                : 191456837110196360108628863488258231257 (0x90093EDD5605774FB73353CCA1084BD9)\r\nComplete name                            : Good.Girls.Revolt.S01E01.REPACK.1080p.AMZN.WEBRip.DD5.1.x264-monkee.mkv\r\nFormat                                   : Matroska\r\nFormat version                           : Version 4\r\nFile size                                : 2.41 GiB\r\nDuration                                 : 55 min 24 s\r\nOverall bit rate mode                    : Variable\r\nOverall bit rate                         : 6 221 kb/s\r\nEncoded date                             : UTC 2016-09-03 00:20:47\r\nWriting application                      : mkvmerge v7.9.0 ('Birds') 32bit\r\nWriting library                          : libebml v1.3.1 + libmatroska v1.4.2\r\n\r\nVideo\r\nID                                       : 1\r\nFormat                                   : AVC\r\nFormat/Info                              : Advanced Video Codec\r\nFormat profile                           : High@L4\r\nFormat settings                          : CABAC / 4 Ref Frames\r\nFormat settings, CABAC                   : Yes\r\nFormat settings, Reference frames        : 4 frames\r\nCodec ID                                 : V_MPEG4/ISO/AVC\r\nDuration                                 : 55 min 24 s\r\nBit rate mode                            : Variable\r\nBit rate                                 : 5 579 kb/s\r\nMaximum bit rate                         : 15.0 Mb/s\r\nWidth                                    : 1 920 pixels\r\nHeight                                   : 1 080 pixels\r\nDisplay aspect ratio                     : 16:9\r\nFrame rate mode                          : Constant\r\nFrame rate                               : 23.976 (24000/1001) FPS\r\nColor space                              : YUV\r\nChroma subsampling                       : 4:2:0\r\nBit depth                                : 8 bits\r\nScan type                                : Progressive\r\nBits/(Pixel*Frame)                       : 0.112\r\nStream size                              : 2.16 GiB (90%)\r\nTitle                                    : Good Girls Revolt S01E00  b1080pB\r\nWriting library                          : x264 core 148 r2623 d5b2374\r\nEncoding settings                        : cabac=1 / ref=4 / deblock=1:-1:-1 / analyse=0x3:0x133 / me=umh / subme=9 / psy=1 / psy_rd=1.00:0.15 / mixed_ref=1 / me_range=24 / chroma_me=1 / trellis=2 / 8x8dct=1 / cqm=0 / deadzone=21,11 / fast_pskip=1 / chroma_qp_offset=-3 / threads=34 / lookahead_threads=5 / sliced_threads=0 / nr=150 / decimate=1 / interlaced=0 / bluray_compat=0 / constrained_intra=0 / bframes=8 / b_pyramid=2 / b_adapt=2 / b_bias=0 / direct=3 / weightb=1 / open_gop=0 / weightp=2 / keyint=120 / keyint_min=61 / scenecut=0 / intra_refresh=0 / rc_lookahead=120 / rc=crf / mbtree=1 / crf=18.0 / qcomp=0.60 / qpmin=0 / qpmax=69 / qpstep=4 / vbv_maxrate=15000 / vbv_bufsize=31250 / crf_max=0.0 / nal_hrd=vbr / filler=0 / ip_ratio=1.40 / aq=3:1.00\r\nDefault                                  : Yes\r\nForced                                   : No\r\nColor range                              : Limited\r\nColor primaries                          : BT.709\r\nTransfer characteristics                 : BT.709\r\nMatrix coefficients                      : BT.709\r\n\r\nAudio\r\nID                                       : 2\r\nFormat                                   : E-AC-3\r\nFormat/Info                              : Enhanced AC-3\r\nCommercial name                          : Dolby Digital Plus\r\nCodec ID                                 : A_EAC3\r\nDuration                                 : 55 min 24 s\r\nBit rate mode                            : Constant\r\nBit rate                                 : 640 kb/s\r\nChannel(s)                               : 6 channels\r\nChannel layout                           : L R C LFE Ls Rs\r\nSampling rate                            : 48.0 kHz\r\nFrame rate                               : 31.250 FPS (1536 SPF)\r\nCompression mode                         : Lossy\r\nStream size                              : 254 MiB (10%)\r\nTitle                                    : English\r\nLanguage                                 : English\r\nService kind                             : Complete Main\r\nDefault                                  : Yes\r\nForced                                   : No\r\n\r\nText\r\nID                                       : 3\r\nFormat                                   : UTF-8\r\nCodec ID                                 : S_TEXT/UTF8\r\nCodec ID/Info                            : UTF-8 Plain Text\r\nDuration                                 : 53 min 50 s\r\nBit rate                                 : 92 b/s\r\nCount of elements                        : 1200\r\nStream size                              : 36.4 KiB (0%)\r\nTitle                                    : English\r\nLanguage                                 : English\r\nDefault                                  : No\r\nForced                                   : No",
+                "bd_info": null,
+                "description": "This is an extended version of episode 1 with some differently cut scenes - 55m24s length\r\nThe regular Amazon streaming version for this episode is 50m4s (DEFLATE release for example)\r\n\r\nNotes from release group:\r\n [i]\"This is the original pilot released during Pilot Season 2015, not the final edit of S01E01. Direct stream d/l from Amazon. No reencoding. REPACK due to incomplete file last time.\"   [/i]                           \r\n\r\nScreenshots:\r\n\r\n  [url=https://imgbox.com/2jyrsA2k][img]https://thumbs2.imgbox.com/7e/e8/2jyrsA2k_t.png[/img][/url] [url=https://imgbox.com/4KURQeQ5][img]https://thumbs2.imgbox.com/97/7c/4KURQeQ5_t.png[/img][/url] [url=https://imgbox.com/0Od16QRE][img]https://thumbs2.imgbox.com/62/b9/0Od16QRE_t.png[/img][/url] [url=https://imgbox.com/2PGuw2CD][img]https://thumbs2.imgbox.com/93/24/2PGuw2CD_t.png[/img][/url] [url=https://imgbox.com/VTZnlRmr][img]https://thumbs2.imgbox.com/7e/53/VTZnlRmr_t.png[/img][/url] [url=https://imgbox.com/qsEr3pGi][img]https://thumbs2.imgbox.com/f8/ad/qsEr3pGi_t.png[/img][/url] [url=https://imgbox.com/hoqqdaxU][img]https://thumbs2.imgbox.com/e9/42/hoqqdaxU_t.png[/img][/url] [url=https://imgbox.com/5TDk8mvo][img]https://thumbs2.imgbox.com/ee/92/5TDk8mvo_t.png[/img][/url]",
+                "info_hash": "053c5e83f174725a9099dec335dbd0b20949f7a4",
+                "size": 2585384242,
+                "num_file": 1,
+                "freeleech": "0%",
+                "double_upload": 0,
+                "internal": 0,
+                "uploader": "bluwarlan",
+                "seeders": 2,
+                "leechers": 0,
+                "times_completed": 11,
+                "tmdb_id": "66869",
+                "imdb_id": "4687892",
+                "tvdb_id": "315419",
+                "mal_id": "0",
+                "igdb_id": "0",
+                "category_id": 2,
+                "type_id": 4,
+                "resolution_id": 2,
+                "created_at": "2021-07-22T22:06:12.000000Z",
+                "download_link": "http://localhost:5000/torrent/download/98223.5b7ea911c9827216bacda80c69d7b9d0",
+                "details_link": "http://localhost:5000/torrents/98223"
+            }
+        },
+        {
+            "type": "torrent",
+            "id": "98074",
+            "attributes": {
+                "poster": "https://image.tmdb.org/t/p/w92/nNsEg2qlCZcmonqAdhxJEq9DSka.jpg",
+                "name": "Good Girls Revolt S01 1080p WEBRip DD+ 5.1 x264-DEFLATE",
+                "release_year": "2015",
+                "category": "TV Show",
+                "type": "WEBRip",
+                "resolution": "1080p",
+                "media_info": "General\r\nUnique ID                                : 269335490259675635148049998826968510207 (0xCAA020EA786482BFFB6107C9C854EEFF)\r\nComplete name                            : Good.Girls.Revolt.S01E01.1080p.WEBRip.X264-DEFLATE.mkv\r\nFormat                                   : Matroska\r\nFormat version                           : Version 4\r\nFile size                                : 4.19 GiB\r\nDuration                                 : 50 min 4 s\r\nOverall bit rate                         : 12.0 Mb/s\r\nEncoded date                             : UTC 2016-11-07 00:01:01\r\nWriting application                      : mkvmerge v9.3.1 ('Mask Machine') 64bit\r\nWriting library                          : libebml v1.3.4 + libmatroska v1.4.5\r\n\r\nVideo\r\nID                                       : 1\r\nFormat                                   : AVC\r\nFormat/Info                              : Advanced Video Codec\r\nFormat profile                           : High@L4.1\r\nFormat settings                          : CABAC / 4 Ref Frames\r\nFormat settings, CABAC                   : Yes\r\nFormat settings, Reference frames        : 4 frames\r\nCodec ID                                 : V_MPEG4/ISO/AVC\r\nDuration                                 : 50 min 4 s\r\nBit rate                                 : 11.1 Mb/s\r\nWidth                                    : 1 920 pixels\r\nHeight                                   : 1 080 pixels\r\nDisplay aspect ratio                     : 16:9\r\nFrame rate mode                          : Constant\r\nFrame rate                               : 23.976 (24000/1001) FPS\r\nColor space                              : YUV\r\nChroma subsampling                       : 4:2:0\r\nBit depth                                : 8 bits\r\nScan type                                : Progressive\r\nBits/(Pixel*Frame)                       : 0.223\r\nStream size                              : 3.88 GiB (93%)\r\nWriting library                          : x264 core 148 r2721+7 72d53ab / tmod 162ad1b X86_64\r\nEncoding settings                        : cabac=1 / ref=4 / deblock=1:-3:-3 / analyse=0x3:0x133 / me=umh / subme=11 / psy=1 / fade_compensate=0.00 / psy_rd=1.05:0.15 / mixed_ref=1 / me_range=36 / chroma_me=1 / trellis=2 / 8x8dct=1 / cqm=0 / deadzone=6,6 / fast_pskip=0 / chroma_qp_offset=-3 / threads=12 / lookahead_threads=3 / sliced_threads=0 / nr=0 / decimate=0 / interlaced=0 / bluray_compat=0 / constrained_intra=0 / fgo=0 / bframes=10 / b_pyramid=2 / b_adapt=2 / b_bias=0 / direct=3 / weightb=1 / open_gop=0 / weightp=2 / keyint=250 / keyint_min=23 / scenecut=40 / intra_refresh=0 / rc=crf / mbtree=0 / crf=17.0000 / qcomp=0.70 / qpmin=0:0:0 / qpmax=69:69:69 / qpstep=4 / ip_ratio=1.10 / pb_ratio=1.10 / aq=3:0.70 / aq-sensitivity=10.00 / aq-factor=1.00:1.00:1.00 / aq2=0 / aq3=0\r\nLanguage                                 : English\r\nDefault                                  : Yes\r\nForced                                   : No\r\n\r\nAudio\r\nID                                       : 2\r\nFormat                                   : E-AC-3\r\nFormat/Info                              : Enhanced AC-3\r\nCommercial name                          : Dolby Digital Plus\r\nCodec ID                                 : A_EAC3\r\nDuration                                 : 50 min 4 s\r\nBit rate mode                            : Constant\r\nBit rate                                 : 640 kb/s\r\nChannel(s)                               : 6 channels\r\nChannel layout                           : L R C LFE Ls Rs\r\nSampling rate                            : 48.0 kHz\r\nFrame rate                               : 31.250 FPS (1536 SPF)\r\nCompression mode                         : Lossy\r\nStream size                              : 229 MiB (5%)\r\nLanguage                                 : English\r\nService kind                             : Complete Main\r\nDefault                                  : Yes\r\nForced                                   : No\r\n\r\nText #1\r\nID                                       : 3\r\nFormat                                   : UTF-8\r\nCodec ID                                 : S_TEXT/UTF8\r\nCodec ID/Info                            : UTF-8 Plain Text\r\nTitle                                    : English\r\nLanguage                                 : English\r\nDefault                                  : No\r\nForced                                   : No\r\n\r\nText #2\r\nID                                       : 4\r\nFormat                                   : UTF-8\r\nCodec ID                                 : S_TEXT/UTF8\r\nCodec ID/Info                            : UTF-8 Plain Text\r\nTitle                                    : English (SDH)\r\nLanguage                                 : English\r\nDefault                                  : No\r\nForced                                   : No",
+                "bd_info": null,
+                "description": "Good.Girls.Revolt.S01.1080p.WEBRip.x264-DEFLATE\r\n10 episodes\r\n1080p x264 video, DD+ 5.1 audio, english subs\r\nI would imagine these are encodes from the 2160p stream because they are very crisp (more detail than the regular 1080p WEB-DL)\r\n\r\nScreenshots:\r\n[URL=https://imgbox.com/Rj4Kv2EE][IMG]https://thumbs2.imgbox.com/af/80/Rj4Kv2EE_t.png[/IMG][/URL] [URL=https://imgbox.com/B9jNsNVK][IMG]https://thumbs2.imgbox.com/50/f6/B9jNsNVK_t.png[/IMG][/URL] [URL=https://imgbox.com/cpfDistq][IMG]https://thumbs2.imgbox.com/77/c4/cpfDistq_t.png[/IMG][/URL] [URL=https://imgbox.com/kqYw8Iuc][IMG]https://thumbs2.imgbox.com/fe/17/kqYw8Iuc_t.png[/IMG][/URL] [URL=https://imgbox.com/7nl8lWUp][IMG]https://thumbs2.imgbox.com/fe/0d/7nl8lWUp_t.png[/IMG][/URL] [URL=https://imgbox.com/BTjQ5t6b][IMG]https://thumbs2.imgbox.com/76/a2/BTjQ5t6b_t.png[/IMG][/URL] [URL=https://imgbox.com/EhLGvjeT][IMG]https://thumbs2.imgbox.com/a5/53/EhLGvjeT_t.png[/IMG][/URL] [URL=https://imgbox.com/gZY2fDKJ][IMG]https://thumbs2.imgbox.com/eb/b3/gZY2fDKJ_t.png[/IMG][/URL] [URL=https://imgbox.com/iM70kxP2][IMG]https://thumbs2.imgbox.com/cc/3d/iM70kxP2_t.png[/IMG][/URL]",
+                "info_hash": "842de512c83512e7c528917b016f47d76cd6c1e5",
+                "size": 56553102266,
+                "num_file": 10,
+                "freeleech": "0%",
+                "double_upload": 0,
+                "internal": 0,
+                "uploader": "bluwarlan",
+                "seeders": 2,
+                "leechers": 0,
+                "times_completed": 5,
+                "tmdb_id": "66869",
+                "imdb_id": "4687892",
+                "tvdb_id": "315419",
+                "mal_id": "0",
+                "igdb_id": "0",
+                "category_id": 2,
+                "type_id": 5,
+                "resolution_id": 2,
+                "created_at": "2021-07-21T22:18:55.000000Z",
+                "download_link": "http://localhost:5000/torrent/download/98074.5b7ea911c9827216bacda80c69d7b9d0",
+                "details_link": "http://localhost:5000/torrents/98074"
+            }
+        }
+    ],
+    "links": {
+        "first": "http://localhost:5000/api/torrents/filter?page=1",
+        "last": "http://localhost:5000/api/torrents/filter?page=1",
+        "prev": null,
+        "next": null,
+        "self": "http://localhost:5000/api/torrents"
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://localhost:5000/api/torrents/filter?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "path": "http://localhost:5000/api/torrents/filter",
+        "per_page": 25,
+        "to": 2,
+        "total": 2
+    }
+}

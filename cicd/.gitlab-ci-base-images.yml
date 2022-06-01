@@ -1,0 +1,157 @@
+# ********************************************** #
+# ********************************************** #
+#             Base Images For GG-BOT             #
+# ********************************************** #
+# ********************************************** #
+
+#
+# -------------- noobmaster669/gg-bot-base:latest
+# This is the base image for GG-BOT Upload Assistant
+#
+gg-bot-base:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage ./
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:latest" -f Dockerfile.baseimage .
+    - |
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
+  only:
+    changes:
+      - Dockerfiles/Dockerfile.baseimage
+
+#
+# -------------- noobmaster669/gg-bot-base:aarch64-latest
+# This is the base image for GG-BOT Upload Assistant aarch64 flavour
+#
+gg-bot-base-aarch64:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest" -f Dockerfile.baseimage.aarch64 .
+    - |
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
+  only:
+    changes:
+      - Dockerfiles/Dockerfile.baseimage.aarch64
+
+  
+#
+# -------------- noobmaster669/gg-bot-base:armhf-latest
+# This is the base image for GG-BOT Upload Assistant armhf flavour
+#
+gg-bot-base-armhf:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.armhf ./
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest" -f Dockerfile.baseimage.armhf .
+    - |
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
+  only:
+    changes:
+      - Dockerfiles/Dockerfile.baseimage.armhf
+
+
+#
+# -------------- noobmaster669/gg-bot-base:test-latest
+# This is the base image for running GG-BOT uploaders unit tests.
+#
+gg-bot-base-test:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.test ./
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest" -f Dockerfile.baseimage.test .
+    - |
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
+  only:
+    changes:
+      - Dockerfiles/Dockerfile.baseimage.test
+
+#
+# -------------- noobmaster669/gg-bot-base:disk-latest
+# This is the base image for  GG-BOT uploader full disk flavour
+#
+gg-bot-base-disk:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.disk ./
+    - |
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest" -f Dockerfile.baseimage.disk .
+    - |
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
+  only:
+    changes:
+      - Dockerfiles/Dockerfile.baseimage.disk

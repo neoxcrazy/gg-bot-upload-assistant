@@ -1,32 +1,25 @@
 # Project exclude paths
 /.github
-/tests.py
 *.mkv
 *.mp4
 *.torrent
-/images/screenshots
 /temp_upload
-rtorrent_on_complete_reupload.sh
-config.env
-reupload.config.env
-config.env.docker
+/tests/resources/bdinfo/working_folder/*
+/tests/working_folder
 /.idea/
 .coverage
 /.vscode
 bdinfo*.txt
-tvmaze.py
-dev_comments.txt
+/config.env
+reupload.config.env
 /dev_comments
-/reuploader_envs
 /_ignore
 /POC/
-/env-files-samples/docker-compose.yml
-/env-files-samples/reupload.config.env
-/test
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+/coverage
 
 # C extensions
 *.so
@@ -111,9 +104,9 @@ celerybeat-schedule
 
 # SageMath parsed files
 *.sage.py
+/files/
 
 # Environments
-.env
 .venv
 env/
 venv/

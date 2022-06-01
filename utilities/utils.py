@@ -4,6 +4,8 @@ import json
 import glob
 import math
 import time
+import shutil
+import hashlib
 import logging
 import subprocess
 
@@ -17,7 +19,16 @@ from dotenv import dotenv_values
 from rich.console import Console
 from pymediainfo import MediaInfo
 
+from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
+
+
 console = Console()
+
+
+def get_hash(string):
+    hashed = hashlib.new('sha256')
+    hashed.update(string.encode())
+    return hashed.hexdigest()
 
 
 def get_piece_size_for_mktorrent(size):
@@ -59,12 +70,12 @@ def calculate_piece_size(size):
 
     :return: calculated piece size
     """
-    if size <= 2**30:          # 1 GiB / 1024 pieces = 1 MiB max
+    if size <= 1 * 2**30:      # 1 GiB / 1024 pieces = 1 MiB max
+        pieces = size / 1024
+    elif size <= 2 * 2**30:    # 2 GiB / 2048 pieces = 2 MiB max
         pieces = size / 1024
     elif size <= 4 * 2**30:    # 4 GiB / 2048 pieces = 2 MiB max
-        pieces = size / 2048
-    elif size <= 6 * 2**30:    # 6 GiB / 3072 pieces = 2 MiB max
-        pieces = size / 3072
+        pieces = size / 1024
     elif size <= 8 * 2**30:    # 8 GiB / 2048 pieces = 4 MiB max
         pieces = size / 2048
     elif size <= 16 * 2**30:   # 16 GiB / 2048 pieces = 8 MiB max
@@ -73,6 +84,8 @@ def calculate_piece_size(size):
         pieces = size / 2048
     elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
         pieces = size / 4096
+    elif size <= 128 * 2**30:  # 128 GiB / 4096 pieces = 16 MiB max
+        pieces = size / 8192
     elif size > 64 * 2**30:
         pieces = size / 10240
     # Math is magic!
@@ -80,7 +93,7 @@ def calculate_piece_size(size):
     return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
-def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None):
+def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None, hash_prefix=""):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """
@@ -88,7 +101,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
     logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
     logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
 
-    if len(glob.glob(working_folder + "/temp_upload/*.torrent")) == 0:
+    if len(glob.glob(f"{working_folder}/temp_upload/{hash_prefix}*.torrent")) == 0:
         # we need to actually generate a torrent file "from scratch"
         logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if use_mktorrent:
@@ -113,9 +126,9 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
             if len(announce) == 1:
-                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
             else:
-                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent\" \"{media}\"")
+                os.system(f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
             logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
         else:
             print("Using python torf to generate the torrent")
@@ -131,7 +144,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
             torrent.generate(callback=callback)
-            torrent.write(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+            torrent.write(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
             torrent.verify_filesize(media)
             logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
     else:
@@ -139,7 +152,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
-        edit_torrent = Torrent.read(glob.glob(working_folder + '/temp_upload/*.torrent')[0])
+        edit_torrent = Torrent.read(glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
 
         if len(announce) == 1:
             logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
@@ -159,12 +172,12 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         edit_torrent.metainfo['announce'] = announce[0]
         edit_torrent.metainfo['info']['source'] = source
         # Edit the previous .torrent and save it as a new copy
-        Torrent.copy(edit_torrent).write(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+        Torrent.copy(edit_torrent).write(filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
 
-    if os.path.isfile(f'{working_folder}/temp_upload/{tracker}-{torrent_title}.torrent'):
-        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+    if os.path.isfile(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent'):
+        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
     else:
-        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{tracker}-{torrent_title}.torrent')
+        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
 
 
 def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break, debug=False):
@@ -267,17 +280,17 @@ def write_uploader_signature_to_description(description_file_path, tracker, bbco
 def has_user_provided_type(user_type):
     if user_type:
         if user_type[0] in ('tv', 'movie'):
-            logging.info(f"Using user provided type {user_type[0]}")
+            logging.info(f"[Utils] Using user provided type {user_type[0]}")
             return True
         else:
-            logging.error(f'User has provided invalid media type as argument {user_type[0]}. Type will be detected dynamically!')
+            logging.error(f'[Utils] User has provided invalid media type as argument {user_type[0]}. Type will be detected dynamically!')
             return False
     else:
-        logging.info("Type not provided by user. Type will be detected dynamically!")
+        logging.info("[Utils] Type not provided by user. Type will be detected dynamically!")
         return False
 
 
-def delete_leftover_files(working_folder):
+def delete_leftover_files(working_folder, resume=False, file=None):
     """
         Used to remove temporary files (mediainfo.txt, description.txt, screenshots) from the previous upload
         Func is called at the start of each run to make sure there are no mix up with wrong screenshots being uploaded etc.
@@ -285,17 +298,33 @@ def delete_leftover_files(working_folder):
         Not much significance when using the containerized solution, however if the `temp_upload` folder in container
         is mapped to a docker volume / host path, then clearing would be best. Hence keeping this method.
     """
-    for old_temp_data in ["/temp_upload/", "/images/screenshots/"]:
-        # We need these folders to store things like screenshots, .torrent & description files.
-        # So create them now if they don't exist
-        try:
-            os.mkdir(f"{working_folder}{old_temp_data}")
-        except FileExistsError:
-            # If they do already exist then we need to remove any old data from them
-            files = glob.glob(f'{working_folder}{old_temp_data}*')
+    # We need these folders to store things like screenshots, .torrent & description files.
+    # So create them now if they don't exist
+    if Path(f"{working_folder}/temp_upload/").is_dir():
+        # this means that the directory exists
+        # If they do already exist then we need to remove any old data from them
+        if resume:
+            logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}/temp_upload/")
+        else:
+            files = glob.glob(f'{working_folder}/temp_upload/*')
             for f in files:
-                os.remove(f)
-            logging.info("[Utils] Deleted the contents of the folder: {}".format(working_folder + old_temp_data))
+                if os.path.isfile(f):
+                    os.remove(f)
+                else:
+                    shutil.rmtree(f)
+            logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}/temp_upload/")
+    else:
+        os.mkdir(f"{working_folder}/temp_upload/")
+
+    if file is not None:
+        hash = get_hash(file)
+        if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
+            os.mkdir(f"{working_folder}/temp_upload/{hash}")
+        if not Path(f"{working_folder}/temp_upload/{hash}/screenshots/").is_dir():
+            os.mkdir(f"{working_folder}/temp_upload/{hash}/screenshots/")
+        logging.info(f"[Utils] Created subfolder {hash} for file {file}")
+        return f"{hash}/"
+    return ""
 
 
 def write_file_contents_to_log_as_debug(file_path):
@@ -333,7 +362,7 @@ def check_for_dir_and_extract_rars(file_path):
         I case of any errors, status will be false and the upload of that file can be skipped
     """
     # If the path the user specified is a folder with .rar files in it then we unpack the video file & set the torrent_info key equal to the extracted video file
-    if os.path.isdir(file_path):
+    if Path(file_path).is_dir():
         logging.info(f"[Utils] User wants to upload a folder: {file_path}")
 
         # Now we check to see if the dir contains rar files
@@ -348,11 +377,11 @@ def check_for_dir_and_extract_rars(file_path):
                 logging.info("[Utils] Found 'unrar' system package, Using it to extract the video file now")
                 
                 # run the system package unrar and save the extracted file to its parent dir
-                subprocess.run([unrar_sys_package, 'e', rar_file[0], file])
+                subprocess.run([unrar_sys_package, 'e', rar_file[0], file_path])
                 logging.debug(f"[Utils] Successfully extracted file : {rar_file[0]}")
 
                 # This is how we identify which file we just extracted (Last modified)
-                list_of_files = glob.glob(f"{os.path.join(file, '')}*")
+                list_of_files = glob.glob(f"{os.path.join(file_path, '')}*")
                 latest_file = max(list_of_files, key=os.path.getctime)
 
                 logging.info(f"[Utils] Using the extracted {latest_file} for further processing")
@@ -431,3 +460,162 @@ def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, 
 
     logging.debug(f"[Utils] Trackers selected by bot: {upload_to_trackers}")
     return upload_to_trackers
+
+
+def _get_client_translated_path(torrent_info):
+    # before we can upload the torrent to the client, we might need to do some path translations.
+    # suppose, we are trying to upload a movie with the user provided path (-p argument) as
+    ''' /home/user/data/movie_name/movie.mkv ''' 
+    # when we add to client and sets the save location, it needs to be set as '/home/user/data/movie_name/'
+    # if the user is running the torrent client in a docker container, or the uploader is running in a docker container 😉,
+    # the paths accessible to the torrent client will be different. It could be ...
+    """ /media/downloads/movie_name/movie.mkv """
+    # In these cases we may need to perform path translations.
+    """ 
+        From: /home/user/data/movie_name/movie.mkv
+        To: /media/downloads/movie_name/movie.mkv
+    """
+
+    if os.getenv('translation_needed', False):
+        logging.info('[Utils] Translating paths... ("translation_needed" flag set to True in config.env) ')
+        
+        # Just in case the user didn't end the path with a forward slash...
+        uploader_path = f"{os.getenv('uploader_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
+        client_path = f"{os.getenv('client_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
+
+        if "__MISCONFIGURED_PATH__/" in [client_path, uploader_path]:
+            logging.error(f"[Utils] User have enabled translation, but haven't provided the translation paths. Stopping cross-seeding...")
+            return False
+
+        # log the changes
+        logging.info(f'[Utils] Uploader path: {torrent_info["upload_media"]}')
+        logging.info(f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_path, client_path)}')
+
+        # Now we replace the remote path with the system one
+        torrent_info["upload_media"] = torrent_info["upload_media"].replace(uploader_path, client_path)
+    return f'{torrent_info["upload_media"]}/'.replace('//', '/')
+
+
+def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker):
+    # TODO check and validate connection to torrent client.
+    # or should this be done at the start?? Just becase torrent client connection cannot be established
+    # doesn't mean that we cannot do the upload. Maybe show a warning at the start that cross-seeding is enabled and 
+    # client is not or misconfigured ???
+    if f"{tracker}_upload_status" in torrent_info and torrent_info[f"{tracker}_upload_status"] == True: # we perform cross-seeding only if tracker upload was successful
+        logging.info(f"[Utils] Attempting to upload dot torrent to configured torrent client.")
+        logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
+        console.print("Starting Post Processing....")
+        console.print(f"File Path: {torrent_info['upload_media']}")
+        console.print(f"Client Save Path: {torrent_info['client_path']}")
+        
+        if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
+            logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
+            save_path = torrent_info["client_path"]
+        else:
+            save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
+
+        res = torrent_client.upload_torrent(
+            torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', 
+            save_path=save_path, 
+            use_auto_torrent_management=False, 
+            is_skip_checking=True
+        )
+        return res if res is not None else True
+    return False
+
+
+def _post_mode_watch_folder(torrent_info, working_folder):
+    move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
+    logging.debug(f"[Utils] Move locations configured by user :: {move_locations}")
+    torrent_info["post_processing_complete"] = True
+
+    for move_location_key, move_location_value in move_locations.items():
+        # If the user supplied a path & it exists we proceed
+        if len(move_location_value) == 0:
+            logging.debug(f'[Utils] Move location not configured for {move_location_key}')
+            continue
+        if os.path.exists(move_location_value):
+            logging.info(f"[Utils] The move path {move_location_value} exists")
+
+            if move_location_key == 'torrent':
+                sub_folder = "/"
+                if os.getenv("enable_type_base_move", False) != False:
+                    sub_folder = sub_folder + torrent_info["type"] + "/"
+                    # os.makedirs(os.path.dirname(move_locations["torrent"] + sub_folder), exist_ok=True)
+                    if os.path.exists(f"{move_locations['torrent']}{sub_folder}"):
+                        logging.info(f"[Utils] Sub location '{move_locations['torrent']}{sub_folder}' exists.")
+                    else:
+                        logging.info(f"[Utils] Creating Sub location '{move_locations['torrent']}{sub_folder}'.")
+                        Path(f"{move_locations['torrent']}{sub_folder}").mkdir(parents=True, exist_ok=True)
+                # The user might have upload to a few sites so we need to move all files that end with .torrent to the new location
+                list_dot_torrent_files = glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}*.torrent")
+                for dot_torrent_file in list_dot_torrent_files:
+                    # Move each .torrent file we find into the directory the user specified
+                    logging.debug(f'[Utils] Moving {dot_torrent_file} to {move_locations["torrent"]}{sub_folder}')
+                    try:
+                        shutil.move(dot_torrent_file, f'{move_locations["torrent"]}{sub_folder}')
+                    except Exception as e:
+                        logging.exception(f'[Utils] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
+
+            # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
+            if move_location_key == 'media':
+                if str(f"{Path(torrent_info['upload_media']).parent}/") == move_location_value:
+                    console.print(f'\nError, {torrent_info["upload_media"]} is already in the move location you specified: "{move_location_value}"\n', style="red", highlight=False)
+                    logging.error(f"[Utils] {torrent_info['upload_media']} is already in {move_location_value}, Not moving the media")
+                else:
+                    sub_folder = "/"
+                    if os.getenv("enable_type_base_move", False) != False:
+                        sub_folder = sub_folder + torrent_info["type"] + "/"
+                        move_location_value = move_location_value + sub_folder
+                        os.makedirs(os.path.dirname(move_location_value), exist_ok=True)
+                    logging.info(f"[Utils] Moving {torrent_info['upload_media']} to {move_location_value }")
+                    try:
+                        shutil.move(torrent_info["upload_media"], move_location_value)
+                    except Exception as e:
+                        logging.exception(f"[Utils] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
+        else:
+            logging.error(f"[Utils] Move path doesn't exist for {move_location_key} as {move_location_value}")
+
+
+def get_torrent_client_if_needed():
+    if os.getenv("enable_post_processing", False) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
+        # getting an instance of the torrent client factory
+        torrent_client_factory = TorrentClientFactory()
+        # creating the torrent client using the factory based on the users configuration
+        torrent_client = torrent_client_factory.create(Clients[os.getenv('client')])
+        # checking whether the torrent client connection has been created successfully or not
+        torrent_client.hello()
+        return torrent_client
+    else:
+        return None
+
+
+def perform_post_processing(torrent_info, torrent_client, working_folder, tracker):
+    # After we finish uploading, we can add all the dot torrent files to a torrent client to start seeding immediately.
+    # This post processing step can be enabled or disabled based on the users configuration
+    if os.getenv("enable_post_processing", False):
+        
+        # When running in a bare meta, there is a chance for the user to provide relative paths.
+        """ data/movie_name/movie.mkv """
+        # the way to identify a relative path is to check whether the `upload_media` starts with a `/`
+        if not torrent_info["upload_media"].startswith("/"):
+            torrent_info["upload_media"] = f'{working_folder}/{torrent_info["upload_media"]}'
+            logging.info(f'[Utils] User has provided relative path. Converting to absolute path for torrent client :: "{torrent_info["upload_media"]}"')
+
+        # apply path translations and getting translated paths
+        translated_path = _get_client_translated_path(torrent_info)
+        if translated_path == False:
+            return False
+        torrent_info["client_path"] = translated_path
+
+        post_processing_mode = os.getenv("post_processing_mode", "")
+        if post_processing_mode == "CROSS_SEED":
+            return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+        elif post_processing_mode == "WATCH_FOLDER":
+            return _post_mode_watch_folder(torrent_info, working_folder)
+        else:
+            logging.error(f"[Utils] Post processing is enabled, but invalid mode provided: '{post_processing_mode}'")
+            return False
+    else:
+        logging.info("[Utils] No process processing steps needed, as per users configuration")
+        return False

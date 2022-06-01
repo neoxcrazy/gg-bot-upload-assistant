@@ -1,0 +1,12 @@
+[html]
+directory = coverage
+
+[xml]
+output = coverage/coverage.xml
+
+[report]
+omit = 
+    *__init__.py
+    *tests/*
+exclude_lines = 
+    if __name__ == .__main__.:

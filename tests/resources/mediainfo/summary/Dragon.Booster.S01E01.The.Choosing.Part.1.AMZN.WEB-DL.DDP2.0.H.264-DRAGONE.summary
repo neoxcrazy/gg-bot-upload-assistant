@@ -1,0 +1,31 @@
+---(GENERAL)----
+Container......: Matroska
+Size...........: 215 MiB
+Duration.......: 20 min 37 s
+Bit Rate.......: 1 456 kb/s
+Frame Rate.....: 
+tmdb...........: 0
+imdb...........: 0
+tvdb...........: 0
+
+----(VIDEO)-----
+Codec..........: AVC
+Bit Rate.......: 1 230 kb/s
+Frame Rate.....: 25.000 FPS
+Bit Depth......: 8 bits
+Language.......: 
+Aspect Ratio...: 1.85:1
+Resolution.....: 720x384
+
+----(AUDIO)-----
+Format.........: Dolby Digital Plus
+Channels.......: 2 channels
+Sampling Rate..: 48.0 kHz
+Compression....: Lossy
+Language.......: 
+Bit Rate.......: 224 kb/s
+Bit Rate Mode..: Constant
+
+--(SUBTITLES)---
+Format.........: UTF-8
+Language.......: SDH, 
