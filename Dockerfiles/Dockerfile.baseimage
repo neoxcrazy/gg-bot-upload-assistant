@@ -11,6 +11,12 @@ RUN \
 	py3-pip \
 	python3-dev
 
+# installing packages for 
+# - rar extraction
+# - mediainfo creation
+# - audio analyzing
+# - python for running the bot
+# - mktorrent to create torrents (mainly in debian)
 RUN \
  echo "**** install runtime packages ****" && \
  apk add --no-cache --upgrade \

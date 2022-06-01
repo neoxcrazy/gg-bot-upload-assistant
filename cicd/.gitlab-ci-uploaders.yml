@@ -41,7 +41,7 @@ gitlab-gg-bot-upload-assistant:
       echo "Publishing Image to Gitlab Container Registry: '$CI_REGISTRY_IMAGE${tag}"
     - docker push "$CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"'  # runs for every tags and master branch
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"'  # runs for every tags and master branch and dev branch
       exists:
         - Dockerfile
 

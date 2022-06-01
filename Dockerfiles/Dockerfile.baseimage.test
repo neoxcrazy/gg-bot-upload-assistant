@@ -103,6 +103,8 @@ RUN set -eux; \
 	; \
 	apk del --no-network .build-deps;
 
+# installing packages for 
+# - rar extraction
 RUN \
 	apk add --no-cache --upgrade unrar; \
 	apk add --no-cache --virtual=build-dependencies g++;

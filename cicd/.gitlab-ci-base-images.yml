@@ -32,7 +32,7 @@ gg-bot-base:
     - docker push "gg-bot-base:latest"
   only:
     changes:
-      - Dockerfile.baseimage
+      - Dockerfiles/Dockerfile.baseimage
 
 #
 # -------------- noobmaster669/gg-bot-base:aarch64-latest
@@ -62,7 +62,7 @@ gg-bot-base-aarch64:
     - docker push "gg-bot-base:aarch64-latest"
   only:
     changes:
-      - Dockerfile.baseimage.aarch64
+      - Dockerfiles/Dockerfile.baseimage.aarch64
 
   
 #
@@ -93,7 +93,7 @@ gg-bot-base-armhf:
     - docker push "gg-bot-base:armhf-latest"
   only:
     changes:
-      - Dockerfile.baseimage.armhf
+      - Dockerfiles/Dockerfile.baseimage.armhf
 
 
 #
@@ -124,7 +124,7 @@ gg-bot-base-test:
     - docker push "gg-bot-base:test-latest"
   only:
     changes:
-      - Dockerfile.baseimage.test
+      - Dockerfiles/Dockerfile.baseimage.test
 
 #
 # -------------- noobmaster669/gg-bot-base:disk-latest
@@ -154,4 +154,4 @@ gg-bot-base-disk:
     - docker push "gg-bot-base:disk-latest"
   only:
     changes:
-      - Dockerfile.baseimage.disk
+      - Dockerfiles/Dockerfile.baseimage.disk
