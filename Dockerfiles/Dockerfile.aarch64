@@ -1,3 +1,4 @@
+# using the gg-bot base image
 FROM noobmaster669/gg-bot-base:aarch64-latest
 
 WORKDIR /app

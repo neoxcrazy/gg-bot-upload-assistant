@@ -1,5 +1,6 @@
 FROM alpine:3.14
 
+# Default envs for upload assistant
 ENV IS_CONTAINERIZED=true
 ENV IS_FULL_DISK_SUPPORTED=false
 
@@ -9,6 +10,7 @@ RUN \
 	g++ \
 	py3-pip \
 	python3-dev
+
 RUN \
  echo "**** install runtime packages ****" && \
  apk add --no-cache --upgrade \

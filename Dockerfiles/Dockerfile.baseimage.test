@@ -1,3 +1,6 @@
+# The contents of this base image is from official python:3.8 image, 
+# with the addition of unrar package being added by default for 
+# performing the tests associated with gg-bot upload assistant and auto reuploader 
 FROM alpine:3.14
 
 # ensure local python is preferred over distribution python
@@ -100,8 +103,8 @@ RUN set -eux; \
 	; \
 	apk del --no-network .build-deps;
 
-RUN apk add --no-cache --upgrade unrar; \
-	\
+RUN \
+	apk add --no-cache --upgrade unrar; \
 	apk add --no-cache --virtual=build-dependencies g++;
 	
 RUN python3 --version

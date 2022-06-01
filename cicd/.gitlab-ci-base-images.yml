@@ -25,22 +25,11 @@ gg-bot-base:
   script:
     - mv Dockerfiles/Dockerfile.baseimage ./
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
+      echo "Building Image 'gg-bot-base:latest"
+    - docker build --pull -t "gg-bot-base:latest" -f Dockerfile.baseimage .
     - |
-      echo "Building Image 'gg-bot-base${tag}"
-    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
-    - docker push "gg-bot-base${tag}"
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:latest"
+    - docker push "gg-bot-base:latest"
   only:
     changes:
       - Dockerfile.baseimage
@@ -66,22 +55,11 @@ gg-bot-base-aarch64:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":aarch64-latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'aarch64-latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":aarch64-$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":aarch64-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
+      echo "Building Image 'gg-bot-base:aarch64-latest"
+    - docker build --pull -t "gg-bot-base:aarch64-latest" -f Dockerfile.baseimage.aarch64 .
     - |
-      echo "Building Image 'gg-bot-base${tag}"
-    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.aarch64 .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
-    - docker push "gg-bot-base${tag}"
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:aarch64-latest"
+    - docker push "gg-bot-base:aarch64-latest"
   only:
     changes:
       - Dockerfile.baseimage.aarch64
@@ -108,22 +86,11 @@ gg-bot-base-armhf:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.armhf ./
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":armhf-latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'armhf-latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":armhf-$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":armhf-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
+      echo "Building Image 'gg-bot-base:armhf-latest"
+    - docker build --pull -t "gg-bot-base:armhf-latest" -f Dockerfile.baseimage.armhf .
     - |
-      echo "Building Image 'gg-bot-base${tag}"
-    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.armhf .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
-    - docker push "gg-bot-base${tag}"
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:armhf-latest"
+    - docker push "gg-bot-base:armhf-latest"
   only:
     changes:
       - Dockerfile.baseimage.armhf
@@ -150,22 +117,11 @@ gg-bot-base-test:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.test ./
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":test-latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'test-latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":test-$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":test-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
+      echo "Building Image 'gg-bot-base:test-latest"
+    - docker build --pull -t "gg-bot-base:test-latest" -f Dockerfile.baseimage.test .
     - |
-      echo "Building Image 'gg-bot-base${tag}"
-    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.test .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
-    - docker push "gg-bot-base${tag}"
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:test-latest"
+    - docker push "gg-bot-base:test-latest"
   only:
     changes:
       - Dockerfile.baseimage.test
@@ -191,22 +147,11 @@ gg-bot-base-disk:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.disk ./
     - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":disk-latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'disk-latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":disk-$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":disk-$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
+      echo "Building Image 'gg-bot-base:disk-latest"
+    - docker build --pull -t "gg-bot-base:disk-latest" -f Dockerfile.baseimage.disk .
     - |
-      echo "Building Image 'gg-bot-base${tag}"
-    - docker build --pull -t "gg-bot-base${tag}" -f Dockerfile.baseimage.disk .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base${tag}"
-    - docker push "gg-bot-base${tag}"
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:disk-latest"
+    - docker push "gg-bot-base:disk-latest"
   only:
     changes:
       - Dockerfile.baseimage.disk

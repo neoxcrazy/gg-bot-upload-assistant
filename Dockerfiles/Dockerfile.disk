@@ -1,3 +1,4 @@
+# using gg-bot base image
 FROM gg-bot-base:disk-latest AS GIT_CLONER
 
 WORKDIR /app

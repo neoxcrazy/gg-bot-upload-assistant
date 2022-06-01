@@ -1,3 +1,4 @@
+# using the gg-bot base image
 FROM noobmaster669/gg-bot-base:armhf-latest
 
 WORKDIR /app
