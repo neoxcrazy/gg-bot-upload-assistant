@@ -9,8 +9,8 @@ include:
 - local: cicd/.gitlab-ci-uploaders.yml
 
 stages:
-- test
 - setup
+- test
 - build
 
 sast:
