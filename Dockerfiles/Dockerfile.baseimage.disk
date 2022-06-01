@@ -12,6 +12,7 @@ RUN git clone https://github.com/zoffline/BDInfoCLI-ng.git
 
 FROM ubuntu:20.04
 
+# Default envs for full disk variant of upload assistant
 ENV MONO_VERSION 6.12.0.122
 ENV DEBIAN_FRONTEND=noninteractive
 ENV IS_CONTAINERIZED=true
@@ -38,37 +39,18 @@ RUN \
 	rm -rf /var/lib/apt/lists/* /tmp/*
 
 RUN mkdir -p /usr/src/app/source /usr/src/app/build
+
 WORKDIR /usr/src/app/source
 
 COPY --from=GIT_CLONER /clone/BDInfoCLI-ng/ .
+
 RUN nuget restore -NonInteractive
 RUN xbuild /property:Configuration=Release /property:OutDir=/usr/src/app/build/
-WORKDIR /usr/src/app/build
 
 RUN \
 	apt update && \
 	apt install -y python3-pip ffmpeg mediainfo python3 mktorrent unrar
-RUN mkdir /app
-WORKDIR /app
-
-# RUN \
-# 	apt update && \
-# 	apt install -y nano
-
-COPY requirements.txt .
 
 RUN \
-  echo "**** install pip packages ****" && \
-  pip install -r requirements.txt && \
-  pip freeze > requirements.txt
-
-COPY . .
-RUN \
-  	rm auto_reupload.py && \
-  	chmod +x auto_upload.py && \
-  	echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
-    chmod +x /usr/bin/bdinfocli
-
-VOLUME /data /temp_upload
-
-ENTRYPOINT [ "python3", "auto_upload.py"]
+	echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
+	chmod +x /usr/bin/bdinfocli

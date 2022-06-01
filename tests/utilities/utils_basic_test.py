@@ -93,14 +93,14 @@ def __get_file_contents(raw_file_name):
             False, # is_disc
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}Monsters.at.Work.S01E10.Its.Laughter.Theyre.After.2160p.WEB-DL.DDP5.1.HDR.H.265-FLUX.xml"), 
             True, # force pymediainfo
-            (None, "PQ10", "x265"), id="PQ10_x265_pymediainfo"
+            (None, "PQ10", "H.265"), id="PQ10_x265_pymediainfo"
         ),
         pytest.param(
             __get_torrent_info(None, "The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.mkv", "Web"), 
             False, # is_disc
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.xml"), 
             False, # force pymediainfo
-            ("DV", "HDR10+", "HEVC"), id="DV_HDR10+_HEVC"
+            ("DV", "HDR10+", "H.265"), id="DV_HDR10+_HEVC"
         ),
         pytest.param(
             __get_torrent_info(None, "The.Great.S02E10.Wedding.2160p.HULU.WEB-DL.DDP5.1.DV.HEVC-NOSiViD.mkv", "Web"), 
@@ -114,7 +114,7 @@ def __get_file_contents(raw_file_name):
             False, # is_disc
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}Why.Women.Kill.S02E10.The.Lady.Confesses.2160p.WEB-DL.DD5.1.HDR.HEVC-TEPES.xml"), 
             False, # force pymediainfo
-            (None, "HDR10+", "HEVC"), id="HDR10+_HEVC"
+            (None, "HDR10+", "H.265"), id="HDR10+_HEVC"
         ),
         pytest.param(
             __get_torrent_info(None, "Why.Women.Kill.S02E10.The.Lady.Confesses.2160p.WEB-DL.DD5.1.HDR.HEVC-TEPES.mkv", "Web"), 
@@ -128,7 +128,7 @@ def __get_file_contents(raw_file_name):
             False, # is_disc
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}What.If.2021.S01E01.What.If.Captain.Carter.Were.The.First.Avenger.REPACK.2160p.WEB-DL.DDP5.1.Atmos.DV.HEVC-FLUX.xml"), 
             False, # force pymediainfo
-            ("DV", None, "HEVC"), id="DV_HEVC"
+            ("DV", None, "H.265"), id="DV_HEVC"
         ),
         pytest.param(
             __get_torrent_info(None, "What.If.2021.S01E01.What.If.Captain.Carter.Were.The.First.Avenger.REPACK.2160p.WEB-DL.DDP5.1.Atmos.DV.HEVC-FLUX.mkv", "Web"), 
@@ -149,7 +149,7 @@ def __get_file_contents(raw_file_name):
             False, # is_disc
             __get_media_info_video_track(f"{working_folder}{mediainfo_xml}Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.xml"), 
             False, # force pymediainfo
-            (None, "HDR", "HEVC"), id="HDR_H.265"
+            (None, "HDR", "H.265"), id="HDR_H.265"
         ),
         pytest.param(
             __get_torrent_info(None, "Arcane.S01E01.Welcome.to.the.Playground.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES.mkv", "Web"), 

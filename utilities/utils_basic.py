@@ -79,6 +79,7 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
 
         Return value (dv, hdr, video_codec)
     """
+    logging.debug(f"[BasicUtils] Dumping torrent_info before video_codec identification. {pformat(torrent_info)}")
     if is_disc and torrent_info["bdinfo"] is not None: 
         return bdinfo_get_video_codec_from_bdinfo(torrent_info["bdinfo"])
    
@@ -103,15 +104,21 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
                 else:
                     # if this executes its AVC/HEVC or x265/x264
                     regex_video_codec = video_codec
-                # return regex_video_codec
+        if "source" in torrent_info and torrent_info["source"] == "Web":
+            if regex_video_codec == "HEVC":
+                regex_video_codec = 'H.265'
+            elif regex_video_codec == "AVC":
+                regex_video_codec = 'H.264'
+
     # If the regex didn't work and the code has reached this point, we will now try pymediainfo
     # If video codec is HEVC then depending on the specific source (web, bluray, etc) we might need to format that differently
     if "HEVC" in media_info_video_track.format:
-        if media_info_video_track.writing_library is not None:
-            pymediainfo_video_codec = 'x265'
+        # Removing the writing library based codec selection
+        # if media_info_video_track.writing_library is not None:
+        #     pymediainfo_video_codec = 'x265'
         # Possible video_codecs now are either H.265 or HEVC
         # If the source is WEB I think we should use H.265 & leave HEVC for bluray discs/remuxs (encodes would fall under x265)
-        elif "source" in torrent_info and torrent_info["source"] == "Web":
+        if "source" in torrent_info and torrent_info["source"] == "Web":
             pymediainfo_video_codec = 'H.265'
         # for everything else we can just default to 'HEVC' since it'll technically be accurate no matter what
         else:
@@ -136,15 +143,13 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
     # Log it!
     logging.info(f"[BasicUtils] Regex identified the video_codec as: {regex_video_codec}")
     logging.info(f"[BasicUtils] Pymediainfo identified the video_codec as: {pymediainfo_video_codec}")
-    if regex_video_codec == pymediainfo_video_codec:
-        logging.debug(f"[BasicUtils] Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] matches")
-        return dv, hdr, regex_video_codec
+    if regex_video_codec != pymediainfo_video_codec:
+        logging.error(f"[BasicUtils] Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] doesn't match!!")
+        logging.info(f"[BasicUtils] If `--force_pymediainfo` or `-fpm` is provided as argument, PyMediaInfo video_codec will be used, else regex extracted video_codec will be used")
+        if force_pymediainfo:
+            return dv, hdr, pymediainfo_video_codec
 
-    logging.error(f"[BasicUtils] Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] doesn't match!!")
-    logging.info(f"[BasicUtils] If `--force_pymediainfo` or `-fpm` is provided as argument, PyMediaInfo video_codec will be used, else regex extracted video_codec will be used")
-    if force_pymediainfo:
-        return dv, hdr, pymediainfo_video_codec
-
+    logging.debug(f"[BasicUtils] Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] matches")
     return dv, hdr, regex_video_codec
 
 

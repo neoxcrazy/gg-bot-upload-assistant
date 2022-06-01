@@ -22,7 +22,7 @@ from imgurpython import ImgurClient
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
 
-def get_ss_range(duration, num_of_screenshots):
+def _get_ss_range(duration, num_of_screenshots):
     # If no spoilers is enabled, then screenshots are taken from first half of the movie or tv show
     # otherwise screenshots are taken at regualar intervals from the whole movie or tv show
     no_spoilers = os.getenv("no_spoilers") or False
@@ -36,7 +36,7 @@ def get_ss_range(duration, num_of_screenshots):
     return list_of_ss_timestamps
 
 
-def upload_screens(img_host, img_host_api, image_path, torrent_title, base_path):
+def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path):
     # ptpimg does all for us to upload multiple images at the same time but to simplify things & 
     # allow for simple "backup hosts"/upload failures we instead upload 1 image at a time
     #
@@ -277,7 +277,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     ss_timestamps_list = []
     screenshots_to_upload_list = []
     image_data_paths = []
-    for ss_timestamp in track(get_ss_range(duration=duration, num_of_screenshots=num_of_screenshots), description="Taking screenshots.."):
+    for ss_timestamp in track(_get_ss_range(duration=duration, num_of_screenshots=num_of_screenshots), description="Taking screenshots.."):
         # Save the ss_ts to the 'ss_timestamps_list' list
         ss_timestamps_list.append(ss_timestamp)
         screenshots_to_upload_list.append(f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
@@ -314,7 +314,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             # This is how we fall back to a second host if the first fails
             for img_host in enabled_img_hosts_list:
                 # call the function that uploads the screenshot
-                upload_image = upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import, base_path=base_path)
+                upload_image = _upload_screens(img_host=img_host, img_host_api=os.getenv(f'{img_host}_api_key'), image_path=ss_to_upload, torrent_title=torrent_title_import, base_path=base_path)
                 # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
                 if upload_image:
                     logging.debug(f"[Screenshots] Response from image host: {upload_image}")

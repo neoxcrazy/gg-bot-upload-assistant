@@ -1,0 +1,157 @@
+# ********************************************** #
+# ********************************************** #
+#             Base Images For GG-BOT             #
+# ********************************************** #
+# ********************************************** #
+
+#
+# -------------- noobmaster669/gg-bot-base:latest
+# This is the base image for GG-BOT Upload Assistant
+#
+gg-bot-base:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage ./
+    - |
+      echo "Building Image 'gg-bot-base:latest"
+    - docker build --pull -t "gg-bot-base:latest" -f Dockerfile.baseimage .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:latest"
+    - docker push "gg-bot-base:latest"
+  only:
+    changes:
+      - Dockerfile.baseimage
+
+#
+# -------------- noobmaster669/gg-bot-base:aarch64-latest
+# This is the base image for GG-BOT Upload Assistant aarch64 flavour
+#
+gg-bot-base-aarch64:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
+    - |
+      echo "Building Image 'gg-bot-base:aarch64-latest"
+    - docker build --pull -t "gg-bot-base:aarch64-latest" -f Dockerfile.baseimage.aarch64 .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:aarch64-latest"
+    - docker push "gg-bot-base:aarch64-latest"
+  only:
+    changes:
+      - Dockerfile.baseimage.aarch64
+
+  
+#
+# -------------- noobmaster669/gg-bot-base:armhf-latest
+# This is the base image for GG-BOT Upload Assistant armhf flavour
+#
+gg-bot-base-armhf:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.armhf ./
+    - |
+      echo "Building Image 'gg-bot-base:armhf-latest"
+    - docker build --pull -t "gg-bot-base:armhf-latest" -f Dockerfile.baseimage.armhf .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:armhf-latest"
+    - docker push "gg-bot-base:armhf-latest"
+  only:
+    changes:
+      - Dockerfile.baseimage.armhf
+
+
+#
+# -------------- noobmaster669/gg-bot-base:test-latest
+# This is the base image for running GG-BOT uploaders unit tests.
+#
+gg-bot-base-test:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.test ./
+    - |
+      echo "Building Image 'gg-bot-base:test-latest"
+    - docker build --pull -t "gg-bot-base:test-latest" -f Dockerfile.baseimage.test .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:test-latest"
+    - docker push "gg-bot-base:test-latest"
+  only:
+    changes:
+      - Dockerfile.baseimage.test
+
+#
+# -------------- noobmaster669/gg-bot-base:disk-latest
+# This is the base image for  GG-BOT uploader full disk flavour
+#
+gg-bot-base-disk:
+  stage: setup
+  image:
+    name: $DOCKER_IMAGE
+  services:
+   - name: docker:dind
+     alias: buildcontainer
+     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://buildcontainer:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - mv Dockerfiles/Dockerfile.baseimage.disk ./
+    - |
+      echo "Building Image 'gg-bot-base:disk-latest"
+    - docker build --pull -t "gg-bot-base:disk-latest" -f Dockerfile.baseimage.disk .
+    - |
+      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:disk-latest"
+    - docker push "gg-bot-base:disk-latest"
+  only:
+    changes:
+      - Dockerfile.baseimage.disk

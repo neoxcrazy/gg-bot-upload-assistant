@@ -1,6 +1,12 @@
 # **GG-BOT Upload Assistant**
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
+
+> Please refer to the readme in `dev` branch to see updated roadmaps and new features.
+
+> If you do not wish to use the docker version of the application, its recommended to checkout and use tags instead of branches for stability reasons.
+
+
 ![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
 
 <br>
@@ -19,6 +25,8 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 * Packed as a docker container. (No need to install any additional tools)
 * Automatically move .torrent and media to specified folders after upload
 * Customizable uploader signature for torrent descriptions
+* Automatic upload to torrent client: Immediate cross-seeding
+* Auto Re-Uploader flavour for uploading gods
 
 <br>
 
@@ -148,49 +156,47 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 <br>
 
 <!-- Basic setup -->
-# Basic setup
+# Basic setup for Upload Assistant
 ## Bare Metal / VM:
-1. Clone / download this repository
-2. Install necessary packages ```pip3 install -r requirements.txt```
-3. Rename `config.env.sample` to `config.env`
-4. Fill out the required values in `config.env`
-5. Ensure you have [mediainfo](https://mediaarea.net/en/MediaInfo/Download/Ubuntu) & [ffmpeg](https://ffmpeg.org/download.html) installed on your system
-6. Optional: Install [mktorrent](https://github.com/pobrn/mktorrent) in your system to use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
-7. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
-8. Run command template ```python3 auto_upload.py -t TSP SPD BHD BLU -p "FILE_OR_FOLDER_TO_BE_UPLOADED" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]```
+1. Clone this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
+> It is recommended to checkout a tag and use it instead of using as the master branch, as there is a possibility for master branch to have bug / error / conflicts during merges.<br>
+> Checkout a tag using the command `git checkout tags/<TAG>` 
+2. Checkout a release tag/version that you wish to use `git checkout tags/2.0`
+2. Install necessary packages ```pip install -r requirements.txt```
+3. Grand execute permission for user. `chmod u+x auto_upload.py`
+4. Copy `config.env` from `samples/assistant` folder to cloned project root.
+5. Fill out the required values in `config.env`
+> Ensure that you have optional dependencies installed. <br>
+> - [MediaInfo](https://mediaarea.net/en/MediaInfo/Download/Ubuntu)
+> - [FFmpeg](https://ffmpeg.org/download.html)
+> - [unrar]
+> - [mktorrent](https://github.com/pobrn/mktorrent): Use --use_mktorrent flag. (Create .torrent using mktorrent instead of torf)
+6. Run the script using [Python3](https://www.python.org/downloads/) (If you're having issues or torf isn't installing, try python3.9)
+> Run command template ```python3 auto_upload.py -t <TRACKERS> -p "<FILE_OR_FOLDER_TO_BE_UPLOADED>" [OPTIONAL ARGUMENTS 1] [OPTIONAL ARGUMENTS 2...]``
+> Please see Bare Metal Installation and Upgrade Wiki for details instructions.
 
-## Docker:
-1. Create new folder / dir [`mkdir GGBotUploader`]
-2. Enter into the new directory [`cd GGBotUploader`]
-3. Pull GG-Bot-Uploader docker image ``` docker pull noobmaster669/gg-bot-uploader:latest``` (See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags)
-4. Download `config.env.sample` to the folder GGBotUploader
-5. Rename `config.env.sample` to `config.env`
-6. Fill out the required values in `config.env`
-7. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
+<br>
+
+## Docker (recommended):
+1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`] 
+2. Download `samples/assistant/config.env` to the newly created folder (`GGBotUploader`)
+3. Fill out the required values in `config.env`
+5. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
 ```
 docker run --rm -it \
     -v <PATH_TO_YOUR_MEDIA>:/data \
     --env-file config.env \
     noobmaster669/gg-bot-uploader -t ATH TSP -p "/data/<YOUR_FILE_FOLDER>"
 ```
+> See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags
 
 <br /> 
 
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
-3. If you're trying to pass in a file as an arg, you may find autocomplete isn't working. Do this to fix it
-    * (What I mean by autocomplete is when you double hit *Tab*, and the filename/folder gets automatically filled in)
-    * ```chmod u+x auto_upload.py```
-    * run script using ```./auto_upload.py -t etc -p /path/to/file/autocompletes.now```
-    * NOTE: This is applicable only when you use the upload assistant on bare metal. Everyhting is taken care of in the docker version.
-4. A folder called ``temp_upload`` will be created which will store the files:
-    * `*.torrent`
-    * `mediainfo.txt` 
-    * `url_images.txt`
-    * `description.txt`
-    * `image_paths.txt`
-5. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **:FullDisk-{TAG}** 
+3. When providing multiple database (TMDB, IMDB, TVMAZE ) ids via optional arguments, uploader uses the ids with priority **`IMDB > TMDB > TVMAZE`**
+4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`** 
 
 <br>
 
@@ -205,18 +211,26 @@ docker run --rm -it \
 
 # Roadmap
 ### v2.0.7
-- [ ] Add Support for new platforms
-    - [ ] Anasch
 - [X] Implement a restart/resume feature for uploads.
 - [X] Refactor dupe check logic and hdr bug fix
+- [X] Refactor screenshots code
 - [X] Add unit tests to the code - phase 1
+- [X] Add unit tests to the code - phase 2
 - [X] CICD for automated tests
 - [ ] Add support to apply hybrid mapping to multiple fields
-- [ ] Add support for immediate cross-seeding to torrent clients
+- [X] Improved watch folder movement post-processing
+- [X] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
     - [X] Qbittorrent
     - [X] Rutorrent
-- [ ] Migrate torrent client feature from v3.0 alpha version
+- [X] Migrate torrent client feature from v3.0 alpha version
+- [X] Refactor and optimize build times for CICD pipelines
+    - [X] Introduce GG-BOT base images for faster builds 
+- [X] Issue#10: Prevent unnecessary folders from being added in movie uploads
+- [X] Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
+- [X] Issue#33: Dupe check error when dealing with DV HDR release
+- [X] Issue#34: Cross-Seeding uploading torrents for failed uploads
+- [X] Issue#35: HEVC codec being used for web releases
 
 ### v3.0
 - [X] Automatic torrent re-uploader
@@ -227,12 +241,15 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
-- [X] GG-Bot Visor for reports and failure recoveries
+- [ ] EPIC: GG-Bot Visor for reports and failure recoveries
 - [ ] Support for overriding target tracker through categories
-- [ ] Bug Fixes and Testing
+- [X] Bug Fixes and Testing Phase 1
+- [ ] Bug Fixes and Testing Phase 2
 - [ ] Discord notification for auto uploaded data
 
 ### Backlogs
+- [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader
+- [ ] EPIC: Refactor GG-BOT Admin to handle GG-BOT Auto ReUploader
 - [ ] Improved Full Disk Support
     - [ ] Support for Bluray Distributors
     - [ ] Detect Bluray disk region automatically
@@ -241,7 +258,8 @@ docker run --rm -it \
     - [ ] Transmission
 - [ ] Add support for bitorrent v2 and v2 hybrid torrents
 - [ ] Add Support for new platforms
-    - [ ] MoreThanTV9
+    - [ ] Anasch
+    - [ ] MoreThanTV
     - [ ] GreatPosterWall
     - [ ] Swarmazon
 - [ ] Add support for DVDs
@@ -249,6 +267,34 @@ docker run --rm -it \
 <br>
 
 # Change Log
+
+## **2.0.7 | UNRELEASED | SUBJECTED TO CHANGE**
+    New Trackers
+        * None
+    
+    New Features
+        * Ability to resume / reuse assets from previous uploads
+        * Improved watch folder movement during post-processing
+        * Support for immediate corss-seeding to torrent clients
+        * Support for communicating with torrent clients [ immediate-cross-seeding ]
+            * Qbittorrent
+            * Rutorrent
+        * Migrated torrent client feature from v3.0 alpha version
+    
+    Underhood Changes
+        * Refactored dupe check logic
+        * Refactored screenshots and image upload logic
+        * Add unit tests to existing code
+        * Add unit tests to the cicd pipeline
+        * Refactored cicd for better performance and faster builds
+        * Introded pre-built base images for cicd improvements
+        
+    Bug Fixes
+        * Issue#10: Prevent unnecessary folders from being added in movie uploads
+        * Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
+        * Issue#33: Dupe check error when dealing with DV HDR release
+        * Issue#34: Cross-Seeding uploading torrents for failed uploads
+        * Issue#35: HEVC codec being used for web releases
 
 ## **2.0.6**
     New Trackers
@@ -269,6 +315,7 @@ docker run --rm -it \
         * Issue#30: Application crash while making TMDB API Call
         * Issue#31: Uploads to BIT-HDTV failing
 
+<br>
 ## **2.0.5**
     New Trackers
         * SkipTheTrailers

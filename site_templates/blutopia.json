@@ -3,7 +3,7 @@
     "url": "https://blutopia.xyz",
     "upload_form": "https://blutopia.xyz/api/torrents/upload?api_token={api_key}",
     "torrents_search": "https://blutopia.xyz/api/torrents/filter?api_token={api_key}",
-    "source": "blu",
+    "source": "BLU",
     "platform": "UNIT3D",
     "bbcode_line_break": "\n",
     "title_separator" : " ",
