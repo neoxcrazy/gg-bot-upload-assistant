@@ -25,11 +25,11 @@ gg-bot-base:
   script:
     - mv Dockerfiles/Dockerfile.baseimage ./
     - |
-      echo "Building Image 'gg-bot-base:latest"
-    - docker build --pull -t "gg-bot-base:latest" -f Dockerfile.baseimage .
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:latest" -f Dockerfile.baseimage .
     - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:latest"
-    - docker push "gg-bot-base:latest"
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
   only:
     changes:
       - Dockerfiles/Dockerfile.baseimage
@@ -55,11 +55,11 @@ gg-bot-base-aarch64:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.aarch64 ./
     - |
-      echo "Building Image 'gg-bot-base:aarch64-latest"
-    - docker build --pull -t "gg-bot-base:aarch64-latest" -f Dockerfile.baseimage.aarch64 .
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest" -f Dockerfile.baseimage.aarch64 .
     - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:aarch64-latest"
-    - docker push "gg-bot-base:aarch64-latest"
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
   only:
     changes:
       - Dockerfiles/Dockerfile.baseimage.aarch64
@@ -86,11 +86,11 @@ gg-bot-base-armhf:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.armhf ./
     - |
-      echo "Building Image 'gg-bot-base:armhf-latest"
-    - docker build --pull -t "gg-bot-base:armhf-latest" -f Dockerfile.baseimage.armhf .
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest" -f Dockerfile.baseimage.armhf .
     - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:armhf-latest"
-    - docker push "gg-bot-base:armhf-latest"
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
   only:
     changes:
       - Dockerfiles/Dockerfile.baseimage.armhf
@@ -117,11 +117,11 @@ gg-bot-base-test:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.test ./
     - |
-      echo "Building Image 'gg-bot-base:test-latest"
-    - docker build --pull -t "gg-bot-base:test-latest" -f Dockerfile.baseimage.test .
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest" -f Dockerfile.baseimage.test .
     - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:test-latest"
-    - docker push "gg-bot-base:test-latest"
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
   only:
     changes:
       - Dockerfiles/Dockerfile.baseimage.test
@@ -147,11 +147,11 @@ gg-bot-base-disk:
   script:
     - mv Dockerfiles/Dockerfile.baseimage.disk ./
     - |
-      echo "Building Image 'gg-bot-base:disk-latest"
-    - docker build --pull -t "gg-bot-base:disk-latest" -f Dockerfile.baseimage.disk .
+      echo "Building Image '$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
+    - docker build --pull -t "$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest" -f Dockerfile.baseimage.disk .
     - |
-      echo "Publishing Image to Gitlab Container Registry: 'gg-bot-base:disk-latest"
-    - docker push "gg-bot-base:disk-latest"
+      echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
+    - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
   only:
     changes:
       - Dockerfiles/Dockerfile.baseimage.disk
