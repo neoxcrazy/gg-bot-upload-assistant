@@ -9,7 +9,7 @@
 # This is the base image for GG-BOT Upload Assistant
 #
 gg-bot-base:
-  stage: setup
+  stage: build
   image:
     name: $DOCKER_IMAGE
   services:
@@ -39,7 +39,7 @@ gg-bot-base:
 # This is the base image for GG-BOT Upload Assistant aarch64 flavour
 #
 gg-bot-base-aarch64:
-  stage: setup
+  stage: build
   image:
     name: $DOCKER_IMAGE
   services:
@@ -70,7 +70,7 @@ gg-bot-base-aarch64:
 # This is the base image for GG-BOT Upload Assistant armhf flavour
 #
 gg-bot-base-armhf:
-  stage: setup
+  stage: build
   image:
     name: $DOCKER_IMAGE
   services:
@@ -101,7 +101,7 @@ gg-bot-base-armhf:
 # This is the base image for running GG-BOT uploaders unit tests.
 #
 gg-bot-base-test:
-  stage: setup
+  stage: build
   image:
     name: $DOCKER_IMAGE
   services:
@@ -131,7 +131,7 @@ gg-bot-base-test:
 # This is the base image for  GG-BOT uploader full disk flavour
 #
 gg-bot-base-disk:
-  stage: setup
+  stage: build
   image:
     name: $DOCKER_IMAGE
   services:
