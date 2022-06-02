@@ -8,7 +8,7 @@
 # Image Description: Normal Docker Image build and stored in GitLab Container Registry
 # Build Conditions: On all branches and tags
 gitlab-gg-bot-upload-assistant:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
@@ -50,7 +50,7 @@ gitlab-gg-bot-upload-assistant:
 # Image Description: Normal Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
 dockerhub-gg-bot-upload-assistant:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
@@ -92,7 +92,7 @@ dockerhub-gg-bot-upload-assistant:
 # Image Description: arm32v7 Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
 dockerhub-gg-bot-upload-assistant-aarch64:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
@@ -134,7 +134,7 @@ dockerhub-gg-bot-upload-assistant-aarch64:
 # Image Description: arm32v7 Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
 dockerhub-gg-bot-upload-assistant-armhf:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
@@ -176,7 +176,7 @@ dockerhub-gg-bot-upload-assistant-armhf:
 # Image Description: Normal Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
 dockerhub-gg-bot-upload-assistant-fulldisk:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
