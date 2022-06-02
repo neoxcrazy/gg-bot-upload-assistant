@@ -217,7 +217,6 @@ docker run --rm -it \
 - [X] Add unit tests to the code - phase 1
 - [X] Add unit tests to the code - phase 2
 - [X] CICD for automated tests
-- [ ] Add support to apply hybrid mapping to multiple fields
 - [X] Improved watch folder movement post-processing
 - [X] Add support for immediate cross-seeding to torrent clients
 - [X] Support for communicating with torrent clients [ immediate-cross-seeding ]
@@ -233,6 +232,7 @@ docker run --rm -it \
 - [X] Issue#35: HEVC codec being used for web releases
 
 ### v3.0
+- [ ] Add support to apply hybrid mapping to multiple fields
 - [X] Automatic torrent re-uploader
 - [X] Improved dupe check - Phase 1
 - [X] Improved TMDB metadata search
