@@ -315,7 +315,6 @@ docker run --rm -it \
         * Issue#30: Application crash while making TMDB API Call
         * Issue#31: Uploads to BIT-HDTV failing
 
-<br>
 ## **2.0.5**
     New Trackers
         * SkipTheTrailers
