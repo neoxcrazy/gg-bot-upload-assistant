@@ -47,10 +47,17 @@ COPY --from=GIT_CLONER /clone/BDInfoCLI-ng/ .
 RUN nuget restore -NonInteractive
 RUN xbuild /property:Configuration=Release /property:OutDir=/usr/src/app/build/
 
+# installing packages for 
+# - rar extraction
+# - mediainfo creation
+# - audio analyzing
+# - python for running the bot
+# - mktorrent to create torrents (mainly in debian)
 RUN \
 	apt update && \
 	apt install -y python3-pip ffmpeg mediainfo python3 mktorrent unrar
 
+# setting bdinfocli as executable
 RUN \
 	echo '#!/bin/bash\nmono /usr/src/app/build/BDInfo.exe "$@"' > /usr/bin/bdinfocli && \
 	chmod +x /usr/bin/bdinfocli
