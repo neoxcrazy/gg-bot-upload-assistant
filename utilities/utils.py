@@ -610,7 +610,11 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
 
         post_processing_mode = os.getenv("post_processing_mode", "")
         if post_processing_mode == "CROSS_SEED":
-            return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+            if torrent_client is not None:
+                return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+            else:
+                logging.error("[Utils] Torrent client not available to perform cross-seeding. Skipping post processing...")
+                return False
         elif post_processing_mode == "WATCH_FOLDER":
             return _post_mode_watch_folder(torrent_info, working_folder)
         else:
