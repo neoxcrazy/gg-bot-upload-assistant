@@ -104,7 +104,7 @@ def _upload_to_imgbox(image_path, thumb_size, torrent_title):
         logging.error('[Screenshots] Screenshot size is over imgbox limit of 10MB, Trying another host (if available)')
         return False
 
-    imgbox_asyncio_upload = asyncio.run(_perform_imgbox_upload(image_path=image_path, thumb_size=thumb_size, torrent_title=torrent_title))
+    imgbox_asyncio_upload = asyncio.run(_perform_imgbox_upload(image_path, thumb_size, torrent_title))
     if imgbox_asyncio_upload:
         return [
             True, 
@@ -116,11 +116,11 @@ def _upload_to_imgbox(image_path, thumb_size, torrent_title):
     else:
         return False
     # # Python 3.7+ version
-    # asyncio.run(imgbox_upload(filepaths=[image_path]))  # call the function that uploads images to imgbox
+    # asyncio.run(_perform_imgbox_upload(image_path, thumb_size, torrent_title))  # call the function that uploads images to imgbox
     #
     # # Python <= 3.6 friendly alternative
     # loop = asyncio.get_event_loop()
-    # loop.run_until_complete(imgbox_upload(list_of_images))
+    # loop.run_until_complete(_perform_imgbox_upload(image_path, thumb_size, torrent_title))
 
 
 def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path):
