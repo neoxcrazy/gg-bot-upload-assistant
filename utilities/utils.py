@@ -578,7 +578,10 @@ def _post_mode_watch_folder(torrent_info, working_folder):
 
 
 def get_torrent_client_if_needed():
-    if os.getenv("enable_post_processing", False) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
+    logging.debug("[Utils] Attempting to create a torrent client connection")
+    logging.debug(f"[Utils] User config :: enable_post_processing :: '{os.getenv('enable_post_processing', False)}'")
+    logging.debug(f"[Utils] User config :: post_processing_mode :: '{os.getenv('post_processing_mode', False)}'")
+    if bool(os.getenv("enable_post_processing", False)) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
         # getting an instance of the torrent client factory
         torrent_client_factory = TorrentClientFactory()
         # creating the torrent client using the factory based on the users configuration
@@ -587,6 +590,7 @@ def get_torrent_client_if_needed():
         torrent_client.hello()
         return torrent_client
     else:
+        logging.info("[Utils] No torrent client available")
         return None
 
 
@@ -610,7 +614,11 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
 
         post_processing_mode = os.getenv("post_processing_mode", "")
         if post_processing_mode == "CROSS_SEED":
-            return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+            if torrent_client is not None:
+                return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+            else:
+                logging.error("[Utils] Torrent client not available to perform cross-seeding. Skipping post processing...")
+                return False
         elif post_processing_mode == "WATCH_FOLDER":
             return _post_mode_watch_folder(torrent_info, working_folder)
         else:
