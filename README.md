@@ -274,6 +274,7 @@ docker run --rm -it \
         * Issue#33: Dupe check error when dealing with DV HDR release
         * Issue#34: Cross-Seeding uploading torrents for failed uploads
         * Issue#35: HEVC codec being used for web releases
+        * Issue#36: Broken screenshots after new UNIT3D update
 
 ## **2.0.6**
     New Trackers
