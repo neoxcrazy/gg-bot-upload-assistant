@@ -37,7 +37,3 @@ unit-test:
       - coverage
       - coverage/coverage.xml
     expire_in: 30 days
-  
-
-sast:
-  stage: test
