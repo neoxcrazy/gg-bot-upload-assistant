@@ -268,9 +268,9 @@ docker run --rm -it \
 
 # Change Log
 
-## **2.0.7 | UNRELEASED | SUBJECTED TO CHANGE**
-    New Trackers
-        * None
+## **2.0.7**
+    Removed Trackers
+        * Telly - ShutDown
     
     New Features
         * Ability to resume / reuse assets from previous uploads
