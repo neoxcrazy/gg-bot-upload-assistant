@@ -243,7 +243,7 @@ docker run --rm -it \
 
 # Change Log
 
-## **2.0.7 | UNRELEASED | SUBJECTED TO CHANGE**
+## **2.0.7**
     Removed Trackers
         * Telly - ShutDown
     
