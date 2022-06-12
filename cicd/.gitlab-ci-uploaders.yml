@@ -43,7 +43,7 @@ gitlab-gg-bot-upload-assistant:
   rules:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"'  # runs for every tags and master branch and dev branch
       exists:
-        - Dockerfiles/Dockerfile
+        - Dockerfile
 
 
 # Image ID: noobmaster669/gg-bot-uploader:{TAG}
@@ -85,7 +85,7 @@ dockerhub-gg-bot-upload-assistant:
   rules:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
-        - Dockerfiles/Dockerfile
+        - Dockerfile
 
   
 # Image ID: noobmaster669/gg-bot-uploader:aarch64-{TAG}
@@ -127,7 +127,7 @@ dockerhub-gg-bot-upload-assistant-aarch64:
   rules:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
-        - Dockerfiles/Dockerfile.aarch64
+        - Dockerfile.aarch64
 
 
 # Image ID: noobmaster669/gg-bot-uploader:arm32v7-{TAG}
@@ -169,7 +169,7 @@ dockerhub-gg-bot-upload-assistant-armhf:
   rules:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
-        - Dockerfiles/Dockerfile.armhf
+        - Dockerfile.armhf
 
 
 # Image ID: noobmaster669/gg-bot-uploader:FullDisk-{TAG}
@@ -211,4 +211,4 @@ dockerhub-gg-bot-upload-assistant-fulldisk:
   rules:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
       exists:
-        - Dockerfiles/Dockerfile.disk
+        - Dockerfile.disk
