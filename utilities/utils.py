@@ -226,9 +226,18 @@ def write_cutsom_user_inputs_to_description(torrent_info, description_file_path,
                         if debug: # just for debugging purposes
                             if "][" in input_wrapper_type:
                                 logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
+                            elif "><" in input_wrapper_type:
+                                logging.debug(f'[CustomUserInputs] >< is present in the wrapper type')
+                            else:
+                                logging.debug(f'[CustomUserInputs] No special characters present in the wrapper type')
                             logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
 
-                        final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
+                        if "][" in input_wrapper_type:
+                            final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[')
+                        elif "><" in input_wrapper_type:
+                            final_formatted_data = input_wrapper_type.replace("><", f'>{formatted_value}<')
+                        else:
+                            final_formatted_data = formatted_value
                         description.write(final_formatted_data)
                         logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
 
@@ -290,7 +299,7 @@ def has_user_provided_type(user_type):
         return False
 
 
-def delete_leftover_files(working_folder, resume=False, file=None):
+def delete_leftover_files(working_folder, file, resume=False):
     """
         Used to remove temporary files (mediainfo.txt, description.txt, screenshots) from the previous upload
         Func is called at the start of each run to make sure there are no mix up with wrong screenshots being uploaded etc.
@@ -316,15 +325,13 @@ def delete_leftover_files(working_folder, resume=False, file=None):
     else:
         os.mkdir(f"{working_folder}/temp_upload/")
 
-    if file is not None:
-        hash = get_hash(file)
-        if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
-            os.mkdir(f"{working_folder}/temp_upload/{hash}")
-        if not Path(f"{working_folder}/temp_upload/{hash}/screenshots/").is_dir():
-            os.mkdir(f"{working_folder}/temp_upload/{hash}/screenshots/")
-        logging.info(f"[Utils] Created subfolder {hash} for file {file}")
-        return f"{hash}/"
-    return ""
+    hash = get_hash(file)
+    if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
+        os.mkdir(f"{working_folder}/temp_upload/{hash}")
+    if not Path(f"{working_folder}/temp_upload/{hash}/screenshots/").is_dir():
+        os.mkdir(f"{working_folder}/temp_upload/{hash}/screenshots/")
+    logging.info(f"[Utils] Created subfolder {hash} for file {file}")
+    return f"{hash}/"
 
 
 def write_file_contents_to_log_as_debug(file_path):

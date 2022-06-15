@@ -97,6 +97,7 @@ uncommon_args = parser.add_argument_group('Less Common Arguments')
 uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for debugging. Writes debug lines to log file")
 uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
 uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
+uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true', help="Skip screenshot generation and upload for a run (overrides config.env)")
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
@@ -1172,7 +1173,7 @@ def reupload_job():
         
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
-        torrent_info["working_folder"] = delete_leftover_files(working_folder)
+        torrent_info["working_folder"] = delete_leftover_files(working_folder, file=torrent_path, resume=False)
 
         console.print(f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
 
@@ -1365,7 +1366,7 @@ def reupload_job():
         take_upload_screens(duration=torrent_info["duration"],
             upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
             torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], 
-            discord_url=discord_url)
+            discord_url=discord_url, skip_screenshots=args.skip_screenshots)
 
         if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'):
             torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'
@@ -1419,7 +1420,7 @@ def reupload_job():
             # -------- Add custom uploader signature to description.txt --------
             write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
             tracker=tracker, bbcode_line_break=bbcode_line_break)
-            
+
             # Add the finished file to the 'torrent_info' dict
             torrent_info["description"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt'
 
@@ -1519,7 +1520,7 @@ def reupload_job():
                         save_path = torrent_info["upload_media"].replace(f'/{torrent_info["raw_file_name"]}', '')
                         logging.info(f'[Main] `raw_video_file` is missing in torrent_info. Hence updating client save path to {save_path}')
 
-                torrent_client.upload_torrent(torrent=f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent', save_path=save_path, use_auto_torrent_management=False, is_skip_checking=True)
+                torrent_client.upload_torrent(torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', save_path=save_path, use_auto_torrent_management=False, is_skip_checking=True)
             else:
                 # getting the overall status of the torrent from cache
                 torrent_status = get_torrent_status(torrent["hash"], cache)
