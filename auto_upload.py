@@ -1412,7 +1412,8 @@ for file in upload_queue:
     # Call function to actually take screenshots & upload them (different file)
     take_upload_screens(duration=torrent_info["duration"],
         upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-        torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], discord_url=discord_url, skip_screenshots=args.skip_screenshots)
+        torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], 
+        discord_url=discord_url, skip_screenshots=args.skip_screenshots)
 
     if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'):
         torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'
