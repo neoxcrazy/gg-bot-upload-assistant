@@ -2,7 +2,7 @@
 # Image Description: Normal Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
 docker-hub-image-reuploader:
-  stage: build
+  stage: deploy
   image:
     name: $DOCKER_IMAGE
   services:
