@@ -259,7 +259,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker):
                         tracker_settings[config["translation"][translation_key]] = torrent_info[translation_key]
                     # Make sure you select the right .torrent file
                     if translation_key == "dot_torrent":
-                        tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{tracker}-{torrent_info["torrent_title"]}.torrent'
+                        tracker_settings[config["translation"]["dot_torrent"]] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent'
                 
                 # The reason why we keep this elif statement here is because the conditional right above is also technically a "string"
                 # but its easier to keep mediainfo and description in text files until we need them so we have that small exception for them
@@ -758,7 +758,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     #     bdinfo_start_time = time.perf_counter()
     #     logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
     #     console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
-    #     torrent_info["mediainfo"] = f'{working_folder}/temp_upload/mediainfo.txt'
+    #     torrent_info["mediainfo"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
     #     torrent_info["bdinfo"] = bdinfo_generate_and_parse_bdinfo(bdinfo_script, working_folder, torrent_info) # TODO handle non-happy paths
     #     logging.debug(f"::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
     #     logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
@@ -793,7 +793,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # if args.disc: TODO uncomment this for full disk auto uploads
     #     # for full disk uploads the bdinfo summary itself will be set as the `mediainfo_summary`
     #     logging.info("[Main] Full Disk Upload. Setting bdinfo summary as mediainfo summary")
-    #     with open(f'{working_folder}/temp_upload/mediainfo.txt', 'r') as summary:
+    #     with open(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt', 'r') as summary:
     #         bdInfo_summary = summary.read()
     #         torrent_info["mediainfo_summary"] = bdInfo_summary
     # else:
@@ -1172,8 +1172,8 @@ def reupload_job():
         
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
-        torrent_info["working_folder"] = delete_leftover_files(working_folder, resume=args.resume)
-        
+        torrent_info["working_folder"] = delete_leftover_files(working_folder)
+
         console.print(f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
 
         rar_file_validation_response = check_for_dir_and_extract_rars(torrent_path)
@@ -1364,22 +1364,23 @@ def reupload_job():
         # Call function to actually take screenshots & upload them (different file)
         take_upload_screens(duration=torrent_info["duration"],
             upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-            torrent_title_import=torrent_info["title"], base_path=working_folder, discord_url=discord_url)
+            torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], 
+            discord_url=discord_url)
 
-        if os.path.exists(f'{working_folder}/temp_upload/bbcode_images.txt'):
-            torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/bbcode_images.txt'
+        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'):
+            torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'
 
-        if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'):
-            torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_nothumb.txt'
+        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'):
+            torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'
 
-        if os.path.exists(f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'):
-            torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/bbcode_images_thumb_nothumb.txt'
+        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'):
+            torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'
         
-        if os.path.exists(f'{working_folder}/temp_upload/url_images.txt'):
-            torrent_info["url_images"] = f'{working_folder}/temp_upload/url_images.txt'
+        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'):
+            torrent_info["url_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'
 
-        if os.path.exists(f'{working_folder}/temp_upload/image_paths.txt'):
-            torrent_info["data_images"] = f'{working_folder}/temp_upload/image_paths.txt'
+        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'):
+            torrent_info["data_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'
 
         # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
         logging.info("[Main] Now starting tracker specific tasks")
@@ -1413,13 +1414,14 @@ def reupload_job():
 
             # -------- Add bbcode images to description.txt --------
             add_bbcode_images_to_description(torrent_info=torrent_info, config=config, 
-                description_file_path=f'{working_folder}/temp_upload/description.txt', bbcode_line_break=bbcode_line_break)
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', bbcode_line_break=bbcode_line_break)
 
             # -------- Add custom uploader signature to description.txt --------
-            write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/description.txt',
-                tracker=tracker, bbcode_line_break=bbcode_line_break)
+            write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
+            tracker=tracker, bbcode_line_break=bbcode_line_break)
+            
             # Add the finished file to the 'torrent_info' dict
-            torrent_info["description"] = f'{working_folder}/temp_upload/description.txt'
+            torrent_info["description"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt'
 
             # -------- Check for Dupes Multiple Trackers --------
             # when the user has configured multiple trackers to upload to
@@ -1458,6 +1460,7 @@ def reupload_job():
                 announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
                 source=config["source"],
                 working_folder=working_folder,
+                hash_prefix=torrent_info["working_folder"],
                 use_mktorrent=args.use_mktorrent,
                 tracker=tracker,
                 torrent_title=torrent_info["torrent_title"],
