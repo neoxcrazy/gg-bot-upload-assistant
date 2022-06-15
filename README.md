@@ -210,8 +210,9 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-
 ### v3.0
+- [ ] Add Support for new platforms
+    - [ ] Swarmazon
 - [X] Automatic torrent re-uploader
 - [X] Improved dupe check - Phase 1
 - [X] Improved TMDB metadata search
@@ -221,10 +222,15 @@ docker run --rm -it \
 - [X] Implement a caching mechanism
     - [X] Mongo DB
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
+- [X] Release GG-BOT source code to public
 - [ ] Support for overriding target tracker through categories
 - [X] Bug Fixes and Testing Phase 1
 - [ ] Bug Fixes and Testing Phase 2
 - [ ] Discord notification for auto uploaded data
+- [X] Issue#37: Automatic cross-seeding not working
+
+### v3.0.1
+- [ ] TBD
 
 ### Backlogs
 - [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader
@@ -240,7 +246,6 @@ docker run --rm -it \
     - [ ] Anasch
     - [ ] MoreThanTV
     - [ ] GreatPosterWall
-    - [ ] Swarmazon
 - [ ] Add support for DVDs
 
 <br>
