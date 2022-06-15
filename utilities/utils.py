@@ -226,9 +226,18 @@ def write_cutsom_user_inputs_to_description(torrent_info, description_file_path,
                         if debug: # just for debugging purposes
                             if "][" in input_wrapper_type:
                                 logging.debug(f'[CustomUserInputs] ][ is present in the wrapper type')
+                            elif "><" in input_wrapper_type:
+                                logging.debug(f'[CustomUserInputs] >< is present in the wrapper type')
+                            else:
+                                logging.debug(f'[CustomUserInputs] No special characters present in the wrapper type')
                             logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
 
-                        final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[' if "][" in input_wrapper_type else formatted_value)
+                        if "][" in input_wrapper_type:
+                            final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[')
+                        elif "><" in input_wrapper_type:
+                            final_formatted_data = input_wrapper_type.replace("><", f'>{formatted_value}<')
+                        else:
+                            final_formatted_data = formatted_value
                         description.write(final_formatted_data)
                         logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
 
