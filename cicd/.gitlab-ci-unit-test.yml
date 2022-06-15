@@ -6,25 +6,13 @@
 unit-test:
   stage: test
   image: noobmaster669/gg-bot-base:test-latest
-  services:
-    - name: datadog/agent:latest
-      alias: ddogagent
-  variables:
-    DD_API_KEY: $DD_API_KEY
-    DD_INSIDE_CI: "true"
-    DD_HOSTNAME: "ddogagent"
-    DD_AGENT_HOST: "ddogagent"
-    DD_TRACE_AGENT_URL: "http://ddogagent:8126"
-    DD_ENV: "ci"
-    DD_SERVICE: "gg-bot-upload-assistant"
-    DD_TRACE_DEBUG: "true"
   script:
     - pip install -r requirements/requirements_test.txt
     - pip freeze > requirements/requirements_test.txt
     # - python -m pytest -vv --cov-report=html --cov=./ .
     # - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     # - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
-    - pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
+    - pytest -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     # - coverage xml -o reports/coverage_1.xml
     - sed -i 's|" filename="|" filename="src/|g' coverage/coverage.xml
   # coverage: '/TOTAL.*\s([.\d]+)%/'

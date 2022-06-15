@@ -4,13 +4,13 @@ README.md
 *.mp4
 *.log
 .coverage
-/tests/*
 .coveragerc
 *.mkv
 *.mp4
 /files/*
-/Dockerfiles
 /cicd
 /samples
 /tests
+/Dockerfiles
 pytest.ini
+junit_report.xml

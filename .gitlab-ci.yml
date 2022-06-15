@@ -7,6 +7,7 @@ include:
 - local: cicd/.gitlab-ci-base-images.yml
 - local: cicd/.gitlab-ci-unit-test.yml
 - local: cicd/.gitlab-ci-uploaders.yml
+- local: cicd/.gitlab-ci-re-uploader.yml
 
 stages:
 - build

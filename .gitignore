@@ -20,6 +20,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 /coverage
+junit_report.xml
 
 # C extensions
 *.so
