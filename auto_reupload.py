@@ -1173,7 +1173,7 @@ def reupload_job():
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
         # delete_leftover_files(working_folder)
-        torrent_info["working_folder"] = delete_leftover_files(working_folder, resume=args.resume)
+        torrent_info["working_folder"] = delete_leftover_files(working_folder)
         console.print(f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
 
         rar_file_validation_response = check_for_dir_and_extract_rars(torrent_path)
