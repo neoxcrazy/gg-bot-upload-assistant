@@ -24,7 +24,7 @@ unit-test:
     # - python -m pytest -vv --cov-report=html --cov=./ .
     # - python -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
     # - coverage run -m pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
-    - pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --cov=./ .
+    - pytest --ddtrace -vv --show-capture=stdout --cov-report=html --cov-report=xml --junitxml=junit_report.xml --cov=./ .
     # - coverage xml -o reports/coverage_1.xml
     - sed -i 's|" filename="|" filename="src/|g' coverage/coverage.xml
   # coverage: '/TOTAL.*\s([.\d]+)%/'
@@ -33,6 +33,8 @@ unit-test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
+      junit:
+        - junit_report.xml
     paths:
       - coverage
       - coverage/coverage.xml
