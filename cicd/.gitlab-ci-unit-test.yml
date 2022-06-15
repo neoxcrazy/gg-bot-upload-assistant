@@ -21,6 +21,8 @@ unit-test:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
+      junit:
+        - junit_report.xml
     paths:
       - coverage
       - coverage/coverage.xml
