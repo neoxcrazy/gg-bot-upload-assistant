@@ -41,7 +41,7 @@ from utilities.utils_dupes import search_for_dupes_api # Method that will search
 from utilities.utils_miscellaneous import *
 from utilities.utils_translation import *
 from utilities.utils_metadata import *
-from utilities.util_reupload import *
+from utilities.utils_reupload import *
 from utilities.utils_bdinfo import *
 from utilities.utils_basic import *
 from utilities.utils import *
@@ -1172,7 +1172,8 @@ def reupload_job():
         
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
-        delete_leftover_files(working_folder)
+        torrent_info["working_folder"] = delete_leftover_files(working_folder, resume=args.resume)
+        
         console.print(f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
 
         rar_file_validation_response = check_for_dir_and_extract_rars(torrent_path)
