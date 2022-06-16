@@ -2,6 +2,10 @@
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
 
+[![pipeline status](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/pipeline.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master)
+[![Latest Release](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/badges/release.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/releases)
+[![coverage report](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/coverage.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master)
+
 > Please refer to the readme in `dev` branch to see updated roadmaps and new features.
 
 > If you do not wish to use the docker version of the application, its recommended to checkout and use tags instead of branches for stability reasons.
