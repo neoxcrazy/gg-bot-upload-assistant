@@ -200,8 +200,8 @@ def reupload_get_translated_torrent_path(torrent_path):
         logging.info('[Main] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
-        host_path = f"{os.getenv('host_path', '')}/".replace('//', '/')
-        remote_path = f"{os.getenv('remote_path', '')}/".replace('//', '/')
+        host_path = f"{os.getenv('uploader_path', '')}/".replace('//', '/')
+        remote_path = f"{os.getenv('torrent_client_path', '')}/".replace('//', '/')
 
         translated_path = str(torrent_path).replace(remote_path, host_path)
         # And finally log the changes

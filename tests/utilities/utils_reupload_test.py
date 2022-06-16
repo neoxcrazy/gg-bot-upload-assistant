@@ -1,3 +1,4 @@
+import os
 import json
 import pytest
 
@@ -343,20 +344,22 @@ def __torrent_path_not_translation_side_effect(param, default=None):
 def __torrent_path_translation_side_effect(param, default=None):
     if param =="translation_needed":
         return "true"
-    elif param == "host_path":
-        return '/host/path/'
-    elif param == "remote_path":
-        return "/remote/location/"
+    elif param == "uploader_path":
+        return '/uploader/path/'
+    elif param == "torrent_client_path":
+        return "/client/location/"
     else:
         return default
+
+
 
 
 @pytest.mark.parametrize(
     ("torrent_path", "expected_path"),
     [
         pytest.param(
-            "/host/path/to/media/file.mkv",
-            "/remote/location/to/media/file.mkv",
+            "/client/location/to/media/file.mkv",
+            "/uploader/path/to/media/file.mkv",
             id="torrent_path_translation_needed"
         )
     ]
@@ -370,12 +373,12 @@ def test_reupload_get_translated_torrent_path(torrent_path, expected_path, mocke
     ("torrent_path", "expected_path"),
     [
         pytest.param(
-            "/host/path/to/media/file.mkv",
-            "/host/path/to/media/file.mkv",
+            "/client/location/to/media/file.mkv",
+            "/client/location/to/media/file.mkv",
             id="torrent_path_translation_not_needed"
         )
     ]
 )
-def test_reupload_get_translated_torrent_path(torrent_path, expected_path, mocker):
+def test_reupload_get_no_translated_torrent_path(torrent_path, expected_path, mocker):
     mocker.patch("os.getenv", side_effect=__torrent_path_not_translation_side_effect)
     assert reupload_get_translated_torrent_path(torrent_path) == expected_path
