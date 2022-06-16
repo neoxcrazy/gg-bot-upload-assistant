@@ -292,3 +292,90 @@ def test_reupload_persist_updated_moviedb_to_cache(existing_data, movie_db, torr
 )
 def test_reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, required_id, expected):
     assert reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, required_id) == expected
+
+
+@pytest.mark.parametrize(
+    ("cache_get_data", "list_torrents_data", "expected"),
+    [
+        pytest.param(
+            [
+                {"status":"PENDING"}
+            ], 
+            [
+                {"completed":"100", "size":"200", "hash": "hash1"},
+                {"completed":"200", "size":"200", "hash": "hash2"},
+            ], 
+            [
+                {"completed":"200", "size":"200", "hash": "hash2"}
+            ],
+            id="processable_torrents_present"
+        ),
+        pytest.param(
+            [
+                {"status":"FAILED"}
+            ], 
+            [
+                {"completed":"100", "size":"200", "hash": "hash1"},
+                {"completed":"200", "size":"200", "hash": "hash2"},
+            ], 
+            [],
+            id="processable_torrents_not_present"
+        ),
+    ]
+)
+def test_reupload_get_processable_torrents(cache_get_data, list_torrents_data, expected, mocker):
+    mock_cache_client = mocker.patch('modules.cache.Cache')
+    mocker.patch("modules.cache.Cache.get", return_value=cache_get_data)
+    
+    mocker_torrent_client = mocker.patch('modules.torrent_client.TorrentClient')
+    mocker.patch("modules.torrent_client.TorrentClient.list_torrents", return_value=list_torrents_data)
+
+    assert reupload_get_processable_torrents(mocker_torrent_client, mock_cache_client) == expected
+
+
+def __torrent_path_not_translation_side_effect(param, default=None):
+    if param =="translation_needed":
+        return "false"
+    else:
+        return default
+
+
+def __torrent_path_translation_side_effect(param, default=None):
+    if param =="translation_needed":
+        return "true"
+    elif param == "host_path":
+        return '/host/path/'
+    elif param == "remote_path":
+        return "/remote/location/"
+    else:
+        return default
+
+
+@pytest.mark.parametrize(
+    ("torrent_path", "expected_path"),
+    [
+        pytest.param(
+            "/host/path/to/media/file.mkv",
+            "/remote/location/to/media/file.mkv",
+            id="torrent_path_translation_needed"
+        )
+    ]
+)
+def test_reupload_get_translated_torrent_path(torrent_path, expected_path, mocker):
+    mocker.patch("os.getenv", side_effect=__torrent_path_translation_side_effect)
+    assert reupload_get_translated_torrent_path(torrent_path) == expected_path
+
+
+@pytest.mark.parametrize(
+    ("torrent_path", "expected_path"),
+    [
+        pytest.param(
+            "/host/path/to/media/file.mkv",
+            "/host/path/to/media/file.mkv",
+            id="torrent_path_translation_not_needed"
+        )
+    ]
+)
+def test_reupload_get_translated_torrent_path(torrent_path, expected_path, mocker):
+    mocker.patch("os.getenv", side_effect=__torrent_path_not_translation_side_effect)
+    assert reupload_get_translated_torrent_path(torrent_path) == expected_path
