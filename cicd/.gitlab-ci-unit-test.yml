@@ -26,19 +26,3 @@ unit-test:
       junit:
         - junit_report.xml
     expire_in: 30 days
-
-pages:
-  stage: deploy
-  dependencies:
-    - unit-test
-  script:
-    # delete everything in the current public folder
-    # and replace with code coverage HTML report
-    - rm -rf public/*
-    - cp -r coverage/* public/
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
-  # only:
-    # - master
