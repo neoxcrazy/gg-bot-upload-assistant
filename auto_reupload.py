@@ -1112,28 +1112,10 @@ def format_title(json_config):
 # ---------------------------------------------------------------------- #
 def reupload_job():  
     logging.info(f'[Main] Starting reupload job at {datetime.now()}')
-    logging.info(f'[Main] Listing latest torrents status from client')
     
-    # listing all the torrents that needs to be re-uploaded
-    torrents = torrent_client.list_torrents()
-    # Attributes present in the torrent list
-    # "category", "completed", "content_path", "hash", "name", "save_path", "size", "tracker"
-    logging.info(f'[Main] Total number of torrents that needs to be reuploaded are {len(torrents)}')
-    
-    # listing out only the completed torrents
-    logging.debug(f'[Main] Torrent data from client: {pformat(torrents)}')
-    torrents = list(
-                    filter(lambda torrent: not is_unprocessable_data_present_in_cache(torrent["hash"], cache), 
-                        filter(lambda torrent: torrent["completed"] == torrent["size"], torrents)
-                    )
-                )
-    logging.info(f'[Main] Total number of completed torrents that needs to be reuploaded are {len(torrents)}')
-    # TODO skip TMDB_IDENTIFICATION_FAILED failed torrents
+    torrents = reupload_get_processable_torrents(torrent_client, cache)
 
-    # removing torrents whose metadata is already present in cache
-
-    
-    if len(torrents) == 0:
+    if torrents is None or len(torrents) == 0:
         logging.info(f'[Main] There are no completed torrents for reuploading. Snoozing...')
         return
     
@@ -1155,21 +1137,9 @@ def reupload_job():
                 continue
 
         save_path = torrent["save_path"]
-        torrent_path = torrent["content_path"]
         # before we start doing anything we need to check whether the media file can be accessed by the uploader.
         # to check whether the file is accessible we need to adhere to any path translations that user want to do
-        if str(os.getenv('translation_needed')).lower() == 'true':
-            logging.info('[Main] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
-
-            # Just in case the user didn't end the path with a forward slash...
-            host_path = f"{os.getenv('host_path')}/".replace('//', '/')
-            remote_path = f"{os.getenv('remote_path')}/".replace('//', '/')
-
-            translated_path = str(torrent_path).replace(remote_path, host_path)
-            # And finally log the changes
-            logging.info(f'[Main] Remote path of the torrent: {torrent_path}')
-            logging.info(f'[Main] Translated path of the torrent: {translated_path}')
-            torrent_path = translated_path
+        torrent_path = reupload_get_translated_torrent_path(torrent["content_path"])
         
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
@@ -1207,32 +1177,17 @@ def reupload_job():
         movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
         possible_matches = None
         # the metadata items will be first obtained from cached_data. if its not available then we'll go ahead with mediainfo_summary data and tmdb search
-        movie_db = check_for_tmdb_cached_data(cache, torrent_info["title"], torrent_info["year"] if "year" in torrent_info else "", torrent_info["type"])
-        logging.debug(f"[Main] MovieDB data obtained from cache: {pformat(movie_db)}")
-        if movie_db is None or ( cached_data is not None and "tmdb_user_choice" in cached_data ):
-            # if we don't have any movie_db data cached in tmdb repo, repo then we'll initialize the movie_db dictionary.cache
-            # similarly if there is a user provided tmdb id (from gg-bot-visor) then we'll give higher priority to users choice and clear the cached movie_db
-            movie_db = dict()
+        movie_db = reupload_get_movie_db_from_cache(
+            cache, 
+            cached_data, 
+            torrent_info["title"], 
+            torrent_info["year"] if "year" in torrent_info else "", 
+            torrent_info["type"]
+        )
 
-        metadata_tmdb = ""
-        if cached_data is not None and "tmdb_user_choice" in cached_data:
-            metadata_tmdb = str(cached_data["tmdb_user_choice"]) # this is value provided by the user. This will never be None
-        elif "tmdb" in movie_db:
-            metadata_tmdb = str(movie_db["tmdb"]) if movie_db["tmdb"] is not None else "" # TODO need to figure out why None is saved in metadata db
-        elif 'tmdb' in torrent_info:
-            metadata_tmdb = str(torrent_info['tmdb'])
-
-        metadata_imdb = ""
-        if "imdb" in movie_db:
-            metadata_imdb = str(movie_db["imdb"]) if movie_db["imdb"] is not None else ""
-        elif 'imdb' in torrent_info:
-            metadata_imdb = str(torrent_info['imdb'])
-
-        metadata_tvmaze = ""
-        if "tvmaze" in movie_db:
-            metadata_tvmaze = str(movie_db["tvmaze"]) if movie_db["tvmaze"] is not None else ""
-        elif 'tvmaze' in torrent_info:
-            metadata_tvmaze = str(torrent_info['tvmaze'])
+        metadata_tmdb = reupload_get_external_id_based_on_priority(movie_db, cached_data, "tmdb")
+        metadata_imdb = reupload_get_external_id_based_on_priority(movie_db, cached_data, "imdb")
+        metadata_tvmaze = reupload_get_external_id_based_on_priority(movie_db, cached_data, "tvmaze")
 
         for media_id_key, media_id_val in { "tmdb": [metadata_tmdb], "imdb": [metadata_imdb], "tvmaze": [metadata_tvmaze] }.items():
             if media_id_val is not None and len(media_id_val[0]) > 1:  # we include ' > 1 ' to prevent blank ID's and issues later
@@ -1304,7 +1259,6 @@ def reupload_job():
             continue
 
         # -------- Use official info from TMDB --------
-        # TODO save the movie db data to the torrent cache as well
         original_title = torrent_info["title"]
         original_year = torrent_info["year"] if "year" in torrent_info else ""
         
@@ -1316,25 +1270,14 @@ def reupload_job():
         torrent_info["tvdb"] = tvdb
         torrent_info["mal"] = mal
 
-        cache_tmdb_metadata = "tmdb" not in movie_db
-        movie_db["tmdb"] = torrent_info["tmdb"] if "tmdb" in torrent_info else "0"
-        movie_db["imdb"] = torrent_info["imdb"] if "imdb" in torrent_info else "0"
-        movie_db["tvmaze"] = torrent_info["tvmaze"] if "tvmaze" in torrent_info else "0"
-        movie_db["tvdb"] = torrent_info["tvdb"] if "tvdb" in torrent_info else "0"
-        movie_db["mal"] = torrent_info["mal"] if "mal" in torrent_info else "0"
-        movie_db["title"] = original_title
-        movie_db["year"] = original_year
-        movie_db["type"] = torrent_info["type"]
-        backup_id = None
-        if "_id" in movie_db:
-            backup_id = movie_db["_id"]
-            del movie_db['_id']
-        update_field(torrent["hash"], "movie_db", movie_db, True, cache)
-        if cache_tmdb_metadata:
-            if backup_id is not None:
-                movie_db['_id'] = backup_id
-            cache_tmdb_selection(cache, movie_db)
-
+        reupload_persist_updated_moviedb_to_cache(
+            cache, 
+            movie_db, 
+            torrent_info, 
+            torrent["hash"],
+            original_title, 
+            original_year
+        )
         # -------- Dupe check for single tracker uploads --------
         # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
         # If there are duplicates in the tracker, then we do not waste time taking and uploading screenshots.
