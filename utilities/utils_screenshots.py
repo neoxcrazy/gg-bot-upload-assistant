@@ -63,7 +63,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             # return data
             return [
                 True, 
-                f'[url={response["link"]}][img={thumb_size}x{thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', 
+                f'[url={response["link"]}][img={thumb_size}]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]', 
                 f'[url={response["link"]}][img]{"m.".join(response["link"].rsplit(".", 1))}[/img][/url]',
                 f'[url={response["link"]}][img]{"t.".join(response["link"].rsplit(".", 1))}[/img][/url]',
                 response["link"]
@@ -84,7 +84,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             # Pretty sure ptpimg doesn't compress/host multiple 'versions' of the same image so we use the direct image link for both parts of the bbcode (url & img)
             return [
                 True, 
-                f'[url={ptp_img_upload[0]}][img={thumb_size}x{thumb_size}]{ptp_img_upload[0]}[/img][/url]', 
+                f'[url={ptp_img_upload[0]}][img={thumb_size}]{ptp_img_upload[0]}[/img][/url]', 
                 f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]',
                 f'[url={ptp_img_upload[0]}][img]{ptp_img_upload[0]}[/img][/url]', 
                 ptp_img_upload[0]
@@ -130,7 +130,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                         img_type = 'medium'
                         # if medium sized image is present then we'll use that as the second and thrid entry in the list.
                         # second one with thumbnail size limit and thrid without
-                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                         returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                         if 'thumb' not in img_upload_response[parent_key]:
                             # thumbnail sized image is not present, hence we'll use medium sized image as fourth entry
@@ -146,13 +146,13 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                             # no medium image type is present. hence we'll use thumb for those as well
                             # second will be the thumbnail sized image with size limit
                             # third and fourth will be thumbnail sized image wihtout any limits
-                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                             returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                             returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                     
                     if len(returnList) != 4:
                         # neither of medium nor thumbnail sized image was present, so we'll just add the full image url as 2 3 and 4th entry
-                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}x{thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                         returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
                         returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
                     
@@ -183,7 +183,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                         logging.info(f'[Screenshots] imgbox edit url for {image_path}: {submission["edit_url"]}')
                         return [
                             True, 
-                            f'[url={submission["web_url"]}][img={thumb_size}x{thumb_size}]{submission["image_url"]}[/img][/url]',
+                            f'[url={submission["web_url"]}][img={thumb_size}]{submission["image_url"]}[/img][/url]',
                             f'[url={submission["web_url"]}][img]{submission["image_url"]}[/img][/url]', 
                             f'[url={submission["web_url"]}][img]{submission["thumbnail_url"]}[/img][/url]',
                             submission["image_url"]
