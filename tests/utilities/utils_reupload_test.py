@@ -201,6 +201,74 @@ def test_reupload_get_movie_db_from_cache(cached_data, movie_db, expected, mocke
                 "year": "original_year"
             }, 
             id="no_movie_db_data"
+        ),
+        pytest.param(
+            [{"movie_db": ""}], # the existing torrent data from cache
+            {"_id":"adsasdasd"}, # this is the moviedb data obtained from `utilities.utils_reupload.reupload_get_movie_db_from_cache`
+            { # this is the metadata in torrent_info
+                "tmdb": "tmdb",
+                "imdb": "imdb",
+                "tvmaze": "tvmaze",
+                "tvdb": "tvdb",
+                "mal": "mal",
+                "type": "type"
+            }, 
+            { # this is the moviedb being saved to cache
+                "tmdb": "tmdb",
+                "_id":"adsasdasd",
+                "imdb": "imdb",
+                "tvmaze": "tvmaze",
+                "tvdb": "tvdb",
+                "mal": "mal",
+                "type": "type",
+                "title": "original_title",
+                "year": "original_year"
+            }, 
+            id="_id_in_movie_db"
+        ),
+        pytest.param(
+            [{"movie_db": ""}], # the existing torrent data from cache
+            {"_id":"adsasdasd", "tmdb":""}, # this is the moviedb data obtained from `utilities.utils_reupload.reupload_get_movie_db_from_cache`
+            { # this is the metadata in torrent_info
+                "tmdb": "tmdb",
+                "imdb": "imdb",
+                "tvmaze": "tvmaze",
+                "tvdb": "tvdb",
+                "mal": "mal",
+                "type": "type"
+            }, 
+            { # this is the moviedb being saved to cache
+                "tmdb": "tmdb",
+                "imdb": "imdb",
+                "tvmaze": "tvmaze",
+                "tvdb": "tvdb",
+                "mal": "mal",
+                "type": "type",
+                "title": "original_title",
+                "year": "original_year"
+            }, 
+            id="tmdb_in_movie_db"
+        ),
+        pytest.param(
+            [{"movie_db": ""}], # the existing torrent data from cache
+            {"_id":"adsasdasd", "tmdb":""}, # this is the moviedb data obtained from `utilities.utils_reupload.reupload_get_movie_db_from_cache`
+            { # this is the metadata in torrent_info
+                "tmdb": "tmdb",
+                "tvmaze": "tvmaze",
+                "mal": "mal",
+                "type": "type"
+            }, 
+            { # this is the moviedb being saved to cache
+                "tmdb": "tmdb",
+                "imdb": "0",
+                "tvmaze": "tvmaze",
+                "tvdb": "0",
+                "mal": "mal",
+                "type": "type",
+                "title": "original_title",
+                "year": "original_year"
+            }, 
+            id="certain_ids_missing"
         )
     ]
 )
@@ -209,3 +277,18 @@ def test_reupload_persist_updated_moviedb_to_cache(existing_data, movie_db, torr
     mocker.patch("modules.cache.Cache.get", return_value=existing_data)
     mocker.patch("modules.cache.Cache.save", return_value=None)
     assert reupload_persist_updated_moviedb_to_cache(mock_cache_client, movie_db, torrent_info, "torrent_hash", "original_title", "original_year") == expected
+
+
+@pytest.mark.parametrize(
+    ("movie_db", "torrent_info", "cached_data", "required_id", "expected"),
+    [
+        pytest.param(None, None, {"tmdb_user_choice": "tmdb_user_choice"}, "tmdb", "tmdb_user_choice", id="tmdb_user_choice"),
+        pytest.param({"tmdb": "tmdb_movie_db"}, None, None, "tmdb", "tmdb_movie_db", id="data_from_movie_db"),
+        pytest.param({"tmdb": None}, None, None, "tmdb", "", id="none_in_movie_db"),
+        pytest.param({"imdb": "imdb_movie_db"}, None, None, "imdb", "imdb_movie_db", id="imdb_external_id"),
+        pytest.param({}, {"tvmaze": "tvmaze_torrent_info"}, None, "tvmaze", "tvmaze_torrent_info", id="data_from_torrent_info"),
+        pytest.param({}, {"tvmaze": None}, "tvmaze", None, "", id="none_in_torrent_info"),
+    ]
+)
+def test_reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, required_id, expected):
+    assert reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, required_id) == expected

@@ -1185,9 +1185,9 @@ def reupload_job():
             torrent_info["type"]
         )
 
-        metadata_tmdb = reupload_get_external_id_based_on_priority(movie_db, cached_data, "tmdb")
-        metadata_imdb = reupload_get_external_id_based_on_priority(movie_db, cached_data, "imdb")
-        metadata_tvmaze = reupload_get_external_id_based_on_priority(movie_db, cached_data, "tvmaze")
+        metadata_tmdb = reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tmdb")
+        metadata_imdb = reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "imdb")
+        metadata_tvmaze = reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tvmaze")
 
         for media_id_key, media_id_val in { "tmdb": [metadata_tmdb], "imdb": [metadata_imdb], "tvmaze": [metadata_tvmaze] }.items():
             if media_id_val is not None and len(media_id_val[0]) > 1:  # we include ' > 1 ' to prevent blank ID's and issues later

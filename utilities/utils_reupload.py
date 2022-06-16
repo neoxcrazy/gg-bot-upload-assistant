@@ -153,11 +153,11 @@ def reupload_persist_updated_moviedb_to_cache(cache, movie_db, torrent_info, tor
         if backup_id is not None:
             movie_db['_id'] = backup_id
         _cache_tmdb_selection(cache, movie_db)
-        
+
     return movie_db
 
 
-def reupload_get_external_id_based_on_priority(movie_db, cached_data, required_id):
+def reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, required_id):
     # in case of tmdb id, we need to give highest priority to the golden data obtained from the user via GG-BOT Visor
     # If bot wants tmdb id and we have data in cached data (for currently uploading torrent) then we return it. 
     # Other wise we go for the cached movieDB data (from another torrent)
@@ -171,7 +171,7 @@ def reupload_get_external_id_based_on_priority(movie_db, cached_data, required_i
     if required_id in movie_db: # TODO need to figure out why None is saved in metadata db
         external_db_id = str(movie_db[required_id]) if movie_db[required_id] is not None else ""
     elif required_id in torrent_info:
-        external_db_id = str(torrent_info[required_id])
+        external_db_id = str(torrent_info[required_id]) if torrent_info[required_id] is not None else ""
     return external_db_id
 
 
