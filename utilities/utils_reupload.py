@@ -86,6 +86,7 @@ def update_torrent_status(info_hash, status, cache):
     logging.debug(f'[ReuploadUtils] Updating status of `{info_hash}` from `{existing_data["status"]}` to `{status}`')
     existing_data["status"]=status
     cache.save(f'{TORRENT_DB_KEY_PREFIX}::{info_hash}', existing_data)
+    return existing_data # returning data for testing
 
 
 def update_field(info_hash, field, data, is_json, cache):
@@ -96,16 +97,19 @@ def update_field(info_hash, field, data, is_json, cache):
     logging.debug(f'[ReuploadUtils] Updating `{field}` of `{info_hash}` from `{existing_data[field]}` to `{data}`')
     existing_data[field]=data
     cache.save(f'{TORRENT_DB_KEY_PREFIX}::{info_hash}', existing_data)
+    return existing_data # returning data for testing
 
 
 def insert_into_job_repo(job_repo_entry, cache):
     logging.debug(f'[ReuploadUtils] Saving job entry in cache for {job_repo_entry["hash"]}')
     cache.save(f'{JOB_REPO_DB_KEY_PREFIX}::{job_repo_entry["hash"]}::{job_repo_entry["tracker"]}', job_repo_entry)
     logging.debug(f'[ReuploadUtils] Successfully saved job entry in cache for {job_repo_entry["hash"]}')
+    return job_repo_entry # returning data for testing
 
 
 def cache_tmdb_selection(cache, movie_db):
     cache.save(f'{TMDB_DB_KEY_PREFIX}::{movie_db["title"]}@{movie_db["year"]}', movie_db)
+    return movie_db # returning data for testing
 
 
 def check_for_tmdb_cached_data(cache, title, year, content_type):
