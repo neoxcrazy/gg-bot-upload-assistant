@@ -217,25 +217,26 @@ docker run --rm -it \
 ### v3.0
 - [ ] Add Support for new platforms
     - [ ] Swarmazon
+- [ ] Discord notification for auto uploaded data
+- [ ] Improved TMDB metadata search Phase 2
 - [X] Automatic torrent re-uploader
 - [X] Improved dupe check - Phase 1
 - [X] Improved screenshots url management
-- [X] Improved TMDB metadata search
+- [X] Improved TMDB metadata search Phase 1
 - [X] Support for communicating with torrent clients
     - [X] Qbittorrent
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
-- [ ] EPIC: GG-Bot Visor for reports and failure recoveries
 - [X] Release GG-BOT source code to public
-- [ ] Support for overriding target tracker through categories
 - [X] Bug Fixes and Testing Phase 1
-- [ ] Bug Fixes and Testing Phase 2
-- [ ] Discord notification for auto uploaded data
+- [X] Bug Fixes and Testing Phase 2
 - [X] Issue#37: Automatic cross-seeding not working
 
 ### v3.0.1
-- [ ] TBD
+- [ ] EPIC: GG-Bot Visor for reports and failure recoveries
+- [ ] Support for overriding target tracker through categories
+- [ ] Ability to reuse already existing torrents.
 
 ### Backlogs
 - [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader

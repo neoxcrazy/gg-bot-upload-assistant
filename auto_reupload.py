@@ -1177,13 +1177,7 @@ def reupload_job():
         movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
         possible_matches = None
         # the metadata items will be first obtained from cached_data. if its not available then we'll go ahead with mediainfo_summary data and tmdb search
-        movie_db = reupload_get_movie_db_from_cache(
-            cache, 
-            cached_data, 
-            torrent_info["title"], 
-            torrent_info["year"] if "year" in torrent_info else "", 
-            torrent_info["type"]
-        )
+        movie_db = reupload_get_movie_db_from_cache(cache, cached_data, torrent_info["title"], torrent_info["year"] if "year" in torrent_info else "", torrent_info["type"] )
 
         metadata_tmdb = reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tmdb")
         metadata_imdb = reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "imdb")
@@ -1270,14 +1264,9 @@ def reupload_job():
         torrent_info["tvdb"] = tvdb
         torrent_info["mal"] = mal
 
-        reupload_persist_updated_moviedb_to_cache(
-            cache, 
-            movie_db, 
-            torrent_info, 
-            torrent["hash"],
-            original_title, 
-            original_year
-        )
+        # saving the updates to moviedb in cache
+        reupload_persist_updated_moviedb_to_cache(cache, movie_db, torrent_info, torrent["hash"], original_title, original_year)
+
         # -------- Dupe check for single tracker uploads --------
         # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
         # If there are duplicates in the tracker, then we do not waste time taking and uploading screenshots.
@@ -1391,6 +1380,7 @@ def reupload_job():
                 torrent_media = torrent_info["raw_video_file"]
             else:
                 torrent_media = torrent_info["upload_media"]
+
             generate_dot_torrent(
                 media=torrent_media,
                 announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
