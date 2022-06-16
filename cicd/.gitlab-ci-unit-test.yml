@@ -11,15 +11,16 @@ unit-test:
     - pip freeze > requirements/requirements_test.txt
     # - pytest -vv --show-capture=stdout --cov-report=html --cov-report=xml --junitxml=junit_report.xml --cov=./ .
     - pytest -vv --show-capture=stdout --cov-report=html --junitxml=junit_report.xml --cov=./ .
-    - coverage xml -o coverage/coverage.xml
-    - sed -i 's|" filename="|" filename="src/|g' coverage/coverage.xml
+    - coverage xml -o coverage.xml
+    - sed -i 's|" filename="|" filename="src/|g' coverage.xml
   artifacts:
+    paths:
+      - coverage
+      - coverage.xml
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/coverage.xml
+        path: coverage.xml
       junit:
         - junit_report.xml
-    paths:
-      - coverage
     expire_in: 30 days
