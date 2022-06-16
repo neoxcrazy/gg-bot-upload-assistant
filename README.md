@@ -219,6 +219,7 @@ docker run --rm -it \
     - [ ] Swarmazon
 - [X] Automatic torrent re-uploader
 - [X] Improved dupe check - Phase 1
+- [X] Improved screenshots url management
 - [X] Improved TMDB metadata search
 - [X] Support for communicating with torrent clients
     - [X] Qbittorrent
