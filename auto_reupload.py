@@ -1311,20 +1311,12 @@ def reupload_job():
             torrent_title_import=torrent_info["title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"], 
             discord_url=discord_url, skip_screenshots=args.skip_screenshots)
 
-        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'):
-            torrent_info["bbcode_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images.txt'
-
-        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'):
-            torrent_info["bbcode_images_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_nothumb.txt'
-
-        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'):
-            torrent_info["bbcode_images_thumb_nothumb"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}bbcode_images_thumb_nothumb.txt'
-        
-        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'):
-            torrent_info["url_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}url_images.txt'
-
-        if os.path.exists(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'):
-            torrent_info["data_images"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}image_paths.txt'
+        screenshots_data = json.load(open(f"{working_folder}/temp_upload/{torrent_info['working_folder']}screenshots/screenshots_data.json"))
+        torrent_info["bbcode_images"] = screenshots_data["bbcode_images"]
+        torrent_info["bbcode_images_nothumb"] = screenshots_data["bbcode_images_nothumb"]
+        torrent_info["bbcode_thumb_nothumb"] = screenshots_data["bbcode_thumb_nothumb"]
+        torrent_info["url_images"] = screenshots_data["url_images"]
+        torrent_info["data_images"] = screenshots_data["url_images"]
 
         # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
         logging.info("[Main] Now starting tracker specific tasks")

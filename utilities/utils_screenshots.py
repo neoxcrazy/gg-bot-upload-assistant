@@ -16,7 +16,6 @@ from rich.console import Console
 from ffmpy import FFmpeg
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
 from imgurpython import ImgurClient
 
 # For more control over rich terminal content, import and construct a Console object.
@@ -202,13 +201,6 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                 imgbox_asyncio_upload[3],
                 imgbox_asyncio_upload[4]
             ]
-
-        # # Python 3.7+ version
-        # asyncio.run(imgbox_upload(filepaths=[image_path]))  # call the function that uploads images to imgbox
-        #
-        # # Python <= 3.6 friendly alternative
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(imgbox_upload(list_of_images))
     else:
         logging.fatal(f'[Screenshots] Invalid imagehost {img_host}. Cannot upload screenshots.')
 
@@ -220,8 +212,6 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     console.rule(f"Screenshots", style='red', align='center')
     console.line(count=1)
 
-    # Open the config
-    load_dotenv(f"{base_path}config.env")
     num_of_screenshots = os.getenv("num_of_screenshots")
 
     logging.info(f"[Screenshots] Sanitizing the torrent title `{torrent_title_import}` since this is from TMDB")
@@ -271,6 +261,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         logging.error(f"[Screenshots] Continuing upload without screenshots")
         console.print(f'Continuing without screenshots\n', style='chartreuse1')
         return
+
     # ##### Now that we've verified that at least 1 imghost is available & has an api key etc we can try & upload the screenshots ##### #
     # We only generate screenshots if a valid image host is enabled/available
     # Figure out where exactly to take screenshots by evenly dividing up the length of the video
@@ -290,11 +281,6 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             logging.info(f"[Screenshots] Continuing upload existing screenshot: {torrent_title_import} - ({ss_timestamp.replace(':', '.')}).png")
         image_data_paths.append(f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
 
-    with open(f"{base_path}/temp_upload/{hash_prefix}image_paths.txt", "w") as image_paths_txt:
-        logging.debug(f"[Screenshots] Writing image data paths to `image_paths.txt`")
-        for image_path in image_data_paths:
-            image_paths_txt.write(f"{image_path}\n")
-    
     console.print('Finished taking screenshots!\n', style='sea_green3')
     # log the list of screenshot timestamps
     logging.info(f'[Screenshots] Taking screenshots at the following timestamps {ss_timestamps_list}')
@@ -307,9 +293,17 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
         console.print('Reusing previously uploaded screenshot urls!\n', style='sea_green3')
     else:
         # ---------------------------------------------------------------------------------------- #
+        # all different type of screenshots that the upload takes.
+        images_data = { "bbcode_images" : "", "bbcode_images_nothumb" : "", "bbcode_thumb_nothumb" : "", "url_images" : "", "data_images": ""}
+
+        for image_path in image_data_paths:
+            images_data["data_images"] = f'{image_path}\n{images_data["data_images"]}'
+
         logging.info("[Screenshots] Starting to upload screenshots to image hosts.")
         console.print(f"Image host order: [chartreuse1]{' [bold blue]:arrow_right:[/bold blue] '.join(enabled_img_hosts_list)}[/chartreuse1]", style="Bold Blue")
+
         successfully_uploaded_image_count = 0
+
         for ss_to_upload in track(screenshots_to_upload_list, description="Uploading screenshots..."):
             # This is how we fall back to a second host if the first fails
             for img_host in enabled_img_hosts_list:
@@ -318,14 +312,17 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
                 # If the upload function returns True, we add it to bbcode_images.txt and url_images.txt
                 if upload_image:
                     logging.debug(f"[Screenshots] Response from image host: {upload_image}")
-                    with open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images.txt", "a") as append_bbcode_txt, open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images_nothumb.txt", "a") as append_bbcode_nothumb_txt, open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images_thumb_nothumb.txt", "a") as append_bbcode_thumb_nothumb_txt, open(f"{base_path}/temp_upload/{hash_prefix}url_images.txt", "a") as append_url_txt:
-                        append_bbcode_txt.write(f"{upload_image[1]} ")
-                        append_bbcode_nothumb_txt.write(f"{upload_image[2]} ")
-                        append_bbcode_thumb_nothumb_txt.write(f"{upload_image[3]} ")
-                        append_url_txt.write(f"{upload_image[4]}\n")
+                    images_data["bbcode_images"] = f'{upload_image[1]} {images_data["bbcode_images"]}'
+                    images_data["bbcode_images_nothumb"] = f'{upload_image[2]} {images_data["bbcode_images_nothumb"]}'
+                    images_data["bbcode_thumb_nothumb"] = f'{upload_image[3]} {images_data["bbcode_thumb_nothumb"]}'
+                    images_data["url_images"] = f'{upload_image[4]}\n{images_data["url_images"]}'
                     successfully_uploaded_image_count += 1
                     # Since the image uploaded successfully, we need to break now so we don't reupload to the backup image host (if exists)
                     break
+
+        logging.info('[Screenshots] Uploaded screenshots. Saving urls and bbcodes...')
+        with open(f"{base_path}/temp_upload/{hash_prefix}screenshots/screenshots_data.json", "a") as screenshots_file:
+            screenshots_file.write(json.dumps(images_data))
 
         # Depending on the image upload outcome we print a success or fail message showing the user what & how many images failed/succeeded
         if len(screenshots_to_upload_list) == successfully_uploaded_image_count:
