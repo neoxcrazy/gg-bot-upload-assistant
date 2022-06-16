@@ -63,6 +63,7 @@ def initialize_torrent_data(torrent, cache):
     init_data["possible_matches"] = "None"
     cache.save(f'{TORRENT_DB_KEY_PREFIX}::{torrent["hash"]}', init_data)
     logging.debug(f'[ReuploadUtils] Successfully initialized torrent data in cache for {torrent["name"]}')
+    return init_data # adding return for testing
 
 
 def should_upload_be_skipped(cache, torrent):
