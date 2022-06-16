@@ -80,7 +80,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://skipthecommericals.xyz/">SkipTheCommericals</a></strong></td>
         </tr>
         <tr style="text-align: center">
-s            <td><strong>RF</strong></td>
+            <td><strong>RF</strong></td>
             <td><strong><a href="https://reelflix.xyz/">ReelFliX</a></strong></td>
         </tr>
         <tr style="text-align: center">
