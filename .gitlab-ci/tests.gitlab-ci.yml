@@ -14,6 +14,9 @@ unit-test:
     - coverage report
     - coverage xml -o coverage.xml
     - sed -i 's|" filename="|" filename="src/|g' coverage.xml
+    - curl -Os https://uploader.codecov.io/latest/alpine/codecov
+    - chmod +x codecov
+    - ./codecov
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
