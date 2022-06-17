@@ -130,6 +130,10 @@ api_keys_dict = prepare_and_validate_tracker_api_keys_dict('./parameters/tracker
 upload_to_trackers = get_and_validate_configured_trackers(args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
 
 console.line(count=2)
+display_banner("  Auto  ReUploader  ")
+console.line(count=1)
+
+console.line(count=2)
 console.rule(f"Establishing Connections", style='red', align='center')
 console.line(count=1)
 

@@ -20,6 +20,7 @@ from imgurpython import ImgurClient
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
 
+
 def _get_ss_range(duration, num_of_screenshots):
     # If no spoilers is enabled, then screenshots are taken from first half of the movie or tv show
     # otherwise screenshots are taken at regualar intervals from the whole movie or tv show

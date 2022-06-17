@@ -6,6 +6,7 @@ import time
 import shutil
 import hashlib
 import logging
+import pyfiglet
 import subprocess
 
 from torf import Torrent
@@ -627,3 +628,12 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
     else:
         logging.info("[Utils] No process processing steps needed, as per users configuration")
         return False
+
+
+def display_banner(mode):
+    gg_bot = pyfiglet.figlet_format("GG-BOT", font="banner3-D")
+    mode = pyfiglet.figlet_format(mode, font="banner3-D", width=210)
+
+    console.print(f'[bold green]{gg_bot}[/bold green]', justify="center")
+    console.print(f'[bold blue]{mode}[/bold blue]', justify="center", style='#38ACEC')
+    return True

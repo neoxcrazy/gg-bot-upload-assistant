@@ -8,6 +8,9 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
 
+console = Console()
+
+
 def miscellaneous_perform_scene_group_capitalization(scene_groups_path, release_group):
     # Scene releases after they unrared are all lowercase (usually) so we fix the torrent title here (Never rename the actual file)
     # new groups can be added in the `scene_groups.json`

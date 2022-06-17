@@ -1099,6 +1099,10 @@ def upload_to_site(upload_to, tracker_api_key):
 script_start_time = time.perf_counter()
 starting_new_upload = f" {'-' * 24} Starting new upload {'-' * 24} "
 
+console.line(count=2)
+display_banner("  Upload  Assistant  ")
+console.line(count=1)
+
 logging.info(starting_new_upload)
 
 if args.tripleup and args.doubleup:

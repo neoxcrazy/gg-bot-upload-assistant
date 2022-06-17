@@ -709,3 +709,9 @@ def test_check_for_dir_and_extract_rars_no_rar_installed(mocker):
     file_path = "tests/working_folder/rar/"
     mocker.patch('os.path.isfile', return_value=False)
     assert check_for_dir_and_extract_rars(file_path) == (False, file_path)
+
+
+def test_display_banner(mocker):
+    mock_console = mocker.patch('rich.console.Console.print')
+    display_banner("GG-BOT-Testing")
+    assert mock_console.call_count == 2
