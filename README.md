@@ -32,7 +32,9 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 > If you do not wish to use the docker version of the application, its recommended to checkout and use tags instead of branches for stability reasons.
 
 
-![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
+<div align="center">
+    <img src="https://imgs.xkcd.com/comics/standards.png">
+</div>
 
 <br>
 
