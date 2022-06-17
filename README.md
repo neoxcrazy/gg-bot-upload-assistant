@@ -1,4 +1,23 @@
-# **GG-BOT Upload Assistant**
+<div align="center">
+<h1 align="center">GG-BOT Upload Assistant & Auto ReUploader</h1>
+  <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant">
+    <img src="https://i.ibb.co/xgrDjLS/gg-bot.png" alt="Logo" width="128">
+  </a>
+</div>
+<br>
+<div align="center">
+    One size fits all solution for automated torrent uploading
+    <br />
+    ·
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/issues/new">Report Bug</a>
+    ·
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/issues/new">Request Feature</a>
+</div>
+<br>
+<div align="center">
+
+</div>
+# ****
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
 
