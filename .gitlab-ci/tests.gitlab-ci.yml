@@ -19,7 +19,9 @@ unit-test:
     - chmod +x codecov
     - ./codecov -R .
     # sending coverage report for codacy
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh)
+    - curl -Ls https://coverage.codacy.com/get.sh
+    - chmod +x get.sh
+    - ./get.sh
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
