@@ -14,9 +14,12 @@ unit-test:
     - coverage report
     - coverage xml -o coverage.xml
     - sed -i 's|" filename="|" filename="src/|g' coverage.xml
+    # sending coverage report to codecov
     - curl -Os https://uploader.codecov.io/latest/alpine/codecov
     - chmod +x codecov
     - ./codecov -R .
+    # sending coverage report for codacy
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh)
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
