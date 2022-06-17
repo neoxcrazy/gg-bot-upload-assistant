@@ -19,7 +19,8 @@ unit-test:
     - chmod +x codecov
     - ./codecov -R .
     # sending coverage report for codacy
-    - wget -qO - https://coverage.codacy.com/get.sh
+    - curl -Os https://coverage.codacy.com/get.sh
+    - chmod +x get.sh
     - sh get.sh -l Python -r coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
