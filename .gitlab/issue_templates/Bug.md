@@ -1,35 +1,32 @@
-## Steps to reproduce
-<!--
-Place information about how to cause the bug here.
--->
+---
+name: Bug report
+about: Create a report to help us improve
 
-1. ...
-2. ...
-3. ...
+---
 
-## Current behavior
-<!--
-Place information about what currently occurs here. Attach images here if needed.
--->
+**Expected behavior**
 
-## Expected behavior
-<!--
-Place information about what you expect to occur here.
--->
+A clear and concise description of what you want to do and what you think should happen. (Code to reproduce the behavior can be added below).
 
-## Version information
+
+**Actual behavior**
+
+What happened instead. Add as much detail as you can. Include (copy and paste) stack traces and any output.
+
+
+**Code to reproduce the behavior**
+
+Show us how to reproduce the failiure. If you can, use trajectory files from the test data.
+
+``` python
+import maicos
+
+....
+
+```
+
+** Version information**C
 - Type of deployment
     - [ ] Docker
     - [ ] Bare Meta
-
-### For docker deployments
-Release Version/Tag: 
-
-### For bare metal deployments
-<!--
-Add information about your system here.
-
-The distribution name should be the Linux distribution being used. If applicable, include the distribution version.
-
-If you believe any other information about your system may be useful, include it here too.
--->
+- Tag: 
