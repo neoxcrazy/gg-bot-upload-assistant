@@ -23,6 +23,7 @@
     <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant"><img src="https://img.shields.io/badge/dynamic/json?color=green&logo=gitlab&label=stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F32631784"></a>
     <a href="https://codecov.io/gl/NoobMaster669/gg-bot-upload-assistant">
   <img src="https://codecov.io/gl/NoobMaster669/gg-bot-upload-assistant/branch/feature/swarmazon/graph/badge.svg?token=YORMWC9D77"/>
+  <a href="https://www.codacy.com/gl/NoobMaster669/gg-bot-upload-assistant/dashboard?utm_source=gitlab.com&amp;utm_medium=referral&amp;utm_content=NoobMaster669/gg-bot-upload-assistant&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/474a4fa3f5b5483bbf464d82afefe7cf"/></a>
 </a>
 </div>
 
