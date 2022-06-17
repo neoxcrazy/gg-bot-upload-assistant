@@ -141,6 +141,8 @@ class Rutorrent:
 
     def list_torrents(self):
         response = self.__call_server(f'{self.base_url}{self.__default_path}', data = {'mode':'list'})
+        if type(response["t"]) == list: 
+            return []
         return list(map(self.__extract_necessary_keys, filter(self.__match_label, map(self.__get_torrent_info, response["t"].items()))))
 
 

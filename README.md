@@ -275,6 +275,7 @@ docker run --rm -it \
         * Issue#34: Cross-Seeding uploading torrents for failed uploads
         * Issue#35: HEVC codec being used for web releases
         * Issue#36: Broken screenshots after new UNIT3D update
+        * Issue#38: Cross-Seeding bug fix
 
 ## **2.0.6**
     New Trackers
