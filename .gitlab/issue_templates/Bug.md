@@ -25,8 +25,14 @@ import maicos
 
 ```
 
-** Version information**C
+**Version information**
 - Type of deployment
     - [ ] Docker
     - [ ] Bare Meta
 - Tag: 
+
+**Logs / Trace**
+```
+Stack trace showing the error / exception.
+Attaching the log from the uploader is also appreciated.
+```
