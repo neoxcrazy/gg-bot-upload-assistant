@@ -21,7 +21,7 @@ unit-test:
     # sending coverage report for codacy
     - curl -Os https://coverage.codacy.com/get.sh
     - chmod +x get.sh
-    - sh get.sh report -l Python -r coverage.xml
+    - sh get.sh -r coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
