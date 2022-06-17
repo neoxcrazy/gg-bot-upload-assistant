@@ -9,8 +9,8 @@ unit-test:
   script:
     - pip install -r requirements/requirements_test.txt
     - pip freeze > requirements/requirements_test.txt
-    # - pytest -vv --show-capture=stdout --cov-report=html --cov-report=xml --junitxml=junit_report.xml --cov=./ .
     - pytest -vv --show-capture=stdout --cov-report=html --junitxml=junit_report.xml --cov=./ .
+    # generating xml coverage report for various platforms
     - coverage report
     - coverage xml -o coverage.xml
     - sed -i 's|" filename="|" filename="src/|g' coverage.xml
