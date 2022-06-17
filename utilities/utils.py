@@ -403,7 +403,7 @@ def prepare_and_validate_tracker_api_keys_dict(api_keys_file_path):
     api_keys = json.load(open(api_keys_file_path))
     api_keys_dict = dict()
     for i in range (0, len(api_keys)):
-        api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper())
+        api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper(), "")
 
     # Make sure the TMDB API is provided [Mandatory Property]
     try:
@@ -420,43 +420,45 @@ def validate_env_file(sample_env_location):
     sample_env_keys = dotenv_values(sample_env_location).keys()
     # validating env file with expected keys from sample file
     for key in sample_env_keys:
-        if os.getenv(key) is None:
+        if os.getenv(key, "") == "":
             console.print(f"Outdated config.env file. Variable [red][bold]{key}[/bold][/red] is missing.", style="blue")
             logging.error(f"Outdated config.env file. Variable {key} is missing.")
 
 
 def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, all_trackers_list):
     upload_to_trackers = []
+    # small sanity check
+    if trackers is not None and len(trackers) < 1:
+        trackers = None
+
 
     tracker_list = all_trackers_list
     if all_trackers: # user wants to upload to all the trackers possible
         logging.info(f"[Utils] User has chosen to upload to add possible trackers: {tracker_list}")
     else:
         logging.info("[Utils] Attempting check and validate and default trackers configured")
-        tracker_list = os.getenv("default_trackers_list") or ""
+        tracker_list = os.getenv("default_trackers_list", "")
         if len(tracker_list) > 0:
             tracker_list= [ x.strip() for x in tracker_list.split(',') ]
 
     for tracker in trackers or tracker_list or []:
-        if "{tracker}_api_key".format(tracker=str(tracker).lower()) in api_keys_dict:
+        tracker = str(tracker)
+        if f"{tracker.lower()}_api_key" in api_keys_dict:
             # Make sure that an API key is set for that site
-            try:
-                if len(api_keys_dict[(str(tracker).lower()) + "_api_key"]) <= 1:
-                    raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
-                if str(tracker).upper() not in upload_to_trackers : upload_to_trackers.append(str(tracker).upper())
-            except AssertionError as err:
-                logging.error("[Utils] We can't upload to '{}' because that sites API key is not specified".format(tracker))
+            if len(api_keys_dict[(tracker.lower()) + "_api_key"]) <= 1:
+                continue
+            if tracker.upper() not in upload_to_trackers : upload_to_trackers.append(tracker.upper())
         else:
-            logging.error("[Utils] We can't upload to '{}' because that site is not supported".format(tracker))
+            logging.error(f"[Utils] We can't upload to '{tracker}' because that site is not supported")
 
     # Make sure that the user provides at least 1 valid tracker we can upload to
-    try:
-        # if len(upload_to_trackers) == 0 that means that the user either didn't provide any site at all, the site is not supported, or the API key isn't provided
-        if len(upload_to_trackers) < 1:
-            raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
-    except AssertionError as err:  # Log AssertionError in the logfile and quit here
+    # if len(upload_to_trackers) == 0 that means that the user either 
+    #   1. didn't provide any site at all, 
+    #   2. the site is not supported, or 
+    #   3. the API key isn't provided
+    if len(upload_to_trackers) < 1:
         logging.exception("[Utils] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
-        raise err
+        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
 
     logging.debug(f"[Utils] Trackers selected by bot: {upload_to_trackers}")
     return upload_to_trackers
@@ -514,12 +516,33 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         else:
             save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
 
-        res = torrent_client.upload_torrent(
-            torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', 
-            save_path=save_path, 
-            use_auto_torrent_management=False, 
-            is_skip_checking=True
-        )
+        """
+        for file in glob.glob(f"{working_folder}/temp_upload/cf831e08aa0008bb6046e40bad7dca96d9ddf3e6ac3cfb6a5a465460ba2636de" + r"/*.torrent"):
+            if file.replace(f"{working_folder}/temp_upload/cf831e08aa0008bb6046e40bad7dca96d9ddf3e6ac3cfb6a5a465460ba2636de/","").startswith("TDB-"):
+                print(f"TorrentDB :: {file}")
+            else:
+                print(f"TheScenePlace :: {file}")
+
+        """
+        # getting the proper .torrent file for the provided tracker
+        torrent_file = None
+        for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):
+            if f"/{tracker}-" in file:
+                torrent_file = file
+        
+        if torrent_file is not None:
+            res = torrent_client.upload_torrent(
+                torrent=torrent_file, 
+                save_path=save_path, 
+                use_auto_torrent_management=False, 
+                is_skip_checking=True
+            )
+        else:
+            logging.error(f"[Utils] Could not identify the .torrent file for tracker '{tracker}'")
+            console.print(f"⚠️ ☠️ ⚠️ [bold red]Could not identify the .torrent file for tracker [green]{tracker}[/green]." + 
+                " [/bold red] Please seed this tracker's torrent manually. ⚠️ ☠️ ⚠️")
+            res = None
+
         return res if res is not None else True
     return False
 
