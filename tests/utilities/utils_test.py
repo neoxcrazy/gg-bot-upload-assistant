@@ -27,12 +27,12 @@ def run_around_tests():
         clean_up(folder)
     else:
         Path(f"{folder}/torrent").mkdir(parents=True, exist_ok=True) # torrents folder
-        Path(f"{folder}/media").mkdir(parents=True, exist_ok=True) # media folder
+        # Path(f"{folder}/media").mkdir(parents=True, exist_ok=True) # media folder
+        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True, exist_ok=True) # media guessit folder
         Path(f"{folder}/move/torrent").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/move/media").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True) # rar folder
         Path(f"{folder}/sample").mkdir(parents=True, exist_ok=True) # config.env folder
-        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True, exist_ok=True) # media guessit folder
     
     for dot_torrent in ["test1.torrent", "test2.torrent"]:
         fp = open(f"{folder}/torrent/{dot_torrent}", 'x')
@@ -676,7 +676,6 @@ def __post_processing_no_post_processing(param, default=None):
             "audio_channels" : "5.1",
             "release_group" : "RELEASE_GROUP",
             "container" : "mkv",
-            "mimetype" : "video/x-matroska",
             "type" : "movie"
         }, id="file_for_guessit"),
         pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/", 
