@@ -1,0 +1,13 @@
+codecov:
+  bot: NoobMaster669
+ignore:
+  - (?s:[^\/]+_test\.py.*)\Z
+  - ^__init__.py.*
+coverage:
+  precision: 2
+  round: nearest
+  range: 60...90
+  status:
+    project:
+      default:
+        threshold: 0.2%
