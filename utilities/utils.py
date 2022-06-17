@@ -542,6 +542,8 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):
             if f"/{tracker}-" in file:
                 torrent_file = file
+                console.print(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
+                logging.info(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
         
         if torrent_file is not None:
             res = torrent_client.upload_torrent(
@@ -551,7 +553,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
                 is_skip_checking=True
             )
         else:
-            logging.error(f"[Utils] Could not identify the .torrent file for tracker {tracker}")
+            logging.error(f"[Utils] Could not identify the .torrent file for tracker '{tracker}'")
             console.print(f"⚠️ ☠️ ⚠️ [bold red]Could not identify the .torrent file for tracker [green]{tracker}[/green]." + 
                 " [/bold red] Please seed this tracker's torrent manually. ⚠️ ☠️ ⚠️")
             res = None
