@@ -578,7 +578,7 @@ def _post_mode_watch_folder(torrent_info, working_folder):
 
 
 def get_torrent_client_if_needed():
-    if os.getenv("enable_post_processing", False) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
+    if bool(os.getenv("enable_post_processing", False)) == True and os.getenv("post_processing_mode", "") == "CROSS_SEED":
         # getting an instance of the torrent client factory
         torrent_client_factory = TorrentClientFactory()
         # creating the torrent client using the factory based on the users configuration
@@ -593,7 +593,7 @@ def get_torrent_client_if_needed():
 def perform_post_processing(torrent_info, torrent_client, working_folder, tracker):
     # After we finish uploading, we can add all the dot torrent files to a torrent client to start seeding immediately.
     # This post processing step can be enabled or disabled based on the users configuration
-    if os.getenv("enable_post_processing", False):
+    if bool(os.getenv("enable_post_processing", False)):
         
         # When running in a bare meta, there is a chance for the user to provide relative paths.
         """ data/movie_name/movie.mkv """
