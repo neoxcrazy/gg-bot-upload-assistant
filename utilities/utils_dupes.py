@@ -59,7 +59,7 @@ def _make_request(url, method, search_site, site_name, json_data=None, multipart
     except Exception as ex:
         console.print(f"[bold red]:warning: Dupe check request to tracker [green]{site_name}[/green], failed. Hence skipping this tracker. :warning:[/bold red]\n")
         logging.exception(f"[DupeCheck] Request to  {search_site} for dupe check Failed. Error {ex}")
-        logging.info(f"[DupeCheck] Skipping upload to tracker since the dupe check request failed. The tracker might not be responding, hence skipping upload.")
+        logging.info("[DupeCheck] Skipping upload to tracker since the dupe check request failed. The tracker might not be responding, hence skipping upload.")
         return True
 
 
@@ -512,7 +512,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             # so now we check each remaining title to see if its a season pack or individual episode
             # endswith case added below to prevent failures when dealing with complete packs on trackers.
             # for most cases the first check of startswith itself will return true to get the season.
-            logging.debug(f'[DupeCheck] Checking each remaining title to see if its a season pack or individual episode')
+            logging.debug('[DupeCheck] Checking each remaining title to see if its a season pack or individual episode')
             extracted_season_episode_from_title = list(filter(lambda x: x.startswith(season_num) or x.endswith(season_num), re.split("[.\s]", existing_release_types_key)))[0]
             if len(extracted_season_episode_from_title) == 3:
                 logging.info(msg=f'[DupeCheck] Found a season pack for {season_num} on {search_site}')
@@ -605,7 +605,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
             return True if bool(util.strtobool(auto_mode)) else not bool(Confirm.ask("\nContinue upload even with possible dupe?"))
     else:
         if is_dupes_present:
-            console.print(f"\n\n    [bold red] :warning:  Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
+            console.print("\n\n    [bold red] :warning:  Possible dupes ignored since threshold not exceeded! :warning: [/bold red]")
             console.print(possible_dupes_table)
             console.line(count=2)
             console.print(f":heavy_check_mark: Yay! No dupes identified on [bold]{str(config['name']).upper()}[/bold] that exceeds the configured threshold, continuing the upload process now\n")

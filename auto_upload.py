@@ -18,11 +18,7 @@ from pathlib import Path
 
 # These packages need to be installed
 import requests
-from torf import Torrent
-from ffmpy import FFprobe
-from guessit import guessit
 from dotenv import load_dotenv
-from dotenv import dotenv_values
 from pymediainfo import MediaInfo
 
 # Rich is used for printing text & interacting with user input
@@ -175,7 +171,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         Returns `skip_to_next_file` if there are no video files in thhe provided folder
     """
     console.line(count=2)
-    console.rule(f"Analyzing & Identifying Video", style='red', align='center')
+    console.rule("Analyzing & Identifying Video", style='red', align='center')
     console.line(count=1)
     
     # ------------ Save obvious info we are almost guaranteed to get from guessit into torrent_info dict ------------ #
@@ -227,7 +223,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # setting NOGROUP as group if the release_group cannot be identified from guessit
     if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None ) is None :
         torrent_info["release_group"] = "NOGROUP"
-        logging.debug(f"Release group could not be identified by guessit. Setting release group as NOGROUP")
+        logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
     elif torrent_info["release_group"].startswith("X-"):
         # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
         logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
@@ -466,7 +462,7 @@ def identify_miscellaneous_details(guess_it_result):
         We also search for "editions" here, this info is typically made known in the filename so we can use some simple regex to extract it 
         (e.g. extended, Criterion, directors, etc)
     """
-    logging.debug(f'[MiscellaneousDetails] Trying to identify miscellaneous details for torrent.')
+    logging.debug('[MiscellaneousDetails] Trying to identify miscellaneous details for torrent.')
     # ------ Specific Source info ------ #
     if "source_type" not in torrent_info:
         torrent_info["source_type"] = miscellaneous_identify_source_type(torrent_info["raw_file_name"], auto_mode, torrent_info["source"])
@@ -675,7 +671,7 @@ def choose_right_tracker_keys():
     # Filling in data for all the keys that have mapping/translations
     # Here we iterate over the translation mapping and for each translation key, we check the required and optional items for that value
     # once identified we handle it
-    logging.info(f"[Main] Starting translations from torrent info to tracker settings.")
+    logging.info("[Main] Starting translations from torrent info to tracker settings.")
     is_hybrid_translation_needed = False
 
     for translation_key, translation_value in config["translation"].items():
@@ -906,7 +902,7 @@ def upload_to_site(upload_to, tracker_api_key):
             logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {upload_to}.')
     # TODO add support for cookie based authentication
     elif config["technical_jargons"]["authentication_mode"] == "COOKIE":
-        logging.fatal(f'[TrackerUpload] Cookie based authentication is not supported as for now.')
+        logging.fatal('[TrackerUpload] Cookie based authentication is not supported as for now.')
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key

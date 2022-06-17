@@ -6,7 +6,7 @@ import requests
 from rich import box
 from rich.table import Table
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
 console = Console()
 
@@ -71,7 +71,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
                     sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
 
         query_title = escaped_query_title
-        logging.info(f"[MetadataUtils] TMDB search has returned proper responses. Parseing and identifying the proper TMDB Id")
+        logging.info("[MetadataUtils] TMDB search has returned proper responses. Parseing and identifying the proper TMDB Id")
         logging.info(f'[MetadataUtils] TMDB Search parameters. Title :: {query_title}, Year :: \'{year}\'')
         
         tmdb_search_results = Table(show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim")
@@ -238,7 +238,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                 logging.info(f"[MetadataUtils] GET Request For IMDB Lookup: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
                 imdb_id_request = requests.get(get_imdb_id_from_tmdb_url).json()
                 if imdb_id_request["imdb_id"] is None:
-                    logging.debug(f"[MetadataUtils] Returning imdb id as `0`")
+                    logging.debug("[MetadataUtils] Returning imdb id as `0`")
                     return "0"
                 logging.debug(f"[MetadataUtils] Returning imdb id as `{imdb_id_request['imdb_id']}`")
                 return imdb_id_request["imdb_id"] if imdb_id_request["imdb_id"] is not None else "0"
@@ -255,8 +255,8 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                 logging.debug(f"[MetadataUtils] Returning tvmaze id as `{tvmaze_id_request['id']}`")
                 return tvmaze_id_request["id"] if tvmaze_id_request["id"] is not None else "0"
             else:
-                logging.error(f"[MetadataUtils] Cannot fetch tvmaze id without imdb id.")
-                logging.debug(f"[MetadataUtils] Returning tvmaze id as `0`")
+                logging.error("[MetadataUtils] Cannot fetch tvmaze id without imdb id.")
+                logging.debug("[MetadataUtils] Returning tvmaze id as `0`")
                 return "0"
         else: # we need tmdb id
             logging.info(f"[MetadataUtils] GET Request For TMDB Lookup: https://api.themoviedb.org/3/find/{id_value}?api_key=<REDACTED>&language=en-US&external_source=imdb_id")
@@ -266,7 +266,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                     logging.debug(f"[MetadataUtils] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
                     return str(tmdb_id_request[item][0]["id"]) if tmdb_id_request[item][0]["id"] is not None else "0"
     except Exception as ex:
-        logging.exception(f"[MetadataUtils] Error while fetching external id. Returning `0` as the id")
+        logging.exception("[MetadataUtils] Error while fetching external id. Returning `0` as the id")
         return "0"
 
 

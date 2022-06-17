@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import glob
 import math
@@ -11,13 +10,11 @@ import subprocess
 
 from torf import Torrent
 from pathlib import Path
-from ffmpy import FFprobe
 from pprint import pformat
 from guessit import guessit
 from datetime import datetime
 from dotenv import dotenv_values
 from rich.console import Console
-from pymediainfo import MediaInfo
 
 from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
 
@@ -33,6 +30,8 @@ def get_hash(string):
 
 def get_piece_size_for_mktorrent(size):
     """
+        How pieces are calclated when using mktorrent...
+
         2^19 = 524 288 = 512 KiB for filesizes between 512 MiB - 1024 MiB
         2^20 = 1 048 576 = 1024 KiB for filesizes between 1 GiB - 2 GiB
         2^21 = 2 097 152 = 2048 KiB for filesizes between 2 GiB - 4 GiB
@@ -191,7 +190,7 @@ def write_cutsom_user_inputs_to_description(torrent_info, description_file_path,
         # we need to make sure that the tracker supports custom description for torrents. 
         # If tracker supports custom descriptions, the the tracker config will have the `description_components` key.
         if "description_components" in config:
-            logging.debug(f'[CustomUserInputs] User has provided custom inputs for torrent description')
+            logging.debug('[CustomUserInputs] User has provided custom inputs for torrent description')
             # here we iterate through all the custom inputs provided by the user
             # then we check whether this component is supported by the target tracker. If tracker supports it then the `key` will be present in the tracker config.
             with open(description_file_path, 'a') as description:
@@ -272,7 +271,7 @@ def write_uploader_signature_to_description(description_file_path, tracker, bbco
     with open(description_file_path, 'a') as description:
         # Finally append the entire thing with some shameless self promotion ;) and some line breaks
         if os.getenv("uploader_signature") is not None and len(os.getenv("uploader_signature")) > 0:
-            logging.debug(f'[Utils] User has provided custom uploader signature to use.')
+            logging.debug('[Utils] User has provided custom uploader signature to use.')
             # the user has provided a custom signature to be used. hence we'll use that.
             uploader_signature = os.getenv("uploader_signature")
             logging.debug(f'[Utils] User provided signature :: {uploader_signature}')

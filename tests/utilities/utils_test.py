@@ -1,13 +1,13 @@
 import os
 import shutil
 import pytest
+import logging
 
 from pathlib import Path
 from pytest_mock import mocker
 from unittest.mock import MagicMock
 
 from utilities.utils import *
-from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
 
 
 working_folder = Path(__file__).resolve().parent.parent.parent

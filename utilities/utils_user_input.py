@@ -11,9 +11,8 @@ console = Console()
 
 
 def collect_custom_messages_from_user(custom_text_components_path):
-    logging.debug(f"[CustomUserInputs] Starting to collect custom messages from user for torrent description")
+    logging.debug("[CustomUserInputs] Starting to collect custom messages from user for torrent description")
     
-    is_first = True
     user_custom_texts = []
 
     custom_text_components = json.load(open(custom_text_components_path))
@@ -25,7 +24,7 @@ def collect_custom_messages_from_user(custom_text_components_path):
     components_choices = components_choices[::-1].replace(" ,", " ro ", 1)[::-1]
     
     # adding I'm and idiot to the components list :p
-    logging.debug(f'[CustomUserInputs] Adding IDIOT key to the text components')
+    logging.debug('[CustomUserInputs] Adding IDIOT key to the text components')
     custom_text_components.append({
         "key" : "IDIOT",
         "display_name": "I'm and idiot",
@@ -39,11 +38,11 @@ def collect_custom_messages_from_user(custom_text_components_path):
         i += 1
         list_of_num.append(str(i))
 
-    console.rule(f"[bold red on white] :warning: Custom Torrent Descriptions! :warning: [/bold red on white]", style='bold red', align='center')
+    console.rule("[bold red on white] :warning: Custom Torrent Descriptions! :warning: [/bold red on white]", style='bold red', align='center')
     console.print(f"You can add custom messages and texts to the torrent description as various text components. These could be {components_choices}", justify='center')
-    console.print(f"[bold red]:warning: Please note that only few trackers supports all these different types. :warning:[/bold red]", highlight=False, justify='center')
-    console.print(f"If any tracker does not support one of the type, then it will be defaulted to 'PLAIN TEXT'", justify='center')
-    console.print(f"[bold red]:warning: The text components added will be added to torrent description in the order which they are entered :warning:[/bold red]", justify='center')
+    console.print("[bold red]:warning: Please note that only few trackers supports all these different types. :warning:[/bold red]", highlight=False, justify='center')
+    console.print("If any tracker does not support one of the type, then it will be defaulted to 'PLAIN TEXT'", justify='center')
+    console.print("[bold red]:warning: The text components added will be added to torrent description in the order which they are entered :warning:[/bold red]", justify='center')
 
     while True:
         # starting a loop to accept multiple components from user
@@ -59,15 +58,15 @@ def collect_custom_messages_from_user(custom_text_components_path):
         else:
             title = None
             if custom_text_components[int(choice) - 1]["title"]:
-                console.print(f"Please provide the title for the component ([bold green]One Liner[/bold green])")
+                console.print("Please provide the title for the component ([bold green]One Liner[/bold green])")
                 title = input("::").split("\\n")[0]
                 logging.debug(f'[CustomUserInputs] User provided {title} as title for {custom_text_components[int(choice) - 1]["key"]}')
 
             console.print(f"Please provide the contents for '{custom_text_components[int(choice) - 1]['key']}'. [bold red on white] Send EOF or Ctrl + D from new line to stop text grabbing [/bold red on white]")
             custom_text = sys.stdin.read()
-            console.print(f"[green] ----------------- USER INPUT COLLECTED ----------------- [/green]")
+            console.print("[green] ----------------- USER INPUT COLLECTED ----------------- [/green]")
             console.print(custom_text)
-            console.print(f"[green] ---------------------------------------------------------- \n\n[/green]")
+            console.print("[green] ---------------------------------------------------------- \n\n[/green]")
             # adding the user provided custom text to the return list
             # the data is added as an object with `key` : `tracker_reference_key` and `value` : `user input`
             user_custom_texts.append(

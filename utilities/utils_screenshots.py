@@ -9,7 +9,6 @@ import pyimgbox
 import ptpimg_uploader
 
 from rich import box
-from rich.table import Table
 from rich.progress import track
 from rich.console import Console
 
@@ -69,7 +68,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             ]
         except Exception:
             logging.error(msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
-            console.print(f"\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
+            console.print("\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
 
     elif img_host == 'ptpimg':
@@ -118,9 +117,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             if img_upload_request.ok:
                 img_upload_response = img_upload_request.json()
                 logging.debug(f'[Screenshots] Image upload response: {img_upload_response}')
-                # When you upload an image you get a few links back, you get 'medium', 'thumbnail', 'url', 'url_viewer' and we only need max 2 
-                # so we set the order/list to try and get the ones we want
-                possible_image_types = ['thumb', 'medium']
+                # When you upload an image you get a few links back, you get 'medium', 'thumbnail', 'url', 'url_viewer'
                 try:
                     returnList = []
                     returnList.append(True) # setting the return status as true
@@ -209,7 +206,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     logging.basicConfig(filename=f'{base_path}/upload_script.log', level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
     
     console.line(count=2)
-    console.rule(f"Screenshots", style='red', align='center')
+    console.rule("Screenshots", style='red', align='center')
     console.line(count=1)
 
     num_of_screenshots = os.getenv("num_of_screenshots")
@@ -223,7 +220,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     enabled_img_hosts_list = []
     if skip_screenshots:
         logging.info("[Screenshots] User has provided the `skip_screenshots` argument. Hence continuing without screenshots.")
-        console.print(f'\nUser provided the argument `[red]skip_screenshots[/red]`. Overriding screenshot configurations in config.env', style='bold green')
+        console.print('\nUser provided the argument `[red]skip_screenshots[/red]`. Overriding screenshot configurations in config.env', style='bold green')
     # ---------------------- check if 'num_of_screenshots=0' or not set ---------------------- #
     elif num_of_screenshots == "0" or not bool(num_of_screenshots):
         logging.error(f'[Screenshots] num_of_screenshots is {"not set" if not bool(num_of_screenshots) else f"set to {num_of_screenshots}"}, continuing without screenshots.')
@@ -332,7 +329,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             upload_marker = Path(f'{base_path}/temp_upload/{hash_prefix}screenshots/uploads_complete.mark')
             with upload_marker.open("w", encoding ="utf-8") as f:
                 f.write("ALL_SCREENSHOT_UPLOADED_SUCCESSFULLY")
-                logging.debug(f"[Screenshots] Marking that all screenshots have been uploaded successfully")
+                logging.debug("[Screenshots] Marking that all screenshots have been uploaded successfully")
         else:
             console.print(f'{len(screenshots_to_upload_list) - successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots failed to upload', style='bold red', highlight=False)
             logging.error(f'[Screenshots] {len(screenshots_to_upload_list) - successfully_uploaded_image_count}/{len(screenshots_to_upload_list)} screenshots failed to upload')

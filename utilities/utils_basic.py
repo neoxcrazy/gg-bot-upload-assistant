@@ -1,4 +1,5 @@
 import re
+import os
 import sys
 import glob
 import json
@@ -49,7 +50,7 @@ def _get_dv_hdr(media_info_video_track):
             elif media_info_video_track.transfer_characteristics_original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_original:
                 hdr = "WCG"
     except Exception as e:
-        logging.exception(f"[BasicUtils] Error occured while trying to parse HDR information from mediainfo.")
+        logging.exception(f"[BasicUtils] Error occured while trying to parse HDR information from mediainfo.", e)
     
     if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
         dv = "DV"

@@ -2,7 +2,6 @@ import pytest
 import datetime
 
 from pathlib import Path
-from pprint import pformat
 from pymediainfo import MediaInfo
 from utilities.utils_basic import *
 
