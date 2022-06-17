@@ -9,6 +9,7 @@ include:
 - local: .gitlab-ci/*.gitlab-ci.yml
 
 stages:
+- prepare
 - build
 - test
 - deploy
