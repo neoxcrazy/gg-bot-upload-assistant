@@ -1,13 +1,14 @@
 <div align="center">
 <h1 align="center">GG-BOT Upload Assistant & Auto ReUploader</h1>
   <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant">
-    <img src="https://i.ibb.co/xgrDjLS/gg-bot.png" alt="Logo" width="128">
+    <img src="https://i.ibb.co/vsqPhLM/gg-bot-round.png" alt="Logo" width="128">
   </a>
 </div>
 <br>
 <div align="center">
     One size fits all solution for automated torrent uploading
     <br />
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/home">Read Wiki</a>
     ·
     <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/issues/new">Report Bug</a>
     ·
@@ -15,15 +16,16 @@
 </div>
 <br>
 <div align="center">
-
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master"><img alt="pipeline status" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/pipeline.svg" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/releases"><img alt="Latest Release" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/badges/release.svg" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master"><img alt="coverage report" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/coverage.svg" /></a>
+    <a href="https://hub.docker.com/r/noobmaster669/gg-bot-uploader/"><img alt="coverage report" src="https://img.shields.io/docker/pulls/noobmaster669/gg-bot-uploader" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant"><img src="https://img.shields.io/badge/dynamic/json?color=green&logo=gitlab&label=stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F32631784"></a>
 </div>
-# ****
+
+## Overview:
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
-
-[![pipeline status](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/pipeline.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master)
-[![Latest Release](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/badges/release.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/releases)
-[![coverage report](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/coverage.svg)](https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master)
 
 > Please refer to the readme in `dev` branch to see updated roadmaps and new features.
 
