@@ -17,8 +17,8 @@ unit-test:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
-      - coverage
       - coverage.xml
+      - coverage
     reports:
       coverage_report:
         coverage_format: cobertura
@@ -26,3 +26,6 @@ unit-test:
       junit:
         - junit_report.xml
     expire_in: 30 days
+
+sast:
+  stage: test
