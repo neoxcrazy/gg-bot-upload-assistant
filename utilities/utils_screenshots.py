@@ -250,6 +250,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
 
     # -------------------------- Check if any img_hosts are still in the 'enabled_img_hosts_list' list -------------------------- #
     # if no image_hosts are left then we show the user an error that we will continue the upload with screenshots & return back to auto_upload.py
+    # TODO: update this to work in line with the new json screenshot data
     if not bool(enabled_img_hosts_list):
         with open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/{hash_prefix}url_images.txt", "a") as append_url_txt:
             no_images.write("[b][color=#FF0000][size=22]None[/size][/color][/b]")

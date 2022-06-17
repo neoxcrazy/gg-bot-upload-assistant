@@ -27,9 +27,14 @@ import maicos
 
 **Version information**
 - Type of deployment
-    - [ ] Docker
+    - [X] Docker
     - [ ] Bare Meta
 - Tag: 
+- System
+    - [X] Linux: <provide_your_distro_here>
+    - [ ] Windows
+    - [ ] Mac
+    - [ ] Arm-Based
 
 **Logs / Trace**
 ```

@@ -14,6 +14,7 @@ working_folder = Path(__file__).resolve().parent.parent.parent
 temp_working_dir = "/tests/working_folder"
 rar_file_source = "/tests/resources/rar/data.rar"
 rar_file_target = f"{temp_working_dir}/rar/data.rar"
+dummy_for_guessit = "Movie.Name.2017.1080p.BluRay.Remux.AVC.DTS.5.1-RELEASE_GROUP"
 
 
 def clean_up(pth):
@@ -40,11 +41,23 @@ def run_around_tests():
         Path(f"{folder}/move/torrent").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/move/media").mkdir(parents=True, exist_ok=True) # media folder
         Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True) # rar folder
+        Path(f"{folder}/sample").mkdir(parents=True, exist_ok=True) # config.env folder
+        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True, exist_ok=True) # media guessit folder
     
     for dot_torrent in ["test1.torrent", "test2.torrent"]:
         fp = open(f"{folder}/torrent/{dot_torrent}", 'x')
         logging.info(f"Creating file: {folder}/torrent/{dot_torrent}")
         fp.close()
+    
+    # creating a dummy sample.env file for `test_validate_env_file`
+    # the contents of this file is also used in `test_write_file_contents_to_log_as_debug`
+    fp = open(f"{folder}/sample/config.env.sample", 'w')
+    fp.write("key1=\nkey2=\nkey3=")
+    fp.close()
+
+    fp = open(f"{folder}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv", 'x')
+    logging.info(f"Creating file: {folder}/media/file.mkv")
+    fp.close()
     
     fp = open(f"{folder}/media/file.mkv", 'x')
     logging.info(f"Creating file: {folder}/media/file.mkv")
@@ -715,3 +728,201 @@ def test_display_banner(mocker):
     mock_console = mocker.patch('rich.console.Console.print')
     display_banner("GG-BOT-Testing")
     assert mock_console.call_count == 2
+
+
+def __post_processing_cross_seed(param, default=None):
+    if param == "enable_post_processing":
+        return "True"
+    elif param ==  "post_processing_mode":
+        return "CROSS_SEED"
+    elif param == "client":
+        return "Rutorrent"
+    else:
+        return None
+
+
+def __post_processing_watch_folder(param, default=None):
+    if param == "enable_post_processing":
+        return "True"
+    elif param ==  "post_processing_mode":
+        return "WATCH_FOLDER"
+    return None
+
+
+def __post_processing_no_post_processing(param, default=None):
+    if param == "enable_post_processing":
+        return "False"
+    return None
+
+
+def test_get_torrent_client_for_cross_seeding(mocker):
+    mock_client = mocker.patch("modules.torrent_client.TorrentClient")
+    mocker.patch("modules.torrent_client.TorrentClientFactory.create", return_value=mock_client)
+    mocker.patch("os.getenv", side_effect=__post_processing_cross_seed)
+
+    assert get_torrent_client_if_needed() == mock_client
+
+
+def test_get_torrent_client_for_watch_folder(mocker):
+    mocker.patch("os.getenv", side_effect=__post_processing_watch_folder)
+    assert get_torrent_client_if_needed() == None
+
+
+def test_get_torrent_client_for_no_post_processing(mocker):
+    mocker.patch("os.getenv", side_effect=__post_processing_no_post_processing)
+    assert get_torrent_client_if_needed() == None
+
+
+def __tracker_key_validation(param, default=None):
+    if param == "ANT_API_KEY":
+        return "ant_api_key_value"
+    elif param == "ATH_API_KEY":
+        return "ath_api_key_value"
+    elif param == "TMDB_API_KEY":
+        return "tmdb_api_key_value"
+    return ""
+
+
+def test_prepare_and_validate_tracker_api_keys_dict(mocker):
+    mocker.patch("os.getenv", side_effect=__tracker_key_validation)
+
+    expected = dict()
+    api_keys = json.load(open(f'{working_folder}/parameters/tracker/api_keys.json')) 
+    for i in range (0, len(api_keys)): 
+        expected[api_keys[i]] = ""
+    expected["ant_api_key"] = "ant_api_key_value"
+    expected["ath_api_key"] = "ath_api_key_value"
+    expected["tmdb_api_key"] = "tmdb_api_key_value"
+
+    assert prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json') == expected
+
+
+def test_validate_tracker_api_keys_no_tmdb(mocker):
+    mocker.patch("os.getenv", return_value="")
+
+    with pytest.raises(AssertionError):
+        assert prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
+
+
+# highest priority is given to -t arguments, then --all_trackers then default_trackers from config file
+@pytest.mark.parametrize(
+    ("trackers", "all_trackers", "expected"),
+    [
+        pytest.param([], True, ["ANT", "ATH"], id="uploading_to_all_trackers"),
+        pytest.param(None, True, ["ANT", "ATH"], id="uploading_to_all_trackers"),
+        pytest.param(["NBL", "ATH", "TSP"], True, ["ATH"], id="uploading_to_selected_trackers"),
+        pytest.param(["NBL", "ATH", "TSP"], False, ["ATH"], id="uploading_to_selected_trackers")
+    ]
+)
+def test_get_and_validate_configured_trackers(trackers, all_trackers, expected, mocker):
+    mocker.patch("os.getenv", side_effect=__tracker_key_validation)
+    
+    acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
+    api_keys_dict = prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
+    
+    assert get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, acronym_to_tracker.keys()) == expected
+
+
+def __default_tracker_failure_key_validation(param, default=None):
+    if param == "ANT_API_KEY":
+        return "ant_api_key_value"
+    elif param == "ATH_API_KEY":
+        return "ath_api_key_value"
+    elif param == "default_trackers_list":
+        return "NBL,STC"
+    elif param == "TMDB_API_KEY":
+        return "tmdb_api_key_value"
+    return ""
+
+
+@pytest.mark.parametrize(
+    ("trackers", "all_trackers"),
+    [
+        pytest.param(["TSP", "BHD", "ABC"], True, id="trackers_provided_with_no_api_key"),
+        pytest.param([], False, id="default_trackers_with_no_api_key"),
+    ]
+)
+def test_get_and_validate_configured_trackers_failures(trackers, all_trackers, mocker):
+    mocker.patch("os.getenv", side_effect=__default_tracker_failure_key_validation)
+    
+    acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
+    api_keys_dict = prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
+
+    with pytest.raises(AssertionError):
+        assert get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, acronym_to_tracker.keys())
+
+
+def __default_tracker_success_key_validation(param, default=None):
+    if param == "ANT_API_KEY":
+        return "ant_api_key_value"
+    elif param == "ATH_API_KEY":
+        return "ath_api_key_value"
+    elif param == "default_trackers_list":
+        return "NBL,STC,ANT"
+    elif param == "TMDB_API_KEY":
+        return "tmdb_api_key_value"
+    return ""
+
+
+def test_get_and_validate_default_trackers(mocker):
+    mocker.patch("os.getenv", side_effect=__default_tracker_success_key_validation)
+    
+    acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
+    api_keys_dict = prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
+
+    assert get_and_validate_configured_trackers(None, False, api_keys_dict, acronym_to_tracker.keys()) == ["ANT"]
+
+
+def test_validate_env_file(mocker):
+
+    get_env = mocker.patch("os.getenv", return_value="")
+    validate_env_file(f"{working_folder}{temp_working_dir}/sample/config.env.sample")
+    
+    assert get_env.call_count == 3
+
+
+@pytest.mark.parametrize(
+    ("input_path", "expected"),
+    [
+        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv", 
+        {
+            "title" : "Movie Name",
+            "year" : 2017,
+            "screen_size" : "1080p",
+            "source" : "Blu-ray",
+            "other" : "Remux",
+            "video_codec" : "H.264",
+            "video_profile" : "Advanced Video Codec High Definition",
+            "audio_codec" : "DTS",
+            "audio_channels" : "5.1",
+            "release_group" : "RELEASE_GROUP",
+            "container" : "mkv",
+            "mimetype" : "video/x-matroska",
+            "type" : "movie"
+        }, id="file_for_guessit"),
+        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/", 
+        {
+            "title" : "Movie Name",
+            "year" : 2017,
+            "screen_size" : "1080p",
+            "source" : "Blu-ray",
+            "other" : "Remux",
+            "video_codec" : "H.264",
+            "video_profile" : "Advanced Video Codec High Definition",
+            "audio_codec" : "DTS",
+            "audio_channels" : "5.1",
+            "release_group" : "RELEASE_GROUP",
+            "type" : "movie"
+        }, id="folder_for_guessit"),
+    ]
+)
+def test_perform_guessit_on_filename(input_path, expected):
+    guessit_result = perform_guessit_on_filename(input_path)
+    for key, value in expected.items():
+        assert guessit_result[key] == expected[key]
+
+
+def test_write_file_contents_to_log_as_debug(mocker):
+    mock_logger = mocker.patch("logging.debug")
+    write_file_contents_to_log_as_debug(f"{working_folder}{temp_working_dir}/sample/config.env.sample")
+    assert mock_logger.call_count == 3

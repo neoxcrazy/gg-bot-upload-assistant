@@ -1309,7 +1309,7 @@ def reupload_job():
         torrent_info["bbcode_images_nothumb"] = screenshots_data["bbcode_images_nothumb"]
         torrent_info["bbcode_thumb_nothumb"] = screenshots_data["bbcode_thumb_nothumb"]
         torrent_info["url_images"] = screenshots_data["url_images"]
-        torrent_info["data_images"] = screenshots_data["url_images"]
+        torrent_info["data_images"] = screenshots_data["data_images"]
 
         # At this point the only stuff that remains to be done is site specific so we can start a loop here for each site we are uploading to
         logging.info("[Main] Now starting tracker specific tasks")
