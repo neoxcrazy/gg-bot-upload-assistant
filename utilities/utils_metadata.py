@@ -29,7 +29,12 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
     result_num = 0
     result_dict = {}
 
+    # here we do a two phase tmdb search. Initially we do a search with escaped title eg: 'Kung fu Panda 1'.
+    # TMDB will try to match the exact title to return results. If we get data here, we proceed with it.
+    #
+    # if we don't get data for the escaped title request, then we do another request to get data without escaped query.
     logging.info(f"[MetadataUtils] GET Request: https://api.themoviedb.org/3/search/{content_type}?api_key=<REDACTED>&query={escaped_query_title}&page=1&include_adult=false{query_year}")
+    # doing search with escaped title (strict search)
     search_tmdb_request = do_tmdb_search(f"https://api.themoviedb.org/3/search/{content_type}?api_key={os.getenv('TMDB_API_KEY')}&query={escaped_query_title}&page=1&include_adult=false{query_year}")
 
     if search_tmdb_request.ok:
@@ -37,7 +42,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
         if len(search_tmdb_request.json()["results"]) == 0:
             logging.critical("[MetadataUtils] No results found on TMDB using the title '{}' and the year '{}'".format(escaped_query_title, year))
             logging.info("[MetadataUtils] Attempting to do a more liberal TMDB Search")
-            
+            # doing request without escaped title (search is not strict)
             search_tmdb_request = do_tmdb_search(f"https://api.themoviedb.org/3/search/{content_type}?api_key={os.getenv('TMDB_API_KEY')}&query={query_title}&page=1&include_adult=false{query_year}")
             
             if search_tmdb_request.ok:
@@ -53,6 +58,8 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
                     else:
                         sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
             else:
+                # well if we don't get any data for both strict and loose search, then we can't proceed in auto mode
+                # TODO check why auto_mode is not used here ???? WTF am i doing ???
                 if int(os.getenv("tmdb_result_auto_select_threshold", 1)) >= 0:
                     return {
                         "tmdb": "0",
@@ -62,10 +69,11 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
                     }
                 else:
                     sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
-        else:
-            query_title = escaped_query_title
+
+        query_title = escaped_query_title
         logging.info(f"[MetadataUtils] TMDB search has returned proper responses. Parseing and identifying the proper TMDB Id")
-        logging.info(f'[MetadataUtils] TMDB Search parameters. Title :: {query_title}, Year :: {year}')
+        logging.info(f'[MetadataUtils] TMDB Search parameters. Title :: {query_title}, Year :: \'{year}\'')
+        
         tmdb_search_results = Table(show_header=True, header_style="bold cyan", box=box.HEAVY, border_style="dim")
         tmdb_search_results.add_column("Result #", justify="center")
         tmdb_search_results.add_column("Title", justify="center")
@@ -91,6 +99,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
             else:
                 logging.error(f"[MetadataUtils] Title not found on TMDB for TMDB ID: {str(possible_match['id'])}")
             logging.info(f'[MetadataUtils] Selected Title: [{title_match_result}]')
+            # TODO implement the tmdb title 1:1 comparision here
 
             # Same situation as with the movie/tv title. The key changes depending on what the content type is
             selected_year = "N.A."
