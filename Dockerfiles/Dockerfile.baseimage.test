@@ -109,6 +109,7 @@ RUN set -eux; \
 # - rar extraction
 RUN \
 	apk add --no-cache --upgrade unrar; \
+	apk add --no-cache --upgrade curl; \
 	apk add --no-cache --virtual=build-dependencies g++;
 	
 RUN python3 --version

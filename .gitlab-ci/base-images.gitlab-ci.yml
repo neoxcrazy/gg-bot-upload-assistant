@@ -124,7 +124,7 @@ gg-bot-base-test:
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'  # runs only on master branch
+    - if: '$CI_DEFAULT_BRANCH'  # runs only on master branch
       changes:
         - Dockerfiles/Dockerfile.baseimage.test
 
