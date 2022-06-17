@@ -49,3 +49,11 @@ unit-test:
 
 sast:
   stage: test
+
+# pre-commit-checks:
+#   image: python:3.9.10
+#   stage: prepare
+#   before_script:
+#     - pip install pre-commit
+#   script:
+#     - pre-commit run --all-files --verbose --show-diff-on-failure
