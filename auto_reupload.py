@@ -35,14 +35,12 @@ from rich.traceback import install
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from utilities.utils_screenshots import take_upload_screens
 # Method that will search for dupes in trackers.
+import utilities.utils_miscellaneous as miscellaneous_utilities
 import utilities.utils_translation as translation_utilities
 from utilities.utils_dupes import search_for_dupes_api
 import utilities.utils_reupload as reupload_utilities
-from utilities.utils_miscellaneous import *
-from utilities.utils_metadata import *
-from utilities.utils_reupload import *
-from utilities.utils_bdinfo import *
-from utilities.utils_basic import *
+import utilities.utils_metadata as metadata_utilities
+import utilities.utils_basic as basic_utilities
 import utilities.utils as utils
 
 # processing modules
@@ -800,7 +798,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
     # guessit uses 'episode' for all tv related content (including seasons)
     if torrent_info["type"] == "episode":
-        s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes = basic_get_episode_basic_details(guess_it_result)
+        s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes = basic_utilities.basic_get_episode_basic_details(guess_it_result)
         torrent_info["s00e00"] = s00e00
         torrent_info["season_number"] = season_number
         torrent_info["episode_number"] = episode_number
@@ -833,7 +831,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         #     torrent_info["raw_video_file"] = raw_video_file
         #     torrent_info["largest_playlist"] = largest_playlist
         # else:
-        raw_video_file = basic_get_raw_video_file(torrent_info['upload_media'])
+        raw_video_file = basic_utilities.basic_get_raw_video_file(torrent_info['upload_media'])
         if raw_video_file is not None:
             torrent_info["raw_video_file"] = raw_video_file
 
@@ -892,7 +890,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # parsing mediainfo, this will be reused for further processing.
     # only when the required data is mediainfo, this will be computed again, but as `text` format to write to file.
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
-    media_info_result = basic_get_mediainfo(parse_me)
+    media_info_result = basic_utilities.basic_get_mediainfo(parse_me)
 
     # if args.disc: TODO uncomment this for full disk auto uploads
     #     # for full disk uploads the bdinfo summary itself will be set as the `mediainfo_summary`
@@ -901,7 +899,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     #         bdInfo_summary = summary.read()
     #         torrent_info["mediainfo_summary"] = bdInfo_summary
     # else:
-    mediainfo_summary, tmdb, imdb, tvdb = basic_get_mediainfo_summary(
+    mediainfo_summary, tmdb, imdb, tvdb = basic_utilities.basic_get_mediainfo_summary(
         media_info_result.to_data())
     torrent_info["mediainfo_summary"] = mediainfo_summary
     if tmdb != "0":
@@ -991,9 +989,9 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------ Save mediainfo to txt ------------ #
     if missing_value == "mediainfo":
-        return basic_get_missing_mediainfo(torrent_info, parse_me, working_folder)
+        return basic_utilities.basic_get_missing_mediainfo(torrent_info, parse_me, working_folder)
 
-    def quit_log_reason(reason):
+    def basic_utilities.quit_log_reason(reason):
         logging.critical(
             f"auto_mode is enabled (no user input) & we can not auto extract the {missing_value}")
         logging.critical(f"Exit Reason: {reason}")
@@ -1008,8 +1006,8 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
-        # source, source_type, user_input_source = basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
-        source, source_type, user_input_source = basic_get_missing_source(
+        # source, source_type, user_input_source = basic_utilities.basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
+        source, source_type, user_input_source = basic_utilities.basic_get_missing_source(
             torrent_info, False, auto_mode, missing_value)
         torrent_info["source"] = source
         torrent_info["source_type"] = source_type
@@ -1017,18 +1015,18 @@ def analyze_video_file(missing_value, media_info):
 
     # ---------------- Video Resolution ---------------- #
     if missing_value == "screen_size":
-        # return basic_get_missing_screen_size(torrent_info, args.disc, media_info_video_track, auto_mode, missing_value)
-        return basic_get_missing_screen_size(torrent_info, False, media_info_video_track, auto_mode, missing_value)
+        # return basic_utilities.basic_get_missing_screen_size(torrent_info, args.disc, media_info_video_track, auto_mode, missing_value)
+        return basic_utilities.basic_get_missing_screen_size(torrent_info, False, media_info_video_track, auto_mode, missing_value)
 
     # ---------------- Audio Channels ---------------- #
     if missing_value == "audio_channels":
-        # return basic_get_missing_audio_channels(torrent_info, args.disc, auto_mode, parse_me, media_info_audio_track, missing_value)
-        return basic_get_missing_audio_channels(torrent_info, False, auto_mode, parse_me, media_info_audio_track, missing_value)
+        # return basic_utilities.basic_get_missing_audio_channels(torrent_info, args.disc, auto_mode, parse_me, media_info_audio_track, missing_value)
+        return basic_utilities.basic_get_missing_audio_channels(torrent_info, False, auto_mode, parse_me, media_info_audio_track, missing_value)
 
     # ---------------- Audio Codec ---------------- #
     if missing_value == "audio_codec":
-        # audio_codec, atmos =  basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=args.disc, auto_mode=auto_mode,
-        audio_codec, atmos = basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=False, auto_mode=auto_mode,
+        # audio_codec, atmos =  basic_utilities.basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=args.disc, auto_mode=auto_mode,
+        audio_codec, atmos = basic_utilities.basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=False, auto_mode=auto_mode,
                                                            audio_codec_file_path=f'{working_folder}/parameters/audio_codecs.json',
                                                            media_info_audio_track=media_info_audio_track, parse_me=parse_me,
                                                            missing_value=missing_value)
@@ -1042,7 +1040,7 @@ def analyze_video_file(missing_value, media_info):
     # I'm pretty confident that a video_codec will be selected automatically each time, unless mediainfo fails catastrophically we should always
     # have a codec we can return. User input isn't needed here
     if missing_value == "video_codec":
-        dv, hdr, video_codec = basic_get_missing_video_codec(torrent_info=torrent_info,
+        dv, hdr, video_codec = basic_utilities.basic_get_missing_video_codec(torrent_info=torrent_info,
                                                              # is_disc=args.disc, auto_mode=auto_mode,
                                                              is_disc=False, auto_mode=auto_mode,
                                                              media_info_video_track=media_info_video_track, force_pymediainfo=args.force_pymediainfo
@@ -1070,24 +1068,24 @@ def identify_miscellaneous_details(guess_it_result):
 
     # ------ Specific Source info ------ #
     if "source_type" not in torrent_info:
-        torrent_info["source_type"] = miscellaneous_identify_source_type(
+        torrent_info["source_type"] = miscellaneous_utilities.miscellaneous_identify_source_type(
             torrent_info["raw_file_name"], auto_mode, torrent_info["source"])
 
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
         # TODO check whether None needs to be set as `web_source`
-        torrent_info["web_source"] = miscellaneous_identify_web_streaming_source(f'{working_folder}/parameters/streaming_services.json', torrent_info["raw_file_name"], guess_it_result)
+        torrent_info["web_source"] = miscellaneous_utilities.miscellaneous_identify_web_streaming_source(f'{working_folder}/parameters/streaming_services.json', torrent_info["raw_file_name"], guess_it_result)
 
     # --- Custom & extra info --- #
     # some torrents have 'extra' info in the title like 'repack', 'DV', 'UHD', 'Atmos', 'remux', etc
     # We simply use regex for this and will add any matches to the dict 'torrent_info', later when building the final title we add any matches (if they exist) into the title
     # repacks
-    torrent_info["repack"] = miscellaneous_identify_repacks(
+    torrent_info["repack"] = miscellaneous_utilities.miscellaneous_identify_repacks(
         torrent_info["raw_file_name"])
 
     # --- Bluray disc type --- #
     if torrent_info["source_type"] == "bluray_disc":
-        torrent_info["bluray_disc_type"] = miscellaneous_identify_bluray_disc_type(
+        torrent_info["bluray_disc_type"] = miscellaneous_utilities.miscellaneous_identify_bluray_disc_type(
             torrent_info["screen_size"], torrent_info["upload_media"])
 
     # Bluray disc regions
@@ -1132,14 +1130,14 @@ def identify_miscellaneous_details(guess_it_result):
 
     # use regex (sourced and slightly modified from official radarr repo) to find torrent editions (Extended, Criterion, Theatrical, etc)
     # https://github.com/Radarr/Radarr/blob/5799b3dc4724dcc6f5f016e8ce4f57cc1939682b/src/NzbDrone.Core/Parser/Parser.cs#L21
-    torrent_info["edition"] = miscellaneous_identify_bluray_edition(
+    torrent_info["edition"] = miscellaneous_utilities.miscellaneous_identify_bluray_edition(
         torrent_info["upload_media"])
 
     # --------- Fix scene group tags --------- #
     # Whilst most scene group names are just capitalized but occasionally as you can see ^^ some are not (e.g. KOGi)
     # either way we don't want to be capitalizing everything (e.g. we want 'NTb' not 'NTB') so we still need a dict of scene groups and their proper capitalization
     if "release_group" in torrent_info:
-        scene, release_group = miscellaneous_perform_scene_group_capitalization(
+        scene, release_group = miscellaneous_utilities.miscellaneous_perform_scene_group_capitalization(
             f'{working_folder}/parameters/scene_groups.json', torrent_info["release_group"])
         torrent_info["release_group"] = release_group
         torrent_info["scene"] = scene
@@ -1346,32 +1344,32 @@ def reupload_job():
             # else we go for tmdb id and then tvmaze id
             if "imdb" in ids_present:
                 # imdb id is available.
-                torrent_info["tmdb"] = metadata_get_external_id(
+                torrent_info["tmdb"] = metadata_utilities.metadata_get_external_id(
                     id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
                 if torrent_info["type"] == "episode":
-                    torrent_info["tvmaze"] = metadata_get_external_id(
+                    torrent_info["tvmaze"] = metadata_utilities.metadata_get_external_id(
                         id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
                 else:
                     torrent_info["tvmaze"] = "0"
             elif "tmdb" in ids_present:
-                torrent_info["imdb"] = metadata_get_external_id(
+                torrent_info["imdb"] = metadata_utilities.metadata_get_external_id(
                     id_site="tmdb", id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"])
                 # we got value for imdb id, now we can use that to find out the tvmaze id
                 if torrent_info["type"] == "episode":
-                    torrent_info["tvmaze"] = metadata_get_external_id(
+                    torrent_info["tvmaze"] = metadata_utilities.metadata_get_external_id(
                         id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
             elif "tvmaze" in ids_present:
                 if torrent_info["type"] == "episode":
                     # we get the imdb id from tvmaze
-                    torrent_info["imdb"] = metadata_get_external_id(
+                    torrent_info["imdb"] = metadata_utilities.metadata_get_external_id(
                         id_site="tvmaze", id_value=torrent_info["tvmaze"], external_site="imdb", content_type=torrent_info["type"])
                     # and use the imdb id to find out the tmdb id
-                    torrent_info["tmdb"] = metadata_get_external_id(
+                    torrent_info["tmdb"] = metadata_utilities.metadata_get_external_id(
                         id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
                 else:
                     logging.fatal("[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
                     # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
-                    metadata_result = metadata_search_tmdb_for_id(
+                    metadata_result = metadata_utilities.metadata_search_tmdb_for_id(
                         query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
 
                     torrent_info["tmdb"] = metadata_result["tmdb"]
@@ -1383,7 +1381,7 @@ def reupload_job():
         else:
             logging.info("[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
             # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
-            metadata_result = metadata_search_tmdb_for_id(query_title=torrent_info["title"],
+            metadata_result = metadata_utilities.metadata_search_tmdb_for_id(query_title=torrent_info["title"],
                                                           year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
 
             torrent_info["tmdb"] = metadata_result["tmdb"]
@@ -1402,7 +1400,7 @@ def reupload_job():
         original_title = torrent_info["title"]
         original_year = torrent_info["year"] if "year" in torrent_info else ""
 
-        title, year, tvdb, mal = metadata_compare_tmdb_data_local(torrent_info)
+        title, year, tvdb, mal = metadata_utilities.metadata_compare_tmdb_data_local(torrent_info)
         torrent_info["title"] = title
         if year is not None:
             torrent_info["year"] = year
@@ -1574,7 +1572,7 @@ def reupload_job():
 
                 # this is the first tracker for this torrent
                 job_repo_entry = {}
-                job_repo_entry["job_id"] = get_unique_id()
+                job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
                 job_repo_entry["status"] = JobStatus.SUCCESS
@@ -1618,7 +1616,7 @@ def reupload_job():
 
                 # this is the first tracker for this torrent
                 job_repo_entry = {}
-                job_repo_entry["job_id"] = get_unique_id()
+                job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
                 job_repo_entry["status"] = JobStatus.FAILED
