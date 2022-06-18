@@ -17,11 +17,10 @@ class Cache:
     cache_client = None
 
     def __init__(self, cache_client):
-        """
-            Cache is wrapper ever the differnet cache_clients that can be created. 
+        """ Cache is wrapper ever the differnet cache_clients that can be created.
 
-            Caches are created by the CacheFactory based on the users configuration. 
-            Currently only Mongo Cache is available 
+            Caches are created by the CacheFactory based on the users configuration.
+            Currently only Mongo Cache is available
         """
         self.cache_client = cache_client
 

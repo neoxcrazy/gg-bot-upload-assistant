@@ -12,7 +12,7 @@ class Mongo:
     database = None
 
     def __init__(self):
-        """ Method to initialize the connection to a redis database. """
+        """Method to initialize the connection to a redis database."""
         # Provide the mongodb atlas url to connect python to mongodb using pymongo
         if os.getenv('cache_username') is not None and len(os.getenv('cache_username')) > 0:
             CONNECTION_STRING = f"mongodb://{os.getenv('cache_username')}:{os.getenv('cache_password')}@{os.getenv('cache_host')}:{os.getenv('cache_port')}/{os.getenv('cache_database')}"
@@ -60,9 +60,7 @@ class Mongo:
             collection.replace_one({"_id": data['_id']}, data, upsert=True)
 
     def delete(self, key, query=None):
-        """
-            Method to delete data from the cache stored against a key
-        """
+        """Method to delete data from the cache stored against a key."""
         collection = self.__get_collection(key)
         if len(key.split("::")) <= 2:
             # no hash provided in key. hence we need to use the user provided query

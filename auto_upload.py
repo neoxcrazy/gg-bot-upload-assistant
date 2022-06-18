@@ -32,13 +32,12 @@ from rich.prompt import Prompt, Confirm
 from utilities.utils_user_input import collect_custom_messages_from_user
 from utilities.utils_screenshots import take_upload_screens
 # Method that will search for dupes in trackers.
-from utilities.utils_dupes import search_for_dupes_api
-from utilities.utils_miscellaneous import *
-from utilities.utils_translation import *
-from utilities.utils_metadata import *
-from utilities.utils_bdinfo import *
+import utilities.utils_miscellaneous as miscellaneous_utilities
+import utilities.utils_metadata as metadata_utilities
+import utilities.utils_dupes import dupe_utilities
 import utilities.utils_bdinfo as bdinfo_utilities
 import utilities.utils_basic as basic_utilities
+from utilities.utils_translation import *
 from utilities.utils import *
 
 # Used for rich.traceback
@@ -165,8 +164,7 @@ args = parser.parse_args()
 
 
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
-    """
-        Method to check for any duplicate torrents in the tracker.
+    """ Method to check for any duplicate torrents in the tracker.
 
         First we read the configuration for the tracker and format the title according to the tracker configuration
         Then invoke the `search_for_dupes_api` method and return the result.
@@ -182,10 +180,17 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     format_title(config)
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-    return search_for_dupes_api(acronym_to_tracker[str(tracker).lower()],
-                                imdb=torrent_info["imdb"], tmdb=torrent_info[
-                                    "tmdb"], tvmaze=torrent_info["tvmaze"], torrent_info=torrent_info,
-                                tracker_api=temp_tracker_api_key, debug=args.debug, working_folder=working_folder, auto_mode=os.getenv('auto_mode'))
+    return dupe_utilities.search_for_dupes_api(
+        acronym_to_tracker[str(tracker).lower()],
+        imdb=torrent_info["imdb"], 
+        tmdb=torrent_info["tmdb"], 
+        tvmaze=torrent_info["tvmaze"], 
+        torrent_info=torrent_info, 
+        tracker_api=temp_tracker_api_key, 
+        debug=args.debug, 
+        working_folder=working_folder, 
+        auto_mode=os.getenv('auto_mode')
+    )
 
 
 def identify_type_and_basic_info(full_path, guess_it_result):
@@ -533,13 +538,13 @@ def identify_miscellaneous_details(guess_it_result):
         '[MiscellaneousDetails] Trying to identify miscellaneous details for torrent.')
     # ------ Specific Source info ------ #
     if "source_type" not in torrent_info:
-        torrent_info["source_type"] = miscellaneous_identify_source_type(
+        torrent_info["source_type"] = miscellaneous_utilities.miscellaneous_identify_source_type(
             torrent_info["raw_file_name"], auto_mode, torrent_info["source"])
 
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
         # TODO check whether None needs to be set as `web_source`
-        torrent_info["web_source"] = miscellaneous_identify_web_streaming_source(
+        torrent_info["web_source"] = miscellaneous_utilities.miscellaneous_identify_web_streaming_source(
             f'{working_folder}/parameters/streaming_services.json', torrent_info["raw_file_name"], guess_it_result)
 
     # --- Custom & extra info --- #
@@ -547,12 +552,12 @@ def identify_miscellaneous_details(guess_it_result):
     # We simply use regex for this and will add any matches to the dict 'torrent_info', later when building the final title we add any matches (if they exist) into the title
 
     # repacks
-    torrent_info["repack"] = miscellaneous_identify_repacks(
+    torrent_info["repack"] = miscellaneous_utilities.miscellaneous_identify_repacks(
         torrent_info["raw_file_name"])
 
     # --- Bluray disc type --- #
     if torrent_info["source_type"] == "bluray_disc":
-        torrent_info["bluray_disc_type"] = miscellaneous_identify_bluray_disc_type(
+        torrent_info["bluray_disc_type"] = miscellaneous_utilities.miscellaneous_identify_bluray_disc_type(
             torrent_info["screen_size"], torrent_info["upload_media"])
 
     # Bluray disc regions
@@ -597,14 +602,14 @@ def identify_miscellaneous_details(guess_it_result):
 
     # use regex (sourced and slightly modified from official radarr repo) to find torrent editions (Extended, Criterion, Theatrical, etc)
     # https://github.com/Radarr/Radarr/blob/5799b3dc4724dcc6f5f016e8ce4f57cc1939682b/src/NzbDrone.Core/Parser/Parser.cs#L21
-    torrent_info["edition"] = miscellaneous_identify_bluray_edition(
+    torrent_info["edition"] = miscellaneous_utilities.miscellaneous_identify_bluray_edition(
         torrent_info["upload_media"])
 
     # --------- Fix scene group tags --------- #
     # Whilst most scene group names are just capitalized but occasionally as you can see ^^ some are not (e.g. KOGi)
     # either way we don't want to be capitalizing everything (e.g. we want 'NTb' not 'NTB') so we still need a dict of scene groups and their proper capitalization
     if "release_group" in torrent_info:
-        torrent_info["scene"], torrent_info["release_group"] = miscellaneous_perform_scene_group_capitalization(
+        torrent_info["scene"], torrent_info["release_group"] = miscellaneous_utilities.miscellaneous_perform_scene_group_capitalization(
             f'{working_folder}/parameters/scene_groups.json', torrent_info["release_group"])
 
     # --------- SD? --------- #
@@ -1556,35 +1561,35 @@ for file in upload_queue:
         # else we go for tmdb id and then tvmaze id
         if "imdb" in ids_present:
             # imdb id is available.
-            torrent_info["tmdb"] = metadata_get_external_id(
+            torrent_info["tmdb"] = metadata_utilities.metadata_get_external_id(
                 id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
             if torrent_info["type"] == "episode":
-                torrent_info["tvmaze"] = metadata_get_external_id(
+                torrent_info["tvmaze"] = metadata_utilities.metadata_get_external_id(
                     id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
             else:
                 torrent_info["tvmaze"] = "0"
         elif "tmdb" in ids_present:
-            torrent_info["imdb"] = metadata_get_external_id(
+            torrent_info["imdb"] = metadata_utilities.metadata_get_external_id(
                 id_site="tmdb", id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"])
             # we got value for imdb id, now we can use that to find out the tvmaze id
             if torrent_info["type"] == "episode":
-                torrent_info["tvmaze"] = metadata_get_external_id(
+                torrent_info["tvmaze"] = metadata_utilities.metadata_get_external_id(
                     id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
             else:
                 torrent_info["tvmaze"] = "0"
         elif "tvmaze" in ids_present:
             if torrent_info["type"] == "episode":
                 # we get the imdb id from tvmaze
-                torrent_info["imdb"] = metadata_get_external_id(
+                torrent_info["imdb"] = metadata_utilities.metadata_get_external_id(
                     id_site="tvmaze", id_value=torrent_info["tvmaze"], external_site="imdb", content_type=torrent_info["type"])
                 # and use the imdb id to find out the tmdb id
-                torrent_info["tmdb"] = metadata_get_external_id(
+                torrent_info["tmdb"] = metadata_utilities.metadata_get_external_id(
                     id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
             else:
                 logging.fatal(
                     "[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
                 # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
-                metadata_result = metadata_search_tmdb_for_id(
+                metadata_result = metadata_utilities.metadata_search_tmdb_for_id(
                     query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
                 torrent_info["tmdb"] = metadata_result["tmdb"]
                 torrent_info["imdb"] = metadata_result["imdb"]
@@ -1594,7 +1599,7 @@ for file in upload_queue:
         logging.info(
             "[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
         # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
-        metadata_result = metadata_search_tmdb_for_id(
+        metadata_result = metadata_utilities.metadata_search_tmdb_for_id(
             query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
         torrent_info["tmdb"] = metadata_result["tmdb"]
         torrent_info["imdb"] = metadata_result["imdb"]
@@ -1606,7 +1611,7 @@ for file in upload_queue:
                          data=f'content='f'IMDB: **{torrent_info["imdb"]}**  |  TMDB: **{torrent_info["tmdb"]}**')
 
     # -------- Use official info from TMDB --------
-    title, year, tvdb, mal = metadata_compare_tmdb_data_local(torrent_info)
+    title, year, tvdb, mal = metadata_utilities.metadata_compare_tmdb_data_local(torrent_info)
     torrent_info["title"] = title
     if year is not None:
         torrent_info["year"] = year
@@ -1619,18 +1624,14 @@ for file in upload_queue:
     if args.edition:
         user_input_edition = str(args.edition[0])
         logging.info(f"[Main] User specified edition: {user_input_edition}")
-        console.print(
-            f"\nUsing the user supplied edition: [medium_spring_green]{user_input_edition}[/medium_spring_green]")
+        console.print(f"\nUsing the user supplied edition: [medium_spring_green]{user_input_edition}[/medium_spring_green]")
         torrent_info["edition"] = user_input_edition
 
     if auto_mode == "false" and Confirm.ask("Do you want to add custom texts to torrent description?", default=False):
-        logging.debug(
-            '[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
-        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(
-            f'{working_folder}/parameters/custom_text_components.json')
+        logging.debug('[Main] User decided to add custom text to torrent description. Handing control to custom_user_input module')
+        torrent_info["custom_user_inputs"] = collect_custom_messages_from_user(f'{working_folder}/parameters/custom_text_components.json')
     else:
-        logging.debug(
-            f'[Main] User decided not to add custom text to torrent description or running in auto_mode')
+        logging.debug('[Main] User decided not to add custom text to torrent description or running in auto_mode')
 
     # -------- Dupe check for single tracker uploads --------
     # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
@@ -1640,43 +1641,42 @@ for file in upload_queue:
         temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
 
         console.line(count=2)
-        console.rule(
-            f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
-        logging.debug(
-            f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
+        console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
+        logging.debug(f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
         dupe_check_response = check_for_dupes_in_tracker(
             tracker, temp_tracker_api_key)
         # If dupes are present and user decided to stop upload, for single tracker uploads we stop operation immediately
         # True == dupe_found
         # False == no_dupes/continue upload
         if dupe_check_response:
-            logging.error(
-                f"[Main] Could not upload to: {tracker} because we found a dupe on site")
+            logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
             if discord_url:  # Send discord notification if enabled
-                requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                              data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
+                requests.post(
+                    url=discord_url, 
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
+                    data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled'
+                )
             if args.auto_mode:
                 continue
             else:
-                sys.exit(console.print("\nOK, quitting now..\n",
-                         style="bold red", highlight=False))
+                sys.exit(console.print("\nOK, quitting now..\n",style="bold red", highlight=False))
 
     # -------- Take / Upload Screenshots --------
-    media_info_duration = MediaInfo.parse(
-        torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]).tracks[1]
-    torrent_info["duration"] = str(
-        media_info_duration.duration).split(".", 1)[0]
+    media_info_duration = MediaInfo.parse(torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]).tracks[1]
+    torrent_info["duration"] = str(media_info_duration.duration).split(".", 1)[0]
     # This is used to evenly space out timestamps for screenshots
     # Call function to actually take screenshots & upload them (different file)
-    take_upload_screens(duration=torrent_info["duration"],
-                        upload_media_import=torrent_info[
-                            "raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-                        torrent_title_import=torrent_info[
-                            "title"], base_path=working_folder, hash_prefix=torrent_info["working_folder"],
-                        discord_url=discord_url, skip_screenshots=args.skip_screenshots)
+    take_upload_screens(
+        duration=torrent_info["duration"],
+        upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
+        torrent_title_import=torrent_info["title"], 
+        base_path=working_folder, 
+        hash_prefix=torrent_info["working_folder"],
+        discord_url=discord_url, 
+        skip_screenshots=args.skip_screenshots
+    )
 
-    screenshots_data = json.load(open(
-        f"{working_folder}/temp_upload/{torrent_info['working_folder']}screenshots/screenshots_data.json"))
+    screenshots_data = json.load(open(f"{working_folder}/temp_upload/{torrent_info['working_folder']}screenshots/screenshots_data.json"))
     torrent_info["bbcode_images"] = screenshots_data["bbcode_images"]
     torrent_info["bbcode_images_nothumb"] = screenshots_data["bbcode_images_nothumb"]
     torrent_info["bbcode_thumb_nothumb"] = screenshots_data["bbcode_thumb_nothumb"]
@@ -1693,8 +1693,7 @@ for file in upload_queue:
 
         # Update discord channel
         if discord_url:
-            requests.request("POST", discord_url, headers={
-                             'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content=Uploading to: **{config["name"]}**')
+            requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content=Uploading to: **{config["name"]}**')
 
         # Create a new dictionary that we store the exact keys/vals that the site is expecting
         tracker_settings = {}
@@ -1712,17 +1711,29 @@ for file in upload_queue:
         bbcode_line_break = config['bbcode_line_break']
 
         # -------- Add custom descriptions to description.txt --------
-        write_cutsom_user_inputs_to_description(torrent_info=torrent_info,
-                                                description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', config=config,
-                                                tracker=tracker, bbcode_line_break=bbcode_line_break, debug=args.debug)
+        write_cutsom_user_inputs_to_description(
+            torrent_info=torrent_info,
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', 
+            config=config, 
+            tracker=tracker, 
+            bbcode_line_break=bbcode_line_break, 
+            debug=args.debug
+        )
 
         # -------- Add bbcode images to description.txt --------
-        add_bbcode_images_to_description(torrent_info=torrent_info, config=config,
-                                         description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', bbcode_line_break=bbcode_line_break)
+        add_bbcode_images_to_description(
+            torrent_info=torrent_info, 
+            config=config, 
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', 
+            bbcode_line_break=bbcode_line_break
+        )
 
         # -------- Add custom uploader signature to description.txt --------
-        write_uploader_signature_to_description(description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
-                                                tracker=tracker, bbcode_line_break=bbcode_line_break)
+        write_uploader_signature_to_description(
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
+            tracker=tracker,
+            bbcode_line_break=bbcode_line_break
+        )
 
         # Add the finished file to the 'torrent_info' dict
         torrent_info["description"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt'

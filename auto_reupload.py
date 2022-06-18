@@ -1,5 +1,4 @@
 # default included packages
-# TODO remove unused packages
 import os
 import re
 import sys
@@ -12,7 +11,6 @@ import shutil
 import logging
 import schedule
 import argparse
-import subprocess
 
 from pathlib import Path
 from pprint import pformat
@@ -29,9 +27,9 @@ from pymediainfo import MediaInfo
 # Rich is used for printing text & interacting with user input
 from rich import box
 from rich.table import Table
+from rich.prompt import Confirm
 from rich.console import Console
 from rich.traceback import install
-from rich.prompt import Prompt, Confirm
 
 # utility methods
 # Method that will search for dupes in trackers.
@@ -39,6 +37,7 @@ from rich.prompt import Prompt, Confirm
 from utilities.utils_screenshots import take_upload_screens
 # Method that will search for dupes in trackers.
 from utilities.utils_dupes import search_for_dupes_api
+import utilities.utils_reupload as reupload_utilities
 from utilities.utils_miscellaneous import *
 from utilities.utils_translation import *
 from utilities.utils_metadata import *
@@ -48,7 +47,7 @@ from utilities.utils_basic import *
 from utilities.utils import *
 
 # processing modules
-from modules.cache import Cache, CacheFactory, CacheVendor
+from modules.cache import CacheFactory, CacheVendor
 from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
 
 # Used for rich.traceback
@@ -67,8 +66,7 @@ torrent_info = {}
 
 # Debug logs for the upload processing
 # Logger running in "w" : write mode
-logging.basicConfig(filename='{}/reupload_script.log'.format(working_folder), filemode="w",
-                    level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+logging.basicConfig(filename='{}/reupload_script.log'.format(working_folder), filemode="w", level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 # Load the .env file that stores info like the tracker/image host API Keys & other info needed to upload
 load_dotenv(f'{working_folder}/reupload.config.env')
@@ -152,11 +150,10 @@ display_banner("  Auto  ReUploader  ")
 console.line(count=1)
 
 console.line(count=2)
-console.rule(f"Establishing Connections", style='red', align='center')
+console.rule("Establishing Connections", style='red', align='center')
 console.line(count=1)
 
-logging.info(
-    "[Main] Going to establish connection to the torrent client configured")
+logging.info("[Main] Going to establish connection to the torrent client configured")
 # getting an instance of the torrent client factory
 torrent_client_factory = TorrentClientFactory()
 # creating the torrent client using the factory based on the users configuration
@@ -1276,48 +1273,39 @@ def format_title(json_config):
 def reupload_job():
     logging.info(f'[Main] Starting reupload job at {datetime.now()}')
 
-    torrents = reupload_get_processable_torrents(torrent_client, cache)
+    torrents = reupload_utilities.reupload_get_processable_torrents(torrent_client, cache)
 
     if torrents is None or len(torrents) == 0:
-        logging.info(
-            f'[Main] There are no completed torrents for reuploading. Snoozing...')
+        logging.info('[Main] There are no completed torrents for reuploading. Snoozing...')
         return
 
-    logging.info(
-        f'[Main] There are a total of {len(torrents)} completed torrents that needs to be re-uploaded')
+    logging.info(f'[Main] There are a total of {len(torrents)} completed torrents that needs to be re-uploaded')
 
     for torrent in torrents:
         # for each completed torrents we start the processing
-        logging.info(
-            f'[Main] Starting processing of torrent {torrent["name"]} from path {torrent["save_path"]}')
+        logging.info(f'[Main] Starting processing of torrent {torrent["name"]} from path {torrent["save_path"]}')
 
-        cached_data = get_cached_data(torrent["hash"], cache)
-        logging.debug(
-            f"[Main] Cached data obtained from cache for torrent {torrent['hash']}: {pformat(cached_data)}")
+        cached_data = reupload_utilities.get_cached_data(torrent["hash"], cache)
+        logging.debug(f"[Main] Cached data obtained from cache for torrent {torrent['hash']}: {pformat(cached_data)}")
         if cached_data is None:
             # Initializing the torrent data to cache
-            initialize_torrent_data(torrent, cache)
+            reupload_utilities.initialize_torrent_data(torrent, cache)
         else:
-            logging.info(
-                f"[Main] Cached data found for torrent with hash {torrent['hash']}")
-            if should_upload_be_skipped(cache, cached_data):
-                logging.info(
-                    f"[Main] Skipping upload and processing of torrent {cached_data['name']} since retry limit has exceeded")
+            logging.info(f"[Main] Cached data found for torrent with hash {torrent['hash']}")
+            if reupload_utilities.should_upload_be_skipped(cache, cached_data):
+                logging.info(f"[Main] Skipping upload and processing of torrent {cached_data['name']} since retry limit has exceeded")
                 continue
 
         save_path = torrent["save_path"]
         # before we start doing anything we need to check whether the media file can be accessed by the uploader.
         # to check whether the file is accessible we need to adhere to any path translations that user want to do
-        torrent_path = reupload_get_translated_torrent_path(
-            torrent["content_path"])
+        torrent_path = reupload_utilities.reupload_get_translated_torrent_path(torrent["content_path"])
 
         torrent_info.clear()
         # Remove all old temp_files & data from the previous upload
-        torrent_info["working_folder"] = delete_leftover_files(
-            working_folder, file=torrent_path, resume=False)
+        torrent_info["working_folder"] = delete_leftover_files(working_folder, file=torrent_path, resume=False)
 
-        console.print(
-            f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
+        console.print(f'Re-Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
 
         rar_file_validation_response = check_for_dir_and_extract_rars(
             torrent_path)
@@ -1327,23 +1315,20 @@ def reupload_job():
             continue
         torrent_info["upload_media"] = rar_file_validation_response[1]
 
-        guess_it_result = perform_guessit_on_filename(
-            torrent_info["upload_media"])
+        guess_it_result = perform_guessit_on_filename(torrent_info["upload_media"])
 
         nfo = glob.glob(f"{torrent_info['upload_media']}/*.nfo")
         if nfo and len(nfo) > 0:
             torrent_info["nfo_file"] = nfo[0]
 
         # File we're uploading
-        console.print(
-            f'Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
+        console.print(f'Uploading File/Folder: [bold][blue]{torrent_path}[/blue][/bold]')
         # -------- Basic info --------
         # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
         # this guy will also try to set tmab and imdb from media info summary
         if identify_type_and_basic_info(torrent_info["upload_media"], guess_it_result) == 'skip_to_next_file':
             # If there is an issue with the file & we can't upload we use this check to skip the current file & move on to the next (if exists)
-            logging.debug(
-                f"[Main] Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
+            logging.debug(f"[Main] Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
             continue
 
         # -------- Fix/update values --------
@@ -1353,15 +1338,11 @@ def reupload_job():
         movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
         possible_matches = None
         # the metadata items will be first obtained from cached_data. if its not available then we'll go ahead with mediainfo_summary data and tmdb search
-        movie_db = reupload_get_movie_db_from_cache(
-            cache, cached_data, torrent_info["title"], torrent_info["year"] if "year" in torrent_info else "", torrent_info["type"])
+        movie_db = reupload_utilities.reupload_get_movie_db_from_cache(cache, cached_data, torrent_info["title"], torrent_info["year"] if "year" in torrent_info else "", torrent_info["type"])
 
-        metadata_tmdb = reupload_get_external_id_based_on_priority(
-            movie_db, torrent_info, cached_data, "tmdb")
-        metadata_imdb = reupload_get_external_id_based_on_priority(
-            movie_db, torrent_info, cached_data, "imdb")
-        metadata_tvmaze = reupload_get_external_id_based_on_priority(
-            movie_db, torrent_info, cached_data, "tvmaze")
+        metadata_tmdb = reupload_utilities.reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tmdb")
+        metadata_imdb = reupload_utilities.reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "imdb")
+        metadata_tvmaze = reupload_utilities.reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tvmaze")
 
         for media_id_key, media_id_val in {"tmdb": [metadata_tmdb], "imdb": [metadata_imdb], "tvmaze": [metadata_tvmaze]}.items():
             # we include ' > 1 ' to prevent blank ID's and issues later
@@ -1374,8 +1355,7 @@ def reupload_job():
 
         if all(x in torrent_info for x in movie_db_providers):
             # This means both the TMDB & IMDB ID are already in the torrent_info dict
-            logging.info(
-                "[Main] TMDB, TVmaze & IMDB ID have been identified from media_info, so no need to make any TMDB API request")
+            logging.info("[Main] TMDB, TVmaze & IMDB ID have been identified from media_info, so no need to make any TMDB API request")
         elif any(x in torrent_info for x in ['imdb', 'tmdb', 'tvmaze']):
             # This means we can skip the search via title/year and instead use whichever ID to get the other (tmdb -> imdb and vice versa)
             ids_present = list(
@@ -1384,8 +1364,7 @@ def reupload_job():
                 id for id in movie_db_providers if id not in ids_present]
 
             logging.info(f"[Main] We have '{ids_present}' with us currently.")
-            logging.info(
-                f"[Main] We are missing '{ids_missing}' starting External Database API requests now")
+            logging.info(f"[Main] We are missing '{ids_missing}' starting External Database API requests now")
             # highest priority is given to imdb id.
             # if imdb id is provided by the user, then we use it to figure our the other two ids.
             # else we go for tmdb id and then tvmaze id
@@ -1414,8 +1393,7 @@ def reupload_job():
                     torrent_info["tmdb"] = metadata_get_external_id(
                         id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
                 else:
-                    logging.fatal(
-                        f"[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
+                    logging.fatal("[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
                     # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
                     metadata_result = metadata_search_tmdb_for_id(
                         query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
@@ -1427,8 +1405,7 @@ def reupload_job():
 
             # there will not be an else case for the above if else ladder.
         else:
-            logging.info(
-                "[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
+            logging.info("[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
             # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
             metadata_result = metadata_search_tmdb_for_id(query_title=torrent_info["title"],
                                                           year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
@@ -1441,10 +1418,8 @@ def reupload_job():
         if torrent_info["tmdb"] == "0" and torrent_info["imdb"] == "0" and torrent_info["tvmaze"] == "0":
             # here we couldn't select a tmdb id automatically / no results from tmdb. Hence we mark this as a special case and stop the upload of the torrent
             # updating the voerall status of the torrent
-            update_field(
-                torrent["hash"], "status", TorrentStatus.TMDB_IDENTIFICATION_FAILED, False, cache)
-            update_field(torrent["hash"], "possible_matches",
-                         possible_matches, True, cache)
+            reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.TMDB_IDENTIFICATION_FAILED, False, cache)
+            reupload_utilities.update_field(torrent["hash"], "possible_matches", possible_matches, True, cache)
             continue
 
         # -------- Use official info from TMDB --------
@@ -1460,8 +1435,7 @@ def reupload_job():
         torrent_info["mal"] = mal
 
         # saving the updates to moviedb in cache
-        reupload_persist_updated_moviedb_to_cache(
-            cache, movie_db, torrent_info, torrent["hash"], original_title, original_year)
+        reupload_utilities.reupload_persist_updated_moviedb_to_cache(cache, movie_db, torrent_info, torrent["hash"], original_title, original_year)
 
         # -------- Dupe check for single tracker uploads --------
         # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
@@ -1480,16 +1454,11 @@ def reupload_job():
             # True == dupe_found
             # False == no_dupes/continue upload
             if dupe_check_response:
-                logging.error(
-                    f"[Main] Could not upload to: {tracker} because we found a dupe on site")
-                logging.info(
-                    f"[Main] Marking this torrent as dupe check failed in cache")
-                update_torrent_status(
-                    torrent["hash"], TorrentStatus.DUPE_CHECK_FAILED, cache)
-                torrent_client.update_torrent_category(
-                    info_hash=torrent["hash"], category_name=TorrentStatus.DUPE_CHECK_FAILED)
-                console.print("Dupe check failed. skipping this torrent upload..\n",
-                              style="bold red", highlight=False)
+                logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
+                logging.info("[Main] Marking this torrent as dupe check failed in cache")
+                reupload_utilities.update_torrent_status(torrent["hash"], TorrentStatus.DUPE_CHECK_FAILED, cache)
+                torrent_client.update_torrent_category(info_hash=torrent["hash"], category_name=TorrentStatus.DUPE_CHECK_FAILED)
+                console.print("Dupe check failed. skipping this torrent upload..\n",style="bold red", highlight=False)
                 continue
 
         # -------- Take / Upload Screenshots --------
@@ -1627,7 +1596,7 @@ def reupload_job():
             # Tracker Settings
             if upload_status:
                 # getting the overall status of the torrent from cache
-                torrent_status = get_torrent_status(torrent["hash"], cache)
+                torrent_status = reupload_utilities.get_torrent_status(torrent["hash"], cache)
 
                 # this is the first tracker for this torrent
                 job_repo_entry = {}
@@ -1635,19 +1604,16 @@ def reupload_job():
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
                 job_repo_entry["status"] = JobStatus.SUCCESS
-                job_repo_entry["tracker_response"] = json.dumps(
-                    upload_response)
+                job_repo_entry["tracker_response"] = json.dumps(upload_response)
                 # inserting the torernt->tracker data to job_repository
-                insert_into_job_repo(job_repo_entry, cache)
+                reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
 
                 if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
                     # updating the voerall status of the torrent
-                    update_field(torrent["hash"], "status",
-                                 TorrentStatus.SUCCESS, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.SUCCESS, False, cache)
                 elif torrent_status == TorrentStatus.FAILED:
                     # updating the voerall status of the torrent
-                    update_field(
-                        torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
                 else:
                     pass  # here the status could be SUCCESS or PARTIALLY_SUCCESSFUL, We don't need to make any changes to this status
 
@@ -1674,7 +1640,7 @@ def reupload_job():
                     torrent=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}{tracker}-{torrent_info["torrent_title"]}.torrent', save_path=save_path, use_auto_torrent_management=False, is_skip_checking=True)
             else:
                 # getting the overall status of the torrent from cache
-                torrent_status = get_torrent_status(torrent["hash"], cache)
+                torrent_status = reupload_utilities.get_torrent_status(torrent["hash"], cache)
 
                 # this is the first tracker for this torrent
                 job_repo_entry = {}
@@ -1682,19 +1648,16 @@ def reupload_job():
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
                 job_repo_entry["status"] = JobStatus.FAILED
-                job_repo_entry["tracker_response"] = json.dumps(
-                    upload_response)
+                job_repo_entry["tracker_response"] = json.dumps(upload_response)
                 # inserting the torernt->tracker data to job_repository
-                insert_into_job_repo(job_repo_entry, cache)
+                reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
 
                 if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
                     # updating the overall status of the torrent
-                    update_field(torrent["hash"], "status",
-                                 TorrentStatus.FAILED, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.FAILED, False, cache)
                 elif torrent_status == TorrentStatus.SUCCESS:
                     # updating the overall status of the torrent
-                    update_field(
-                        torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
                 else:
                     pass  # here status could be FAILED or PARTIALLY_SUCCESSFUL, we don't need to change this status
 

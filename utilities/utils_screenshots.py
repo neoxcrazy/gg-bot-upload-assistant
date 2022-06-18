@@ -8,7 +8,6 @@ import requests
 import pyimgbox
 import ptpimg_uploader
 
-from rich import box
 from rich.progress import track
 from rich.console import Console
 
@@ -82,7 +81,8 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             ptp_img_upload = ptpimg_uploader.upload(api_key=os.getenv(
                 'ptpimg_api_key'), files_or_urls=[image_path], timeout=5)
             # Make sure the response we get from ptpimg is a list
-            assert type(ptp_img_upload) == list
+            if not isinstance(ptp_img_upload, ptp_img_upload):
+                return False
             # assuming it is, we can then get the img url, format it into bbcode & return it
             logging.debug(
                 f'[Screenshots] Ptpimg image upload response: {ptp_img_upload}')
@@ -306,13 +306,12 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     # TODO: update this to work in line with the new json screenshot data
     if not bool(enabled_img_hosts_list):
         with open(f"{base_path}/temp_upload/{hash_prefix}bbcode_images.txt", "w") as no_images, open(f"{base_path}/temp_upload/{hash_prefix}url_images.txt", "a") as append_url_txt:
-            no_images.write(
-                "[b][color=#FF0000][size=22]None[/size][/color][/b]")
+            no_images.write("[b][color=#FF0000][size=22]None[/size][/color][/b]")
             append_url_txt.write("No Screenshots Available")
             append_url_txt.close()
             no_images.close()
-        logging.error(f"[Screenshots] Continuing upload without screenshots")
-        console.print(f'Continuing without screenshots\n', style='chartreuse1')
+        logging.error("[Screenshots] Continuing upload without screenshots")
+        console.print('Continuing without screenshots\n', style='chartreuse1')
         return
 
     # ##### Now that we've verified that at least 1 imghost is available & has an api key etc we can try & upload the screenshots ##### #
@@ -324,23 +323,19 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
     for ss_timestamp in track(_get_ss_range(duration=duration, num_of_screenshots=num_of_screenshots), description="Taking screenshots.."):
         # Save the ss_ts to the 'ss_timestamps_list' list
         ss_timestamps_list.append(ss_timestamp)
-        screenshots_to_upload_list.append(
-            f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
+        screenshots_to_upload_list.append(f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
         # Now with each of those timestamps we can take a screenshot and update the progress bar
         # `-itsoffset -2` added for Frame accurate screenshot
         if not Path(f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png').is_file():
             FFmpeg(inputs={upload_media_import: f'-loglevel panic -ss {ss_timestamp} -itsoffset -2'},
                    outputs={f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png': '-frames:v 1 -q:v 10'}).run()
         else:
-            logging.info(
-                f"[Screenshots] Continuing upload existing screenshot: {torrent_title_import} - ({ss_timestamp.replace(':', '.')}).png")
-        image_data_paths.append(
-            f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
+            logging.info(f"[Screenshots] Continuing upload existing screenshot: {torrent_title_import} - ({ss_timestamp.replace(':', '.')}).png")
+        image_data_paths.append(f'{base_path}/temp_upload/{hash_prefix}screenshots/{torrent_title_import} - ({ss_timestamp.replace(":", ".")}).png')
 
     console.print('Finished taking screenshots!\n', style='sea_green3')
     # log the list of screenshot timestamps
-    logging.info(
-        f'[Screenshots] Taking screenshots at the following timestamps {ss_timestamps_list}')
+    logging.info(f'[Screenshots] Taking screenshots at the following timestamps {ss_timestamps_list}')
 
     # checking whether we have previously uploaded all the screenshots. If we have, then no need to upload them again
     # if screenshots were not uploaded previously, then we'll upload them.

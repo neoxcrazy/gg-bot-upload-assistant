@@ -4,11 +4,8 @@ import base64
 import logging
 import requests
 
-from pprint import pformat
 
-
-rutorrent_keys = ["d.get_custom1", "d.get_bytes_done",
-                  "d.get_base_path", "hash", "d.get_name", "d.get_size_bytes"]
+rutorrent_keys = ["d.get_custom1", "d.get_bytes_done", "d.get_base_path", "hash", "d.get_name", "d.get_size_bytes"]
 rutorrent_keys_translation = {
     "d.get_custom1": "category",
     "d.get_bytes_done": "completed",
@@ -27,8 +24,7 @@ class Rutorrent:
     __upload_torrent_path = "/php/addtorrent.php"
 
     def __call_server(self, url, data={}, files=None, header=None):
-        response = requests.post(
-            url, data=data, files=files, headers=header or self.header)
+        response = requests.post(url, data=data, files=files, headers=header or self.header)
         return response.json() if 'application/json' in response.headers.get('Content-Type') else response
 
     def __get_torrent_info(self, item):
@@ -85,10 +81,8 @@ class Rutorrent:
         return rutorrent_keys_translation[key] if key in rutorrent_keys_translation else key
 
     def __extract_necessary_keys(self, torrent):
-        torrent = {self.__do_key_translation(
-            key): value for key, value in torrent.items() if key in rutorrent_keys}
-        torrent["save_path"] = torrent["content_path"].replace(
-            torrent["name"], "")
+        torrent = {self.__do_key_translation(key): value for key, value in torrent.items() if key in rutorrent_keys}
+        torrent["save_path"] = torrent["content_path"].replace(torrent["name"], "")
         return torrent
 
     def __format_bytes(self, size):
@@ -113,8 +107,7 @@ class Rutorrent:
         self.base_url = f'{self.host}:{self.port}{self.path}'
 
         if self.username:
-            hashed = base64.b64encode(
-                f"{self.username}:{self.password or ''}".encode('ascii')).decode('ascii')
+            hashed = base64.b64encode(f"{self.username}:{self.password or ''}".encode('ascii')).decode('ascii')
             self.header = {"Authorization": f"Basic {hashed}"}
         else:
             self.header = {}
@@ -124,35 +117,28 @@ class Rutorrent:
         # `seed_label` is the label which will be added to the cross-seeded torrents
         self.seed_label = os.getenv('cross_seed_label', 'GGBotCrossSeed')
         # `source_label` is thelabel which will be added to the original torrent in the client
-        self.source_label = os.getenv(
-            'source_seed_label', 'GGBotCrossSeed_Source')
+        self.source_label = os.getenv('source_seed_label', 'GGBotCrossSeed_Source')
 
         try:
             logging.info("[Rutorrent] Checking connection to Rutorrent")
-            self.__call_server(
-                f'{self.base_url}{self.__connection_check_path}')
+            self.__call_server(f'{self.base_url}{self.__connection_check_path}')
             print('Successfully established connection with Rutorrent')
         except Exception as err:
-            logging.fatal(
-                "[Rutorrent] Authentication with Rutorrent instance failed")
+            logging.fatal("[Rutorrent] Authentication with Rutorrent instance failed")
             raise err
 
     def hello(self):
         response = self.__call_server(f'{self.base_url}{self.__cpu_load_path}')
         try:
             print(f"Rutorrent CPU Load: {response['load']}%")
-            response = self.__call_server(
-                f'{self.base_url}{self.__disk_size_path}')
-            print(
-                f"Rutorrent Storage: {self.__format_bytes(response['free'])} free out of {self.__format_bytes(response['total'])}")
+            response = self.__call_server(f'{self.base_url}{self.__disk_size_path}')
+            print(f"Rutorrent Storage: {self.__format_bytes(response['free'])} free out of {self.__format_bytes(response['total'])}")
         except Exception as err:
-            logging.fatal(
-                f"Failed to connect to rutorrent. Error:{response.text}")
+            logging.fatal(f"Failed to connect to rutorrent. Error:{response.text}")
             raise err
 
     def list_torrents(self):
-        response = self.__call_server(
-            f'{self.base_url}{self.__default_path}', data={'mode': 'list'})
+        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={'mode': 'list'})
         if type(response["t"]) == list:
             return []
         return list(map(self.__extract_necessary_keys, filter(self.__match_label, map(self.__get_torrent_info, response["t"].items()))))
@@ -160,26 +146,17 @@ class Rutorrent:
     def upload_torrent(self, torrent, save_path, use_auto_torrent_management, is_skip_checking, category=None):
         category = category if category is not None else self.seed_label
         logging.info(f"[Rutorrent] Uploading torrent with category {category}")
-        response = self.__call_server(f'{self.base_url}{self.__upload_torrent_path}',
-                                      data={
-                                          "fast_resume": "1" if is_skip_checking else "0",
-                                          "label": category,
-                                          "dir_edit": save_path
-                                      },
-                                      files={
-                                          "torrent_file": open(torrent, "rb")
-                                      }
-                                      )
+        response = self.__call_server(
+            f'{self.base_url}{self.__upload_torrent_path}',
+            data={ "fast_resume": "1" if is_skip_checking else "0", "label": category, "dir_edit": save_path},
+            files={"torrent_file": open(torrent, "rb")}
+        )
 
     def update_torrent_category(self, info_hash, category_name=None):
         category_name = category_name if category_name is not None else self.source_label
-        logging.info(
-            f"[Rutorrent] Updating category of torrent with hash {info_hash} to {category_name}")
-        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={
-                                      "mode": "setlabel", "hash": info_hash, "v": category_name, "s": "label"})
+        logging.info(f"[Rutorrent] Updating category of torrent with hash {info_hash} to {category_name}")
+        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={"mode": "setlabel", "hash": info_hash, "v": category_name, "s": "label"})
         if response[0] == category_name:
-            logging.info(
-                f"[Rutorrent] Successfully updated category of torrent with hash {info_hash} to {category_name}")
+            logging.info(f"[Rutorrent] Successfully updated category of torrent with hash {info_hash} to {category_name}")
         else:
-            logging.error(
-                f"[RuTorrent] Failed to update category of torrent with hash {info_hash} to {category_name}")
+            logging.error(f"[RuTorrent] Failed to update category of torrent with hash {info_hash} to {category_name}")
