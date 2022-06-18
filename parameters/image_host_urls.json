@@ -1,6 +1,6 @@
 {
-    "imgbb": "https://api.imgbb.com/1/upload", 
-    "freeimage": "https://freeimage.host/api/1/upload", 
-    "imgfi" : " https://imgfi.com/api/1/upload",
+    "imgbb": "https://api.imgbb.com/1/upload",
+    "freeimage": "https://freeimage.host/api/1/upload",
+    "imgfi": " https://imgfi.com/api/1/upload",
     "snappie": "https://snappie.net/api/1/upload"
 }

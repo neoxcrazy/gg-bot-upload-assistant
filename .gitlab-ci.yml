@@ -1,19 +1,14 @@
 variables:
   DOCKER_IMAGE: "docker:stable"
+  PAGES_URL: https://noobmaster669.gitlab.io/-/gg-bot-upload-assistant/
 
 include:
-- template: Security/Secret-Detection.gitlab-ci.yml
-- template: Security/SAST.gitlab-ci.yml
-# - template: Code-Quality.gitlab-ci.yml
-- local: cicd/.gitlab-ci-base-images.yml
-- local: cicd/.gitlab-ci-unit-test.yml
-- local: cicd/.gitlab-ci-uploaders.yml
-- local: cicd/.gitlab-ci-re-uploader.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - local: .gitlab/ci/*.gitlab-ci.yml
 
 stages:
-- build
-- test
-- deploy
-
-sast:
-  stage: test
+  - lint
+  - build
+  - test
+  - deploy

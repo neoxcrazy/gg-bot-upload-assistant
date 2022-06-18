@@ -214,7 +214,7 @@
     "Required": {
         "torrent": "file",
         "name": "string",
-        "screenshot_urls": "file|string|array",
+        "screenshot_urls": "string|array",
         "imdb": "string",
         "description":"string",
         "anon":"string",

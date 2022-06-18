@@ -2,7 +2,7 @@
     "name": "Swarmazon",
     "url": "https://swarmazon.club",
     "upload_form": "https://swarmazon.club/api/upload.php?api_key={api_key}",
-    "torrents_search": "",
+    "torrents_search": "https://swarmazon.club/api/search.php?api_key={api_key}",
     "source": "Swarmazon",
     "platform": "Swarmazon",
     "bbcode_line_break": "\n",
@@ -18,20 +18,70 @@
     },
 
     "hybrid_type": {
-        "required": false
+        "required": true,
+        "__comments__": {
+            "1": "Movies: WEB-DL/WEBRip",
+            "3": "Movies: FullDisk, Remux, Encode",
+            "5": "TV: Episode (anything tv that fails check for 6)",
+            "6": "TV: Season (episode number is 0)",
+
+            "category_id":{
+                "1": "movie",
+                "2": "episode"
+            }
+        },
+        "mapping": {
+            "1":{
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source":{
+                    "data_source": "tracker",
+                    "values": ["4", "5"]
+                }
+            },
+            "3":{
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                },
+                "source":{
+                    "data_source": "tracker",
+                    "values": ["1", "3", "12"]
+                }
+            },
+            "6":{
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                },
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": ["0"]
+                }
+            },
+            "5": {
+                "category_id": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
+            }
+        }
     },
 
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "description": "description",
-        "mediainfo": "mediainfo",
-        "bdinfo": "bdinfo",
+        "mediainfo": "media_info",
+        "bdinfo": "media_info",
         "type": "category_id",
-        "source": "type_id",
+        "source": "source",
+        "hybrid_type": "type_id",
         "resolution": "resolution_id",
         "tmdb": "tmdb",
-        "imdb": "imdb",
+        "imdb_with_tt": "media_ref",
         "anon": "anonymous",
         "live": "live",
         "sd": "sd",
@@ -57,8 +107,9 @@
         "sd": "string",
         "stream": "string",
         "tvdb": "string",
+        "type_id":"string",
         "tmdb": "string",
-        "imdb": "string",
+        "media_ref": "string",
         "mal": "string",
         "igdb": "string",
 
@@ -73,7 +124,7 @@
             "2": "episode"
         },
 
-        "type_id": {
+        "source": {
             "1": {
                 "disc": 1,
                 "bluray_disc": 2,
@@ -137,8 +188,7 @@
         "season_number": "string",
         "episode_number": "string",
 
-        "bdinfo": "string",
-        "mediainfo": "string"
+        "media_info": "string"
     },
 
     "Default":{},
@@ -151,13 +201,12 @@
             "request_method": "GET"
         },
 
-        "url_format": "{search_url}&imdbId={imdb}",
-        "strip_text": true,
+        "url_format": "{search_url}&media_ref={imdb}",
+        "strip_text": false,
 
         "parse_json": {
             "is_needed": true,
-            "top_lvl": "data",
-            "torrent_details": "attributes"
+            "top_lvl": "data"
         },
 
         "different_cuts": "1",

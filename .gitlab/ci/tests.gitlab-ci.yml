@@ -1,0 +1,57 @@
+# ********************************************** #
+# ********************************************** #
+#                Unit Tests GG-BOT               #
+# ********************************************** #
+# ********************************************** #
+unit-test:
+  stage: test
+  image: noobmaster669/gg-bot-base:test-latest
+  variables:
+    SOURCE_DIRECTORY: gg-bot-upload-assistant
+  script:
+    - pip install -r requirements/requirements_test.txt
+    - pip freeze > requirements/requirements_test.txt
+    - pytest -vv --show-capture=stdout --cov-report=html --junitxml=junit_report.xml --cov=./ .
+    # generating xml coverage report for various platforms
+    - coverage report
+    - coverage xml -o coverage.xml
+    # - sed -i 's|" filename="|" filename="src/|g' coverage.xml
+    - sed -i "s=<source>.*${SOURCE_DIRECTORY}</source>=<source>./${SOURCE_DIRECTORY}</source>=g" coverage.xml
+    - sed -i "s;filename=\";filename=\"${SOURCE_DIRECTORY}/;g" coverage.xml
+    # sending coverage report to codecov
+    - curl -Os https://uploader.codecov.io/latest/alpine/codecov
+    - chmod +x codecov
+    - ./codecov -R .
+    # sending coverage report for codacy
+    - curl -Os https://coverage.codacy.com/get.sh
+    - chmod +x get.sh
+    - sh get.sh report -l Python -r coverage.xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    name: "test-report-$CI_COMMIT_REF_NAME"
+    expose_as: Unit test and coverage results
+    paths:
+      - coverage.xml
+      - junit_report.xml
+      - coverage
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit:
+        - junit_report.xml
+    expire_in: 90 days
+  environment:
+    name: test/reports/$CI_COMMIT_REF_NAME
+    auto_stop_in: 2 months
+    url: $PAGES_URL/-/jobs/$CI_JOB_ID/artifacts/coverage/index.html
+
+sast:
+  stage: test
+# pre-commit-checks:
+#   image: python:3.9.10
+#   stage: prepare
+#   before_script:
+#     - pip install pre-commit
+#   script:
+#     - pre-commit run --all-files --verbose --show-diff-on-failure

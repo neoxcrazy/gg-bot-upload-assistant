@@ -44,6 +44,4 @@ services:
       - rutorrent
     # provide the list of trackers to upload to here
     # TODO see how this can be taken from the .env file
-    command: [
-      "-t", "<TRACKERS>", "<OPTIONAL_ARGUMENTS>"
-    ]
+    command: [ "-t", "<TRACKERS>", "<OPTIONAL_ARGUMENTS>" ]

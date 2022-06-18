@@ -6,8 +6,8 @@ ENV IS_FULL_DISK_SUPPORTED=false
 
 # dependencies necessary in alpine to use and run python
 RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
+	echo "**** install build packages ****" && \
+	apk add --no-cache --virtual=build-dependencies \
 	g++ \
 	py3-pip \
 	python3-dev
@@ -19,8 +19,8 @@ RUN \
 # - python for running the bot
 # - mktorrent to create torrents (mainly in debian)
 RUN \
- echo "**** install runtime packages ****" && \
- apk add --no-cache --upgrade \
+	echo "**** install runtime packages ****" && \
+	apk add --no-cache --upgrade \
 	ffmpeg \
 	mediainfo \
 	python3 \

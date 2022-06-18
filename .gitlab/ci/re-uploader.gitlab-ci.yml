@@ -6,9 +6,9 @@ docker-hub-image-reuploader:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
