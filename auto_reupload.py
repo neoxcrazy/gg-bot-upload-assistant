@@ -1000,10 +1000,13 @@ def identify_miscellaneous_details(guess_it_result):
                 torrent_info["region"] = str(word).upper()
 
         # Dolby vision (filename detection)
-        # HDR is also added from here. The type of hdr is updated from media info
-        if any(x in str(word).lower() for x in ['dv', 'dovi', 'do-vi']):
+        if any(x in str(word).lower() for x in ['dv', 'dovi']) or all(x in str(word).lower() for x in ['do', 'vi']):
             logging.info("Detected Dolby Vision from the filename")
-            torrent_info["dv"] = "DV"
+            if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
+                torrent_info["dv"] = "DV"
+                logging.info("Adding dolby vision data identified from file name")
+            else:
+                logging.info("Dolby Vision already identified from mediainfo... Skipping the data collected from file name.")
 
     # use regex (sourced and slightly modified from official radarr repo) to find torrent editions (Extended, Criterion, Theatrical, etc)
     # https://github.com/Radarr/Radarr/blob/5799b3dc4724dcc6f5f016e8ce4f57cc1939682b/src/NzbDrone.Core/Parser/Parser.cs#L21

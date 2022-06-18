@@ -492,7 +492,7 @@ def _get_client_translated_path(torrent_info):
         To: /media/downloads/movie_name/movie.mkv
     """
 
-    if os.getenv('translation_needed', False):
+    if os.getenv('translation_needed', False) == True:
         logging.info('[Utils] Translating paths... ("translation_needed" flag set to True in config.env) ')
         
         # Just in case the user didn't end the path with a forward slash...

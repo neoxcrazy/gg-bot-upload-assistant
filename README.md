@@ -263,6 +263,7 @@ docker run --rm -it \
 - [X] Bug Fixes and Testing Phase 1
 - [X] Bug Fixes and Testing Phase 2
 - [X] Issue#37: Automatic cross-seeding not working
+- [X] Issue#39: Info log says translation needed even when disabled
 
 ### v3.0.1
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
@@ -317,6 +318,7 @@ docker run --rm -it \
         * Issue#34: Cross-Seeding uploading torrents for failed uploads
         * Issue#35: HEVC codec being used for web releases
         * Issue#36: Broken screenshots after new UNIT3D update
+        * Issue:38: Cross-seeding error with multiple trackers
 
 ## **2.0.6**
     New Trackers

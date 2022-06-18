@@ -54,6 +54,9 @@ def _get_dv_hdr(media_info_video_track):
     
     if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
         dv = "DV"
+        logging.info("[BasicUtils] Identified 'Dolby Vision' from mediainfo.")
+
+    logging.info(f"[BasicUtils] HDR Format identified from mediainfo is '{hdr}'")
     return dv, hdr
 
 
