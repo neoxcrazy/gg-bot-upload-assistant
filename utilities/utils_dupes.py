@@ -201,7 +201,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         config = json.load(config_file)
     
     is_repack_or_proper = torrent_info["repack"]
-    logging.info(f"[DupeCheck] We curently are tying to upload a '{is_repack_or_proper}'. Non '{is_repack_or_proper}' release will be ignored during dupe check")
+    logging.info(f"[DupeCheck] We curently are tying to upload a repack type: '{is_repack_or_proper}'. Non '{is_repack_or_proper}' release will be ignored during dupe check")
     
     imdb = imdb.replace('tt', '') if config["dupes"]["strip_text"] == True else imdb
     url_dupe_payload = None  # this is here just for the log, its not technically needed

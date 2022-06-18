@@ -86,6 +86,7 @@ def get_hybrid_type(target_val, tracker_settings, config, exit_program, torrent_
         """
             Method to get a hybrid type from the source, resolution and type properties of the torrent
         """
+        logging.info("[HybridMapping] Performing hybrid mapping now...")
         logging.debug(f'------------------ Hybrid mapping started ------------------')
         # getting values for the source, resolution and type properties
         source = tracker_settings[config["translation"]["source"]]

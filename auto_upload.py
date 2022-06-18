@@ -766,18 +766,22 @@ def choose_right_tracker_keys():
                     if return_value == "STOP":
                         return return_value
                     tracker_settings[config["translation"][translation_key]] = return_value
-
-                if translation_key == "hybrid_type" and config["hybrid_type"] is not None and config["hybrid_type"]["required"]:
+                
+                if translation_key == "hybrid_type" and config["hybrid_type"] is not None and bool(config["hybrid_type"]["required"]) == True:
                     # to do hybrid translation we need values for source, type and resolution to be resolved before hand.
                     # we first check whether they have been resolved or not. 
                     # If those values have been resolved then we can just call the `get_hybrid_type` to resolve it.
                     # otherwise we mark the present of this hybrid type and do the mapping after all required and optional 
                     # value mapping have been completed.
+                    
+                    logging.info(f"[CategoryMapping] Going to perform hybrid mapping for :: {config['translation'][translation_key]}")
                     if config["translation"]["source"] in tracker_settings and config["translation"]["resolution"] in tracker_settings and config["translation"]["type"] in tracker_settings:
                         tracker_settings[config["translation"][translation_key]] = get_hybrid_type(target_val=translation_key,
                             tracker_settings=tracker_settings, config=config, exit_program=True, torrent_info=torrent_info)
                         is_hybrid_translation_needed = False
                     else:
+                        logging.error("[CategoryMapping] Cannot do hybrid mapping now as `source` or `resolution` or `type` is not available now")
+                        logging.info("[CategoryMapping] Noting the need for hybrid mapping. Hybrid mapping will be done once all 3 above keys have been resolved.")
                         is_hybrid_translation_needed = True
         # ------------ required_items end ------------
 
@@ -843,28 +847,28 @@ def choose_right_tracker_keys():
                 # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
                 # for full disks the bdInfo is saved under the same key as mediainfo
                 elif translation_key == "mediainfo":
-                    logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    logging.debug(f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
-                        logging.debug("Skipping mediainfo for tracker settings since upload is FullDisk.")
+                        logging.debug("[CategoryMapping] Skipping mediainfo for tracker settings since upload is FullDisk.")
                     else:
-                        logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        logging.debug(f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                         tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
                         continue
                 elif translation_key == "bdinfo":
-                    logging.debug(f"Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    logging.debug(f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
-                        logging.debug(f"Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        logging.debug(f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
                         tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
                         continue
                     else:
-                        logging.debug("Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
+                        logging.debug("[CategoryMapping] Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
                     tracker_settings[optional_key] = torrent_info.get(translation_key, "")
         # ------------ optional_items end ------------
 
     # Adding default values from template to tracker settings
     for default_key, default_value in config["Default"].items():
-        logging.debug(f'Adding default key `{default_key}` with value `{default_value}` to tracker settings')
+        logging.debug(f'[CategoryMapping] Adding default key `{default_key}` with value `{default_value}` to tracker settings')
         tracker_settings[default_key] = default_value
 
     # at this point we have finished iterating over the translation key items
