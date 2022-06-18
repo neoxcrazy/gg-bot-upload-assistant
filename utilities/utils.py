@@ -99,17 +99,14 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
     """
     logging.info("[DotTorrentGeneration] Creating the .torrent file now")
     logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
-    logging.info(
-        f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
+    logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
 
     if len(glob.glob(f"{working_folder}/temp_upload/{hash_prefix}*.torrent")) == 0:
         # we need to actually generate a torrent file "from scratch"
-        logging.info(
-            "[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
+        logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if use_mktorrent:
             print("Using mktorrent to generate the torrent")
-            logging.info(
-                "[DotTorrentGeneration] Using MkTorrent to generate the torrent")
+            logging.info("[DotTorrentGeneration] Using MkTorrent to generate the torrent")
             """
             mktorrent options
                 -v => Be verbose.
@@ -124,21 +121,17 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             current version of mktorrent pulled from alpine package doesn't have the -e flag.
             Once an updated version is available, the flag can be added
             """
-            torrent_size = sum(f.stat().st_size for f in Path(media).glob(
-                '**/*') if f.is_file()) if os.path.isdir(media) else os.path.getsize(media)
+            torrent_size = sum(f.stat().st_size for f in Path(media).glob('**/*') if f.is_file()) if os.path.isdir(media) else os.path.getsize(media)
             piece_size = get_piece_size_for_mktorrent(torrent_size)
-            logging.info(
-                f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
-            logging.info(
-                f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
+            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
+            logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
             if len(announce) == 1:
                 os.system(
                     f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
             else:
                 os.system(
                     f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
-            logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format(
-                "[" + source + "]" + torrent_title + ".torrent"))
+            logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
         else:
             print("Using python torf to generate the torrent")
             torrent = Torrent(media,
@@ -151,57 +144,44 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
                               private=True,
                               creation_date=datetime.now())
             torrent.piece_size = calculate_piece_size(torrent.size)
-            logging.info(
-                f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
-            logging.info(
-                f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
+            logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent.size}')
+            logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {torrent.piece_size}')
             torrent.generate(callback=callback)
-            torrent.write(
-                f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
+            torrent.write(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
             torrent.verify_filesize(media)
-            logging.info("[DotTorrentGeneration] Trying to write into {}".format(
-                "[" + source + "]" + torrent_title + ".torrent"))
+            logging.info("[DotTorrentGeneration] Trying to write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
     else:
         print("Editing previous .torrent file to work with {} instead of generating a new one".format(source))
-        logging.info(
-            "[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
+        logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
         edit_torrent = Torrent.read(
             glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
 
         if len(announce) == 1:
-            logging.debug(
-                f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
-            logging.debug(
-                f"[DotTorrentGeneration] Removing announce-list if present in existing torrent.")
+            logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
+            logging.debug("[DotTorrentGeneration] Removing announce-list if present in existing torrent.")
             edit_torrent.metainfo.pop('announce-list', "")
         else:
-            logging.debug(
-                f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
+            logging.debug(f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
             edit_torrent.metainfo.pop('announce-list', "")
             edit_torrent.metainfo['announce-list'] = list()
             for announce_url in announce[1:]:
-                logging.debug(
-                    f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
+                logging.debug(f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
                 announce_list = list()
                 announce_list.append(announce_url)
                 edit_torrent.metainfo['announce-list'].append(announce_list)
-            logging.debug(
-                f"[DotTorrentGeneration] Final announce-list in torrent metadata {edit_torrent.metainfo['announce-list']}")
+            logging.debug(f"[DotTorrentGeneration] Final announce-list in torrent metadata {edit_torrent.metainfo['announce-list']}")
 
         edit_torrent.metainfo['announce'] = announce[0]
         edit_torrent.metainfo['info']['source'] = source
         # Edit the previous .torrent and save it as a new copy
-        Torrent.copy(edit_torrent).write(
-            filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
+        Torrent.copy(edit_torrent).write(filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
 
     if os.path.isfile(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent'):
-        logging.info(
-            f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
+        logging.info(f'[DotTorrentGeneration] Successfully created the following file: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
     else:
-        logging.error(
-            f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
+        logging.error(f'[DotTorrentGeneration] The following .torrent file was not created: {working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')
 
 
 def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break, debug=False):
@@ -215,78 +195,60 @@ def write_cutsom_user_inputs_to_description(torrent_info, description_file_path,
         # we need to make sure that the tracker supports custom description for torrents.
         # If tracker supports custom descriptions, the the tracker config will have the `description_components` key.
         if "description_components" in config:
-            logging.debug(
-                '[CustomUserInputs] User has provided custom inputs for torrent description')
+            logging.debug('[CustomUserInputs] User has provided custom inputs for torrent description')
             # here we iterate through all the custom inputs provided by the user
             # then we check whether this component is supported by the target tracker. If tracker supports it then the `key` will be present in the tracker config.
             with open(description_file_path, 'a') as description:
                 description_components = config["description_components"]
-                logging.debug(
-                    f'[CustomUserInputs] Custom Message components configured for tracker {tracker} are {pformat(description_components)}')
+                logging.debug(f'[CustomUserInputs] Custom Message components configured for tracker {tracker} are {pformat(description_components)}')
                 for custom_user_input in torrent_info["custom_user_inputs"]:
                     # getting the component type
-                    logging.debug(
-                        f'[CustomUserInputs] Custom input data {pformat(custom_user_input)}')
+                    logging.debug(f'[CustomUserInputs] Custom input data {pformat(custom_user_input)}')
                     if custom_user_input["key"] not in description_components:
-                        logging.debug(
-                            f'[CustomUserInputs] This type of component is not supported by the tracker. Writing input to description as plain text')
+                        logging.debug('[CustomUserInputs] This type of component is not supported by the tracker. Writing input to description as plain text')
                         # the provided component is not present in the trackers list. hence we adds this to the description directly (plain text)
                         description.write(custom_user_input["value"])
                     else:
                         # provided component is present in the tracker list, so first we'll format the content to be added to the tracker template
                         input_wrapper_type = description_components[custom_user_input["key"]]
-                        logging.debug(
-                            f'[CustomUserInputs] Component wrapper :: `{input_wrapper_type}`')
-                        formatted_value = custom_user_input["value"].replace(
-                            "\\n", bbcode_line_break)
+                        logging.debug(f'[CustomUserInputs] Component wrapper :: `{input_wrapper_type}`')
+                        formatted_value = custom_user_input["value"].replace("\\n", bbcode_line_break)
                         # next we need to check whether the text component has any title
                         if "title" in custom_user_input and custom_user_input["title"] is not None:
-                            logging.debug(
-                                f'[CustomUserInputs] User has provided a title for this component')
+                            logging.debug('[CustomUserInputs] User has provided a title for this component')
                             # if user has provided title, next we'll make sure that the tracker supports title for the component.
                             if "TITLE_PLACEHOLDER" in input_wrapper_type:
-                                logging.debug(
-                                    f'[CustomUserInputs] Adding title [{custom_user_input["title"].strip()}] to this component')
-                                input_wrapper_type = input_wrapper_type.replace(
-                                    "TITLE_PLACEHOLDER", custom_user_input["title"].strip())
+                                logging.debug(f'[CustomUserInputs] Adding title [{custom_user_input["title"].strip()}] to this component')
+                                input_wrapper_type = input_wrapper_type.replace("TITLE_PLACEHOLDER", custom_user_input["title"].strip())
                             else:
                                 logging.debug(
                                     f'[CustomUserInputs] Title is not supported for this component {custom_user_input["key"]} in this tracker {tracker}. Skipping title placement')
                         # in cases where tracker supports title and user hasn't provided any title, we'll just remove the title placeholder
                         # note that the = is intentional. since title would be [spoiler=TITILE]. we need to remove =TITLE
                         # if title has already been repalced the below statement won't do anything
-                        input_wrapper_type = input_wrapper_type.replace(
-                            "=TITLE_PLACEHOLDER", "")
+                        input_wrapper_type = input_wrapper_type.replace("=TITLE_PLACEHOLDER", "")
 
                         if debug:  # just for debugging purposes
                             if "][" in input_wrapper_type:
-                                logging.debug(
-                                    f'[CustomUserInputs] ][ is present in the wrapper type')
+                                logging.debug('[CustomUserInputs] ][ is present in the wrapper type')
                             elif "><" in input_wrapper_type:
-                                logging.debug(
-                                    f'[CustomUserInputs] >< is present in the wrapper type')
+                                logging.debug('[CustomUserInputs] >< is present in the wrapper type')
                             else:
-                                logging.debug(
-                                    f'[CustomUserInputs] No special characters present in the wrapper type')
-                            logging.debug(
-                                f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
+                                logging.debug('[CustomUserInputs] No special characters present in the wrapper type')
+                            logging.debug(f'[CustomUserInputs] Wrapper type before formatting {input_wrapper_type}')
 
                         if "][" in input_wrapper_type:
-                            final_formatted_data = input_wrapper_type.replace(
-                                "][", f']{formatted_value}[')
+                            final_formatted_data = input_wrapper_type.replace("][", f']{formatted_value}[')
                         elif "><" in input_wrapper_type:
-                            final_formatted_data = input_wrapper_type.replace(
-                                "><", f'>{formatted_value}<')
+                            final_formatted_data = input_wrapper_type.replace("><", f'>{formatted_value}<')
                         else:
                             final_formatted_data = formatted_value
                         description.write(final_formatted_data)
-                        logging.debug(
-                            f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
+                        logging.debug(f'[CustomUserInputs] Formatted value being appended to torrent description {final_formatted_data}')
 
                     description.write(bbcode_line_break)
         else:  # else for "description_components" in config
-            logging.debug(
-                f"[Utils] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
+            logging.debug(f"[Utils] The tracker {tracker} doesn't support custom descriptions. Skipping custom description placements.")
 
 
 def add_bbcode_images_to_description(torrent_info, config, description_file_path, bbcode_line_break):
@@ -316,20 +278,16 @@ def write_uploader_signature_to_description(description_file_path, tracker, bbco
     with open(description_file_path, 'a') as description:
         # Finally append the entire thing with some shameless self promotion ;) and some line breaks
         if os.getenv("uploader_signature") is not None and len(os.getenv("uploader_signature")) > 0:
-            logging.debug(
-                '[Utils] User has provided custom uploader signature to use.')
+            logging.debug('[Utils] User has provided custom uploader signature to use.')
             # the user has provided a custom signature to be used. hence we'll use that.
             uploader_signature = os.getenv("uploader_signature")
-            logging.debug(
-                f'[Utils] User provided signature :: {uploader_signature}')
+            logging.debug(f'[Utils] User provided signature :: {uploader_signature}')
             if not uploader_signature.startswith("[center]") and not uploader_signature.endswith("[/center]"):
                 uploader_signature = f'[center]{uploader_signature}[/center]'
             uploader_signature = f'{uploader_signature}{bbcode_line_break}[center]Powered by GG-BOT Upload Assistant[/center]'
-            description.write(
-                f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
+            description.write(f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
         else:
-            logging.debug(
-                f'[Utils] User has not provided any custom uploader signature to use. Using default signature')
+            logging.debug('[Utils] User has not provided any custom uploader signature to use. Using default signature')
             description.write(
                 f'{bbcode_line_break}{bbcode_line_break}[center] Uploaded with [color=red]{"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"}[/color] using GG-BOT Upload Assistant[/center]')
 
@@ -340,12 +298,10 @@ def has_user_provided_type(user_type):
             logging.info(f"[Utils] Using user provided type {user_type[0]}")
             return True
         else:
-            logging.error(
-                f'[Utils] User has provided invalid media type as argument {user_type[0]}. Type will be detected dynamically!')
+            logging.error(f'[Utils] User has provided invalid media type as argument {user_type[0]}. Type will be detected dynamically!')
             return False
     else:
-        logging.info(
-            "[Utils] Type not provided by user. Type will be detected dynamically!")
+        logging.info("[Utils] Type not provided by user. Type will be detected dynamically!")
         return False
 
 
@@ -363,8 +319,7 @@ def delete_leftover_files(working_folder, file, resume=False):
         # this means that the directory exists
         # If they do already exist then we need to remove any old data from them
         if resume:
-            logging.info(
-                f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}/temp_upload/")
+            logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}/temp_upload/")
         else:
             files = glob.glob(f'{working_folder}/temp_upload/*')
             for f in files:
@@ -372,8 +327,7 @@ def delete_leftover_files(working_folder, file, resume=False):
                     os.remove(f)
                 else:
                     shutil.rmtree(f)
-            logging.info(
-                f"[Utils] Deleted the contents of the folder: {working_folder}/temp_upload/")
+            logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}/temp_upload/")
     else:
         os.mkdir(f"{working_folder}/temp_upload/")
 
@@ -565,28 +519,22 @@ def _get_client_translated_path(torrent_info):
     """
 
     if os.getenv('translation_needed', False) == True:
-        logging.info(
-            '[Utils] Translating paths... ("translation_needed" flag set to True in config.env) ')
+        logging.info('[Utils] Translating paths... ("translation_needed" flag set to True in config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
-        uploader_path = f"{os.getenv('uploader_path', '__MISCONFIGURED_PATH__')}/".replace(
-            '//', '/')
-        client_path = f"{os.getenv('client_path', '__MISCONFIGURED_PATH__')}/".replace(
-            '//', '/')
+        uploader_path = f"{os.getenv('uploader_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
+        client_path = f"{os.getenv('client_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
 
         if "__MISCONFIGURED_PATH__/" in [client_path, uploader_path]:
-            logging.error(
-                f"[Utils] User have enabled translation, but haven't provided the translation paths. Stopping cross-seeding...")
+            logging.error("[Utils] User have enabled translation, but haven't provided the translation paths. Stopping cross-seeding...")
             return False
 
         # log the changes
         logging.info(f'[Utils] Uploader path: {torrent_info["upload_media"]}')
-        logging.info(
-            f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_path, client_path)}')
+        logging.info(f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_path, client_path)}')
 
         # Now we replace the remote path with the system one
-        torrent_info["upload_media"] = torrent_info["upload_media"].replace(
-            uploader_path, client_path)
+        torrent_info["upload_media"] = torrent_info["upload_media"].replace(uploader_path, client_path)
     return f'{torrent_info["upload_media"]}/'.replace('//', '/')
 
 
@@ -597,29 +545,18 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
     # client is not or misconfigured ???
     # we perform cross-seeding only if tracker upload was successful
     if f"{tracker}_upload_status" in torrent_info and torrent_info[f"{tracker}_upload_status"] == True:
-        logging.info(
-            f"[Utils] Attempting to upload dot torrent to configured torrent client.")
-        logging.info(
-            f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
+        logging.info("[Utils] Attempting to upload dot torrent to configured torrent client.")
+        logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
         console.print("Starting Post Processing....")
         console.print(f"File Path: {torrent_info['upload_media']}")
         console.print(f"Client Save Path: {torrent_info['client_path']}")
 
         if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
-            logging.info(
-                f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
+            logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
             save_path = torrent_info["client_path"]
         else:
-            save_path = torrent_info["client_path"].replace(
-                f'/{torrent_info["raw_file_name"]}', '')
-        """
-        for file in glob.glob(f"{working_folder}/temp_upload/cf831e08aa0008bb6046e40bad7dca96d9ddf3e6ac3cfb6a5a465460ba2636de" + r"/*.torrent"):
-            if file.replace(f"{working_folder}/temp_upload/cf831e08aa0008bb6046e40bad7dca96d9ddf3e6ac3cfb6a5a465460ba2636de/","").startswith("TDB-"):
-                print(f"TorrentDB :: {file}")
-            else:
-                print(f"TheScenePlace :: {file}")
+            save_path = torrent_info["client_path"].replace(f'/{torrent_info["raw_file_name"]}', '')
 
-        """
         # getting the proper .torrent file for the provided tracker
         torrent_file = None
         for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):

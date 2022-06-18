@@ -48,7 +48,7 @@ from utilities.utils import *
 
 # processing modules
 from modules.cache import CacheFactory, CacheVendor
-from modules.torrent_client import Clients, TorrentClientFactory, TorrentClient
+from modules.torrent_client import Clients, TorrentClientFactory
 
 # Used for rich.traceback
 install()

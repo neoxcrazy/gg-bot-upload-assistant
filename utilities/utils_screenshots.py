@@ -96,22 +96,17 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                 ptp_img_upload[0]
             ]
         except AssertionError:
-            logging.error(
-                msg='[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
-            console.print(
-                f"\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
+            logging.error('[Screenshots] ptpimg uploaded an image but returned something unexpected (should be a list)')
+            console.print("\nUnexpected response from ptpimg upload (should be a list). No image link found\n", style='Red', highlight=False)
             return False
         except Exception:
-            logging.error(
-                msg='[Screenshots] ptpimg upload failed, double check the ptpimg API Key & try again.')
-            console.print(
-                "\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
+            logging.error('[Screenshots] ptpimg upload failed, double check the ptpimg API Key & try again.')
+            console.print("\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
 
     elif img_host in ('imgbb', 'freeimage', 'imgfi', 'snappie'):
         # Get the correct image host url/json key
-        available_image_host_urls = json.load(
-            open(f'{base_path}/parameters/image_host_urls.json'))
+        available_image_host_urls = json.load(open(f'{base_path}/parameters/image_host_urls.json'))
 
         parent_key = 'data' if img_host == 'imgbb' else 'image'
 
@@ -122,17 +117,14 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             data = {'key': img_host_api}
             if img_host in ('imgfi', 'snappie'):
                 files = {'source': open(image_path, 'rb')}
-                img_upload_request = requests.post(
-                    url=image_host_url, data=data, files=files)
+                img_upload_request = requests.post(url=image_host_url, data=data, files=files)
             else:
                 data['image'] = base64.b64encode(open(image_path, "rb").read())
-                img_upload_request = requests.post(
-                    url=image_host_url, data=data)
+                img_upload_request = requests.post(url=image_host_url, data=data)
 
             if img_upload_request.ok:
                 img_upload_response = img_upload_request.json()
-                logging.debug(
-                    f'[Screenshots] Image upload response: {img_upload_response}')
+                logging.debug(f'[Screenshots] Image upload response: {img_upload_response}')
                 # When you upload an image you get a few links back, you get 'medium', 'thumbnail', 'url', 'url_viewer'
                 try:
                     returnList = []
@@ -143,59 +135,44 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
                         img_type = 'medium'
                         # if medium sized image is present then we'll use that as the second and thrid entry in the list.
                         # second one with thumbnail size limit and thrid without
-                        returnList.append(
-                            f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
-                        returnList.append(
-                            f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                         if 'thumb' not in img_upload_response[parent_key]:
                             # thumbnail sized image is not present, hence we'll use medium sized image as fourth entry
-                            returnList.append(
-                                f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
 
                     if 'thumb' in img_upload_response[parent_key]:
                         img_type = 'thumb'
                         if len(returnList) == 3:
                             # if medium sized image was present, then the size of the list would be 3
                             # hence we only need to add the 4th one as the thumbnail sized image without any size limits
-                            returnList.append(
-                                f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
                         else:
                             # no medium image type is present. hence we'll use thumb for those as well
                             # second will be the thumbnail sized image with size limit
                             # third and fourth will be thumbnail sized image wihtout any limits
-                            returnList.append(
-                                f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
-                            returnList.append(
-                                f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
-                            returnList.append(
-                                f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                            returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
 
                     if len(returnList) != 4:
                         # neither of medium nor thumbnail sized image was present, so we'll just add the full image url as 2 3 and 4th entry
-                        returnList.append(
-                            f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
-                        returnList.append(
-                            f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
-                        returnList.append(
-                            f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img={thumb_size}]{img_upload_response[parent_key][img_type]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
+                        returnList.append(f'[url={img_upload_response[parent_key]["url_viewer"]}][img]{img_upload_response[parent_key]["url"]}[/img][/url]')
 
                     returnList.append(img_upload_response[parent_key]["url"])
                     return returnList
                 except KeyError as key_error:
-                    logging.error(
-                        f'[Screenshots] {img_host} json KeyError: {key_error}')
+                    logging.error(f'[Screenshots] {img_host} json KeyError: {key_error}')
                     return False
             else:
-                logging.error(
-                    f'[Screenshots] {img_host} upload failed. JSON Response: {img_upload_request.json()}')
-                console.print(
-                    f"{img_host} upload failed. Status code: [bold]{img_upload_request.status_code}[/bold]", style='red3', highlight=False)
+                logging.error(f'[Screenshots] {img_host} upload failed. JSON Response: {img_upload_request.json()}')
+                console.print(f"{img_host} upload failed. Status code: [bold]{img_upload_request.status_code}[/bold]", style='red3', highlight=False)
                 return False
         except requests.exceptions.RequestException:
-            logging.exception(
-                f"[Screenshots] Failed to upload {image_path} to {img_host}")
-            console.print(
-                f"upload to [bold]{img_host}[/bold] has failed!", style="Red")
+            logging.exception(f"[Screenshots] Failed to upload {image_path} to {img_host}")
+            console.print(f"upload to [bold]{img_host}[/bold] has failed!", style="Red")
             return False
 
     # Instead of coding our own solution we'll use the awesome project https://github.com/plotski/pyimgbox to upload to imgbox
@@ -282,24 +259,19 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             enabled_img_host_num_loop += 1
         # now check if the loop ^^ found any enabled image hosts
         if not bool(enabled_img_host_num_loop):
-            logging.error(
-                '[Screenshots] All image-hosts are disabled/not set (try setting "img_host_1=imgbox" in config.env)')
-            console.print(
-                f'\nNo image-hosts are enabled, maybe try setting [dodger_blue2][bold]img_host_1=imgbox[/bold][/dodger_blue2] in [dodger_blue2]config.env[/dodger_blue2]\n', style='bold red')
+            logging.error('[Screenshots] All image-hosts are disabled/not set (try setting "img_host_1=imgbox" in config.env)')
+            console.print('\nNo image-hosts are enabled, maybe try setting [dodger_blue2][bold]img_host_1=imgbox[/bold][/dodger_blue2] in [dodger_blue2]config.env[/dodger_blue2]\n', style='bold red')
 
         # -------------------- verify an API key is set for 'enabled_img_hosts' -------------------- #
         for img_host_api_check in enabled_img_hosts_list:
             # Check if an API key is set for the image host
             if not bool(os.getenv(f'{img_host_api_check}_api_key')):
-                logging.error(
-                    f"Can't upload to {img_host_api_check} without an API key")
-                console.print(
-                    f"\nCan't upload to [bold]{img_host_api_check}[/bold] without an API key\n", style='red3', highlight=False)
+                logging.error(f"Can't upload to {img_host_api_check} without an API key")
+                console.print(f"\nCan't upload to [bold]{img_host_api_check}[/bold] without an API key\n", style='red3', highlight=False)
                 # If the api key is missing then remove the img_host from the 'enabled_img_hosts_list' list
                 enabled_img_hosts_list.remove(img_host_api_check)
         # log the leftover enabled image hosts
-        logging.info(
-            f"[Screenshots] Image host order we will try & upload to: {enabled_img_hosts_list}")
+        logging.info(f"[Screenshots] Image host order we will try & upload to: {enabled_img_hosts_list}")
 
     # -------------------------- Check if any img_hosts are still in the 'enabled_img_hosts_list' list -------------------------- #
     # if no image_hosts are left then we show the user an error that we will continue the upload with screenshots & return back to auto_upload.py

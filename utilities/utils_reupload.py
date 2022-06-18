@@ -193,14 +193,13 @@ def reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_da
 
 
 def reupload_get_processable_torrents(torrent_client, cache):
-    logging.info(f'[Main] Listing latest torrents status from client')
+    logging.info('[Main] Listing latest torrents status from client')
     # listing all the torrents that needs to be re-uploaded
     torrents = torrent_client.list_torrents()
 
     # Attributes present in the torrent list
     # "category", "completed", "content_path", "hash", "name", "save_path", "size", "tracker"
-    logging.info(
-        f'[Main] Total number of torrents that needs to be reuploaded are {len(torrents)}')
+    logging.info(f'[Main] Total number of torrents that needs to be reuploaded are {len(torrents)}')
 
     # listing out only the completed torrents and eliminating unprocessable torrents based on cached data
     logging.debug(f'[Main] Torrent data from client: {pformat(torrents)}')

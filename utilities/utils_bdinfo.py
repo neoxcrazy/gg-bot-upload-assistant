@@ -29,7 +29,7 @@ def bdinfo_validate_presence_of_bdmv_stream(upload_media):
 
 
 def bdinfo_get_video_codec_from_bdinfo(bdinfo):
-    """ Method to get the video_codec information from the bdinfo.
+    """Method to get the video_codec information from the bdinfo.
 
         The method also checks for the presence of DV layer and any HDR formats.
         The return value is (DV, HDR, VIDEO_CODEC)

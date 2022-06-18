@@ -24,21 +24,17 @@ def _get_headers(technical_jargons, search_site, tracker_api):
         return None
 
     if technical_jargons["authentication_mode"] == "BEARER":
-        logging.info(
-            f"[DupeCheck] Using Bearer Token authentication method for tracker {search_site}")
+        logging.info(f"[DupeCheck] Using Bearer Token authentication method for tracker {search_site}")
         return {'Authorization': f'Bearer {tracker_api}'}
 
     if technical_jargons["authentication_mode"] == "HEADER":
         if len(technical_jargons["header_key"]) > 0:
-            logging.info(
-                f"[DupeCheck] Using Header based authentication method for tracker {search_site}")
+            logging.info(f"[DupeCheck] Using Header based authentication method for tracker {search_site}")
             return {technical_jargons["header_key"]: tracker_api}
         else:
-            logging.fatal(
-                f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {search_site}.')
+            logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {search_site}.')
     elif technical_jargons["authentication_mode"] == "COOKIE":
-        logging.fatal(
-            f'[DupeCheck] Cookie based authentication is not supported yet.')
+        logging.fatal('[DupeCheck] Cookie based authentication is not supported yet.')
 
     return None
 
@@ -640,22 +636,17 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         is_dupes_present = True
 
     if max_dupe_percentage_exceeded:
-        console.print(
-            f"\n\n[bold red on white] :warning: Detected possible dupe! :warning: [/bold red on white]")
+        console.print("\n\n[bold red on white] :warning: Detected possible dupe! :warning: [/bold red on white]")
         console.print(possible_dupes_table)
 
         if single_episode_upload_with_season_pack_available:
             # if this is an interactive upload then we can prompt the user & let them choose if they want to cancel or continue the upload
-            logging.error(
-                msg="[DupeCheck] Almost all trackers don't allow individual episodes to be uploaded after season pack is released")
-            console.print(
-                f"\n[bold red on white] :warning: Need user input! :warning: [/bold red on white]")
+            logging.error("[DupeCheck] Almost all trackers don't allow individual episodes to be uploaded after season pack is released")
+            console.print("\n[bold red on white] :warning: Need user input! :warning: [/bold red on white]")
             console.print(
                 f"You're trying to upload an [bold red]Individual Episode[/bold red] [bold green]({torrent_info['title']} {torrent_info['s00e00']})[/bold green] to [bold]{search_site}[/bold]",  highlight=False)
-            console.print(
-                f"[bold red]Season Packs[/bold red] are already available: [bold green]({existing_release_types_key})[/bold green]", highlight=False)
-            console.print(
-                "Most sites [bold red]don't allow[/bold red] individual episode uploads when the season pack is available")
+            console.print(f"[bold red]Season Packs[/bold red] are already available: [bold green]({existing_release_types_key})[/bold green]", highlight=False)
+            console.print("Most sites [bold red]don't allow[/bold red] individual episode uploads when the season pack is available")
             console.print(
                 '---------------------------------------------------------')
             # If auto_mode is enabled then return true in all cases

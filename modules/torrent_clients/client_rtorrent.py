@@ -146,7 +146,7 @@ class Rutorrent:
     def upload_torrent(self, torrent, save_path, use_auto_torrent_management, is_skip_checking, category=None):
         category = category if category is not None else self.seed_label
         logging.info(f"[Rutorrent] Uploading torrent with category {category}")
-        response = self.__call_server(
+        self.__call_server(
             f'{self.base_url}{self.__upload_torrent_path}',
             data={ "fast_resume": "1" if is_skip_checking else "0", "label": category, "dir_edit": save_path},
             files={"torrent_file": open(torrent, "rb")}
