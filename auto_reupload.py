@@ -1418,7 +1418,7 @@ def reupload_job():
         if torrent_info["tmdb"] == "0" and torrent_info["imdb"] == "0" and torrent_info["tvmaze"] == "0":
             # here we couldn't select a tmdb id automatically / no results from tmdb. Hence we mark this as a special case and stop the upload of the torrent
             # updating the voerall status of the torrent
-            reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.TMDB_IDENTIFICATION_FAILED, False, cache)
+            reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.TMDB_IDENTIFICATION_FAILED, False, cache)
             reupload_utilities.update_field(torrent["hash"], "possible_matches", possible_matches, True, cache)
             continue
 
@@ -1456,8 +1456,8 @@ def reupload_job():
             if dupe_check_response:
                 logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
                 logging.info("[Main] Marking this torrent as dupe check failed in cache")
-                reupload_utilities.update_torrent_status(torrent["hash"], TorrentStatus.DUPE_CHECK_FAILED, cache)
-                torrent_client.update_torrent_category(info_hash=torrent["hash"], category_name=TorrentStatus.DUPE_CHECK_FAILED)
+                reupload_utilities.update_torrent_status(torrent["hash"], reupload_utilities.TorrentStatus.DUPE_CHECK_FAILED, cache)
+                torrent_client.update_torrent_category(info_hash=torrent["hash"], category_name=reupload_utilities.TorrentStatus.DUPE_CHECK_FAILED)
                 console.print("Dupe check failed. skipping this torrent upload..\n",style="bold red", highlight=False)
                 continue
 
@@ -1608,12 +1608,12 @@ def reupload_job():
                 # inserting the torernt->tracker data to job_repository
                 reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
 
-                if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
+                if torrent_status == reupload_utilities.TorrentStatus.PENDING or torrent_status == reupload_utilities.TorrentStatus.READY_FOR_PROCESSING:
                     # updating the voerall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.SUCCESS, False, cache)
-                elif torrent_status == TorrentStatus.FAILED:
+                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.SUCCESS, False, cache)
+                elif torrent_status == reupload_utilities.TorrentStatus.FAILED:
                     # updating the voerall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
                 else:
                     pass  # here the status could be SUCCESS or PARTIALLY_SUCCESSFUL, We don't need to make any changes to this status
 
@@ -1652,19 +1652,19 @@ def reupload_job():
                 # inserting the torernt->tracker data to job_repository
                 reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
 
-                if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
+                if torrent_status == reupload_utilities.TorrentStatus.PENDING or torrent_status == reupload_utilities.TorrentStatus.READY_FOR_PROCESSING:
                     # updating the overall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.FAILED, False, cache)
-                elif torrent_status == TorrentStatus.SUCCESS:
+                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.FAILED, False, cache)
+                elif torrent_status == reupload_utilities.TorrentStatus.SUCCESS:
                     # updating the overall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
                 else:
                     pass  # here status could be FAILED or PARTIALLY_SUCCESSFUL, we don't need to change this status
 
         # -------- Post Processing --------
         # TODO do proper post processing steps
         torrent_client.update_torrent_category(
-            info_hash=torrent["hash"], category_name=None if is_non_dupes_present else TorrentStatus.DUPE_CHECK_FAILED)
+            info_hash=torrent["hash"], category_name=None if is_non_dupes_present else reupload_utilities.TorrentStatus.DUPE_CHECK_FAILED)
 # -------------- END of reupload_job --------------
 
 # now that we have verified that the client and cache connections have been created successfully
