@@ -33,12 +33,12 @@ from utilities.utils_user_input import collect_custom_messages_from_user
 from utilities.utils_screenshots import take_upload_screens
 # Method that will search for dupes in trackers.
 import utilities.utils_miscellaneous as miscellaneous_utilities
+import utilities.utils_translation as translation_utilities
 import utilities.utils_metadata as metadata_utilities
-import utilities.utils_dupes as dupe_utilities
 import utilities.utils_bdinfo as bdinfo_utilities
 import utilities.utils_basic as basic_utilities
-from utilities.utils_translation import *
-from utilities.utils import *
+import utilities.utils_dupes as dupe_utilities
+import utilities.utils as utils
 
 # Used for rich.traceback
 install()
@@ -56,29 +56,25 @@ torrent_info = {}
 
 # Debug logs for the upload processing
 # Logger running in "w" : write mode
-logging.basicConfig(filename='{}/upload_script.log'.format(working_folder), filemode="w",
-                    level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+logging.basicConfig(filename='{}/upload_script.log'.format(working_folder), filemode="w", level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 # Load the .env file that stores info like the tracker/image host API Keys & other info needed to upload
 load_dotenv(f'{working_folder}/config.env')
 # Getting the keys present in the config.env.sample
 # These keys are then used to compare with the env variable keys provided during runtime.
 # Presently we just displays any missing keys, in the future do something more useful with this information
-validate_env_file(f'{working_folder}/samples/assistant/config.env')
+utils.validate_env_file(f'{working_folder}/samples/assistant/config.env')
 
 # Used to correctly select json file
 # the value in this dictionay must correspond to the file name of the site template
-acronym_to_tracker = json.load(
-    open(f'{working_folder}/parameters/tracker/acronyms.json'))
+acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
 
 # the `prepare_tracker_api_keys_dict` prepares the api_keys_dict and also does mandatory property validations
-api_keys_dict = prepare_and_validate_tracker_api_keys_dict(
-    f'{working_folder}/parameters/tracker/api_keys.json')
+api_keys_dict = utils.prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
 
 # Import 'auto_mode' status
 if str(os.getenv('auto_mode')).lower() not in ['true', 'false']:
-    logging.error(
-        '[Main] `auto_mode` is not set to `true/false` in `config.env`. Defaulting to `false`')
+    logging.error('[Main] `auto_mode` is not set to `true/false` in `config.env`. Defaulting to `false`')
 auto_mode = str(os.getenv('auto_mode', 'false')).lower()
 
 # import discord webhook url (if exists)
@@ -228,7 +224,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_want_torrent_info = ['release_group', 'episode_title']
     keys_we_need_torrent_info = ['screen_size', 'source', 'audio_channels']
 
-    if has_user_provided_type(args.type):
+    if utils.has_user_provided_type(args.type):
         torrent_info["type"] = torrent_info["type"] = 'episode' if args.type[0] == 'tv' else 'movie'
     else:
         keys_we_need_torrent_info.append('type')
@@ -878,12 +874,15 @@ def choose_right_tracker_keys():
                         return "STOP"
 
                 if translation_key in ('source', 'resolution', 'resolution_id'):
-                    return_value = identify_resolution_source(
-                        target_val=translation_key, config=config, relevant_torrent_info_values=relevant_torrent_info_values, torrent_info=torrent_info)
+                    return_value = translation_utilities.identify_resolution_source(
+                        target_val=translation_key,
+                        config=config,
+                        relevant_torrent_info_values=relevant_torrent_info_values,
+                        torrent_info=torrent_info
+                    )
                     if return_value == "STOP":
                         return return_value
-                    tracker_settings[config["translation"]
-                                     [translation_key]] = return_value
+                    tracker_settings[config["translation"][translation_key]] = return_value
 
                 if translation_key == "hybrid_type" and config["hybrid_type"] is not None and bool(config["hybrid_type"]["required"]) == True:
                     # to do hybrid translation we need values for source, type and resolution to be resolved before hand.
@@ -895,14 +894,17 @@ def choose_right_tracker_keys():
                     logging.info(
                         f"[CategoryMapping] Going to perform hybrid mapping for :: {config['translation'][translation_key]}")
                     if config["translation"]["source"] in tracker_settings and config["translation"]["resolution"] in tracker_settings and config["translation"]["type"] in tracker_settings:
-                        tracker_settings[config["translation"][translation_key]] = get_hybrid_type(target_val=translation_key,
-                                                                                                   tracker_settings=tracker_settings, config=config, exit_program=True, torrent_info=torrent_info)
+                        tracker_settings[config["translation"][translation_key]] = translation_utilities.get_hybrid_type(
+                            target_val=translation_key,
+                            tracker_settings=tracker_settings,
+                            config=config,
+                            exit_program=True,
+                            torrent_info=torrent_info
+                        )
                         is_hybrid_translation_needed = False
                     else:
-                        logging.error(
-                            "[CategoryMapping] Cannot do hybrid mapping now as `source` or `resolution` or `type` is not available now")
-                        logging.info(
-                            "[CategoryMapping] Noting the need for hybrid mapping. Hybrid mapping will be done once all 3 above keys have been resolved.")
+                        logging.error("[CategoryMapping] Cannot do hybrid mapping now as `source` or `resolution` or `type` is not available now")
+                        logging.info("[CategoryMapping] Noting the need for hybrid mapping. Hybrid mapping will be done once all 3 above keys have been resolved.")
                         is_hybrid_translation_needed = True
         # ------------ required_items end ------------
 
@@ -911,13 +913,11 @@ def choose_right_tracker_keys():
         # BLU/ACM only have 'nfo_file' as an optional item which we take care of later
         for optional_key, optional_value in optional_items.items():
             if str(optional_key) == str(translation_value):
-                logging.debug(
-                    f"[Main] Key {translation_key} mapped to optional item {optional_key} with value type as {optional_value}")
+                logging.debug(f"[Main] Key {translation_key} mapped to optional item {optional_key} with value type as {optional_value}")
                 # -!-!- Editions -!-!- #
                 if optional_key == 'edition' and 'edition' in torrent_info:
                     # First we remove any 'fluff' so that we can try to match the edition to the list BHD has, if not we just upload it as a custom edition
-                    local_edition_formatted = str(torrent_info["edition"]).lower().replace(
-                        "edition", "").replace("cut", "").replace("'", "").replace(" ", "")
+                    local_edition_formatted = str(torrent_info["edition"]).lower().replace("edition", "").replace("cut", "").replace("'", "").replace(" ", "")
                     # Remove extra 's'
                     if local_edition_formatted.endswith('s'):
                         local_edition_formatted = local_edition_formatted[:-1]
@@ -972,60 +972,53 @@ def choose_right_tracker_keys():
                 # TODO make changes to save bdinfo to bdinfo and move the existing bdinfo metadata to someother key
                 # for full disks the bdInfo is saved under the same key as mediainfo
                 elif translation_key == "mediainfo":
-                    logging.debug(
-                        f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    logging.debug(f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
-                        logging.debug(
-                            "[CategoryMapping] Skipping mediainfo for tracker settings since upload is FullDisk.")
+                        logging.debug("[CategoryMapping] Skipping mediainfo for tracker settings since upload is FullDisk.")
                     else:
-                        logging.debug(
-                            f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
-                        tracker_settings[optional_key] = torrent_info.get(
-                            "mediainfo", "0")
+                        logging.debug(f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
                         continue
                 elif translation_key == "bdinfo":
-                    logging.debug(
-                        f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
+                    logging.debug(f"[CategoryMapping] Identified {optional_key} for tracker with {'FullDisk' if args.disc else 'File/Folder'} upload")
                     if args.disc:
-                        logging.debug(
-                            f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
-                        tracker_settings[optional_key] = torrent_info.get(
-                            "mediainfo", "0")
+                        logging.debug(f"[CategoryMapping] Setting mediainfo from torrent_info to tracker_settings for optional_key {optional_key}")
+                        tracker_settings[optional_key] = torrent_info.get("mediainfo", "0")
                         continue
                     else:
-                        logging.debug(
-                            "[CategoryMapping] Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
+                        logging.debug("[CategoryMapping] Skipping bdinfo for tracker settings since upload is NOT FullDisk.")
                 else:
-                    tracker_settings[optional_key] = torrent_info.get(
-                        translation_key, "")
+                    tracker_settings[optional_key] = torrent_info.get(translation_key, "")
         # ------------ optional_items end ------------
 
     # Adding default values from template to tracker settings
     for default_key, default_value in config["Default"].items():
-        logging.debug(
-            f'[CategoryMapping] Adding default key `{default_key}` with value `{default_value}` to tracker settings')
+        logging.debug(f'[CategoryMapping] Adding default key `{default_key}` with value `{default_value}` to tracker settings')
         tracker_settings[default_key] = default_value
 
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
-        tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type(target_val="hybrid_type",
-                                                                                 tracker_settings=tracker_settings, config=config, exit_program=False, torrent_info=torrent_info)
+        tracker_settings[config["translation"]["hybrid_type"]] = translation_utilities.get_hybrid_type(
+            target_val="hybrid_type",
+            tracker_settings=tracker_settings,
+            config=config,
+            exit_program=False,
+            torrent_info=torrent_info
+        )
 
 
 # ---------------------------------------------------------------------- #
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
 def upload_to_site(upload_to, tracker_api_key):
-    logging.info(
-        "[TrackerUpload] Attempting to upload to: {}".format(upload_to))
+    logging.info("[TrackerUpload] Attempting to upload to: {}".format(upload_to))
     url = str(config["upload_form"]).format(api_key=tracker_api_key)
     url_masked = str(config["upload_form"]).format(api_key="REDACTED")
     payload = {}
     files = []
     display_files = {}
 
-    logging.debug(
-        "::::::::::::::::::::::::::::: Tracker settings that will be used for creating payload :::::::::::::::::::::::::::::")
+    logging.debug("::::::::::::::::::::::::::::: Tracker settings that will be used for creating payload :::::::::::::::::::::::::::::")
     logging.debug(f'\n{pformat(tracker_settings)}')
 
     # multiple authentication modes
@@ -1034,25 +1027,19 @@ def upload_to_site(upload_to, tracker_api_key):
         pass  # headers = None
     elif config["technical_jargons"]["authentication_mode"] == "API_KEY_PAYLOAD":
         # api key needs to be added in payload. the key in payload for api key can be obtained from `auth_payload_key`
-        payload[config["technical_jargons"]
-                ["auth_payload_key"]] = tracker_api_key
+        payload[config["technical_jargons"]["auth_payload_key"]] = tracker_api_key
     elif config["technical_jargons"]["authentication_mode"] == "BEARER":
         headers = {'Authorization': f'Bearer {tracker_api_key}'}
-        logging.info(
-            f"[TrackerUpload] Using Bearer Token authentication method for tracker {upload_to}")
+        logging.info(f"[TrackerUpload] Using Bearer Token authentication method for tracker {upload_to}")
     elif config["technical_jargons"]["authentication_mode"] == "HEADER":
         if len(config["technical_jargons"]["header_key"]) > 0:
-            headers = {config["technical_jargons"]
-                       ["header_key"]: tracker_api_key}
-            logging.info(
-                f"[DupeCheck] Using Header based authentication method for tracker {upload_to}")
+            headers = {config["technical_jargons"]["header_key"]: tracker_api_key}
+            logging.info(f"[DupeCheck] Using Header based authentication method for tracker {upload_to}")
         else:
-            logging.fatal(
-                f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {upload_to}.')
+            logging.fatal(f'[DupeCheck] Header based authentication cannot be done without `header_key` for tracker {upload_to}.')
     # TODO add support for cookie based authentication
     elif config["technical_jargons"]["authentication_mode"] == "COOKIE":
-        logging.fatal(
-            '[TrackerUpload] Cookie based authentication is not supported as for now.')
+        logging.fatal('[TrackerUpload] Cookie based authentication is not supported as for now.')
 
     for key, val in tracker_settings.items():
         # First check to see if its a required or optional key
@@ -1310,16 +1297,14 @@ script_start_time = time.perf_counter()
 starting_new_upload = f" {'-' * 24} Starting new upload {'-' * 24} "
 
 console.line(count=2)
-display_banner("  Upload  Assistant  ")
+utils.display_banner("  Upload  Assistant  ")
 console.line(count=1)
 
 logging.info(starting_new_upload)
 
 if args.tripleup and args.doubleup:
-    logging.error(
-        "[Main] User tried to pass tripleup and doubleup together. Stopping torrent upload process")
-    console.print(
-        "You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
+    logging.error("[Main] User tried to pass tripleup and doubleup together. Stopping torrent upload process")
+    console.print("You can not use the arg [deep_sky_blue1]-doubleup[/deep_sky_blue1] and [deep_sky_blue1]-tripleup[/deep_sky_blue1] together. Only one can be used at a time\n", style='bright_red')
     console.print("Exiting...\n", style='bright_red bold')
     sys.exit()
 
@@ -1375,7 +1360,7 @@ if args.disc and os.getenv("IS_CONTAINERIZED") == "true" and not os.getenv("IS_F
     sys.exit(console.print("\nQuiting upload process since Full Disk uploads are not allowed in this image.\n",
              style="bold red", highlight=False))
 
-torrent_client = get_torrent_client_if_needed()
+torrent_client = utils.get_torrent_client_if_needed()
 
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path
@@ -1387,8 +1372,7 @@ if discord_url:
 
 # Verify we support the tracker specified
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
-upload_to_trackers = get_and_validate_configured_trackers(
-    args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
+upload_to_trackers = utils.get_and_validate_configured_trackers(args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
 
 # Show the user what sites we will upload to
 console.line(count=2)
@@ -1479,8 +1463,7 @@ for file in upload_queue:
     # Remove all old temp_files & data from the previous upload
     torrent_info.clear()
     # the working_folder will container a hash value with succeeding /
-    torrent_info["working_folder"] = delete_leftover_files(
-        working_folder, resume=args.resume, file=file)
+    torrent_info["working_folder"] = utils.delete_leftover_files(working_folder, resume=args.resume, file=file)
 
     # TODO these are some hardcoded values to be handled at a later point in time
     # setting this to 0 is fine. But need to add support for these eventually.
@@ -1490,13 +1473,13 @@ for file in upload_queue:
     # File we're uploading
     console.print(f'Uploading File/Folder: [bold][blue]{file}[/blue][/bold]')
 
-    rar_file_validation_response = check_for_dir_and_extract_rars(file)
+    rar_file_validation_response = utils.check_for_dir_and_extract_rars(file)
     if not rar_file_validation_response[0]:
         # Skip this entire 'file upload' & move onto the next (if exists)
         continue
     torrent_info["upload_media"] = rar_file_validation_response[1]
     # Performing guessit on the rawfile name and reusing the result instead of calling guessit over and over again
-    guess_it_result = perform_guessit_on_filename(torrent_info["upload_media"])
+    guess_it_result = utils.perform_guessit_on_filename(torrent_info["upload_media"])
 
     # -------- Basic info --------
     # So now we can start collecting info about the file/folder that was supplied to us (Step 1)
@@ -1711,7 +1694,7 @@ for file in upload_queue:
         bbcode_line_break = config['bbcode_line_break']
 
         # -------- Add custom descriptions to description.txt --------
-        write_cutsom_user_inputs_to_description(
+        utils.write_cutsom_user_inputs_to_description(
             torrent_info=torrent_info,
             description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
             config=config,
@@ -1721,7 +1704,7 @@ for file in upload_queue:
         )
 
         # -------- Add bbcode images to description.txt --------
-        add_bbcode_images_to_description(
+        utils.add_bbcode_images_to_description(
             torrent_info=torrent_info,
             config=config,
             description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
@@ -1729,7 +1712,7 @@ for file in upload_queue:
         )
 
         # -------- Add custom uploader signature to description.txt --------
-        write_uploader_signature_to_description(
+        utils.write_uploader_signature_to_description(
             description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
             tracker=tracker,
             bbcode_line_break=bbcode_line_break
@@ -1778,7 +1761,7 @@ for file in upload_queue:
         else:
             torrent_media = torrent_info["upload_media"]
 
-        generate_dot_torrent(
+        utils.generate_dot_torrent(
             media=torrent_media,
             announce=list(
                 os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
@@ -1825,20 +1808,17 @@ for file in upload_queue:
     for tracker in upload_to_trackers:
         if torrent_info["post_processing_complete"] == True:
             break  # this flag is used for watch folder post processing. we need to move only once
-        perform_post_processing(
-            torrent_info, torrent_client, working_folder, tracker)
+        utils.perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
 
     # Torrent Info
     console.print("\n\n")
-    torrent_info_table = Table(
-        show_header=True, title='[bold][deep_pink1]Extracted Torrent Metadata[/bold][/deep_pink1]', header_style="bold cyan")
+    torrent_info_table = Table(show_header=True, title='[bold][deep_pink1]Extracted Torrent Metadata[/bold][/deep_pink1]', header_style="bold cyan")
     torrent_info_table.add_column("Key", justify="left")
     torrent_info_table.add_column("Value", justify="left")
 
     for torrent_info_key, torrent_info_value in sorted(torrent_info.items()):
         # Add torrent_info data to each row
-        torrent_info_table.add_row(
-            "[purple][bold]{}[/bold][/purple]".format(torrent_info_key), str(torrent_info_value))
+        torrent_info_table.add_row("[purple][bold]{}[/bold][/purple]".format(torrent_info_key), str(torrent_info_value))
 
     console.print(torrent_info_table, justify="center")
 
