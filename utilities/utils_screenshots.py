@@ -72,7 +72,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             ]
         except Exception:
             logging.error(
-                msg='[Screenshots] imgur upload failed, double check the ptpimg API Key & try again.')
+                msg='[Screenshots] imgur upload failed, double check the imgur API Key & try again.')
             console.print(
                 "\imgur upload failed. double check the [bold]imgur_client_id[/bold] and in [bold]imgur_api_key[/bold] [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
@@ -105,7 +105,7 @@ def _upload_screens(img_host, img_host_api, image_path, torrent_title, base_path
             logging.error(
                 msg='[Screenshots] ptpimg upload failed, double check the ptpimg API Key & try again.')
             console.print(
-                f"\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
+                "\nptpimg upload failed. double check the [bold]ptpimg_api_key[/bold] in [bold]config.env[/bold]\n", style='Red', highlight=False)
             return False
 
     elif img_host in ('imgbb', 'freeimage', 'imgfi', 'snappie'):
