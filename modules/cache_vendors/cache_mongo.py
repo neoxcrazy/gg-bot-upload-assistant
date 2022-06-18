@@ -12,9 +12,7 @@ class Mongo:
     database = None
 
     def __init__(self):
-        """
-            Method to initialize the connection to a redis database.
-        """
+        """ Method to initialize the connection to a redis database. """
         # Provide the mongodb atlas url to connect python to mongodb using pymongo
         if os.getenv('cache_username') is not None and len(os.getenv('cache_username')) > 0:
             CONNECTION_STRING = f"mongodb://{os.getenv('cache_username')}:{os.getenv('cache_password')}@{os.getenv('cache_host')}:{os.getenv('cache_port')}/{os.getenv('cache_database')}"
