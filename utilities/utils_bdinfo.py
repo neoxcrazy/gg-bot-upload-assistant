@@ -200,7 +200,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
 def bdinfo_generate_and_parse_bdinfo(bdinfo_script, torrent_info, debug):
     """
         Method generates the BDInfo for the full disk and writes to the mediainfo.txt file.
-        Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method 
+        Once it has been generated the generated BDInfo is parsed using the `parse_bdinfo` method
         and result is saved in `torrent_info` as `bdinfo`
 
         It also sets the `mediainfo` key in torrent_info
@@ -315,7 +315,7 @@ def parse_bdinfo(bdinfo_location):
                 bdinfo["video"].append(video_metadata)
             elif line.startswith("Audio:"):
                 """
-                    audio_components: examples 
+                    audio_components: examples
                     English / Dolby TrueHD/Atmos Audio / 7.1 / 48 kHz /  4291 kbps / 24-bit (AC3 Embedded: 5.1 / 48 kHz /   640 kbps / DN -31dB)
                     English / DTS-HD Master Audio / 7.1 / 48 kHz /  5002 kbps / 24-bit (DTS Core: 5.1 / 48 kHz /  1509 kbps / 24-bit)
                     English / Dolby Digital Audio / 5.1 / 48 kHz /   448 kbps / DN -31dB

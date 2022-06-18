@@ -195,7 +195,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 ## Bare Metal / VM:
 1. Clone this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
 > It is recommended to checkout a tag and use it instead of using as the master branch, as there is a possibility for master branch to have bug / error / conflicts during merges.<br>
-> Checkout a tag using the command `git checkout tags/<TAG>` 
+> Checkout a tag using the command `git checkout tags/<TAG>`
 2. Checkout a release tag/version that you wish to use `git checkout tags/2.0`
 2. Install necessary packages ```pip install -r requirements.txt```
 3. Grand execute permission for user. `chmod u+x auto_upload.py`
@@ -213,7 +213,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 <br>
 
 ## Docker (recommended):
-1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`] 
+1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`]
 2. Download `samples/assistant/config.env` to the newly created folder (`GGBotUploader`)
 3. Fill out the required values in `config.env`
 5. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
@@ -225,13 +225,13 @@ docker run --rm -it \
 ```
 > See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags
 
-<br /> 
+<br />
 
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
 3. When providing multiple database (TMDB, IMDB, TVMAZE ) ids via optional arguments, uploader uses the ids with priority **`IMDB > TMDB > TVMAZE`**
-4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`** 
+4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`**
 
 <br>
 
@@ -293,7 +293,7 @@ docker run --rm -it \
 ## **2.0.7**
     Removed Trackers
         * Telly - ShutDown
-    
+
     New Features
         * Ability to resume / reuse assets from previous uploads
         * Improved watch folder movement during post-processing
@@ -302,7 +302,7 @@ docker run --rm -it \
             * Qbittorrent
             * Rutorrent
         * Migrated torrent client feature from v3.0 alpha version
-    
+
     Underhood Changes
         * Refactored dupe check logic
         * Refactored screenshots and image upload logic
@@ -310,7 +310,7 @@ docker run --rm -it \
         * Add unit tests to the cicd pipeline
         * Refactored cicd for better performance and faster builds
         * Introded pre-built base images for cicd improvements
-        
+
     Bug Fixes
         * Issue#10: Prevent unnecessary folders from being added in movie uploads
         * Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
@@ -324,14 +324,14 @@ docker run --rm -it \
     New Trackers
         * Anthelion
         * ReelFlix
-    
+
     New Features
         * Refactoring code in anticipation to v3.0 release
         * Improved dupe check with HDR Support
         * Improved dupe check with support for REPACKS and PROPER
         * Dynamic piece size calculation for mktorrent
-        * Implemented a Skip Screenshots feature 
-        
+        * Implemented a Skip Screenshots feature
+
     Bug Fixes
         * Issue#25: Unhashable list error when uploading tv shows
         * Issue#26: NBL dupe check issue
@@ -349,7 +349,7 @@ docker run --rm -it \
         * Support for default trackers
         * Ability to upload to all available trackers (USE WITH CAUTION)
         * Improved TMDB search results filtering
-    
+
     Bug Fixes
         * Issue#19: Multiple episode naming bug fixed
         * Issue#20: Uploader crash when handling complete packs from tracker
@@ -466,7 +466,7 @@ docker run --rm -it \
 
 ##  **1.1**
     New Trackers
-        * DesiTorrents 
+        * DesiTorrents
     New Features
         * No spoiler screenshot feature
         * CICD pipeline optimizations

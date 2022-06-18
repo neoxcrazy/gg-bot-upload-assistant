@@ -1084,7 +1084,7 @@ def identify_miscellaneous_details(guess_it_result):
         This function is dedicated to analyzing the filename and extracting snippets such as "repack, "DV", "AMZN", etc
         Depending on what the "source" is we might need to search for a "web source" (amzn, nf, hulu, etc)
 
-        We also search for "editions" here, this info is typically made known in the filename so we can use some simple regex to extract it 
+        We also search for "editions" here, this info is typically made known in the filename so we can use some simple regex to extract it
         (e.g. extended, Criterion, directors, etc)
     """
     logging.debug(

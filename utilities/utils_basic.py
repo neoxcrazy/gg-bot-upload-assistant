@@ -66,24 +66,24 @@ def _get_dv_hdr(media_info_video_track):
 
 def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_video_track, force_pymediainfo):
     """ Along with video_codec extraction the HDR format and DV is also updated from here.
-        
+
         Steps:
         get Color primaries from MediaInfo
         if it is one of "BT.2020", "REC.2020" then
-            if HDR10 is present in HDR Format then 
+            if HDR10 is present in HDR Format then
                 HDR = HDR
-            if HDR10+ is present in HDR Format then 
+            if HDR10+ is present in HDR Format then
                 HDR = HDR10+
-            confirm the HDRFormat doesn't exist in the media info 
-            check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo 
-                HDR = PQ10 
+            confirm the HDRFormat doesn't exist in the media info
+            check whether its PQ is present in Transfer characteristics or transfer_characteristics_Original from MediaInfo
+                HDR = PQ10
             get transfer_characteristics_Original from media info
-            if HLG is present in that then 
+            if HLG is present in that then
                 HDR = HLG
-            else if "BT.2020 (10-bit)" is present then 
+            else if "BT.2020 (10-bit)" is present then
                 HDR = WCG
 
-        if Dolby Vision is present in HDR Format then mark present of DV 
+        if Dolby Vision is present in HDR Format then mark present of DV
 
         Return value (dv, hdr, video_codec)
     """
@@ -269,7 +269,7 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
 
             # If the regex failed we can try ffprobe
             audio_info_probe = FFprobe(
-                inputs={parse_me: None}, 
+                inputs={parse_me: None},
                 global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']
             ).run(stdout=subprocess.PIPE)
             audio_info = json.loads(audio_info_probe[0].decode('utf-8'))

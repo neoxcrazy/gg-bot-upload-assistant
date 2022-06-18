@@ -182,13 +182,13 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
     return dupe_utilities.search_for_dupes_api(
         acronym_to_tracker[str(tracker).lower()],
-        imdb=torrent_info["imdb"], 
-        tmdb=torrent_info["tmdb"], 
-        tvmaze=torrent_info["tvmaze"], 
-        torrent_info=torrent_info, 
-        tracker_api=temp_tracker_api_key, 
-        debug=args.debug, 
-        working_folder=working_folder, 
+        imdb=torrent_info["imdb"],
+        tmdb=torrent_info["tmdb"],
+        tvmaze=torrent_info["tvmaze"],
+        torrent_info=torrent_info,
+        tracker_api=temp_tracker_api_key,
+        debug=args.debug,
+        working_folder=working_folder,
         auto_mode=os.getenv('auto_mode')
     )
 
@@ -1334,9 +1334,9 @@ if args.debug:
 
 """
 ----------------------- Full Disk & BDInfo CLI Related Notes -----------------------
-There is no way to use the `bdinfo_script` to create a bdinfocli docker container implementation inside a 
-docker container unless docker in docker support with the docker socket / docker socket proxy is implemented. 
- 
+There is no way to use the `bdinfo_script` to create a bdinfocli docker container implementation inside a
+docker container unless docker in docker support with the docker socket / docker socket proxy is implemented.
+
 The docker socket approach is not considered due to the security risks associated with it.
 Hence BDInfo usage inside container is prohibited by default.
 
@@ -1652,8 +1652,8 @@ for file in upload_queue:
             logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
             if discord_url:  # Send discord notification if enabled
                 requests.post(
-                    url=discord_url, 
-                    headers={'Content-Type': 'application/x-www-form-urlencoded'}, 
+                    url=discord_url,
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
                     data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled'
                 )
             if args.auto_mode:
@@ -1669,10 +1669,10 @@ for file in upload_queue:
     take_upload_screens(
         duration=torrent_info["duration"],
         upload_media_import=torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"],
-        torrent_title_import=torrent_info["title"], 
-        base_path=working_folder, 
+        torrent_title_import=torrent_info["title"],
+        base_path=working_folder,
         hash_prefix=torrent_info["working_folder"],
-        discord_url=discord_url, 
+        discord_url=discord_url,
         skip_screenshots=args.skip_screenshots
     )
 
@@ -1713,18 +1713,18 @@ for file in upload_queue:
         # -------- Add custom descriptions to description.txt --------
         write_cutsom_user_inputs_to_description(
             torrent_info=torrent_info,
-            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', 
-            config=config, 
-            tracker=tracker, 
-            bbcode_line_break=bbcode_line_break, 
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
+            config=config,
+            tracker=tracker,
+            bbcode_line_break=bbcode_line_break,
             debug=args.debug
         )
 
         # -------- Add bbcode images to description.txt --------
         add_bbcode_images_to_description(
-            torrent_info=torrent_info, 
-            config=config, 
-            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt', 
+            torrent_info=torrent_info,
+            config=config,
+            description_file_path=f'{working_folder}/temp_upload/{torrent_info["working_folder"]}description.txt',
             bbcode_line_break=bbcode_line_break
         )
 

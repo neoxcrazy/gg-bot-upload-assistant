@@ -119,7 +119,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
                 -c => Add a comment to the metainfo.
                 -s => Add source string embedded in infohash.
                 -l => piece size (potency of 2)
-                
+
                 -e *.txt,*.jpg,*.png,*.nfo,*.svf,*.rar,*.screens,*.sfv # TODO to be added when supported mktorrent is available in alpine
             current version of mktorrent pulled from alpine package doesn't have the -e flag.
             Once an updated version is available, the flag can be added
@@ -473,7 +473,7 @@ def prepare_and_validate_tracker_api_keys_dict(api_keys_file_path):
     """
         Reads the apis keys from environment and returns as a dictionary.
 
-        Method will read the available api_keys from the `api_keys_file_path`, and for each of the mentioned keys, the value will be 
+        Method will read the available api_keys from the `api_keys_file_path`, and for each of the mentioned keys, the value will be
         read from the environment variables. This method also checks whether the TMDB api key has been provided or not.
 
         In cases where the TMDB api key has not been configured, the method will raise an `AssertionError`.
@@ -559,7 +559,7 @@ def _get_client_translated_path(torrent_info):
     # the paths accessible to the torrent client will be different. It could be ...
     """ /media/downloads/movie_name/movie.mkv """
     # In these cases we may need to perform path translations.
-    """ 
+    """
         From: /home/user/data/movie_name/movie.mkv
         To: /media/downloads/movie_name/movie.mkv
     """
