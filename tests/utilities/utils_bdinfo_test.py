@@ -64,8 +64,9 @@ working_folder = Path(__file__).resolve().parent.parent.parent
 
 
 def __get_torrent_info(file_name):
-    meta_data = json.load(open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
-    
+    meta_data = json.load(
+        open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
+
     torrent_info = {}
     torrent_info["upload_media"] = f'{working_folder}{bdinfo_working_folder}{file_name}/'
     torrent_info["mediainfo"] = f'{working_folder}{bdinfo_working_folder}{file_name}/mediainfo.txt'
@@ -73,10 +74,10 @@ def __get_torrent_info(file_name):
     torrent_info["raw_file_name"] = meta_data["raw_file_name"]
     torrent_info["file_name"] = file_name
     torrent_info["raw_video_file"] = meta_data["raw_video_file"]
-    
+
     source = f'{working_folder}{bdinfo_summary}{file_name}.txt'
     destination = f'{working_folder}{bdinfo_working_folder}{file_name}/BDINFO.{torrent_info["raw_file_name"]}.txt'
-    
+
     p = Path(f'{working_folder}{bdinfo_working_folder}{file_name}/')
     p.mkdir(parents=True, exist_ok=True)
 
@@ -89,7 +90,8 @@ def __get_expected_bd_info(file_name):
 
 
 def __get_data_for_largest_playlist(file_name, override=None):
-    data = json.load(open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
+    data = json.load(
+        open(f'{working_folder}{bdinfo_metadata}{file_name}.json'))
     return f'{working_folder}{bdinfo_working_folder}{file_name}/', data["bdinfo_output_split"], data["largest_playlist"] if override is None else override
 
 
@@ -97,37 +99,45 @@ def __get_data_for_largest_playlist(file_name, override=None):
     ("torrent_info", "expected", "debug"),
     [
         pytest.param(
-            __get_torrent_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"), 
-            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
-            False, # debug
+            __get_torrent_info(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            __get_expected_bd_info(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            False,  # debug
             id="bd_info_1"
         ),
         pytest.param(
-            __get_torrent_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"), 
-            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
-            False, # debug
+            __get_torrent_info(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            __get_expected_bd_info(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            False,  # debug
             id="bd_info_2"
         ),
         pytest.param(
-            __get_torrent_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"), 
-            __get_expected_bd_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
-            False, # debug
+            __get_torrent_info(
+                "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            __get_expected_bd_info(
+                "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            False,  # debug
             id="bd_info_3"
         ),
         pytest.param(
-            __get_torrent_info("PIRATES_1_CURSE_OF_BLACK_PEARL"), 
+            __get_torrent_info("PIRATES_1_CURSE_OF_BLACK_PEARL"),
             __get_expected_bd_info("PIRATES_1_CURSE_OF_BLACK_PEARL"),
-            False, # debug
+            False,  # debug
             id="bd_info_4"
         ),
         pytest.param(
-            __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
-            __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
-            False, # debug
+            __get_torrent_info(
+                "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            __get_expected_bd_info(
+                "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            False,  # debug
             id="bd_info_5"
         ),
         # pytest.param(
-        #     __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"), 
+        #     __get_torrent_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
         #     __get_expected_bd_info("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
         #     True, # debug
         #     id="bd_info_5_debug"
@@ -136,22 +146,26 @@ def __get_data_for_largest_playlist(file_name, override=None):
 )
 def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, debug, mocker):
     mocker.patch("subprocess.run", return_value=None)
-    assert bdinfo_generate_and_parse_bdinfo(None, torrent_info, debug) == expected
+    assert bdinfo_generate_and_parse_bdinfo(
+        None, torrent_info, debug) == expected
 
 
 @pytest.mark.parametrize(
     ("input"),
     [
         pytest.param(
-            __get_data_for_largest_playlist("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            __get_data_for_largest_playlist(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
             id="largest_playlist_1"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            __get_data_for_largest_playlist(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
             id="largest_playlist_2"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            __get_data_for_largest_playlist(
+                "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
             id="largest_playlist_3"
         ),
         pytest.param(
@@ -159,40 +173,48 @@ def test_bdinfo_generate_and_parse_bdinfo(torrent_info, expected, debug, mocker)
             id="largest_playlist_4"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            __get_data_for_largest_playlist(
+                "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
             id="largest_playlist_5"
         ),
     ]
 )
 def test_bdinfo_get_largest_playlist(input, mocker):
     mocker.patch("subprocess.check_output", return_value=input[1])
-    assert bdinfo_get_largest_playlist(None, "true", input[0]) == ('', input[2])
+    assert bdinfo_get_largest_playlist(
+        None, "true", input[0]) == ('', input[2])
+
 
 @pytest.mark.parametrize(
     ("input", "user_choice"),
     [
         pytest.param(
-            __get_data_for_largest_playlist("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME", "00380.MPLS"),
+            __get_data_for_largest_playlist(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME", "00380.MPLS"),
             3,
             id="largest_playlist_manual_mode_2"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            __get_data_for_largest_playlist(
+                "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
             1,
             id="largest_playlist_manual_mode_3"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("PIRATES_1_CURSE_OF_BLACK_PEARL", "01309.MPLS"),
+            __get_data_for_largest_playlist(
+                "PIRATES_1_CURSE_OF_BLACK_PEARL", "01309.MPLS"),
             3,
             id="largest_playlist_manual_mode_4"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
+            __get_data_for_largest_playlist(
+                "Robot 2010 1080p Blu-ray AVC DTS-HD MA 5.1-DRs"),
             1,
             id="largest_playlist_manual_mode_5"
         ),
         pytest.param(
-            __get_data_for_largest_playlist("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED", "00004.MPLS"),
+            __get_data_for_largest_playlist(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED", "00004.MPLS"),
             2,
             id="largest_playlist_manual_mode_override_user"
         ),
@@ -201,24 +223,28 @@ def test_bdinfo_get_largest_playlist(input, mocker):
 def test_bdinfo_get_largest_playlist_manual_mode(input, user_choice, mocker):
     mocker.patch("subprocess.check_output", return_value=input[1])
     mocker.patch("rich.prompt.Prompt.ask", return_value=user_choice)
-    assert bdinfo_get_largest_playlist(None, "false", input[0]) == ('', input[2])
+    assert bdinfo_get_largest_playlist(
+        None, "false", input[0]) == ('', input[2])
 
 
 @pytest.mark.parametrize(
     ("bdinfo", "expected"),
     [
         pytest.param(
-            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            __get_expected_bd_info(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
             "2.0",
             id="bdinfo_audio_channels_2_0"
         ),
         pytest.param(
-            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            __get_expected_bd_info(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
             "7.1",
             id="bdinfo_audio_channels_7_1"
         ),
         pytest.param(
-            __get_expected_bd_info("Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
+            __get_expected_bd_info(
+                "Hardware 1990 1080p Blu-ray AVC DD 5.1-BaggerInc"),
             "5.1",
             id="bdinfo_audio_channels_5_1"
         )
@@ -232,19 +258,22 @@ def test_bdinfo_get_audio_channels_from_bdinfo(bdinfo, expected):
     ("bdinfo", "expected"),
     [
         pytest.param(
-            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            __get_expected_bd_info(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
             (None, "DTS-HD MA"),
             id="bdinfo_audio_codec_dtshdma"
         ),
         pytest.param(
-            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            __get_expected_bd_info(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
             ("Atmos", "TrueHD"),
             id="bdinfo_audio_codec_truehd_atmos"
         )
     ]
 )
 def test_bdinfo_get_audio_codec_from_bdinfo(bdinfo, expected):
-    assert bdinfo_get_audio_codec_from_bdinfo(bdinfo, json.load(open(f'{working_folder}/parameters/audio_codecs.json'))) == expected
+    assert bdinfo_get_audio_codec_from_bdinfo(bdinfo, json.load(
+        open(f'{working_folder}/parameters/audio_codecs.json'))) == expected
 
 
 @pytest.mark.parametrize(
@@ -252,7 +281,8 @@ def test_bdinfo_get_audio_codec_from_bdinfo(bdinfo, expected):
     [
         # TODO: Add tests for HDR10+ and DV
         pytest.param(
-            __get_expected_bd_info("Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
+            __get_expected_bd_info(
+                "Company.Business.1991.COMPLETE.BLURAY-UNTOUCHED"),
             (None, None, "AVC"),
             id="bdinfo_video_codec_avc"
         ),
@@ -262,7 +292,8 @@ def test_bdinfo_get_audio_codec_from_bdinfo(bdinfo, expected):
             id="bdinfo_video_codec_"
         ),
         pytest.param(
-            __get_expected_bd_info("Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
+            __get_expected_bd_info(
+                "Dont.Breathe.2.2021.MULTi.COMPLETE.UHD.BLURAY-GLiMME"),
             (None, "HDR", "HEVC"),
             id="bdinfo_video_codec_"
         )

@@ -21,17 +21,18 @@ repos:
       - id: codespell
         name: check for misspellings
         description: Check for common misspellings in text files
-        args: [
-          --check-hidden,
-          --check-filenames,
-          --skip=*.po,
-          --builtin,
-          clear,
-          rare,
-          informal,
-          usage,
-          code
-        ]
+        args:
+          [
+            --check-hidden,
+            --check-filenames,
+            --skip=*.po,
+            --builtin,
+            clear,
+            rare,
+            informal,
+            usage,
+            code,
+          ]
         language: system
         entry: poetry run codespell
         types: [text]
@@ -69,4 +70,3 @@ repos:
         language: system
         entry: poetry run pydocstyle
         types: [python]
-

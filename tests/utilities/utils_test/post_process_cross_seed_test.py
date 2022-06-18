@@ -17,7 +17,8 @@ def run_around_tests():
     if Path(folder).is_dir():
         clean_up(folder)
     else:
-        Path(f"{folder}/temp_upload/test_working_folder").mkdir(parents=True, exist_ok=True) # temp_upload folder
+        Path(f"{folder}/temp_upload/test_working_folder").mkdir(parents=True,
+                                                                exist_ok=True)  # temp_upload folder
 
     # created torrents for cross-seeding tests
     touch(f'{folder}/temp_upload/test_working_folder/TRACKER-Some Title different from torrent_title.torrent')
@@ -105,6 +106,7 @@ def __cross_seed_with_translation_side_effect(param, default):
     else:
         return default
 
+
 def __mock_upload_torrent(torrent, save_path, use_auto_torrent_management, is_skip_checking):
     return (torrent, save_path, use_auto_torrent_management, is_skip_checking)
 
@@ -122,17 +124,19 @@ def test_client_upload_tv_season_with_translation(mocker):
     torrent_info["individual_episodes"] = "0"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_with_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_with_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
-    
+
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         '/some/folder/accessible/by/client/data/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
 
 
 def test_client_upload_tv_episode_with_translation(mocker):
@@ -147,17 +151,19 @@ def test_client_upload_tv_episode_with_translation(mocker):
     torrent_info["individual_episodes"] = "1"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_with_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_with_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         '/some/folder/accessible/by/client/data/Arcane.S01.1080p.NF.WEB-DL.DDP5.1.HDR.HEVC-TEPES/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
 
 
 def test_client_upload_movie_folder_with_translation(mocker):
@@ -170,17 +176,19 @@ def test_client_upload_movie_folder_with_translation(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_with_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_with_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
-    
+
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         '/some/folder/accessible/by/client/data/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
 
 
 def test_client_upload_movie_folder(mocker):
@@ -193,18 +201,20 @@ def test_client_upload_movie_folder(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         '/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
-        
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+
 
 def test_client_upload_movie_folder_torrent_upload_failed(mocker):
     torrent_info = {}
@@ -216,11 +226,13 @@ def test_client_upload_movie_folder_torrent_upload_failed(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
-   
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == False
+
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == False
 
 
 def test_client_upload_movie_file(mocker):
@@ -232,17 +244,19 @@ def test_client_upload_movie_file(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         '/gg-bot-upload-assistant/files/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
 
 
 def test_client_upload_movie_file_relative(mocker):
@@ -254,14 +268,16 @@ def test_client_upload_movie_file_relative(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
     expected = (
-        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent', 
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
         f'{working_folder}{temp_working_dir}/files/',
         False,
         True
     )
-    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected

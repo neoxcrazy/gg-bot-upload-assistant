@@ -32,7 +32,8 @@ def run_around_tests():
     if Path(folder).is_dir():
         clean_up(folder)
     else:
-        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True, exist_ok=True) # media guessit folder
+        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True,
+                                                          exist_ok=True)  # media guessit folder
 
     touch(f"{folder}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv")
     yield
@@ -42,35 +43,35 @@ def run_around_tests():
 @pytest.mark.parametrize(
     ("input_path", "expected"),
     [
-        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv", 
-        {
-            "title" : "Movie Name",
-            "year" : 2017,
-            "screen_size" : "1080p",
-            "source" : "Blu-ray",
-            "other" : "Remux",
-            "video_codec" : "H.264",
-            "video_profile" : "Advanced Video Codec High Definition",
-            "audio_codec" : "DTS",
-            "audio_channels" : "5.1",
-            "release_group" : "RELEASE_GROUP",
-            "container" : "mkv",
-            "type" : "movie"
-        }, id="file_for_guessit"),
-        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/", 
-        {
-            "title" : "Movie Name",
-            "year" : 2017,
-            "screen_size" : "1080p",
-            "source" : "Blu-ray",
-            "other" : "Remux",
-            "video_codec" : "H.264",
-            "video_profile" : "Advanced Video Codec High Definition",
-            "audio_codec" : "DTS",
-            "audio_channels" : "5.1",
-            "release_group" : "RELEASE_GROUP",
-            "type" : "movie"
-        }, id="folder_for_guessit"),
+        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv",
+                     {
+                         "title": "Movie Name",
+                         "year": 2017,
+                         "screen_size": "1080p",
+                         "source": "Blu-ray",
+                         "other": "Remux",
+                         "video_codec": "H.264",
+                         "video_profile": "Advanced Video Codec High Definition",
+                         "audio_codec": "DTS",
+                         "audio_channels": "5.1",
+                         "release_group": "RELEASE_GROUP",
+                         "container": "mkv",
+                         "type": "movie"
+                     }, id="file_for_guessit"),
+        pytest.param(f"{working_folder}{temp_working_dir}/media/{dummy_for_guessit}/",
+                     {
+                         "title": "Movie Name",
+                         "year": 2017,
+                         "screen_size": "1080p",
+                         "source": "Blu-ray",
+                         "other": "Remux",
+                         "video_codec": "H.264",
+                         "video_profile": "Advanced Video Codec High Definition",
+                         "audio_codec": "DTS",
+                         "audio_channels": "5.1",
+                         "release_group": "RELEASE_GROUP",
+                         "type": "movie"
+                     }, id="folder_for_guessit"),
     ]
 )
 def test_perform_guessit_on_filename(input_path, expected):

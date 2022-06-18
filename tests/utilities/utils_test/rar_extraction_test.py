@@ -11,7 +11,7 @@ import utilities.utils as utils
 
 working_folder = Path(__file__).resolve().parent.parent.parent.parent
 temp_working_dir = "/tests/working_folder"
-rar_file_source = "/tests/resources/rar/data.rar" # this file already exists
+rar_file_source = "/tests/resources/rar/data.rar"  # this file already exists
 rar_file_target = f"{temp_working_dir}/rar/data.rar"
 
 
@@ -32,10 +32,12 @@ def run_around_tests():
     if Path(folder).is_dir():
         clean_up(folder)
     else:
-        Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True) # rar folder
-        Path(f"{folder}/media").mkdir(parents=True, exist_ok=True) # rar folder
-    
-    shutil.copy(f"{working_folder}{rar_file_source}", f"{working_folder}{rar_file_target}")
+        Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True)  # rar folder
+        Path(f"{folder}/media").mkdir(parents=True,
+                                      exist_ok=True)  # rar folder
+
+    shutil.copy(f"{working_folder}{rar_file_source}",
+                f"{working_folder}{rar_file_target}")
     yield
     clean_up(folder)
 
@@ -52,10 +54,12 @@ def test_check_for_dir_and_extract_rars_non_rar_folder():
 
 def test_check_for_dir_and_extract_rars_rar_folder():
     file_path = "tests/working_folder/rar/"
-    assert utils.check_for_dir_and_extract_rars(file_path) == (True, "tests/working_folder/rar/something.mkv")
+    assert utils.check_for_dir_and_extract_rars(file_path) == (
+        True, "tests/working_folder/rar/something.mkv")
 
 
 def test_check_for_dir_and_extract_rars_no_rar_installed(mocker):
     file_path = "tests/working_folder/rar/"
     mocker.patch('os.path.isfile', return_value=False)
-    assert utils.check_for_dir_and_extract_rars(file_path) == (False, file_path)
+    assert utils.check_for_dir_and_extract_rars(
+        file_path) == (False, file_path)

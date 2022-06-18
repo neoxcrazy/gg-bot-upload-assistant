@@ -10,7 +10,8 @@ working_folder = Path(__file__).resolve().parent.parent.parent.parent
 
 def test_get_torrent_client_for_cross_seeding(mocker):
     mock_client = mocker.patch("modules.torrent_client.TorrentClient")
-    mocker.patch("modules.torrent_client.TorrentClientFactory.create", return_value=mock_client)
+    mocker.patch("modules.torrent_client.TorrentClientFactory.create",
+                 return_value=mock_client)
     mocker.patch("os.getenv", side_effect=__post_processing_cross_seed)
     assert utils.get_torrent_client_if_needed() == mock_client
 
@@ -35,9 +36,11 @@ def test_client_upload_movie_folder_with_translation_sad_path(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__cross_seed_with_translation_side_effect_sad_path)
+    mocker.patch(
+        "os.getenv", side_effect=__cross_seed_with_translation_side_effect_sad_path)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
-    assert utils.perform_post_processing(torrent_info, mock_client, working_folder, tracker) == False
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, working_folder, tracker) == False
 
 
 def test_invalid_processing_mode(mocker):
@@ -50,9 +53,11 @@ def test_invalid_processing_mode(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch("os.getenv", side_effect=__invalid_processing_mode_side_effect)
+    mocker.patch(
+        "os.getenv", side_effect=__invalid_processing_mode_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
-    assert utils.perform_post_processing(torrent_info, mock_client, working_folder, tracker) == False
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, working_folder, tracker) == False
 
 
 def test_no_client_upload(mocker):
@@ -67,7 +72,8 @@ def test_no_client_upload(mocker):
 
     mocker.patch("os.getenv", side_effect=__no_cross_seed_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
-    assert utils.perform_post_processing(torrent_info, mock_client, working_folder, tracker) == False
+    assert utils.perform_post_processing(
+        torrent_info, mock_client, working_folder, tracker) == False
 
 
 def __cross_seed_with_translation_side_effect_sad_path(param, default):
@@ -94,7 +100,7 @@ def __invalid_processing_mode_side_effect(param, default):
 def __post_processing_cross_seed(param, default=None):
     if param == "enable_post_processing":
         return "True"
-    elif param ==  "post_processing_mode":
+    elif param == "post_processing_mode":
         return "CROSS_SEED"
     elif param == "client":
         return "Rutorrent"
@@ -105,7 +111,7 @@ def __post_processing_cross_seed(param, default=None):
 def __post_processing_watch_folder(param, default=None):
     if param == "enable_post_processing":
         return "True"
-    elif param ==  "post_processing_mode":
+    elif param == "post_processing_mode":
         return "WATCH_FOLDER"
     return None
 

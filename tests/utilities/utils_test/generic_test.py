@@ -45,9 +45,11 @@ def run_around_tests():
     if Path(folder).is_dir():
         clean_up(folder)
     else:
-        Path(f"{folder}/temp_upload/{utils.get_hash('some_name')}/screenshots").mkdir(parents=True, exist_ok=True) # temp_upload folder
-        Path(f"{folder}/nothing").mkdir(parents=True, exist_ok=True) # temp_upload folder
-    
+        Path(f"{folder}/temp_upload/{utils.get_hash('some_name')}/screenshots").mkdir(
+            parents=True, exist_ok=True)  # temp_upload folder
+        Path(f"{folder}/nothing").mkdir(parents=True,
+                                        exist_ok=True)  # temp_upload folder
+
     # creating some random files inside `/tests/working_folder/temp_upload`
     touch(f'{folder}/temp_upload/{utils.get_hash("some_name")}/torrent1.torrent')
     touch(f'{folder}/temp_upload/torrent1.torrent')
@@ -78,16 +80,19 @@ def test_delete_leftover_files():
     # here we'll be working with /tests/working_folder/temp_upload/
     # this will be the folder that the actual code will be dealing with
     computed_working_folder = utils.delete_leftover_files(
-        working_folder=f"{working_folder}{temp_working_dir}", 
-        file="some_name1", 
+        working_folder=f"{working_folder}{temp_working_dir}",
+        file="some_name1",
         resume=False
     )
     hash = utils.get_hash("some_name1")
     old_hash = utils.get_hash("some_name")
     # check whether the hash folder has been created or not
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{hash}").is_dir() == True
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{old_hash}").is_dir() == False
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{hash}/screenshots/").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{hash}").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{old_hash}").is_dir() == False
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{hash}/screenshots/").is_dir() == True
     assert computed_working_folder == f"{hash}/"
 
 
@@ -95,15 +100,18 @@ def test_retain_leftover_files_for_resume():
     # here we'll be working with /tests/working_folder/temp_upload/
     # this will be the folder that the actual code will be dealing with
     computed_working_folder = utils.delete_leftover_files(
-        working_folder=f"{working_folder}{temp_working_dir}", 
-        file="some_name1", 
+        working_folder=f"{working_folder}{temp_working_dir}",
+        file="some_name1",
         resume=True
     )
     hash = utils.get_hash("some_name1")
     old_hash = utils.get_hash("some_name")
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{hash}").is_dir() == True
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{old_hash}").is_dir() == True
-    assert Path(f"{working_folder}{temp_working_dir}/temp_upload/{hash}/screenshots/").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{hash}").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{old_hash}").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/temp_upload/{hash}/screenshots/").is_dir() == True
     assert computed_working_folder == f"{hash}/"
 
 
@@ -111,11 +119,13 @@ def test_create_temp_upload_itself():
     # here we'll be working with /tests/working_folder/temp_upload/
     # this will be the folder that the actual code will be dealing with
     computed_working_folder = utils.delete_leftover_files(
-        working_folder=f"{working_folder}{temp_working_dir}/nothing", 
-        file="some_name1", 
+        working_folder=f"{working_folder}{temp_working_dir}/nothing",
+        file="some_name1",
         resume=True
     )
     hash = utils.get_hash("some_name1")
-    assert Path(f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}").is_dir() == True
-    assert Path(f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}/screenshots/").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}").is_dir() == True
+    assert Path(
+        f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}/screenshots/").is_dir() == True
     assert computed_working_folder == f"{hash}/"

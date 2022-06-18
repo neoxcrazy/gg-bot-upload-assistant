@@ -46,10 +46,8 @@ unit-test:
     auto_stop_in: 2 months
     url: $PAGES_URL/-/jobs/$CI_JOB_ID/artifacts/coverage/index.html
 
-
 sast:
   stage: test
-
 # pre-commit-checks:
 #   image: python:3.9.10
 #   stage: prepare
