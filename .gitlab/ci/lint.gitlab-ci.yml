@@ -21,7 +21,7 @@ pylint:
       codequality: codeclimate.json
     when: always
 
-pages:
+pylint_report:
   stage: lint
   image: alpine:latest
   script:
