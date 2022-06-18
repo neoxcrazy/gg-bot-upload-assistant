@@ -264,6 +264,7 @@ docker run --rm -it \
 - [X] Bug Fixes and Testing Phase 2
 - [X] Issue#37: Automatic cross-seeding not working
 - [X] Issue#39: Info log says translation needed even when disabled
+- [X] Issue#40: False positive DV detection
 
 ### v3.0.1
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
