@@ -3,4 +3,4 @@ pylint:
   stage: lint
   script:
     - pip install pylint
-    - pylint src/
+    - pylint ./
