@@ -991,7 +991,7 @@ def analyze_video_file(missing_value, media_info):
     if missing_value == "mediainfo":
         return basic_utilities.basic_get_missing_mediainfo(torrent_info, parse_me, working_folder)
 
-    def basic_utilities.quit_log_reason(reason):
+    def quit_log_reason(reason):
         logging.critical(
             f"auto_mode is enabled (no user input) & we can not auto extract the {missing_value}")
         logging.critical(f"Exit Reason: {reason}")
