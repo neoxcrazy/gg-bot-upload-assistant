@@ -1095,38 +1095,38 @@ def identify_miscellaneous_details(guess_it_result):
 
     # Try to split the torrent title and match a few key words
     # End user can add their own 'key_words' that they might want to extract and add to the final torrent title
-    key_words = {'remux': 'REMUX', 'hdr': torrent_info.get(
-        "hdr", "HDR"),  'uhd': 'UHD', 'hybrid': 'Hybrid', 'atmos': 'Atmos', 'ddpa': 'Atmos'}
+    key_words = {'remux': 'REMUX', 'hdr': torrent_info.get("hdr", "HDR"),  'uhd': 'UHD', 'hybrid': 'Hybrid', 'atmos': 'Atmos', 'ddpa': 'Atmos'}
 
-    hdr_hybrid_remux_keyword_search = str(torrent_info["raw_file_name"]).replace(
-        " ", ".").replace("-", ".").split(".")
+    hdr_hybrid_remux_keyword_search = str(torrent_info["raw_file_name"]).lower().replace(" ", ".").replace("-", ".").split(".")
 
     for word in hdr_hybrid_remux_keyword_search:
-        if str(word).lower() in key_words.keys():
-            logging.info(
-                f"extracted the key_word: {word.lower()} from the filename")
+        word = str(word)
+        if word in key_words.keys():
+            logging.info(f"extracted the key_word: {word} from the filename")
             # special case. TODO find a way to generalize and handle this
-            if str(word).lower() == 'ddpa':
-                torrent_info["atmos"] = key_words[str(word).lower()]
+            if word == 'ddpa':
+                torrent_info["atmos"] = key_words[word]
             else:
-                torrent_info[str(word).lower()] = key_words[str(word).lower()]
+                torrent_info[word] = key_words[word]
 
         # Bluray region source
         if "disc" in torrent_info["source_type"]:
             # This is either a bluray or dvd disc, these usually have the source region in the filename, try to extract it now
-            if str(word).upper() in bluray_regions.keys():
-                torrent_info["region"] = str(word).upper()
+            if word.upper() in bluray_regions.keys():
+                torrent_info["region"] = word.upper()
 
         # Dolby vision (filename detection)
-        if any(x in str(word).lower() for x in ['dv', 'dovi']) or all(x in str(word).lower() for x in ['do', 'vi']):
-            logging.info("Detected Dolby Vision from the filename")
-            if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
+        # we only need to do this if user is having an older verison of mediainfo, which can't detect dv
+        if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+            if any(x == word for x in ['dv', 'dovi']):
+                logging.info("Detected Dolby Vision from the filename")
                 torrent_info["dv"] = "DV"
-                logging.info(
-                    "Adding dolby vision data identified from file name")
-            else:
-                logging.info(
-                    "Dolby Vision already identified from mediainfo... Skipping the data collected from file name.")
+
+    # trying to check whether Do-Vi exists in the title, again needed only for older versions of mediainfo
+    if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+        if 'do'in hdr_hybrid_remux_keyword_search and 'vi' in hdr_hybrid_remux_keyword_search:
+            torrent_info["dv"] = "DV"
+            logging.info("Adding Do-Vi from file name. Marking existing of Dolby Vision")
 
     # use regex (sourced and slightly modified from official radarr repo) to find torrent editions (Extended, Criterion, Theatrical, etc)
     # https://github.com/Radarr/Radarr/blob/5799b3dc4724dcc6f5f016e8ce4f57cc1939682b/src/NzbDrone.Core/Parser/Parser.cs#L21
