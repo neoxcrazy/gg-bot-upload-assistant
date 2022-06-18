@@ -5,7 +5,7 @@ import logging
 
 from pathlib import Path
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
 
 console = Console()
@@ -30,12 +30,10 @@ def miscellaneous_identify_bluray_edition(upload_media):
     try:
         torrent_editions = re.search(
             r"((Recut.|Extended.|Ultimate.|Criterion.|International.)?(Director.?s|Collector.?s|Theatrical|Ultimate|Final|Criterion|International(?=(.(Cut|Edition|Version|Collection)))|Extended|Rogue|Special|Despecialized|\d{2,3}(th)?.Anniversary)(.(Cut|Edition|Version|Collection))?(.(Extended|Uncensored|Remastered|Unrated|Uncut|IMAX|Fan.?Edit))?|(Uncensored|Remastered|Unrated|Uncut|IMAX|Fan.?Edit|Edition|Restored|(234)in1))", upload_media)
-        logging.info(
-            f"[MiscellaneousUtils] extracted '{str(torrent_editions.group()).replace('.', ' ')}' as the 'edition' for the final torrent name")
+        logging.info(f"[MiscellaneousUtils] extracted '{str(torrent_editions.group()).replace('.', ' ')}' as the 'edition' for the final torrent name")
         return str(torrent_editions.group()).replace(".", " ")
     except AttributeError:
-        logging.error(
-            "[MiscellaneousUtils] No custom 'edition' found for this torrent")
+        logging.error("[MiscellaneousUtils] No custom 'edition' found for this torrent")
     return None
 
 
@@ -59,8 +57,7 @@ def miscellaneous_identify_repacks(raw_file_name):
     match_repack = re.search(
         r'RERIP|PROPER2|PROPER3|PROPER4|PROPER|REPACK2|REPACK3|REPACK4|REPACK', raw_file_name, re.IGNORECASE)
     if match_repack is not None:
-        logging.info(
-            f'[MiscellaneousUtils] Used Regex to extract: "{match_repack.group()}" from the filename')
+        logging.info(f'[MiscellaneousUtils] Used Regex to extract: "{match_repack.group()}" from the filename')
         return match_repack.group()
     return None
 
@@ -79,32 +76,26 @@ def miscellaneous_identify_web_streaming_source(streaming_services, raw_file_nam
     web_source = guess_it_result.get('streaming_service', '')
 
     if type(web_source) is list:
-        logging.info(
-            f"[MiscellaneousUtils] GuessIt identified multiple streaming services [{web_source}]. Proceeding with the first in the list.")
+        logging.info(f"[MiscellaneousUtils] GuessIt identified multiple streaming services [{web_source}]. Proceeding with the first in the list.")
         web_source = web_source[0]
     guessit_output = streaming_sources.get(web_source)
 
     if guessit_output is not None:
-        logging.info(
-            f'[MiscellaneousUtils] Used guessit to extract the WEB Source: {guessit_output}')
+        logging.info(f'[MiscellaneousUtils] Used guessit to extract the WEB Source: {guessit_output}')
         return guessit_output
     else:
-        source_regex = "[\.|\ ](" + \
-            "|".join(streaming_sources.values()) + ")[\.|\ ]"
+        source_regex = "[\.|\ ](" + "|".join(streaming_sources.values()) + ")[\.|\ ]"
         match_web_source = re.search(source_regex, raw_file_name.upper())
         if match_web_source is not None:
-            logging.info(
-                f'[MiscellaneousUtils] Used Regex to extract the WEB Source: {match_web_source.group().replace(".", "").strip()}')
+            logging.info(f'[MiscellaneousUtils] Used Regex to extract the WEB Source: {match_web_source.group().replace(".", "").strip()}')
             return match_web_source.group().replace('.', '').strip()
         else:
-            logging.error(
-                "[MiscellaneousUtils] Not able to extract the web source information from REGEX and GUESSIT")
+            logging.error("[MiscellaneousUtils] Not able to extract the web source information from REGEX and GUESSIT")
     return None
 
 
 def miscellaneous_identify_source_type(raw_file_name, auto_mode, source):
-    logging.debug(
-        f'[MiscellaneousUtils] Source type is not available. Trying to identify source type')
+    logging.debug(f'[MiscellaneousUtils] Source type is not available. Trying to identify source type')
     match_source = re.search(r'(?P<bluray_remux>.*blu(.ray|ray).*remux.*)|'
                              r'(?P<bluray_disc>.*blu(.ray|ray)((?!x(264|265)|h.(265|264)|H.(265|264)|H(265|264)).)*$)|'
                              r'(?P<webrip>.*web(.rip|rip).*)|'

@@ -34,7 +34,7 @@ from utilities.utils_screenshots import take_upload_screens
 # Method that will search for dupes in trackers.
 import utilities.utils_miscellaneous as miscellaneous_utilities
 import utilities.utils_metadata as metadata_utilities
-import utilities.utils_dupes import dupe_utilities
+import utilities.utils_dupes as dupe_utilities
 import utilities.utils_bdinfo as bdinfo_utilities
 import utilities.utils_basic as basic_utilities
 from utilities.utils_translation import *

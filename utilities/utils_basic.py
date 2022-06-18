@@ -5,6 +5,7 @@ import glob
 import json
 import time
 import logging
+import subprocess
 
 from ffmpy import FFprobe
 from pprint import pformat
@@ -14,6 +15,7 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
 from utilities.utils_bdinfo import *
+
 
 console = Console()
 
@@ -34,10 +36,8 @@ def _get_dv_hdr(media_info_video_track):
     hdr = None
     dv = None
     try:
-        logging.debug(
-            f"[BasicUtils] Logging video track atrtibutes used to detect HDR type")
-        logging.debug(
-            f"[BasicUtils] Video track info from mediainfo \n {pformat(media_info_video_track.to_data())}")
+        logging.debug("[BasicUtils] Logging video track atrtibutes used to detect HDR type")
+        logging.debug(f"[BasicUtils] Video track info from mediainfo \n {pformat(media_info_video_track.to_data())}")
         color_primaries = media_info_video_track.color_primaries
         if color_primaries is not None and color_primaries in ("BT.2020", "REC.2020"):
             hdr_format = f"{media_info_video_track.hdr_format}, {media_info_video_track.hdr_format_version}, {media_info_video_track.hdr_format_compatibility}"
@@ -54,21 +54,19 @@ def _get_dv_hdr(media_info_video_track):
             elif media_info_video_track.transfer_characteristics_original is not None and "BT.2020 (10-bit)" in media_info_video_track.transfer_characteristics_original:
                 hdr = "WCG"
     except Exception as e:
-        logging.exception(
-            f"[BasicUtils] Error occured while trying to parse HDR information from mediainfo.", e)
+        logging.exception("[BasicUtils] Error occured while trying to parse HDR information from mediainfo.", e)
 
     if media_info_video_track.hdr_format is not None and "Dolby Vision" in media_info_video_track.hdr_format:
         dv = "DV"
         logging.info("[BasicUtils] Identified 'Dolby Vision' from mediainfo.")
 
-    logging.info(
-        f"[BasicUtils] HDR Format identified from mediainfo is '{hdr}'")
+    logging.info(f"[BasicUtils] HDR Format identified from mediainfo is '{hdr}'")
     return dv, hdr
 
 
 def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_video_track, force_pymediainfo):
-    """
-        along with video_codec extraction the HDR format and DV is also updated from here.
+    """ Along with video_codec extraction the HDR format and DV is also updated from here.
+        
         Steps:
         get Color primaries from MediaInfo
         if it is one of "BT.2020", "REC.2020" then
@@ -270,8 +268,10 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
                 return return_value, None
 
             # If the regex failed we can try ffprobe
-            audio_info_probe = FFprobe(inputs={parse_me: None},
-                                       global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']).run(stdout=subprocess.PIPE)
+            audio_info_probe = FFprobe(
+                inputs={parse_me: None}, 
+                global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']
+            ).run(stdout=subprocess.PIPE)
             audio_info = json.loads(audio_info_probe[0].decode('utf-8'))
 
             for stream in audio_info["streams"]:
@@ -343,8 +343,10 @@ def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me,
                 return possible_audio_channels
 
     # If the regex failed ^^ (Likely) then we use ffprobe to try and auto detect the channels
-    audio_info_probe = FFprobe(inputs={parse_me: None},
-                               global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']).run(stdout=subprocess.PIPE)
+    audio_info_probe = FFprobe(
+        inputs={parse_me: None},
+        global_options=['-v', 'quiet', '-print_format', 'json', '-select_streams a:0', '-show_format', '-show_streams']
+    ).run(stdout=subprocess.PIPE)
 
     audio_info = json.loads(audio_info_probe[0].decode('utf-8'))
     for stream in audio_info["streams"]:

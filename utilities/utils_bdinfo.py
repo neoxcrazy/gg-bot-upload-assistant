@@ -17,25 +17,20 @@ def bdinfo_validate_bdinfo_script_for_bare_metal(bdinfo_script):
     # Verify that the bdinfo script exists only when executed on bare metal / VM instead of container
     # The containerized version has bdinfo packed inside.
     if not os.getenv("IS_CONTAINERIZED") == "true" and not os.path.isfile(bdinfo_script):
-        logging.critical(
-            "[BDInfoUtils] You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
-        logging.info(
-            "[BDInfoUtils] Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
-        raise AssertionError(
-            f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
+        logging.critical("[BDInfoUtils] You've specified the '-disc' arg but have not supplied a valid bdinfo script path in config.env")
+        logging.info("[BDInfoUtils] Can not upload a raw disc without bdinfo output, update the 'bdinfo_script' path in config.env")
+        raise AssertionError(f"The bdinfo script you specified: ({bdinfo_script}) does not exist")
 
 
 def bdinfo_validate_presence_of_bdmv_stream(upload_media):
     if not os.path.exists(f'{upload_media}BDMV/STREAM/'):
-        logging.critical(
-            "[BDInfoUtils] BD folder not recognized. We can only upload if we detect a '/BDMV/STREAM/' folder")
-        raise AssertionError(
-            "Currently unable to upload .iso files or disc/folders that does not contain a '/BDMV/STREAM/' folder")
+        logging.critical("[BDInfoUtils] BD folder not recognized. We can only upload if we detect a '/BDMV/STREAM/' folder")
+        raise AssertionError("Currently unable to upload .iso files or disc/folders that does not contain a '/BDMV/STREAM/' folder")
 
 
 def bdinfo_get_video_codec_from_bdinfo(bdinfo):
-    """
-        Method to get the video_codec information from the bdinfo.
+    """ Method to get the video_codec information from the bdinfo.
+
         The method also checks for the presence of DV layer and any HDR formats.
         The return value is (DV, HDR, VIDEO_CODEC)
     """
