@@ -41,7 +41,7 @@ class Mongo:
             # print("Initialzed connection to the redis server configured")
             self.mongo_client.admin.command('ping')
             # print("Successfully established the connection to the server")
-            print(f'Mongo Server Connection Established Successfully')
+            print('Mongo Server Connection Established Successfully')
         else:
             print("Failed to initialize connection to Mongo server")
 
@@ -61,7 +61,7 @@ class Mongo:
 
     def delete(self, key, query=None):
         """
-            Method to delete data from the cache stored against a key 
+            Method to delete data from the cache stored against a key
         """
         collection = self.__get_collection(key)
         if len(key.split("::")) <= 2:
@@ -77,21 +77,22 @@ class Mongo:
             return 1
 
     @map_cursor_to_list
-    def get(self, key, filter=None):
+    def get(self, key, filter_query=None):
         collection = self.__get_collection(key)
         # <=2 because keys are in the form of GROUP::COLLECTION::KEY
-        filter = ({} if filter is None else filter) if len(
+        filter_query = ({} if filter_query is None else filter_query) if len(
             key.split("::")) <= 2 else {"hash": key.split("::")[2]}
-        return collection.find(filter)
+        return collection.find(filter_query)
 
     @map_cursor_to_list
-    def advanced_get(self, key, limit, page_number, sort_field, filter={}):
+    def advanced_get(self, key, limit, page_number, sort_field, filter_query=None):
         collection = self.__get_collection(key)
-        return collection.find(filter).skip((page_number - 1) * limit).limit(limit).sort(sort_field, -1)
+        filter_query = {} if filter_query is None else filter_query
+        return collection.find(filter_query).skip((page_number - 1) * limit).limit(limit).sort(sort_field, -1)
 
-    def count(self, key, filter=None):
+    def count(self, key, filter_query=None):
         collection = self.__get_collection(key)
-        return collection.count_documents(filter if filter is not None else {})
+        return collection.count_documents(filter_query if filter_query is not None else {})
 
     def close(self):
         """
