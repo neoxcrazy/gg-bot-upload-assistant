@@ -1,5 +1,4 @@
 import enum
-from modules.cache_vendors.cache_mongo import Mongo
 
 
 class CacheVendor(enum.Enum):
@@ -8,8 +7,8 @@ class CacheVendor(enum.Enum):
 
 class CacheFactory():
 
-    def create(self, type):
-        targetclass = type.name.capitalize()
+    def create(self, cache_type):
+        targetclass = cache_type.name.capitalize()
         return Cache(globals()[targetclass]())
 
 
@@ -18,6 +17,12 @@ class Cache:
     cache_client = None
 
     def __init__(self, cache_client):
+        """
+            Cache is wrapper ever the differnet cache_clients that can be created. 
+
+            Caches are created by the CacheFactory based on the users configuration. 
+            Currently only Mongo Cache is available 
+        """
         self.cache_client = cache_client
 
     def hello(self):

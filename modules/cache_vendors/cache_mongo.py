@@ -77,22 +77,21 @@ class Mongo:
             return 1
 
     @map_cursor_to_list
-    def get(self, key, filter_query=None):
+    def get(self, key, filter=None):
         collection = self.__get_collection(key)
         # <=2 because keys are in the form of GROUP::COLLECTION::KEY
-        filter_query = ({} if filter_query is None else filter_query) if len(
+        filter = ({} if filter is None else filter) if len(
             key.split("::")) <= 2 else {"hash": key.split("::")[2]}
-        return collection.find(filter_query)
+        return collection.find(filter)
 
     @map_cursor_to_list
-    def advanced_get(self, key, limit, page_number, sort_field, filter_query=None):
+    def advanced_get(self, key, limit, page_number, sort_field, filter=None):
         collection = self.__get_collection(key)
-        filter_query = {} if filter_query is None else filter_query
-        return collection.find(filter_query).skip((page_number - 1) * limit).limit(limit).sort(sort_field, -1)
+        return collection.find(filter if filter is not None else {}).skip((page_number - 1) * limit).limit(limit).sort(sort_field, -1)
 
-    def count(self, key, filter_query=None):
+    def count(self, key, filter=None):
         collection = self.__get_collection(key)
-        return collection.count_documents(filter_query if filter_query is not None else {})
+        return collection.count_documents()
 
     def close(self):
         """
