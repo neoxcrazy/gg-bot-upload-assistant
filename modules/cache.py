@@ -1,5 +1,7 @@
 import enum
 
+from modules.cache_vendors.cache_mongo import Mongo
+
 
 class CacheVendor(enum.Enum):
     Mongo = 1
