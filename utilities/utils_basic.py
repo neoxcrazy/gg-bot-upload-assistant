@@ -555,7 +555,7 @@ def basic_get_episode_basic_details(guess_it_result):
         season_number = int(guess_it_result["season"])
         # check if we have an episode number
         if 'episode' in guess_it_result:
-            if type(guess_it_result["episode"]) is list:
+            if isinstance(guess_it_result["episode"], list):
                 episode_number = int(guess_it_result["episode"][0])
                 s00e00 = f'S{season_number:02d}'
                 for episode in guess_it_result["episode"]:

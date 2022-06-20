@@ -72,7 +72,7 @@ class Server(object):
 
     def start(self, detached=False):
         kwargs = {'host': '127.0.0.1', 'port': 5001, 'threaded': True, 'use_reloader': False, 'debug': False}
-        Thread(target=self.run, daemon=True, kwargs=kwargs).start() if detached == True else self.run()
+        _ = Thread(target=self.run, daemon=True, kwargs=kwargs).start() if detached == True else self.run()
 
 
     @api_required

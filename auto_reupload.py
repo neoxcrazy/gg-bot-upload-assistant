@@ -564,16 +564,14 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
             if os.path.isfile(tracker_settings[key]):
-                logging.debug(
-                    f"[TrackerUpload] Setting file|base64 for key {key}")
+                logging.debug(f"[TrackerUpload] Setting file|base64 for key {key}")
                 with open(tracker_settings[key], 'rb') as binary_file:
                     binary_file_data = binary_file.read()
                     base64_encoded_data = base64.b64encode(binary_file_data)
                     base64_message = base64_encoded_data.decode('utf-8')
                     payload[key] = base64_message
             else:
-                logging.critical(
-                    f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         else:
             # if str(val).endswith(".nfo") or str(val).endswith(".txt"):
@@ -584,8 +582,7 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
                 with open(val, 'r') as txt_file:
                     val = txt_file.read()
             if req_opt == "Optional":
-                logging.info(
-                    f"[TrackerUpload] Optional key {key} will be added to payload")
+                logging.info(f"[TrackerUpload] Optional key {key} will be added to payload")
             payload[key] = val
 
     logging.fatal("[TrackerUpload] URL: {url} \n Data: {data} \n Files: {files}".format(
@@ -688,7 +685,7 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
         try:
             logging.critical(
                 f'[TrackerUpload] 400 was returned on that upload, this is a problem with the site ({upload_to}). Error: Error {response.json()["error"] if "error" in response.json() else response.json()}')
-        except:
+        except Exception:
             logging.critical(f'[TrackerUpload] 400 was returned on that upload, this is a problem with the site ({upload_to}).')
         logging.error("[TrackerUpload] Upload failed")
         return False, response.status_code
@@ -873,28 +870,23 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     #         bdInfo_summary = summary.read()
     #         torrent_info["mediainfo_summary"] = bdInfo_summary
     # else:
-    mediainfo_summary, tmdb, imdb, tvdb = basic_utilities.basic_get_mediainfo_summary(
-        media_info_result.to_data())
+    mediainfo_summary, tmdb, imdb, _ = basic_utilities.basic_get_mediainfo_summary(media_info_result.to_data())
     torrent_info["mediainfo_summary"] = mediainfo_summary
     if tmdb != "0":
         # we will get movie/12345 or tv/12345 => we only need 12345 part.
         tmdb = tmdb[tmdb.find("/") + 1:] if tmdb.find("/") >= 0 else tmdb
         torrent_info['tmdb'] = tmdb
-        logging.info(
-            f"[Main] Obtained TMDB Id from mediainfo summary. Proceeding with {torrent_info['tmdb']}")
+        logging.info(f"[Main] Obtained TMDB Id from mediainfo summary. Proceeding with {torrent_info['tmdb']}")
     if imdb != "0":
         torrent_info['imdb'] = imdb
-        logging.info(
-            f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {torrent_info['imdb']}")
+        logging.info(f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {torrent_info['imdb']}")
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
         # Save the analyze_video_file() return result into the 'torrent_info' dict
-        torrent_info[missing_val] = analyze_video_file(
-            missing_value=missing_val, media_info=media_info_result)
+        torrent_info[missing_val] = analyze_video_file(missing_value=missing_val, media_info=media_info_result)
 
-    logging.debug(
-        "::::::::::::::::::::::::::::: Torrent Information collected so far :::::::::::::::::::::::::::::")
+    logging.debug("::::::::::::::::::::::::::::: Torrent Information collected so far :::::::::::::::::::::::::::::")
     logging.debug(f"\n{pformat(torrent_info)}")
     # Show the user what we identified so far
     columns_we_want = {
@@ -964,17 +956,6 @@ def analyze_video_file(missing_value, media_info):
     # ------------ Save mediainfo to txt ------------ #
     if missing_value == "mediainfo":
         return basic_utilities.basic_get_missing_mediainfo(torrent_info, parse_me, working_folder)
-
-    def quit_log_reason(reason):
-        logging.critical(
-            f"auto_mode is enabled (no user input) & we can not auto extract the {missing_value}")
-        logging.critical(f"Exit Reason: {reason}")
-        # let the user know the error/issue
-        console.print(
-            f"\nCritical error when trying to extract: {missing_value}", style='red bold')
-        console.print(f"Exit Reason: {reason}")
-        # and finally exit since this will affect all trackers we try and upload to, so it makes no sense to try the next tracker
-        sys.exit()
 
     # !!! [ Block tests/probes start now ] !!!
 

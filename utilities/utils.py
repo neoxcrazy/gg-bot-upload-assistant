@@ -331,13 +331,13 @@ def delete_leftover_files(working_folder, file, resume=False):
     else:
         os.mkdir(f"{working_folder}/temp_upload/")
 
-    hash = get_hash(file)
-    if not Path(f"{working_folder}/temp_upload/{hash}").is_dir():
-        os.mkdir(f"{working_folder}/temp_upload/{hash}")
-    if not Path(f"{working_folder}/temp_upload/{hash}/screenshots/").is_dir():
-        os.mkdir(f"{working_folder}/temp_upload/{hash}/screenshots/")
-    logging.info(f"[Utils] Created subfolder {hash} for file {file}")
-    return f"{hash}/"
+    unique_hash = get_hash(file)
+    if not Path(f"{working_folder}/temp_upload/{unique_hash}").is_dir():
+        os.mkdir(f"{working_folder}/temp_upload/{unique_hash}")
+    if not Path(f"{working_folder}/temp_upload/{unique_hash}/screenshots/").is_dir():
+        os.mkdir(f"{working_folder}/temp_upload/{unique_hash}/screenshots/")
+    logging.info(f"[Utils] Created subfolder {unique_hash} for file {file}")
+    return f"{unique_hash}/"
 
 
 def write_file_contents_to_log_as_debug(file_path):
@@ -347,7 +347,7 @@ def write_file_contents_to_log_as_debug(file_path):
     """
     with open(file_path, 'r') as file_contents:
         lines = file_contents.readlines()
-        [logging.debug(line.replace('\\n', '').strip()) for line in lines]
+        _ = [logging.debug(line.replace('\\n', '').strip()) for line in lines]
 
 
 def perform_guessit_on_filename(file_name):
@@ -435,8 +435,8 @@ def prepare_and_validate_tracker_api_keys_dict(api_keys_file_path):
 
     api_keys = json.load(open(api_keys_file_path))
     api_keys_dict = dict()
-    for i in range(0, len(api_keys)):
-        api_keys_dict[api_keys[i]] = os.getenv(api_keys[i].upper(), "")
+    for value in api_keys:
+        api_keys_dict[value] = os.getenv(value.upper(), "")
 
     # Make sure the TMDB API is provided [Mandatory Property]
     try:

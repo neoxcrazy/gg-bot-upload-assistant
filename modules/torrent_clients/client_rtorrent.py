@@ -22,8 +22,8 @@ class Rutorrent:
     __default_path = "/plugins/httprpc/action.php"
     __upload_torrent_path = "/php/addtorrent.php"
 
-    def __call_server(self, url, data={}, files=None, header=None):
-        response = requests.post(url, data=data, files=files, headers=header or self.header)
+    def __call_server(self, url, data=None, files=None, header=None):
+        response = requests.post(url, data=data if data is not None else {}, files=files, headers=header or self.header)
         return response.json() if 'application/json' in response.headers.get('Content-Type') else response
 
     def __get_torrent_info(self, item):
@@ -138,7 +138,7 @@ class Rutorrent:
 
     def list_torrents(self):
         response = self.__call_server(f'{self.base_url}{self.__default_path}', data={'mode': 'list'})
-        if type(response["t"]) == list:
+        if isinstance(response["t"], list):
             return []
         return list(map(self.__extract_necessary_keys, filter(self.__match_label, map(self.__get_torrent_info, response["t"].items()))))
 

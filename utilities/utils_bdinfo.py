@@ -299,10 +299,8 @@ def parse_bdinfo(bdinfo_location):
                 }
                 video_components = line.split(':', 1)[1].split('/')
                 video_metadata = {}
-                for loop_variable in range(0, len(video_components)):
-                    video_metadata[video_components_dict[loop_variable]
-                                   ] = video_components[loop_variable].strip()
-
+                for index, component in enumerate(video_components):
+                    video_metadata[video_components_dict[index]] = component.strip()
                 if "HEVC" in video_metadata["codec"]:
                     video_metadata["codec"] = "HEVC"
                 elif "AVC" in video_metadata["codec"]:
@@ -331,16 +329,15 @@ def parse_bdinfo(bdinfo_location):
                 audio_components = line.split(':', 1)[1].split(
                     '/ ')  # not so sure about this /{space}
                 audio_metadata = {}
-                for loop_variable in range(0, len(audio_components)):
+                for index, component in enumerate(audio_components):
                     # identifying and tagging atmos audio
-                    if "Atmos" in audio_components[loop_variable]:
-                        codec_split = audio_components[loop_variable].split(
-                            "/")
+                    if "Atmos" in component:
+                        codec_split = component.split("/")
                         audio_metadata["atmos"] = codec_split[1].strip()
-                        audio_components[loop_variable] = codec_split[0].strip()
+                        component = codec_split[0].strip()
 
-                    audio_metadata[audio_components_dict[loop_variable]
-                                   ] = audio_components[loop_variable].strip()
+                    audio_metadata[audio_components_dict[index]] = component.strip()
+
                 bdinfo["audio"].append(audio_metadata)
             # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
             elif line.startswith("Disc Title:"):

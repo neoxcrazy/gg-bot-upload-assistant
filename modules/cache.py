@@ -44,5 +44,5 @@ class Cache:
     def close(self):
         self.cache_client.close()
 
-    def advanced_get(self, key, limit, page_number, sort_field=None, filter={}):
+    def advanced_get(self, key, limit, page_number, sort_field=None, filter=None):
         return self.cache_client.advanced_get(key, limit, page_number, sort_field, filter)
