@@ -1,9 +1,9 @@
 import enum
 
-from modules.torrent_clients.client_deluge import Deluge
+# from modules.torrent_clients.client_deluge import Deluge
 from modules.torrent_clients.client_qbittorrent import Qbittorrent
 from modules.torrent_clients.client_rtorrent import Rutorrent
-from modules.torrent_clients.client_transmission import Transmission
+# from modules.torrent_clients.client_transmission import Transmission
 
 
 # Using enum class create enumerations
