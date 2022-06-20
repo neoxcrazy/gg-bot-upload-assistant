@@ -34,10 +34,10 @@ from rich.traceback import install
 # Method that will search for dupes in trackers.
 # This is used to take screenshots and eventually upload them to either imgbox, imgbb, ptpimg or freeimage
 from utilities.utils_screenshots import take_upload_screens
+from utilities.utils_dupes import search_for_dupes_api
 # Method that will search for dupes in trackers.
 import utilities.utils_miscellaneous as miscellaneous_utilities
 import utilities.utils_translation as translation_utilities
-from utilities.utils_dupes import search_for_dupes_api
 import utilities.utils_reupload as reupload_utilities
 import utilities.utils_metadata as metadata_utilities
 import utilities.utils_basic as basic_utilities
@@ -86,37 +86,24 @@ auto_mode = 'true'
 parser = argparse.ArgumentParser()
 
 common_args = parser.add_argument_group('Commonly Used Arguments')
-common_args.add_argument('-t', '--trackers', nargs='*',
-                         help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
-common_args.add_argument('-a', '--all_trackers', action='store_true',
-                         help="Select all trackers that can be uploaded to")
-common_args.add_argument('-anon', action='store_true',
-                         help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
+common_args.add_argument('-t', '--trackers', nargs='*', help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
+common_args.add_argument('-a', '--all_trackers', action='store_true', help="Select all trackers that can be uploaded to")
+common_args.add_argument('-anon', action='store_true', help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
 
 uncommon_args = parser.add_argument_group('Less Common Arguments')
-uncommon_args.add_argument('-d', '--debug', action='store_true',
-                           help="Used for debugging. Writes debug lines to log file")
-uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true',
-                           help="Use mktorrent instead of torf (Latest git version only)")
-uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true',
-                           help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
-uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true',
-                           help="Skip screenshot generation and upload for a run (overrides config.env)")
+uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for debugging. Writes debug lines to log file")
+uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
+uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
+uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true', help="Skip screenshot generation and upload for a run (overrides config.env)")
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
-internal_args.add_argument('-internal', action='store_true',
-                           help="(Internal) Used to mark an upload as 'Internal'")
-internal_args.add_argument('-freeleech', action='store_true',
-                           help="(Internal) Used to give a new upload freeleech")
-internal_args.add_argument(
-    '-featured', action='store_true', help="(Internal) feature a new upload")
-internal_args.add_argument('-doubleup', action='store_true',
-                           help="(Internal) Give a new upload 'double up' status")
-internal_args.add_argument('-tripleup', action='store_true',
-                           help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]")
-internal_args.add_argument(
-    '-sticky', action='store_true', help="(Internal) Pin the new upload")
+internal_args.add_argument('-internal', action='store_true', help="(Internal) Used to mark an upload as 'Internal'")
+internal_args.add_argument('-freeleech', action='store_true', help="(Internal) Used to give a new upload freeleech")
+internal_args.add_argument('-featured', action='store_true', help="(Internal) feature a new upload")
+internal_args.add_argument('-doubleup', action='store_true', help="(Internal) Give a new upload 'double up' status")
+internal_args.add_argument('-tripleup', action='store_true', help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]")
+internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload")
 
 args = parser.parse_args()
 
@@ -154,13 +141,10 @@ torrent_client_factory = TorrentClientFactory()
 torrent_client = torrent_client_factory.create(Clients[os.getenv('client')])
 # checking whether the torrent client connection has been created successfully or not
 torrent_client.hello()
+logging.info(f"[Main] Successfully established connection to the torrent client {os.getenv('client')}")
 
 
-logging.info(
-    f"[Main] Successfully established connection to the torrent client {os.getenv('client')}")
-
-logging.info(
-    "[Main] Going to establish connection to the cache server configured")
+logging.info("[Main] Going to establish connection to the cache server configured")
 # creating an instance of cache based on the users configuration
 # TODO if user hasn't provided any configuration then we need to use some other means to keep track
 # of these metadata
@@ -170,8 +154,7 @@ cache_client_factory = CacheFactory()
 cache = cache_client_factory.create(CacheVendor[os.getenv('cache_type')])
 # checking whether the cache connection has been created successfully or not
 cache.hello()
-logging.info(
-    "[Main] Successfully established connection to the cache server configured")
+logging.info("[Main] Successfully established connection to the cache server configured")
 
 
 # ---------------------------------------------------------------------- #
@@ -1117,13 +1100,13 @@ def identify_miscellaneous_details(guess_it_result):
 
         # Dolby vision (filename detection)
         # we only need to do this if user is having an older verison of mediainfo, which can't detect dv
-        if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+        if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
             if any(x == word for x in ['dv', 'dovi']):
                 logging.info("Detected Dolby Vision from the filename")
                 torrent_info["dv"] = "DV"
 
     # trying to check whether Do-Vi exists in the title, again needed only for older versions of mediainfo
-    if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+    if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
         if 'do'in hdr_hybrid_remux_keyword_search and 'vi' in hdr_hybrid_remux_keyword_search:
             torrent_info["dv"] = "DV"
             logging.info("Adding Do-Vi from file name. Marking existing of Dolby Vision")

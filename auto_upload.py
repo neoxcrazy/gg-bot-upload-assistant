@@ -581,13 +581,13 @@ def identify_miscellaneous_details(guess_it_result):
 
         # Dolby vision (filename detection)
         # we only need to do this if user is having an older verison of mediainfo, which can't detect dv
-        if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+        if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
             if any(x == word for x in ['dv', 'dovi']):
                 logging.info("Detected Dolby Vision from the filename")
                 torrent_info["dv"] = "DV"
 
     # trying to check whether Do-Vi exists in the title, again needed only for older versions of mediainfo
-    if "dv" not in torrent_info and torrent_info["dv"] is not None and len(torrent_info["dv"]) < 1:
+    if "dv" not in torrent_info or torrent_info["dv"] is None or len(torrent_info["dv"]) < 1:
         if 'do'in hdr_hybrid_remux_keyword_search and 'vi' in hdr_hybrid_remux_keyword_search:
             torrent_info["dv"] = "DV"
             logging.info("Adding Do-Vi from file name. Marking existing of Dolby Vision")

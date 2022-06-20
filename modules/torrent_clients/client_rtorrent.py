@@ -100,10 +100,10 @@ class Rutorrent:
         if self.host is None or len(self.host) == 0:
             raise Exception("Invalid RuTorrent host provided")
 
-        self.port = os.getenv("client_port") or 80
+        self.port = os.getenv("client_port", "80")
         self.username = os.getenv("client_username")
         self.password = os.getenv("client_password")
-        self.path = os.getenv("client_path") or "/"
+        self.path = os.getenv("client_path", "/")
         self.base_url = f'{self.host}:{self.port}{self.path}'
 
         if self.username:

@@ -26,8 +26,7 @@ class Mongo:
                 self.is_mongo_initalized = True
                 self.database = self.mongo_client[os.getenv('cache_database')]
             except Exception as ex:
-                logging.fatal(
-                    f'[Cache] Failed to connect to Mongo DB. Error: {ex}')
+                logging.fatal(f'[Cache] Failed to connect to Mongo DB. Error: {ex}')
                 raise Exception(f"Failed to connect to Mongo DB. Error: {ex}")
 
     def map_cursor_to_list(function):
@@ -47,8 +46,7 @@ class Mongo:
 
     def __get_collection(self, key):
         if not self.is_mongo_initalized:
-            raise Exception(
-                "Mongo client has not been initalized yet. Use the init() to initalize connection.")
+            raise Exception("Mongo client has not been initalized yet. Use the init() to initalize connection.")
         key = key.split("::")
         return self.database[key[0] + "_" + key[1]]
 
@@ -66,8 +64,7 @@ class Mongo:
             # no hash provided in key. hence we need to use the user provided query
             # if user has not provided any query then we'll raise an exception
             if query is None:
-                raise Exception(
-                    "No hash or query provided. Cannot delete document")
+                raise Exception("No hash or query provided. Cannot delete document")
             # returns the number of documents deleted
             return collection.delete_many(query)
         else:
@@ -78,8 +75,7 @@ class Mongo:
     def get(self, key, filter=None):
         collection = self.__get_collection(key)
         # <=2 because keys are in the form of GROUP::COLLECTION::KEY
-        filter = ({} if filter is None else filter) if len(
-            key.split("::")) <= 2 else {"hash": key.split("::")[2]}
+        filter = ({} if filter is None else filter) if len(key.split("::")) <= 2 else {"hash": key.split("::")[2]}
         return collection.find(filter)
 
     @map_cursor_to_list
@@ -89,7 +85,7 @@ class Mongo:
 
     def count(self, key, filter=None):
         collection = self.__get_collection(key)
-        return collection.count_documents()
+        return collection.count_documents(filter if filter is not None else {})
 
     def close(self):
         """
@@ -97,6 +93,5 @@ class Mongo:
             This is a wrapper around the redis `hgetall` operation
         """
         if not self.is_mongo_initalized:
-            raise Exception(
-                "Redis client has not been initalized yet. Use the init() to initalize connection.")
+            raise Exception("Redis client has not been initalized yet. Use the init() to initalize connection.")
         self.mongo_client.close()

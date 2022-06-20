@@ -453,11 +453,9 @@ def validate_env_file(sample_env_location):
     sample_env_keys = dotenv_values(sample_env_location).keys()
     # validating env file with expected keys from sample file
     for key in sample_env_keys:
-        if os.getenv(key, "") == "":
-            console.print(
-                f"Outdated config.env file. Variable [red][bold]{key}[/bold][/red] is missing.", style="blue")
-            logging.error(
-                f"Outdated config.env file. Variable {key} is missing.")
+        if os.getenv(key) is None:
+            console.print(f"Outdated config.env file. Variable [red][bold]{key}[/bold][/red] is missing.", style="blue")
+            logging.error(f"Outdated config.env file. Variable {key} is missing.")
 
 
 def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, all_trackers_list):
@@ -522,19 +520,19 @@ def _get_client_translated_path(torrent_info):
         logging.info('[Utils] Translating paths... ("translation_needed" flag set to True in config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
-        uploader_path = f"{os.getenv('uploader_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
-        client_path = f"{os.getenv('client_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
+        uploader_accessible_path = f"{os.getenv('uploader_accessible_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
+        client_accessible_path = f"{os.getenv('client_accessible_path', '__MISCONFIGURED_PATH__')}/".replace('//', '/')
 
-        if "__MISCONFIGURED_PATH__/" in [client_path, uploader_path]:
+        if "__MISCONFIGURED_PATH__/" in [client_accessible_path, uploader_accessible_path]:
             logging.error("[Utils] User have enabled translation, but haven't provided the translation paths. Stopping cross-seeding...")
             return False
 
         # log the changes
         logging.info(f'[Utils] Uploader path: {torrent_info["upload_media"]}')
-        logging.info(f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_path, client_path)}')
+        logging.info(f'[Utils] Translated path: {torrent_info["upload_media"].replace(uploader_accessible_path, client_accessible_path)}')
 
         # Now we replace the remote path with the system one
-        torrent_info["upload_media"] = torrent_info["upload_media"].replace(uploader_path, client_path)
+        torrent_info["upload_media"] = torrent_info["upload_media"].replace(uploader_accessible_path, client_accessible_path)
     return f'{torrent_info["upload_media"]}/'.replace('//', '/')
 
 

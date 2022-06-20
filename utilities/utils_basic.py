@@ -162,12 +162,19 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
     return dv, hdr, regex_video_codec
 
 
+def __get_atmos_from_media_info(media_info_audio_track):
+    if "atmos" in media_info_audio_track.commercial_name.lower():
+        return "Atmos"
+    return None
+
+
 def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_file_path, media_info_audio_track, parse_me, missing_value):
     """
         Returns (audio_codec, atmos)
     """
     # We store some common audio code translations in this dict
     audio_codec_dict = json.load(open(audio_codec_file_path))
+    atmos = __get_atmos_from_media_info(media_info_audio_track)
 
     # TODO handle returning atmos from here
     if is_disc and torrent_info["bdinfo"] is not None:
@@ -175,12 +182,12 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
         return audio_codec, atmos
 
     # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
-    elif "audio_codec" in torrent_info:
+    if "audio_codec" in torrent_info:
         logging.debug(f"[BasicUtils] audio_codec is present in the torrent info [{torrent_info['audio_codec']}]. Trying to match it with audio_codec_dict")
         for key in audio_codec_dict.keys():
             if str(torrent_info["audio_codec"]) == key:
                 logging.info(f'[BasicUtils] Used (audio_codec_dict + GuessIt) to identify the audio codec: {audio_codec_dict[torrent_info["audio_codec"]]}')
-                return audio_codec_dict[torrent_info["audio_codec"]], None
+                return audio_codec_dict[torrent_info["audio_codec"]], atmos
 
     # This regex is mainly for bluray_discs
     # TODO rewrite this to be more inclusive of other audio codecs
@@ -193,7 +200,7 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
                 if audio_codec == "DTSHDMA":
                     audio_codec = "DTS-HD MA"
                 logging.info(f'[BasicUtils] Used regex to identify the audio codec: {audio_codec}')
-                return audio_codec, None
+                return audio_codec, atmos
 
      # Now we try to identify the audio_codec using pymediainfo
     if media_info_audio_track is not None:
@@ -224,18 +231,17 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
             # AAC gets its own 'if' statement because 'audio_codec' can return something like 'AAC LC-SBR' or 'AAC-HE/LC'
             # Its unnecessary for a torrent title and we only need the "AAC" part
             logging.info(f'[BasicUtils] Used pymediainfo to identify the audio codec: {audio_codec}')
-            return "AAC", None
+            return "AAC", atmos
 
         if "FLAC" in audio_codec:
             # This is similar to the AAC situation right above ^^, on a recent upload I got the value "A_FLAC" which can be shortened to 'FLAC'
             logging.info('[BasicUtils] Used pymediainfo to identify the audio codec: FLAC')
-            return "FLAC", None
+            return "FLAC", atmos
 
         if "DTS" in audio_codec:
             # DTS audio is a bit "special" and has a few possible profiles so we deal with that here
             # We'll first try to extract it all via regex, should that fail we can use ffprobe
-            match_dts_audio = re.search(
-                r'DTS(-HD(.MA.)|-ES.|(.[xX].|[xX].)|(.HD.|HD.)|)', torrent_info["raw_file_name"].replace(" ", "."), re.IGNORECASE)
+            match_dts_audio = re.search(r'DTS(-HD(.MA.)|-ES.|(.[xX].|[xX].)|(.HD.|HD.)|)', torrent_info["raw_file_name"].replace(" ", "."), re.IGNORECASE)
             if match_dts_audio is not None:
                 # Some releases have DTS-X-RELEASE_GROUP, in this case we only need DTS-X
                 return_value = str(match_dts_audio.group()).upper().replace(".", " ").strip()
@@ -246,8 +252,8 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
                 if return_value in audio_codec_dict.keys():
                     # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
                     logging.info(f'[BasicUtils] Used (pymediainfo + regex + audio_codec_dict) to identify the audio codec: {audio_codec_dict[return_value]}')
-                    return audio_codec_dict[return_value], None
-                return return_value, None
+                    return audio_codec_dict[return_value], atmos
+                return return_value, atmos
 
             # If the regex failed we can try ffprobe
             audio_info_probe = FFprobe(
@@ -258,14 +264,14 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
 
             for stream in audio_info["streams"]:
                 logging.info(f'[BasicUtils] Used ffprobe to identify the audio codec: {stream["profile"]}')
-                return stream["profile"], None
+                return stream["profile"], atmos
 
         logging.debug(f"[BasicUtils] Pymediainfo extracted audio_codec as {audio_codec}")
 
         if audio_codec in audio_codec_dict.keys():
             # Now its a bit of a Hail Mary and we try to match whatever pymediainfo returned to our audio_codec_dict/translation
             logging.info(f'[BasicUtils] Used (pymediainfo + audio_codec_dict) to identify the audio codec: {audio_codec_dict[audio_codec]}')
-            return audio_codec_dict[audio_codec], None
+            return audio_codec_dict[audio_codec], atmos
 
     # If the audio_codec has not been extracted yet then we try user_input
     if auto_mode == 'false':
@@ -276,14 +282,14 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
                 console.print(f'[red]Invalid input provided. Please provide a valid {missing_value}[/red]')
             else:
                 logging.info(f"[BasicUtils] Used user_input to identify the {missing_value}: {audio_codec_input}")
-                return str(audio_codec_input), None
+                return str(audio_codec_input), atmos
 
     # -- ! This runs if auto_mode == true !
     # We could technically upload without the audio codec in the filename, check to see what the user wants
     # This means we will still force an upload without the audio_codec
     if str(os.getenv('force_auto_upload')).lower() == 'true':
         logging.info("[BasicUtils] force_auto_upload=true so we'll upload without the audio_codec in the torrent title")
-        return "", None
+        return "", atmos
 
     # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
     # Exit the script now
