@@ -17,7 +17,7 @@ def do_tmdb_search(url):
 
 def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
     console.line(count=2)
-    console.rule(f"TMDB Search Results", style='red', align='center')
+    console.rule("TMDB Search Results", style='red', align='center')
     console.line(count=1)
 
     # sanitizing query_title
@@ -279,7 +279,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                 if len(tmdb_id_request[item]) == 1:
                     logging.debug(f"[MetadataUtils] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
                     return str(tmdb_id_request[item][0]["id"]) if tmdb_id_request[item][0]["id"] is not None else "0"
-    except Exception as ex:
+    except Exception:
         logging.exception("[MetadataUtils] Error while fetching external id. Returning `0` as the id")
         return "0"
 

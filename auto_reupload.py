@@ -2,25 +2,19 @@
 import os
 import re
 import sys
-import math
 import glob
 import time
 import json
 import base64
-import shutil
 import logging
 import schedule
 import argparse
 
-from pathlib import Path
 from pprint import pformat
 from datetime import datetime
 
 # These packages need to be installed
 import requests
-from torf import Torrent
-from ffmpy import FFprobe
-from guessit import guessit
 from dotenv import load_dotenv
 from pymediainfo import MediaInfo
 
@@ -724,14 +718,13 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         Returns `skip_to_next_file` if there are no video files in thhe provided folder
     """
     console.line(count=2)
-    console.rule(f"Analyzing & Identifying Video", style='red', align='center')
+    console.rule("Analyzing & Identifying Video", style='red', align='center')
     console.line(count=1)
 
     # ------------ Save obvious info we are almost guaranteed to get from guessit into torrent_info dict ------------ #
     # But we can immediately assign some values now like Title & Year
     if not guess_it_result["title"]:
-        raise AssertionError(
-            "Guessit could not even extract the title, something is really wrong with this filename.")
+        raise AssertionError("Guessit could not even extract the title, something is really wrong with this filename.")
 
     torrent_info["title"] = guess_it_result["title"]
     if "year" in guess_it_result:  # Most TV Shows don't have the year included in the filename
@@ -749,8 +742,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     keys_we_need_but_missing_torrent_info = []
     # We can (need to) have some other information in the final torrent title like 'editions', 'hdr', etc
     # All of that is important but not essential right now so we will try to extract that info later in the script
-    logging.debug(
-        f"Attempting to detect the following keys from guessit :: {keys_we_need_torrent_info}")
+    logging.debug(f"Attempting to detect the following keys from guessit :: {keys_we_need_torrent_info}")
     for basic_key in keys_we_need_torrent_info:
         if basic_key in guess_it_result:
             torrent_info[basic_key] = str(guess_it_result[basic_key])
@@ -770,8 +762,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
     elif torrent_info["release_group"].startswith("X-"):
         # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
-        logging.info(
-            f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
+        logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
         torrent_info["release_group"] = torrent_info["release_group"][2:]
 
     if "type" not in torrent_info:
@@ -1207,21 +1198,18 @@ def format_title(json_config):
     # These translations are then applied here.
     if "torrent_title_translation" in json_config:
         torrent_title_translation = json_config["torrent_title_translation"]
-        logging.info(
-            f"Going to apply title translations to generated title: {formatted_title}")
+        logging.info(f"Going to apply title translations to generated title: {formatted_title}")
         for key, val in torrent_title_translation.items():
             formatted_title = formatted_title.replace(key, val)
 
-    logging.info(
-        f"Torrent title after formatting and translations: {formatted_title}")
+    logging.info(f"Torrent title after formatting and translations: {formatted_title}")
     # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings"
     # which is used to store the payload for the actual POST upload request
     torrent_info["torrent_title"] = str(formatted_title[1:])
 
     if discord_url:
         time.sleep(1)
-        requests.request("POST", discord_url, headers={
-                         'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Torrent Title: **{torrent_info["torrent_title"]}**')
+        requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Torrent Title: **{torrent_info["torrent_title"]}**')
 # -------------- END of format_title --------------
 
 
@@ -1510,10 +1498,8 @@ def reupload_job():
 
             is_non_dupes_present = True
             # -------- Generate .torrent file --------
-            console.print(
-                f'\n[bold]Generating .torrent file for [chartreuse1]{tracker}[/chartreuse1][/bold]')
-            logging.debug(
-                f'[Main] Torrent info just before dot torrent creation. \n {pformat(torrent_info)}')
+            console.print(f'\n[bold]Generating .torrent file for [chartreuse1]{tracker}[/chartreuse1][/bold]')
+            logging.debug(f'[Main] Torrent info just before dot torrent creation. \n {pformat(torrent_info)}')
             # If the type is a movie, then we only include the `raw_video_file` for torrent file creation.
             # If type is an episode, then we'll create torrent file for the the `upload_media` which could be an single episode or a season folder
             if torrent_info["type"] == "movie" and "raw_video_file" in torrent_info:
@@ -1558,7 +1544,7 @@ def reupload_job():
                 job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
-                job_repo_entry["status"] = JobStatus.SUCCESS
+                job_repo_entry["status"] = reupload_utilities.JobStatus.SUCCESS
                 job_repo_entry["tracker_response"] = json.dumps(upload_response)
                 # inserting the torernt->tracker data to job_repository
                 reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
@@ -1602,7 +1588,7 @@ def reupload_job():
                 job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
                 job_repo_entry["hash"] = torrent["hash"]
                 job_repo_entry["tracker"] = tracker
-                job_repo_entry["status"] = JobStatus.FAILED
+                job_repo_entry["status"] = reupload_utilities.JobStatus.FAILED
                 job_repo_entry["tracker_response"] = json.dumps(upload_response)
                 # inserting the torernt->tracker data to job_repository
                 reupload_utilities.insert_into_job_repo(job_repo_entry, cache)

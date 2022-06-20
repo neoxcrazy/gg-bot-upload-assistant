@@ -1,7 +1,6 @@
 import os
 import logging
 
-from pprint import pformat
 from datetime import datetime
 from transmission_rpc import Client
 

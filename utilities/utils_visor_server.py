@@ -1,7 +1,7 @@
 import math
 import json
 
-from bson import json_util, ObjectId
+from bson import json_util
 
 
 TORRENT_DB_KEY_PREFIX = "ReUpload::Torrent"

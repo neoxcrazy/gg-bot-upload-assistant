@@ -75,7 +75,7 @@ def miscellaneous_identify_web_streaming_source(streaming_services, raw_file_nam
     streaming_sources = json.load(open(streaming_services))
     web_source = guess_it_result.get('streaming_service', '')
 
-    if type(web_source) is list:
+    if isinstance(web_source, list):
         logging.info(f"[MiscellaneousUtils] GuessIt identified multiple streaming services [{web_source}]. Proceeding with the first in the list.")
         web_source = web_source[0]
     guessit_output = streaming_sources.get(web_source)
@@ -95,7 +95,7 @@ def miscellaneous_identify_web_streaming_source(streaming_services, raw_file_nam
 
 
 def miscellaneous_identify_source_type(raw_file_name, auto_mode, source):
-    logging.debug(f'[MiscellaneousUtils] Source type is not available. Trying to identify source type')
+    logging.debug('[MiscellaneousUtils] Source type is not available. Trying to identify source type')
     match_source = re.search(r'(?P<bluray_remux>.*blu(.ray|ray).*remux.*)|'
                              r'(?P<bluray_disc>.*blu(.ray|ray)((?!x(264|265)|h.(265|264)|H.(265|264)|H(265|264)).)*$)|'
                              r'(?P<webrip>.*web(.rip|rip).*)|'

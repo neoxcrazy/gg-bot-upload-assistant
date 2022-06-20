@@ -91,70 +91,42 @@ parser = argparse.ArgumentParser()
 
 # Required Arguments [Mandatory]
 required_args = parser.add_argument_group('Required Arguments')
-required_args.add_argument('-p', '--path', nargs='*', required=True,
-                           help="Use this to provide path(s) to file/folder")
+required_args.add_argument('-p', '--path', nargs='*', required=True, help="Use this to provide path(s) to file/folder")
 
 # Commonly used args:
 common_args = parser.add_argument_group('Commonly Used Arguments')
-common_args.add_argument('-t', '--trackers', nargs='*',
-                         help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
-common_args.add_argument('-a', '--all_trackers', action='store_true',
-                         help="Select all trackers that can be uploaded to")
-common_args.add_argument(
-    '-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
-common_args.add_argument(
-    '-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
-common_args.add_argument(
-    '-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
-common_args.add_argument('-anon', action='store_true',
-                         help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
+common_args.add_argument('-t', '--trackers', nargs='*', help="Tracker(s) to upload to. Space-separates if multiple (no commas)")
+common_args.add_argument('-a', '--all_trackers', action='store_true',help="Select all trackers that can be uploaded to")
+common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
+common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
+common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
+common_args.add_argument('-anon', action='store_true',help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
 
 # Less commonly used args (Not essential for most)
 uncommon_args = parser.add_argument_group('Less Common Arguments')
-uncommon_args.add_argument(
-    '-title', nargs=1, help="Custom title provided by the user")
-uncommon_args.add_argument(
-    '-type', nargs=1, help="Use to manually specify 'movie' or 'tv'")
-uncommon_args.add_argument(
-    '-reupload', nargs='*', help="This is used in conjunction with autodl to automatically re-upload any filter matches")
-uncommon_args.add_argument('-batch', action='store_true',
-                           help="Pass this arg if you want to upload all the files/folder within the folder you specify with the '-p' arg")
-uncommon_args.add_argument('-disc', action='store_true',
-                           help="If you are uploading a raw dvd/bluray disc you need to pass this arg")
-uncommon_args.add_argument('-e', '--edition', nargs='*',
-                           help="Manually provide an 'edition' (e.g. Criterion Collection, Extended, Remastered, etc)")
-uncommon_args.add_argument(
-    '-nfo', nargs=1, help="Use this to provide the path to an nfo file you want to upload")
-uncommon_args.add_argument('-d', '--debug', action='store_true',
-                           help="Used for debugging. Writes debug lines to log file")
-uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true',
-                           help="Use mktorrent instead of torf (Latest git version only)")
-uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true',
-                           help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
-uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true',
-                           help="Skip screenshot generation and upload for a run (overrides config.env)")
-uncommon_args.add_argument(
-    '-r', '--resume', action='store_true', help="Resume previously unfinished upload.")
-
-uncommon_args.add_argument('-3d', action='store_true',
-                           help="Mark the upload as 3D content")
-uncommon_args.add_argument('-foreign', action='store_true',
-                           help="Mark the upload as foreign content [Non-English]")
+uncommon_args.add_argument('-title', nargs=1, help="Custom title provided by the user")
+uncommon_args.add_argument('-type', nargs=1, help="Use to manually specify 'movie' or 'tv'")
+uncommon_args.add_argument('-reupload', nargs='*', help="This is used in conjunction with autodl to automatically re-upload any filter matches")
+uncommon_args.add_argument('-batch', action='store_true',help="Pass this arg if you want to upload all the files/folder within the folder you specify with the '-p' arg")
+uncommon_args.add_argument('-disc', action='store_true',help="If you are uploading a raw dvd/bluray disc you need to pass this arg")
+uncommon_args.add_argument('-e', '--edition', nargs='*',help="Manually provide an 'edition' (e.g. Criterion Collection, Extended, Remastered, etc)")
+uncommon_args.add_argument('-nfo', nargs=1, help="Use this to provide the path to an nfo file you want to upload")
+uncommon_args.add_argument('-d', '--debug', action='store_true',help="Used for debugging. Writes debug lines to log file")
+uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true',help="Use mktorrent instead of torf (Latest git version only)")
+uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true',help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
+uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true',help="Skip screenshot generation and upload for a run (overrides config.env)")
+uncommon_args.add_argument('-r', '--resume', action='store_true', help="Resume previously unfinished upload.")
+uncommon_args.add_argument('-3d', action='store_true',help="Mark the upload as 3D content")
+uncommon_args.add_argument('-foreign', action='store_true',help="Mark the upload as foreign content [Non-English]")
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
-internal_args.add_argument('-internal', action='store_true',
-                           help="(Internal) Used to mark an upload as 'Internal'")
-internal_args.add_argument('-freeleech', action='store_true',
-                           help="(Internal) Used to give a new upload freeleech")
-internal_args.add_argument(
-    '-featured', action='store_true', help="(Internal) feature a new upload")
-internal_args.add_argument('-doubleup', action='store_true',
-                           help="(Internal) Give a new upload 'double up' status")
-internal_args.add_argument('-tripleup', action='store_true',
-                           help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]")
-internal_args.add_argument(
-    '-sticky', action='store_true', help="(Internal) Pin the new upload")
+internal_args.add_argument('-internal', action='store_true',help="(Internal) Used to mark an upload as 'Internal'")
+internal_args.add_argument('-freeleech', action='store_true',help="(Internal) Used to give a new upload freeleech")
+internal_args.add_argument('-featured', action='store_true', help="(Internal) feature a new upload")
+internal_args.add_argument('-doubleup', action='store_true',help="(Internal) Give a new upload 'double up' status")
+internal_args.add_argument('-tripleup', action='store_true',help="(Internal) Give a new upload 'triple up' status [XBTIT Exclusive]")
+internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload")
 
 args = parser.parse_args()
 
@@ -388,7 +360,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # certain release groups will add IMDB, TMDB and TVDB id in the general section of mediainfo. If one such id is present then we can use it and
         # consider it the same as being provided by the user (no need to search)
         # PS: We don't use the tvdb id obtained here. (Might be deprecated)
-        mediainfo_summary, tmdb, imdb, tvdb = basic_utilities.basic_get_mediainfo_summary(
+        mediainfo_summary, tmdb, imdb, _ = basic_utilities.basic_get_mediainfo_summary(
             media_info_result.to_data())
         torrent_info["mediainfo_summary"] = mediainfo_summary
         if tmdb != "0":

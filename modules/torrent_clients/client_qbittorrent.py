@@ -2,7 +2,6 @@ import os
 import logging
 import qbittorrentapi
 
-from pprint import pformat
 from datetime import datetime
 
 

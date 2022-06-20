@@ -12,10 +12,9 @@ from pprint import pformat
 from pymediainfo import MediaInfo
 
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
-from utilities.utils_bdinfo import *
-
+import utilities.utils_bdinfo as bdinfo_utilities
 
 console = Console()
 
@@ -88,7 +87,7 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
     logging.debug(
         f"[BasicUtils] Dumping torrent_info before video_codec identification. {pformat(torrent_info)}")
     if is_disc and torrent_info["bdinfo"] is not None:
-        return bdinfo_get_video_codec_from_bdinfo(torrent_info["bdinfo"])
+        return bdinfo_utilities.bdinfo_get_video_codec_from_bdinfo(torrent_info["bdinfo"])
 
     dv, hdr = _get_dv_hdr(media_info_video_track)
 
@@ -154,7 +153,7 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
     logging.info(f"[BasicUtils] Pymediainfo identified the video_codec as: {pymediainfo_video_codec}")
     if regex_video_codec != pymediainfo_video_codec:
         logging.error(f"[BasicUtils] Regex extracted video_codec [{regex_video_codec}] and pymediainfo extracted video_codec [{pymediainfo_video_codec}] doesn't match!!")
-        logging.info(f"[BasicUtils] If `--force_pymediainfo` or `-fpm` is provided as argument, PyMediaInfo video_codec will be used, else regex extracted video_codec will be used")
+        logging.info("[BasicUtils] If `--force_pymediainfo` or `-fpm` is provided as argument, PyMediaInfo video_codec will be used, else regex extracted video_codec will be used")
         if force_pymediainfo:
             return dv, hdr, pymediainfo_video_codec
 
@@ -178,7 +177,7 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
 
     # TODO handle returning atmos from here
     if is_disc and torrent_info["bdinfo"] is not None:
-        atmos, audio_codec = bdinfo_get_audio_codec_from_bdinfo(torrent_info['bdinfo'], audio_codec_dict)
+        atmos, audio_codec = bdinfo_utilities.bdinfo_get_audio_codec_from_bdinfo(torrent_info['bdinfo'], audio_codec_dict)
         return audio_codec, atmos
 
     # First check to see if GuessIt inserted an audio_codec into torrent_info and if it did then we can verify its formatted correctly
@@ -298,7 +297,7 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
 
 def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me, media_info_audio_track, missing_value):
     if is_disc and torrent_info["bdinfo"] is not None:
-        return bdinfo_get_audio_channels_from_bdinfo(torrent_info["bdinfo"])
+        return bdinfo_utilities.bdinfo_get_audio_channels_from_bdinfo(torrent_info["bdinfo"])
 
     # First try detecting the 'audio_channels' using regex
     if "raw_file_name" in torrent_info:
@@ -377,13 +376,11 @@ def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me,
 
 
 def basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track, auto_mode, missing_value):
-    width_to_height_dict = {"720": "576", "960": "540", "1280": "720",
-                            "1920": "1080", "4096": "2160", "3840": "2160", "692": "480", "1024": "576"}
-    logging.debug(f"[BasicUtils] Attempting to identify the resolution")
+    width_to_height_dict = {"720": "576", "960": "540", "1280": "720", "1920": "1080", "4096": "2160", "3840": "2160", "692": "480", "1024": "576"}
+    logging.debug("[BasicUtils] Attempting to identify the resolution")
 
     if is_disc and torrent_info["bdinfo"] is not None:
-        logging.info(
-            f"[BasicUtils] `screen_size` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['resolution']}")
+        logging.info(f"[BasicUtils] `screen_size` identifed from bdinfo as {torrent_info['bdinfo']['video'][0]['resolution']}")
         return torrent_info["bdinfo"]["video"][0]["resolution"]
 
     # First we use attempt to use "width" since its almost always constant (Groups like to crop black bars so "height" is always changing)

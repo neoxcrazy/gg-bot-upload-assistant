@@ -8,7 +8,7 @@ import subprocess
 from rich import box
 from rich.table import Table
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
 console = Console()
 
@@ -107,7 +107,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
     bd_max_size = 0
     bd_max_file = ""  # file with the largest size inside the STEAM folder
 
-    for folder, subfolders, files in os.walk(f'{upload_media}BDMV/STREAM/'):
+    for folder, _, files in os.walk(f'{upload_media}BDMV/STREAM/'):
         # checking the size of each file
         for bd_file in files:
             size = os.stat(os.path.join(folder, bd_file)).st_size
@@ -116,12 +116,9 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
                 bd_max_size = size
                 bd_max_file = os.path.join(folder, bd_file)
 
-    bdinfo_output_split = str(' '.join(str(subprocess.check_output(
-        [bdinfo_script, upload_media, "-l"])).split())).split(' ')
-    logging.debug(
-        f"[BDInfoUtils] BDInfo output split from of list command: ---{bdinfo_output_split}--- ")
-    all_mpls_playlists = re.findall(
-        r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
+    bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, upload_media, "-l"])).split())).split(' ')
+    logging.debug(f"[BDInfoUtils] BDInfo output split from of list command: ---{bdinfo_output_split}--- ")
+    all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
     dict_of_playlist_length_size = {}
     dict_of_playlist_info_list = []  # list of dict
@@ -129,8 +126,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
     for index, mpls_playlist in enumerate(bdinfo_output_split):
         if mpls_playlist in all_mpls_playlists:
             playlist_details = {}
-            playlist_details["no"] = bdinfo_output_split[index -
-                                                         2].replace("\\n", "")
+            playlist_details["no"] = bdinfo_output_split[index - 2].replace("\\n", "")
             playlist_details["group"] = bdinfo_output_split[index - 1]
             playlist_details["file"] = bdinfo_output_split[index]
             playlist_details["length"] = bdinfo_output_split[index + 1]

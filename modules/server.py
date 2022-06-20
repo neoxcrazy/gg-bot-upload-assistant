@@ -1,10 +1,9 @@
 import os
-import time
 import hashlib
 import functools
 
 from threading import Thread
-from flask import Flask, Response, request
+from flask import Flask, request
 
 import utilities.utils_visor_server as visor
 

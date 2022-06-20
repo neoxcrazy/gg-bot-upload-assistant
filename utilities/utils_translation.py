@@ -106,8 +106,8 @@ def get_hybrid_type(target_val, tracker_settings, config, exit_program, torrent_
     # getting values for the source, resolution and type properties
     source = tracker_settings[config["translation"]["source"]]
     resolution = tracker_settings[config["translation"]["resolution"]]
-    type = tracker_settings[config["translation"]["type"]]
-    logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{type}]')
+    upload_type = tracker_settings[config["translation"]["type"]]
+    logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{upload_type}]')
 
     for key in config["hybrid_type"]["mapping"]:
         logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")

@@ -39,12 +39,12 @@ def _get_headers(technical_jargons, search_site, tracker_api):
     return None
 
 
-def _prepare_post_payload(search_site, imdb, tmdb, tvmaze, tracker_api, payload, type, title):
+def _prepare_post_payload(search_site, imdb, tmdb, tvmaze, tracker_api, payload, upload_type, title):
     # -------------------------------------------------------------------------
     # Temporary fix for BIT-HDTV TODO need to find a better solution for this.
     if search_site == "bit-hdtv":
         url_replacer = f"https://www.imdb.com/title/{imdb}"
-        if type == "episode":
+        if upload_type == "episode":
             url_replacer = f"https://www.tvmaze.com/shows/{tvmaze}"
         url_dupe_payload = payload.replace(
             "<imdb>", url_replacer).replace("<title>", title)
@@ -98,7 +98,7 @@ def _combine_field_for_title(fields, torrent_details):
                 f'[DupeCheck] Combine field `{field}` is not present in the obtained torrent details response')
             continue
 
-        if type(torrent_details[field]) is list:
+        if isinstance(torrent_details[field], list):
             for field_data in torrent_details[field]:
                 # well we don't need these components in the torrent title
                 if str(field_data) in ["Commentary"]:
@@ -284,19 +284,15 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         msg=f'[DupeCheck] Dupe search request | Method: {str(config["dupes"]["technical_jargons"]["request_method"])} | URL: {url_dupe_search} | Payload: {url_dupe_payload}')
 
     if dupe_check_result.status_code != 200:
-        logging.error(
-            f"[DupeCheck] {search_site} returned the status code: {dupe_check_result.status_code}")
-        logging.error(
-            f"[DupeCheck] Payload response from {search_site} {pformat(dupe_check_result)}")
-        logging.info(
-            f"[DupeCheck] Dupe check for {search_site} failed, assuming no dupes and continuing upload")
+        logging.error(f"[DupeCheck] {search_site} returned the status code: {dupe_check_result.status_code}")
+        logging.error(f"[DupeCheck] Payload response from {search_site} {pformat(dupe_check_result)}")
+        logging.info(f"[DupeCheck] Dupe check for {search_site} failed, assuming no dupes and continuing upload")
         return False
 
     # Now that we have the response from tracker(X) we can parse the json and try to identify dupes
     # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
     existing_release_types = {}
-    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0,
-                               'hdtv': 0, 'hdr': 0, "dv": 0}  # We also log the num each type shows up on site
+    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0, 'hdr': 0, "dv": 0}  # We also log the num each type shows up on site
     # this list will have the list of titles that are 100% dupes.
     # if we are trying to upload a single episode and a season pack already exist, then the season pack is 100% dupe
     # similarly if a repack or a proper release is already on tracker, then thats 100% dupe
@@ -312,8 +308,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # for compatbility with other trackers a new flag is added named `is_needed` under `parse_json`
     # as the name indicates, it decides whether or not the `dupe_check_result` returned from the tracker
     # needs any further parsing.
-    logging.debug(
-        f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
+    logging.debug( f'[DupeCheck] DupeCheck config for tracker `{search_site}` \n {pformat(config["dupes"])}')
     dupe_check_response = _get_response_from_wrapper(
         dupe_check_result, search_site, str(config['name']).upper())
     if dupe_check_response == True:
@@ -337,55 +332,42 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
         # If the configured fields are not present then, we'll log the errors and then just skip it.
         if "combine_fields" in config["dupes"]["parse_json"] and config["dupes"]["parse_json"]["combine_fields"] is True:
             if "fields" in config["dupes"]["parse_json"]:
-                torrent_title = _combine_field_for_title(
-                    config["dupes"]["parse_json"]["fields"], torrent_details)
+                torrent_title = _combine_field_for_title(config["dupes"]["parse_json"]["fields"], torrent_details)
             else:
                 # well thats a bummer, you want to combine fields, but haven't given any fields.
                 # so we just continue with the `torrent_name_key` that we have constructed till now.
                 pass
 
-        torrent_title_split = re.split('[.\s]', torrent_title.lower().replace(
-            "blu-ray", "bluray").replace("-", " "))
-        torrent_title_upper_split = re.split(
-            '[.\s]', torrent_title.replace("-", " "))
+        torrent_title_split = re.split('[.\s]', torrent_title.lower().replace("blu-ray", "bluray").replace("-", " "))
+        torrent_title_upper_split = re.split('[.\s]', torrent_title.replace("-", " "))
 
-        logging.debug(
-            f'[DupeCheck] Dupe check torrent title obtained from tracker {search_site} is {torrent_title}')
+        logging.debug(f'[DupeCheck] Dupe check torrent title obtained from tracker {search_site} is {torrent_title}')
         logging.debug(f'[DupeCheck] Torrent title split {torrent_title_split}')
-        logging.debug(
-            f'[DupeCheck] Torrent title split {torrent_title_upper_split}')
+        logging.debug(f'[DupeCheck] Torrent title split {torrent_title_upper_split}')
 
-        existing_release_types = _fill_existing_release_types_with_source_data(
-            existing_release_types, torrent_title, torrent_title_split, torrent_title_upper_split)
-        hdr_format_types = _fill_hdr_format_types(
-            hdr_format_types, torrent_title, torrent_title_split)
+        existing_release_types = _fill_existing_release_types_with_source_data(existing_release_types, torrent_title, torrent_title_split, torrent_title_upper_split)
+        hdr_format_types = _fill_hdr_format_types(hdr_format_types, torrent_title, torrent_title_split)
 
-    logging.debug(
-        f'[DupeCheck] Existing release types identified from tracker {search_site} are {existing_release_types}')
-    logging.debug(
-        f'[DupeCheck] Existing release types based on hdr formats identified from tracker {search_site} are {hdr_format_types}')
+    logging.debug(f'[DupeCheck] Existing release types identified from tracker {search_site} are {existing_release_types}')
+    logging.debug(f'[DupeCheck] Existing release types based on hdr formats identified from tracker {search_site} are {hdr_format_types}')
 
     # This just updates a dict with the number of a particular "type" of release exists on site (e.g. "2 bluray_encodes" or "1 bluray_remux" etc)
     for onsite_quality_type in existing_release_types.values():
         existing_releases_count[onsite_quality_type] += 1
-    for hdr_format in hdr_format_types.keys():
+    for hdr_format in hdr_format_types:
         existing_releases_count[hdr_format] = len(hdr_format_types[hdr_format])
-    logging.info(
-        msg=f'[DupeCheck] Results from initial dupe query (all resolution): {existing_releases_count}')
+    logging.info(msg=f'[DupeCheck] Results from initial dupe query (all resolution): {existing_releases_count}')
 
     # If we get no matches when searching via IMDB ID that means this content hasn't been upload in any format, no possibility for dupes
     if len(existing_release_types.keys()) == 0:
-        logging.info(
-            msg='[DupeCheck] Dupe query did not return any releases that we could parse, assuming no dupes exist.')
-        console.print(
-            f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
+        logging.info(msg='[DupeCheck] Dupe query did not return any releases that we could parse, assuming no dupes exist.')
+        console.print(f":heavy_check_mark: Yay! No dupes found on [bold]{str(config['name']).upper()}[/bold], continuing the upload process now\n")
         return False
 
     our_format = _get_our_hdr_format(torrent_info)
 
-    logging.info(
-        f'[DupeCheck] Eliminating releases based on HDR Format. We are tring to upload: "{our_format}". All other formats will be ignored.')
-    for item in hdr_format_types.keys():
+    logging.info(f'[DupeCheck] Eliminating releases based on HDR Format. We are tring to upload: "{our_format}". All other formats will be ignored.')
+    for item in hdr_format_types:
         if item != our_format:
             for their_title in hdr_format_types[item]:
                 if their_title in existing_release_types and their_title not in hdr_format_types[our_format]:
@@ -601,7 +583,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     max_dupe_percentage_exceeded = False
     is_dupes_present = False
     logging.debug(f"[DupeCheck] Existing release types that are dupes: {existing_release_types}")
-    for possible_dupe_title in existing_release_types.keys():
+    for possible_dupe_title in existing_release_types:
         # If we get a match then run further checks
         if possible_dupe_title in cent_percent_dupes:
             possible_dupe_with_percentage_dict[possible_dupe_title] = 100
