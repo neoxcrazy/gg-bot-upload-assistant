@@ -360,19 +360,16 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # certain release groups will add IMDB, TMDB and TVDB id in the general section of mediainfo. If one such id is present then we can use it and
         # consider it the same as being provided by the user (no need to search)
         # PS: We don't use the tvdb id obtained here. (Might be deprecated)
-        mediainfo_summary, tmdb, imdb, _ = basic_utilities.basic_get_mediainfo_summary(
-            media_info_result.to_data())
+        mediainfo_summary, tmdb, imdb, _ = basic_utilities.basic_get_mediainfo_summary(media_info_result.to_data())
         torrent_info["mediainfo_summary"] = mediainfo_summary
         if tmdb != "0":
             # we will get movie/12345 or tv/12345 => we only need 12345 part.
             tmdb = tmdb[tmdb.find("/") + 1:] if tmdb.find("/") >= 0 else tmdb
             args.tmdb = [tmdb]
-            logging.info(
-                f"[Main] Obtained TMDB Id from mediainfo summary. Proceeding with {args.tmdb}")
+            logging.info(f"[Main] Obtained TMDB Id from mediainfo summary. Proceeding with {args.tmdb}")
         if imdb != "0":
             args.imdb = [imdb]
-            logging.info(
-                f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {args.imdb}")
+            logging.info(f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {args.imdb}")
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
     for missing_val in keys_we_need_but_missing_torrent_info:
@@ -1537,8 +1534,7 @@ for file in upload_queue:
                 torrent_info["tmdb"] = metadata_utilities.metadata_get_external_id(
                     id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
             else:
-                logging.fatal(
-                    "[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
+                logging.fatal("[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
                 # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
                 metadata_result = metadata_utilities.metadata_search_tmdb_for_id(
                     query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
@@ -1547,8 +1543,7 @@ for file in upload_queue:
                 torrent_info["tvmaze"] = metadata_result["tvmaze"]
         # there will not be an else case for the above if else ladder.
     else:
-        logging.info(
-            "[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
+        logging.info("[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
         # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
         metadata_result = metadata_utilities.metadata_search_tmdb_for_id(
             query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)

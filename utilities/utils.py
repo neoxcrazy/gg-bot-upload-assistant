@@ -361,10 +361,8 @@ def perform_guessit_on_filename(file_name):
 
     guess_it_result = guessit(file_name)
     guessit_end_time = time.perf_counter()
-    logging.debug(
-        f'[Utils] Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
-    logging.debug(
-        "::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
+    logging.debug(f'[Utils] Time taken for guessit regex operations :: {guessit_end_time - guessit_start_time}')
+    logging.debug("::::::::::::::::::::::::::::: GuessIt output result :::::::::::::::::::::::::::::")
     logging.debug(f'\n{pformat(guess_it_result)}')
     return guess_it_result
 
@@ -383,38 +381,30 @@ def check_for_dir_and_extract_rars(file_path):
         # Now we check to see if the dir contains rar files
         rar_file = glob.glob(f"{os.path.join(file_path, '')}*rar")
         if rar_file:
-            logging.info(
-                f"[Utils] '{file_path}' is a .rar archive, extracting now...")
+            logging.info(f"[Utils] '{file_path}' is a .rar archive, extracting now...")
             logging.info(f"[Utils] Rar file: {rar_file[0]}")
 
             # Now verify that unrar is installed
             unrar_sys_package = '/usr/bin/unrar'
             if os.path.isfile(unrar_sys_package):
-                logging.info(
-                    "[Utils] Found 'unrar' system package, Using it to extract the video file now")
+                logging.info("[Utils] Found 'unrar' system package, Using it to extract the video file now")
 
                 # run the system package unrar and save the extracted file to its parent dir
-                subprocess.run(
-                    [unrar_sys_package, 'e', rar_file[0], file_path])
-                logging.debug(
-                    f"[Utils] Successfully extracted file : {rar_file[0]}")
+                subprocess.run([unrar_sys_package, 'e', rar_file[0], file_path])
+                logging.debug(f"[Utils] Successfully extracted file : {rar_file[0]}")
 
                 # This is how we identify which file we just extracted (Last modified)
                 list_of_files = glob.glob(f"{os.path.join(file_path, '')}*")
                 latest_file = max(list_of_files, key=os.path.getctime)
 
-                logging.info(
-                    f"[Utils] Using the extracted {latest_file} for further processing")
+                logging.info(f"[Utils] Using the extracted {latest_file} for further processing")
                 # the value for 'upload_media' with the path to the video file we just extracted
                 return True, latest_file
             else:
                 # If the user doesn't have unrar installed then we let them know here and move on to the next file (if exists)
-                console.print(
-                    'unrar is not installed, Unable to extract the rar archinve\n', style='bold red')
-                logging.critical(
-                    '[Utils] `unrar` is not installed, Unable to extract rar archive')
-                logging.info(
-                    '[Utils] Perhaps first try "sudo apt-get install unrar" then run this script again')
+                console.print('unrar is not installed, Unable to extract the rar archinve\n', style='bold red')
+                logging.critical('[Utils] `unrar` is not installed, Unable to extract rar archive')
+                logging.info('[Utils] Perhaps first try "sudo apt-get install unrar" then run this script again')
                 # Skip this entire 'file upload' & move onto the next (if exists)
                 return False, file_path
         return True, file_path
@@ -466,11 +456,9 @@ def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, 
 
     tracker_list = all_trackers_list
     if all_trackers:  # user wants to upload to all the trackers possible
-        logging.info(
-            f"[Utils] User has chosen to upload to add possible trackers: {tracker_list}")
+        logging.info(f"[Utils] User has chosen to upload to add possible trackers: {tracker_list}")
     else:
-        logging.info(
-            "[Utils] Attempting check and validate and default trackers configured")
+        logging.info("[Utils] Attempting check and validate and default trackers configured")
         tracker_list = os.getenv("default_trackers_list", "")
         if len(tracker_list) > 0:
             tracker_list = [x.strip() for x in tracker_list.split(',')]
@@ -484,8 +472,7 @@ def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, 
             if tracker.upper() not in upload_to_trackers:
                 upload_to_trackers.append(tracker.upper())
         else:
-            logging.error(
-                f"[Utils] We can't upload to '{tracker}' because that site is not supported")
+            logging.error(f"[Utils] We can't upload to '{tracker}' because that site is not supported")
 
     # Make sure that the user provides at least 1 valid tracker we can upload to
     # if len(upload_to_trackers) == 0 that means that the user either
@@ -493,10 +480,8 @@ def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, 
     #   2. the site is not supported, or
     #   3. the API key isn't provided
     if len(upload_to_trackers) < 1:
-        logging.exception(
-            "[Utils] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
-        raise AssertionError(
-            "Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
+        logging.exception("[Utils] No valid trackers specified for upload destination (e.g. BHD, BLU, ACM)")
+        raise AssertionError("Provide at least 1 tracker we can upload to (e.g. BHD, BLU, ACM)")
 
     logging.debug(f"[Utils] Trackers selected by bot: {upload_to_trackers}")
     return upload_to_trackers
@@ -560,10 +545,8 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):
             if f"/{tracker}-" in file:
                 torrent_file = file
-                console.print(
-                    f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
-                logging.info(
-                    f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
+                console.print(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
+                logging.info(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
 
         if torrent_file is not None:
             res = torrent_client.upload_torrent(
@@ -573,8 +556,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
                 is_skip_checking=True
             )
         else:
-            logging.error(
-                f"[Utils] Could not identify the .torrent file for tracker '{tracker}'")
+            logging.error(f"[Utils] Could not identify the .torrent file for tracker '{tracker}'")
             console.print(f"⚠️ ☠️ ⚠️ [bold red]Could not identify the .torrent file for tracker [green]{tracker}[/green]." +
                           " [/bold red] Please seed this tracker's torrent manually. ⚠️ ☠️ ⚠️")
             res = None
@@ -661,8 +643,7 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
         # the way to identify a relative path is to check whether the `upload_media` starts with a `/`
         if not torrent_info["upload_media"].startswith("/"):
             torrent_info["upload_media"] = f'{working_folder}/{torrent_info["upload_media"]}'
-            logging.info(
-                f'[Utils] User has provided relative path. Converting to absolute path for torrent client :: "{torrent_info["upload_media"]}"')
+            logging.info(f'[Utils] User has provided relative path. Converting to absolute path for torrent client :: "{torrent_info["upload_media"]}"')
 
         # apply path translations and getting translated paths
         translated_path = _get_client_translated_path(torrent_info)
@@ -676,12 +657,10 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
         elif post_processing_mode == "WATCH_FOLDER":
             return _post_mode_watch_folder(torrent_info, working_folder)
         else:
-            logging.error(
-                f"[Utils] Post processing is enabled, but invalid mode provided: '{post_processing_mode}'")
+            logging.error(f"[Utils] Post processing is enabled, but invalid mode provided: '{post_processing_mode}'")
             return False
     else:
-        logging.info(
-            "[Utils] No process processing steps needed, as per users configuration")
+        logging.info("[Utils] No process processing steps needed, as per users configuration")
         return False
 
 
@@ -690,6 +669,5 @@ def display_banner(mode):
     mode = pyfiglet.figlet_format(mode, font="banner3-D", width=210)
 
     console.print(f'[bold green]{gg_bot}[/bold green]', justify="center")
-    console.print(f'[bold blue]{mode}[/bold blue]',
-                  justify="center", style='#38ACEC')
+    console.print(f'[bold blue]{mode}[/bold blue]', justify="center", style='#38ACEC')
     return True
