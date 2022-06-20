@@ -262,6 +262,7 @@ docker run --rm -it \
 - [X] Release GG-BOT source code to public
 - [X] Bug Fixes and Testing Phase 1
 - [X] Bug Fixes and Testing Phase 2
+- [X] Issue#32: Atmos not detected if not present in file name
 - [X] Issue#37: Automatic cross-seeding not working
 - [X] Issue#39: Info log says translation needed even when disabled
 - [X] Issue#40: False positive DV detection
