@@ -1,0 +1,262 @@
+{
+    "translation": {
+        "source": "source",
+        "resolution": "resolution",
+        "type": "cat",
+        "hybrid_type":"subcat"
+    },
+
+    "hybrid_type": {
+        "required": true,
+        "__comments__": {
+            "1": "Movies: Encode x264",
+            "43": "Movies: Encode HEVC",
+            "2": "Movies: Remux",
+            "48": "Movies: Remux HEVC",
+            "3": "Movies: Blu-ray",
+            "5": "Movies and TV : WEB-DL",
+            "6": "Movies: HDTV",
+            "45": "Movies: Remux 3D  --- NOT POSSIBLE",
+            "46": "Movies: Blu-ray 3D  --- NOT POSSIBLE",
+            "44": "Movies: Encode 3D  --- NOT POSSIBLE",
+
+            "7": "TV: HDTV",
+            "10": "TV: Encode",
+            "11": "TV: Remux",
+            "12": "TV: Blu-ray",
+
+            "13": "TV Season: HDTV",
+            "16": "TV Season: Encode",
+            "17": "TV Season: Remux",
+            "18": "TV Season: Blu-ray",
+            "19": "Anime",
+
+            "100": "TV: Episode (anything tv that fails check for 6)",
+            "101": "TV: Season (episode number is 0)",
+
+            "_cat" : {
+                "data_source": "tracker",
+                "7": "movie",
+                "12": "complete_season",
+                "10": "individual_episodes"
+            },
+            "_source" : {
+                "data_source": "tracker",
+                "1":"full disc",
+                "2":"remux",
+                "3":"encode",
+                "4":"wedl",
+                "5":"webrip",
+                "6":"hdtv"
+            },
+            "_video_codec":{
+                "data_source": "torrent"
+            }
+        },
+
+        "mapping": {
+            "anime": {
+                "mal" : {
+                    "data_source": "torrent",
+                    "values": ["IS_NOT_NONE_OR_IS_PRESENT"]
+                }
+            },
+            "1": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                },
+                "video_codec": {
+                    "data_source": "torrent",
+                    "values": [
+                        "x264", "H264", "h264",
+                        "x.264", "H.264", "h.264",
+                        "x 264", "H 264", "h 264", "AVC"
+                    ]
+                }
+            },
+            "43": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                },
+                "video_codec": {
+                    "data_source": "torrent",
+                    "values": [
+                        "x265", "H265", "h265",
+                        "x.265", "H.265", "h.265",
+                        "x 265", "H 265", "h 265", "HEVC"
+                    ]
+                }
+            },
+            "2": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                },
+                "video_codec": {
+                    "data_source": "torrent",
+                    "values": ["AVC"]
+                }
+            },
+            "48": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                },
+                "video_codec": {
+                    "data_source": "torrent",
+                    "values": ["HEVC"]
+                }
+            },
+            "3": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                }
+            },
+            "5": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": []
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["4", "5"]
+                }
+            },
+            "6": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["7"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                }
+            },
+            "7": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["10"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                }
+            },
+            "10": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["10"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                }
+            },
+            "11": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["10"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
+            },
+            "12": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["10"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                }
+            },
+            "13": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["6"]
+                }
+            },
+            "16": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["3"]
+                }
+            },
+            "17": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["2"]
+                }
+            },
+            "18": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": ["12"]
+                },
+                "source": {
+                    "data_source": "tracker",
+                    "values": ["1"]
+                }
+            },
+            "100": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": [
+                        "2"
+                    ]
+                },
+                "episode_number": {
+                    "data_source": "torrent",
+                    "values": [
+                        "0"
+                    ]
+                }
+            },
+            "101": {
+                "cat": {
+                    "data_source": "tracker",
+                    "values": [
+                        "2"
+                    ]
+                }
+            }
+        }
+    }
+}
