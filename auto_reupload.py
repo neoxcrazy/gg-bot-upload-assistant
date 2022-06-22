@@ -1,7 +1,6 @@
 # default included packages
 import os
 import re
-import sys
 import glob
 import time
 import json
@@ -71,8 +70,6 @@ utils.validate_env_file(f'{working_folder}/reupload.config.env.sample')
 # the value in this dictionay must correspond to the file name of the site template
 acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
 
-# BHD Live/Draft
-is_live_on_site = str(os.getenv('live')).lower()
 discord_url = None
 auto_mode = 'true'
 

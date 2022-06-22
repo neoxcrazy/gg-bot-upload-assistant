@@ -11,12 +11,15 @@ working_folder = Path(__file__).resolve().parent.parent.parent
 
 @pytest.fixture(scope='class')
 def load_config():
-    yield json.load(open(f"{working_folder}/tests/resources/hybrid_mapping/hybrid_mapping.json"))
+    yield json.load(open(f"{working_folder}/tests/resources/translations/hybrid_mapping.json"))
 
 @pytest.fixture(scope='class')
 def load_multiple_mapping_config():
-    yield json.load(open(f"{working_folder}/tests/resources/hybrid_mapping/multiple_hybrid_mapping.json"))
+    yield json.load(open(f"{working_folder}/tests/resources/translations/multiple_hybrid_mapping.json"))
 
+@pytest.fixture(scope='class')
+def full_tracker_config():
+    yield json.load(open(f"{working_folder}/tests/resources/translations/full_tracker_config.json"))
 
 
 # resolution            source              type
@@ -407,3 +410,7 @@ def test_perform_delayed_hybrid_mapping_multiple_mappings(
     assert tracker_settings["subcat_3"] == subcat_3
     assert tracker_settings["subcat_4"] == subcat_4
     assert tracker_settings["subcat_5"] == subcat_5
+
+
+# def test_choose_right_tracker_keys():
+#     pass

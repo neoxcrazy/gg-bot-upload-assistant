@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 
@@ -163,7 +164,7 @@ def perform_delayed_hybrid_mapping(config, tracker_settings, torrent_info, exit_
     no_of_hybrid_mappings = len(config["hybrid_mappings"].keys())
     logging.info(f"[HybridMapping] Performing hybrid mapping after all translations have completed. No of hybrid mappings :: '{no_of_hybrid_mappings}'")
 
-    for index in range(0, no_of_hybrid_mappings):
+    for _ in range(0, no_of_hybrid_mappings):
         for translation_value in config["hybrid_mappings"].keys():
             # check whether the particular field can be underdo hybrid mapping
             delay_mapping = should_delay_mapping(
@@ -260,6 +261,8 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                 elif required_value in ("string", "string|array"):
                     # BHD requires the key "live" (0 = Sent to drafts and 1 = Live on site)
                     if required_key == "live":
+                        # BHD Live/Draft
+                        is_live_on_site = str(os.getenv('live')).lower()
                         live = '1' if is_live_on_site == 'true' else '0'
                         logging.info(f"Upload live status: {'Live (Visible)' if is_live_on_site == 'true' else 'Draft (Hidden)'}")
                         tracker_settings[config["translation"][translation_key]] = live
@@ -467,7 +470,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
         tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type(
-            target_val="hybrid_type",
+            translation_value=translation_value,
             tracker_settings=tracker_settings,
             config=config,
             exit_program=False,

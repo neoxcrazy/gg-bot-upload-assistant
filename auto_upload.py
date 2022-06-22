@@ -83,9 +83,6 @@ if len(os.getenv('DISCORD_WEBHOOK')) != 0:
 else:
     discord_url = None
 
-# BHD Live/Draft
-is_live_on_site = str(os.getenv('live')).lower()
-
 # Setup args
 parser = argparse.ArgumentParser()
 
