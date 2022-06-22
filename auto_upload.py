@@ -740,6 +740,7 @@ def choose_right_tracker_keys():
                 # hybrid_type is managed by hybrid_mapping.
                 if required_value == "hybrid_type":
                     break
+
                 logging.debug(f"[Main] Key {translation_key} mapped to required item {required_key} with value type as {required_value}")
 
                 # the torrent file is always submitted as a file
@@ -882,8 +883,7 @@ def choose_right_tracker_keys():
                             if str(tag).lower() == str(torrent_info["source_type"]).lower():
                                 upload_these_tags_list.append(str(tag))
                     if len(upload_these_tags_list) != 0:
-                        tracker_settings[optional_key] = ",".join(
-                            upload_these_tags_list)
+                        tracker_settings[optional_key] = ",".join(upload_these_tags_list)
 
                 # TODO figure out why .nfo uploads fail on BHD & don't display on BLU...
                 # if optional_key in ["nfo_file", "nfo"] and "nfo_file" in torrent_info:
@@ -959,12 +959,19 @@ def choose_right_tracker_keys():
 
     # Adding default values from template to tracker settings
     for default_key, default_value in config["Default"].items():
-        logging.debug(f'[HybridMapping] Adding default key `{default_key}` with value `{default_value}` to tracker settings')
+        logging.debug(f'[DefaultMapping] Adding default key `{default_key}` with value `{default_value}` to tracker settings')
         tracker_settings[default_key] = default_value
 
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
-        translation_utilities.perform_delayed_hybrid_mapping(config, tracker_settings, torrent_info, True)
+        tracker_settings[config["translation"]["hybrid_type"]] = translation_utilities.get_hybrid_type(
+            target_val="hybrid_type",
+            tracker_settings=tracker_settings,
+            config=config,
+            exit_program=False,
+            torrent_info=torrent_info
+        )
+# -------------- END of choose_right_tracker_keys --------------
 
 
 # ---------------------------------------------------------------------- #
