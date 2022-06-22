@@ -5,6 +5,7 @@
     "cat": "2",
     "source": "2",
     "subcat": "11",
+    "subcat_2":"subcat_2_value",
     "resolution": "4",
     "sd":"",
     "sdescr": "promo",

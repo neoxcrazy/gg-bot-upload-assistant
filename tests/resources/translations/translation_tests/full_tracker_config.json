@@ -6,6 +6,7 @@
         "bdinfo": "mediainfo",
         "type": "cat",
         "source": "source",
+        "hybrid_type_2": "subcat_2",
         "hybrid_type": "subcat",
         "resolution": "resolution",
         "shameless_self_promotion": "sdescr",
@@ -22,6 +23,22 @@
         "nfo_file": "nfo"
     },
     "hybrid_mappings": {
+        "subcat_2":{
+            "required": true,
+            "prerequisite": [
+                "subcat"
+            ],
+            "mapping": {
+                "subcat_2_value":{
+                    "subcat":{
+                        "data_source": "tracker",
+                        "values": [
+                            "IS_NOT_NONE_OR_IS_PRESENT"
+                        ]
+                    }
+                }
+            }
+        },
         "subcat": {
             "required": true,
             "prerequisite": [
@@ -359,6 +376,7 @@
         "name": "string",
         "screen": "string",
         "subcat": "hybrid_type",
+        "subcat_2": "hybrid_type",
         "imdb": "url",
         "tmdb": "url",
         "tvmaze": "url",

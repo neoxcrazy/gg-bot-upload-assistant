@@ -6,6 +6,7 @@
     "source": "4",
     "sd":1,
     "subcat": "5",
+    "subcat_2":"subcat_2_value",
     "resolution": "3",
     "sdescr": "promo",
     "descr": "mediainfo_summary_text",

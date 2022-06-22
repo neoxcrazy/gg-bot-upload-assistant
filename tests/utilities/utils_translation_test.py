@@ -171,7 +171,7 @@ class Args:
 )
 @pytest.mark.usefixtures("load_config")
 def test_get_hybrid_type(load_config, tracker_settings, torrent_info, expected):
-    assert translation.__get_hybrid_type("subcat", tracker_settings, load_config, False, torrent_info) == expected
+    assert translation._get_hybrid_type("subcat", tracker_settings, load_config, False, torrent_info) == expected
 
 
 @pytest.mark.parametrize(
@@ -195,7 +195,7 @@ def test_get_hybrid_type(load_config, tracker_settings, torrent_info, expected):
 @pytest.mark.usefixtures("load_config")
 def test_get_hybrid_type_application_exit(load_config, tracker_settings, torrent_info):
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-            translation.__get_hybrid_type("subcat", tracker_settings, load_config, True, torrent_info)
+            translation._get_hybrid_type("subcat", tracker_settings, load_config, True, torrent_info)
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == "Invalid hybrid mapping configuration provided."
 
@@ -433,7 +433,12 @@ def test_perform_delayed_hybrid_mapping_multiple_mappings(
             json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/2/torrent_info.json")),
             json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/2/tracker_settings.json")),
             id="torrent_info_2"
-        )
+        ),
+        # pytest.param(
+        #     json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/torrent_info.json")),
+        #     json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/tracker_settings.json")),
+        #     id="torrent_info_3"
+        # )
     ]
 )
 @pytest.mark.usefixtures("full_tracker_config")

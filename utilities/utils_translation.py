@@ -8,7 +8,7 @@ from rich.console import Console
 console = Console()
 
 
-def __identify_resolution_source(target_val, config, relevant_torrent_info_values, torrent_info):
+def _identify_resolution_source(target_val, config, relevant_torrent_info_values, torrent_info):
     # target_val is type (source) or resolution_id (resolution)
     possible_match_layer_1 = []
     for key in config["Required"][(config["translation"][target_val])]:
@@ -92,7 +92,7 @@ def __identify_resolution_source(target_val, config, relevant_torrent_info_value
         return "STOP"
 
 
-def __get_hybrid_type(translation_value, tracker_settings, config, exit_program, torrent_info):
+def _get_hybrid_type(translation_value, tracker_settings, config, exit_program, torrent_info):
     """
         Method to get a hybrid type from the source, resolution and type properties of the torrent
     """
@@ -176,7 +176,7 @@ def perform_delayed_hybrid_mapping(config, tracker_settings, torrent_info, exit_
                 tracker_settings=tracker_settings
             )
             if translation_value not in tracker_settings and delay_mapping == False:
-                tracker_settings[translation_value] = __get_hybrid_type(
+                tracker_settings[translation_value] = _get_hybrid_type(
                     translation_value=translation_value,
                     tracker_settings=tracker_settings,
                     config=config,
@@ -234,7 +234,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
     # once identified we handle it
     logging.info("[Main] Starting translations from torrent info to tracker settings.")
     is_hybrid_translation_needed = False
-
+    hybrid_translation_keys = []
     for translation_key, translation_value in config["translation"].items():
         logging.debug(f"[Main] Trying to translate {translation_key} to {translation_value}")
 
@@ -326,7 +326,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                         return "STOP"
 
                 if translation_key in ('source', 'resolution', 'resolution_id'):
-                    return_value = __identify_resolution_source(
+                    return_value = _identify_resolution_source(
                         target_val=translation_key,
                         config=config,
                         relevant_torrent_info_values=relevant_torrent_info_values,
@@ -433,7 +433,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                 delayed_mapping = False
                 # to do hybrid translation we might need certain prerequisite fields to be resolved before hand in tracker settings.
                 # we first check whether they have been resolved or not.
-                # If those values have been resolved then we can just call the `__get_hybrid_type` to resolve it.
+                # If those values have been resolved then we can just call the `_get_hybrid_type` to resolve it.
                 # otherwise we mark the present of this hybrid type and do the mapping after all required and optional
                 # value mapping have been completed.
                 # prerequisite needed only for tracker_settings. Not for torrent_info data
@@ -448,10 +448,11 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                     logging.info(f"[HybridMapping] No 'prerequisite' required for '{translation_value}'")
 
                 if delayed_mapping == True:
+                    hybrid_translation_keys.append(translation_value)
                     continue
 
                 logging.info(f"[HybridMapping] Going to perform hybrid mapping for :: '{translation_value}'")
-                tracker_settings[translation_value] = __get_hybrid_type(
+                tracker_settings[translation_value] = _get_hybrid_type(
                     translation_value=translation_value,
                     tracker_settings=tracker_settings,
                     config=config,
@@ -471,11 +472,10 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
 
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
-        tracker_settings[config["translation"]["hybrid_type"]] = __get_hybrid_type(
-            translation_value=translation_value,
+        perform_delayed_hybrid_mapping(
             tracker_settings=tracker_settings,
             config=config,
-            exit_program=False,
+            exit_program=True,
             torrent_info=torrent_info
         )
 # -------------- END of choose_right_tracker_keys --------------
