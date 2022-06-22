@@ -115,11 +115,12 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://reelflix.xyz/">ReelFliX</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td rowspan="2"><strong>XBTIT</strong></td>
+            <td rowspan="1"><strong>XBTIT</strong></td>
             <td><strong>TSP</strong></td>
             <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
         </tr>
         <tr style="text-align: center">
+            <td rowspan="1"><strong>Swarmazon</strong></td>
             <td><strong>SZN</strong></td>
             <td><strong><a href="https://swarmazon.club/">Swarmazon</a></strong></td>
         </tr>
@@ -246,10 +247,9 @@ docker run --rm -it \
 
 # Roadmap
 ### v3.0
-- [ ] Add Support for new platforms
-    - [ ] Swarmazon
-- [ ] Discord notification for auto uploaded data
-- [ ] Improved TMDB metadata search Phase 2
+- [X] Hybrid Mapping v2
+- [X] Add Support for new platforms
+    - [X] Swarmazon
 - [X] Automatic torrent re-uploader
 - [X] Improved dupe check - Phase 1
 - [X] Improved screenshots url management
@@ -259,6 +259,9 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
+- [ ] Improved TMDB metadata search Phase 2
+- [ ] Discord notification for auto uploaded data
+- [ ] Accept MAL id as user argument
 - [X] Release GG-BOT source code to public
 - [X] Bug Fixes and Testing Phase 1
 - [X] Bug Fixes and Testing Phase 2
@@ -271,6 +274,9 @@ docker run --rm -it \
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
 - [ ] Support for overriding target tracker through categories
 - [ ] Ability to reuse already existing torrents.
+- [ ] Add support for anonymous uploads to BHDTV
+- [ ] Support for Dual Audio Detection
+- [ ] Better MAL id detection
 
 ### Backlogs
 - [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader
