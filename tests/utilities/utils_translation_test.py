@@ -454,6 +454,7 @@ def test_choose_right_tracker_keys(full_tracker_config, torrent_info, expected):
             assert tracker_settings[key] == expected[key]
     assert len(tracker_settings) == len(expected)
 
+
 @pytest.mark.parametrize(
     ("torrent_info", "expected"),
     [
