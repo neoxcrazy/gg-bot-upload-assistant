@@ -434,16 +434,40 @@ def test_perform_delayed_hybrid_mapping_multiple_mappings(
             json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/2/tracker_settings.json")),
             id="torrent_info_2"
         ),
-        # pytest.param(
-        #     json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/torrent_info.json")),
-        #     json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/tracker_settings.json")),
-        #     id="torrent_info_3"
-        # )
+        pytest.param(
+            json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/torrent_info.json")),
+            json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/3/tracker_settings.json")),
+            id="torrent_info_3"
+        )
     ]
 )
 @pytest.mark.usefixtures("full_tracker_config")
 def test_choose_right_tracker_keys(full_tracker_config, torrent_info, expected):
     args = Args()
+    tracker_settings = {}
+    translation.choose_right_tracker_keys(full_tracker_config, tracker_settings, "GG-BOT", torrent_info, args, working_folder)
+
+    for key in tracker_settings.keys() if len(tracker_settings) > len(expected) else expected.keys():
+        if key == "file":
+            assert tracker_settings[key].endswith(expected[key])
+        else:
+            assert tracker_settings[key] == expected[key]
+    assert len(tracker_settings) == len(expected)
+
+@pytest.mark.parametrize(
+    ("torrent_info", "expected"),
+    [
+        pytest.param(
+            json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/1/torrent_info.json")),
+            json.load(open(f"{working_folder}/tests/resources/translations/translation_tests/1/tracker_settings.json")),
+            id="torrent_info_1"
+        )
+    ]
+)
+@pytest.mark.usefixtures("full_tracker_config")
+def test_choose_right_tracker_keys_disc_enabled(full_tracker_config, torrent_info, expected):
+    args = Args()
+    args.disc = True
     tracker_settings = {}
     translation.choose_right_tracker_keys(full_tracker_config, tracker_settings, "GG-BOT", torrent_info, args, working_folder)
 

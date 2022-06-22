@@ -209,6 +209,72 @@ def __get_relevant_items_for_tracker_keys(torrent_info):
     return relevant_torrent_info_values
 
 
+def _get_url_type_data(translation_key, torrent_info):
+    url = ""
+    if translation_key == "imdb":
+        url = f"https://www.imdb.com/title/{torrent_info['imdb_with_tt']}"
+    elif translation_key == "tmdb":
+        url = f"https://www.themoviedb.org/{'movie' if torrent_info['type'] == 'movie' else 'tv'}/{torrent_info['tmdb']}"
+    elif translation_key == "tvdb" and torrent_info["type"] == "episode":
+        url = f"https://www.thetvdb.com/?tab=series&id={torrent_info['tvdb']}"
+    elif translation_key == "mal":
+        url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
+    elif translation_key == "tvmaze" and torrent_info["type"] == "episode":
+        url = f"https://www.tvmaze.com/shows/{torrent_info['tvmaze']}"
+    else:
+        logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
+    return url
+
+
+def _get_bluray_region(optional_value, region_from_torrent_info):
+    for region in optional_value:
+        if str(region).upper() == str(region_from_torrent_info).upper():
+            return region
+    return None
+
+
+# ---------------------------------------------------------------------- #
+#           !!! WARN !!! This Method has side effects. !!! WARN !!!
+# ---------------------------------------------------------------------- #
+def _validate_and_do_hybrid_mapping(translation_value, config, tracker_settings, torrent_info, is_hybrid_translation_needed):
+    logging.info(f"[HybridMapping] Identified 'hybrid_type' for tracker attribute '{translation_value}'")
+    logging.info(f"[HybridMapping] Validating the hybrid mapping settings for '{translation_value}'")
+    if "hybrid_mappings" in config and translation_value in config["hybrid_mappings"]:
+        delayed_mapping = False
+        # to do hybrid translation we might need certain prerequisite fields to be resolved before hand in tracker settings.
+        # we first check whether they have been resolved or not.
+        # If those values have been resolved then we can just call the `_get_hybrid_type` to resolve it.
+        # otherwise we mark the present of this hybrid type and do the mapping after all required and optional
+        # value mapping have been completed.
+        # prerequisite needed only for tracker_settings. Not for torrent_info data
+        if "prerequisite" in config["hybrid_mappings"][translation_value]:
+            delayed_mapping = should_delay_mapping(
+                translation_value=translation_value,
+                prerequisites=config["hybrid_mappings"][translation_value]["prerequisite"],
+                tracker_settings=tracker_settings
+            )
+            is_hybrid_translation_needed = delayed_mapping if is_hybrid_translation_needed == False else is_hybrid_translation_needed
+        else:
+            logging.info(f"[HybridMapping] No 'prerequisite' required for '{translation_value}'")
+
+        if delayed_mapping == True:
+            return True, is_hybrid_translation_needed
+
+        logging.info(f"[HybridMapping] Going to perform hybrid mapping for :: '{translation_value}'")
+        tracker_settings[translation_value] = _get_hybrid_type(
+            translation_value=translation_value,
+            tracker_settings=tracker_settings,
+            config=config,
+            exit_program=True,
+            torrent_info=torrent_info
+        )
+    else:
+        logging.error(f"[HybridMapping] No hybrid mapping configurations provided for '{translation_value}'." +
+            "\nFor all `hybrid_type` hybrid mapping is required irrepective whether the value is required or optional.")
+        sys.exit("Invalid hybrid mapping configuration provided.")
+    return False, is_hybrid_translation_needed
+
+
 # ---------------------------------------------------------------------- #
 #                  Set correct tracker API Key/Values                    #
 # ---------------------------------------------------------------------- #
@@ -287,24 +353,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
 
                 elif required_value == "url":
                     # URLs can be set only to for certain media databases
-                    url = tracker_settings[config["translation"][translation_key]] if config["translation"][translation_key] in tracker_settings else ""
-                    if translation_key == "imdb":
-                        url = f"https://www.imdb.com/title/{torrent_info['imdb_with_tt']}"
-                    elif translation_key == "tmdb":
-                        url = f"https://www.themoviedb.org/{'movie' if torrent_info['type'] == 'movie' else 'tv'}/{torrent_info['tmdb']}"
-                    elif translation_key == "tvdb":
-                        url = f"https://www.thetvdb.com/?tab=series&id={torrent_info['tvdb']}"
-                    elif translation_key == "mal":
-                        url = f"https://myanimelist.net/anime/{torrent_info['mal']}"
-                    # This and condition is a patch for BIT-HDTV. For this tracker both imdb and tvmaze needs to be mapped to same key url,
-                    # depending on the type of the upload. For movies, it need to be imdb url, and for tv it needs to be tvmaze url.
-                    # TODO check whether a much cleaner approach can be used here
-                    elif translation_key == "tvmaze" and torrent_info["type"] == "episode":
-                        url = f"https://www.tvmaze.com/shows/{torrent_info['tvmaze']}"
-                    else:
-                        logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
-                    tracker_settings[config["translation"][translation_key]] = url
-
+                    tracker_settings[config["translation"][translation_key]] = _get_url_type_data(translation_key, torrent_info)
                 else:
                     logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
 
@@ -367,10 +416,9 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                 # -!-!- Region -!-!- # (Disc only)
                 elif optional_key == 'region' and 'region' in torrent_info:
                     # This will only run if you are uploading a bluray_disc
-                    for region in optional_value:
-                        if str(region).upper() == str(torrent_info["region"]).upper():
-                            tracker_settings[optional_key] = region
-                            break
+                    region = _get_bluray_region(optional_value, torrent_info["region"])
+                    if region is not None:
+                        tracker_settings[optional_key] = region
 
                 # -!-!- Tags -!-!- #
                 elif optional_key == 'tags':  # (Only supported on BHD)
@@ -427,42 +475,10 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
         # using in instead of == since multiple hybrid mappings can be configured
         # such as hybrid_type_1, hybrid_type_2, hybrid_type_3 ....
         if "hybrid_type" in translation_key:
-            logging.info(f"[HybridMapping] Identified 'hybrid_type' for tracker attribute '{translation_value}'")
-            logging.info(f"[HybridMapping] Validating the hybrid mapping settings for '{translation_value}'")
-            if "hybrid_mappings" in config and translation_value in config["hybrid_mappings"]:
-                delayed_mapping = False
-                # to do hybrid translation we might need certain prerequisite fields to be resolved before hand in tracker settings.
-                # we first check whether they have been resolved or not.
-                # If those values have been resolved then we can just call the `_get_hybrid_type` to resolve it.
-                # otherwise we mark the present of this hybrid type and do the mapping after all required and optional
-                # value mapping have been completed.
-                # prerequisite needed only for tracker_settings. Not for torrent_info data
-                if "prerequisite" in config["hybrid_mappings"][translation_value]:
-                    delayed_mapping = should_delay_mapping(
-                        translation_value=translation_value,
-                        prerequisites=config["hybrid_mappings"][translation_value]["prerequisite"],
-                        tracker_settings=tracker_settings
-                    )
-                    is_hybrid_translation_needed = delayed_mapping if is_hybrid_translation_needed == False else is_hybrid_translation_needed
-                else:
-                    logging.info(f"[HybridMapping] No 'prerequisite' required for '{translation_value}'")
-
-                if delayed_mapping == True:
-                    hybrid_translation_keys.append(translation_value)
-                    continue
-
-                logging.info(f"[HybridMapping] Going to perform hybrid mapping for :: '{translation_value}'")
-                tracker_settings[translation_value] = _get_hybrid_type(
-                    translation_value=translation_value,
-                    tracker_settings=tracker_settings,
-                    config=config,
-                    exit_program=True,
-                    torrent_info=torrent_info
-                )
-            else:
-                logging.error(f"[HybridMapping] No hybrid mapping configurations provided for '{translation_value}'." +
-                    "\nFor all `hybrid_type` hybrid mapping is required irrepective whether the value is required or optional.")
-                sys.exit("Invalid hybrid mapping configuration provided.")
+            should_continue, is_hybrid_translation_needed = _validate_and_do_hybrid_mapping(translation_value, config, tracker_settings, torrent_info, is_hybrid_translation_needed)
+            if should_continue:
+                hybrid_translation_keys.append(translation_value)
+                continue
         # ------------ hybrid_mapping_v2 end ------------
 
     # Adding default values from template to tracker settings

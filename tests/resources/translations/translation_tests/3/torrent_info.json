@@ -11,17 +11,17 @@
 
     "edition": "",
     "region": "",
-    "sd": "",
     "mediainfo": "",
     "mediainfo_summary": "mediainfo_summary_text",
     "nfo_file": "",
 
     "source": "",
-    "source_type": "",
-    "screen_size": "",
+    "source_type": "bluray_encode",
+    "screen_size": "720p",
     "bluray_disc_type": "",
+    "video_codec": "HEVC",
 
-    "dot_torrent": "",
+    "dot_torrent": "dot_torrent_data",
     "shameless_self_promotion": "promo",
     "bbcode_thumb_nothumb": "bbcode_thumb_nothumb"
 }
