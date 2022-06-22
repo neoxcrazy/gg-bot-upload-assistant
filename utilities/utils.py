@@ -531,8 +531,8 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         logging.info("[Utils] Attempting to upload dot torrent to configured torrent client.")
         logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
         console.print("Starting Post Processing....")
-        console.print(f"File Path: {torrent_info['upload_media']}")
-        console.print(f"Client Save Path: {torrent_info['client_path']}")
+        console.print(f"File Path: \t{torrent_info['upload_media']}")
+        console.print(f"Client Save Path: \t{torrent_info['client_path']}")
 
         if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
             logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
@@ -545,7 +545,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):
             if f"/{tracker}-" in file:
                 torrent_file = file
-                console.print(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
+                console.print(f"Identified .torrent file \t'{file}' for tracker '{tracker}'")
                 logging.info(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
 
         if torrent_file is not None:

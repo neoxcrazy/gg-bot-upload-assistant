@@ -3,10 +3,114 @@
         "source": "source",
         "resolution": "resolution",
         "type": "cat",
-        "hybrid_type_1": "subcat"
+        "hybrid_type_1": "subcat_1",
+        "hybrid_type_2": "subcat_2",
+        "hybrid_type_3": "subcat_3",
+        "hybrid_type_4": "subcat_4",
+        "hybrid_type_5": "subcat_5"
     },
+    "__comments": [
+        "subcat_1 NEEDS subcat_2 and subcat_5",
+        "subcat_2 NEEDS subcat_5",
+        "subcat_3 NEEDS subcat_4",
+        "subcat_4 NEEDS subcat_5",
+        "subcat_5 cant be resolved immediately"
+    ],
     "hybrid_mappings": {
-        "subcat": {
+        "subcat_1": {
+            "required": true,
+            "prerequisite": [
+                "cat",
+                "source",
+                "subcat_2",
+                "subcat_5"
+            ],
+            "mapping": {
+                "subcat_1_mapping":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["anime"]
+                    },
+                    "subcat_2":{
+                        "data_source": "tracker",
+                        "values":["subcat_2_anime"]
+                    }
+                }
+            }
+        },
+        "subcat_2" : {
+            "required": true,
+            "prerequisite": [
+                "subcat_5"
+            ],
+            "mapping": {
+                "subcat_2_anime":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["anime"]
+                    }
+                },
+                "subcat_2_digits":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":[]
+                    }
+                }
+            }
+        },
+        "subcat_3" : {
+            "required": true,
+            "prerequisite": [
+                "subcat_4"
+            ],
+            "mapping": {
+                "subcat_3_anime":{
+                    "subcat_4":{
+                        "data_source": "tracker",
+                        "values":["subcat_4_anime"]
+                    }
+                },
+                "subcat_3_digits":{
+                    "subcat_4":{
+                        "data_source": "tracker",
+                        "values":["subcat_4_one_digit", "subcat_4_two_digit", "subcat_4_three_digit"]
+                    }
+                }
+            }
+        },
+        "subcat_4" : {
+            "required": true,
+            "prerequisite": [
+                "subcat_5"
+            ],
+            "mapping": {
+                "subcat_4_anime":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["anime"]
+                    }
+                },
+                "subcat_4_one_digit":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["1", "2", "3", "5", "6", "7"]
+                    }
+                },
+                "subcat_4_two_digit":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["43", "48", "10", "11", "12", "13", "15", "17", "18"]
+                    }
+                },
+                "subcat_4_three_digit":{
+                    "subcat_5":{
+                        "data_source": "tracker",
+                        "values":["100", "101"]
+                    }
+                }
+            }
+        },
+        "subcat_5" : {
             "required": true,
             "prerequisite": [
                 "cat",
@@ -16,7 +120,7 @@
                 "anime": {
                     "mal": {
                         "data_source": "torrent",
-                        "not": true,
+                        "not":true,
                         "values": [
                             "0"
                         ]

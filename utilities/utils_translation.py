@@ -88,46 +88,52 @@ def identify_resolution_source(target_val, config, relevant_torrent_info_values,
         return "STOP"
 
 
-def get_hybrid_type(target_val, tracker_settings, config, exit_program, torrent_info):
+def get_hybrid_type(translation_value, tracker_settings, config, exit_program, torrent_info):
     """
         Method to get a hybrid type from the source, resolution and type properties of the torrent
     """
     logging.info("[HybridMapping] Performing hybrid mapping now...")
     logging.debug('------------------ Hybrid mapping started ------------------')
-    # getting values for the source, resolution and type properties
-    source = tracker_settings[config["translation"]["source"]]
-    resolution = tracker_settings[config["translation"]["resolution"]]
-    upload_type = tracker_settings[config["translation"]["type"]]
-    logging.debug(f'[HybridMapping] Selected values :: source [{source}] resolution [{resolution}] type [{upload_type}]')
+    # logging all the Prerequisite data
+    # if any of the Prerequisite data is not available, then this method will not be invoked
+    for prerequisite in config["hybrid_mappings"][translation_value]["prerequisite"]:
+        logging.info(f"[HybridMapping] Prerequisite :: '{prerequisite}' Value :: '{tracker_settings[prerequisite]}'")
 
-    for key in config["hybrid_type"]["mapping"]:
-        logging.debug(f"[HybridMapping] Trying to match `{config['translation'][target_val]}` to hybrid key `{key}`")
+    for key in config["hybrid_mappings"][translation_value]["mapping"]:
+        logging.debug(f"[HybridMapping] Trying to match '{translation_value}' to hybrid key '{key}'")
         is_valid = None
-        for sub_key, sub_val in config["hybrid_type"]["mapping"][key].items():
-            logging.debug(f'[HybridMapping] The subkey `{sub_key}` from `{sub_val["data_source"]}` need to be one of `{sub_val["values"]}` for the mapping to be accepted.')
+        for sub_key, sub_val in config["hybrid_mappings"][translation_value]["mapping"][key].items():
+            user_wants_negation = "not" in sub_val and sub_val["not"] == True
+            if user_wants_negation:
+                logging.debug(f"[HybridMapping] The subkey '{sub_key}' from '{sub_val['data_source']}' must NOT be one of {sub_val['values']} for the mapping to be accepted.")
+            else:
+                logging.debug(f"[HybridMapping] The subkey '{sub_key}' from '{sub_val['data_source']}' need to be one of {sub_val['values']} for the mapping to be accepted.")
 
             datasource = tracker_settings if sub_val["data_source"] == "tracker" else torrent_info
             selected_val = datasource[sub_key] if sub_key in datasource else None
-
+            logging.debug(f"[HybridMapping] Value selected from data source is '{selected_val}'")
             if selected_val is not None:
                 if len(sub_val["values"]) == 0:
-                    logging.info(f"[HybridMapping] For the subkey `{sub_key}` the values configured `{sub_val['values']}` is empty. Assuming by default as valid and continuing.")
+                    logging.info(f"[HybridMapping] For the subkey '{sub_key}' the values configured '{sub_val['values']}' is empty. Assuming by default as valid and continuing.")
                     is_valid = True if is_valid is None else is_valid
-                elif str(selected_val) in sub_val['values']:
-                    logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
+                elif user_wants_negation and str(selected_val) not in sub_val['values']:
+                    logging.debug(f"[HybridMapping] The subkey '{sub_key}' '{selected_val}' is not present in '{sub_val['values']}' for '{sub_key}' and '{key}'")
+                    is_valid = True if is_valid is None else is_valid
+                elif not user_wants_negation and str(selected_val) in sub_val['values']:
+                    logging.debug(f"[HybridMapping] The subkey '{sub_key}' '{selected_val}' is present in '{sub_val['values']}' for '{sub_key}' and '{key}'")
                     is_valid = True if is_valid is None else is_valid
                 elif sub_val['values'][0] == "IS_NOT_NONE_OR_IS_PRESENT" and selected_val is not None and len(str(selected_val)) > 0:
-                    logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is present in `{sub_val['data_source']}` for `{sub_key}` and `{key}`")
+                    logging.debug(f"[HybridMapping] The subkey '{sub_key}' '{selected_val}' is present in '{sub_val['data_source']}' for '{sub_key}' and '{key}'")
                     is_valid = True if is_valid is None else is_valid
                 else:
-                    logging.debug(f"[HybridMapping] The subkey `{sub_key}` `{selected_val}` is NOT present in `{sub_val['values']}` for `{sub_key}` and `{key}`")
+                    logging.debug(f"[HybridMapping] The subkey '{sub_key}' '{selected_val}' is NOT present in '{sub_val['values']}' for '{sub_key}' and '{key}'")
                     is_valid = False
             else:
                 is_valid = False
-                logging.fatal(f"[HybridMapping] Invalid configuration provided for hybrid key mapping. Key ::{key}, sub key :: {sub_key}, sub value :: {sub_val}")
+                logging.fatal(f"[HybridMapping] Invalid configuration provided for hybrid key mapping. Key :: '{key}', sub key :: '{sub_key}', sub value :: '{sub_val}'")
 
         if is_valid:
-            logging.info(f'[HybridMapping] The hybrid key was identified to be {key}')
+            logging.info(f"[HybridMapping] The hybrid key was identified to be '{key}'")
             logging.debug('------------------ Hybrid mapping Completed ------------------')
             # is_valid is true
             # all the categories match
@@ -137,8 +143,39 @@ def get_hybrid_type(target_val, tracker_settings, config, exit_program, torrent_
     # this means we either have 2 potential matches or no matches at all (this happens if the media does not fit any of the allowed parameters)
     logging.critical('[HybridMapping] Unable to find a suitable "hybrid mapping" match for this file')
     logging.error("[HybridMapping] Its possible that the media you are trying to upload is not allowed on site (e.g. DVDRip to BLU is not allowed)")
-    console.print(
-        f'\nThis "Type" ([bold]{torrent_info["source"]}[/bold]) or this "Resolution" ([bold]{torrent_info["screen_size"]}[/bold]) is not allowed on this tracker', style='Red underline', highlight=False)
-    if exit_program:
+    console.print(f"Failed to perform Hybrid Mapping for '{translation_value}'. This type of upload might not be allowed on this tracker.", style='Red underline')
+    if exit_program: # TODO add check for required or optional. If required, then exit app
         sys.exit("Invalid hybrid mapping configuration provided.")
     return "HYBRID_MAPPING_INVALID_CONFIGURATION"
+
+
+def should_delay_mapping(translation_value, prerequisites, tracker_settings):
+    logging.info(f"[HybridMapping] Performing 'prerequisite' validation for '{translation_value}'")
+    for prerequisite in prerequisites :
+        if prerequisite not in tracker_settings:
+            logging.info(f"[HybridMapping] The prerequisite '{prerequisite}' for '{translation_value}' is not available currently. " +
+                "Skipping hybrid mapping for now and proceeding with remaining translations...")
+            return True
+    return False
+
+
+def perform_delayed_hybrid_mapping(config, tracker_settings, torrent_info, exit_program):
+    no_of_hybrid_mappings = len(config["hybrid_mappings"].keys())
+    logging.info(f"[HybridMapping] Performing hybrid mapping after all translations have completed. No of hybrid mappings :: '{no_of_hybrid_mappings}'")
+
+    for index in range(0, no_of_hybrid_mappings):
+        for translation_value in config["hybrid_mappings"].keys():
+            # check whether the particular field can be underdo hybrid mapping
+            delay_mapping = should_delay_mapping(
+                translation_value=translation_value,
+                prerequisites=config["hybrid_mappings"][translation_value]["prerequisite"],
+                tracker_settings=tracker_settings
+            )
+            if translation_value not in tracker_settings and delay_mapping == False:
+                tracker_settings[translation_value] = get_hybrid_type(
+                    translation_value=translation_value,
+                    tracker_settings=tracker_settings,
+                    config=config,
+                    exit_program=exit_program,
+                    torrent_info=torrent_info
+                )

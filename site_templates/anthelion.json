@@ -21,8 +21,7 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
+    "hybrid_mappings": {
     },
 
     "translation": {
@@ -100,7 +99,7 @@
     },
 
     "dupes": {
-        
+
         "technical_jargons": {
             "authentication_mode": "API_KEY",
             "payload_type": "MULTI-PART",
