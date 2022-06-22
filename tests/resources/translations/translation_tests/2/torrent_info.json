@@ -1,0 +1,26 @@
+{
+    "imdb": "10168",
+    "mal": "16782",
+    "tvdb": "279121",
+    "tmdb": "60572",
+
+    "torrent_title": "The.Title.0000.Source.Audio.Codec.Video.Codec-GGBot",
+    "working_folder": "some_ramdom_hash/",
+    "type": "movie",
+
+    "edition": "Directors Cut",
+    "region": "ITA",
+    "sd": "1",
+    "mediainfo": "media_info_file.txt",
+    "mediainfo_summary": "mediainfo_summary_text",
+    "nfo_file": "",
+
+    "source": "",
+    "source_type": "webdl",
+    "screen_size": "1080p",
+    "bluray_disc_type": "",
+
+    "dot_torrent": "",
+    "shameless_self_promotion": "promo",
+    "bbcode_thumb_nothumb": "bbcode_thumb_nothumb"
+}

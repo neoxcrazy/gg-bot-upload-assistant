@@ -8,7 +8,7 @@ from rich.console import Console
 console = Console()
 
 
-def identify_resolution_source(target_val, config, relevant_torrent_info_values, torrent_info):
+def __identify_resolution_source(target_val, config, relevant_torrent_info_values, torrent_info):
     # target_val is type (source) or resolution_id (resolution)
     possible_match_layer_1 = []
     for key in config["Required"][(config["translation"][target_val])]:
@@ -24,8 +24,7 @@ def identify_resolution_source(target_val, config, relevant_torrent_info_values,
 
         for sub_key, sub_val in config["Required"][(config["translation"][target_val])][key].items():
             # for each sub key and its priority we
-            logging.debug(
-                f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
+            logging.debug(f'[ResolutionSourceMapping] Considering item `{sub_key}` with priority `{sub_val}`')
             # Sub-Key Priorities
             # ---------------------
             # 0 = optional
@@ -33,31 +32,29 @@ def identify_resolution_source(target_val, config, relevant_torrent_info_values,
             # 2 = select from available items in list
 
             if sub_val == 1:
-                total_num_of_required_keys += 1
+                total_num_of_required_keys += 1 # no of keys with priority 1 in config
                 # Now check if the sub_key is in the relevant_torrent_info_values list
                 if sub_key in str(relevant_torrent_info_values).lower():
-                    total_num_of_acquired_keys += 1
-                    logging.debug(
-                        f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
+                    total_num_of_acquired_keys += 1 # no of keys with priority 1 identified
+                    logging.debug(f'[ResolutionSourceMapping] Required `{sub_key}` is present in relevant torrent info list. Considering key as acquired')
             elif sub_val == 2:
                 if sub_key in str(relevant_torrent_info_values).lower():
-                    total_num_of_optionals_matched += 1
-                    logging.debug(
-                        f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
-                optional_keys.append(sub_key)
+                    total_num_of_optionals_matched += 1 # indicates whether an optional key has been matched or not
+                    logging.debug(f'[ResolutionSourceMapping] SelectMultiple `{sub_key}` is present in relevant torrent info list. Considering key as acquired value')
+                optional_keys.append(sub_key) # number of optional keys configured
 
         logging.debug(f'[ResolutionSourceMapping] Total number of required keys: {total_num_of_required_keys}')
         logging.debug(f'[ResolutionSourceMapping] Total number of acquired keys: {total_num_of_acquired_keys}')
         logging.debug(f'[ResolutionSourceMapping] Optional keys: {optional_keys}')
         logging.debug(f'[ResolutionSourceMapping] Total number of optionals matched: {total_num_of_optionals_matched}')
 
-        if int(total_num_of_required_keys) == int(total_num_of_acquired_keys):
+        if int(total_num_of_required_keys) == int(total_num_of_acquired_keys): # all required keys matched
             if len(optional_keys) > 0:
-                if int(total_num_of_optionals_matched) > 0:
+                if int(total_num_of_optionals_matched) > 0: # atlest one optional has been matched
                     logging.debug(
                         f'[ResolutionSourceMapping] Some {total_num_of_optionals_matched} of optional keys {optional_keys} were matched and no of required items and no of acquired items are equal. Hence considering key `{key}` as a match for `{config["translation"][target_val]}`')
                     possible_match_layer_1.append(key)
-                else:
+                else: # required keys matched, but not optional keys
                     logging.debug(f'[ResolutionSourceMapping] No optional keys {optional_keys} were matched.')
             else:
                 logging.debug(
@@ -66,12 +63,18 @@ def identify_resolution_source(target_val, config, relevant_torrent_info_values,
             # We check for " == 0" so that if we get a profile that matches all the "1" then we can break immediately (2160p BD remux requires 'remux', '2160p', 'bluray')
             # so if we find all those values in optional_keys list then we can break
             # knowing that we hit 100% of the required values instead of having to cycle through the "optional" values and select one of them
+
+            # Note: No idea what the below conditions are for. but it works
+            # and if it ain't broken, don't fix it
             if len(optional_keys) == 0 and key != "other":
                 break
 
+            # TODO: try to find out in which scenario this condition gets satisfied
             if len(optional_keys) >= 2 and int(total_num_of_optionals_matched) == 1:
                 break
 
+        # We give higher priority to the non Other match
+        #Removing other, if Other and another key was matched.
         if len(possible_match_layer_1) >= 2 and "Other" in possible_match_layer_1:
             possible_match_layer_1.remove("Other")
 
@@ -89,7 +92,7 @@ def identify_resolution_source(target_val, config, relevant_torrent_info_values,
         return "STOP"
 
 
-def get_hybrid_type(translation_value, tracker_settings, config, exit_program, torrent_info):
+def __get_hybrid_type(translation_value, tracker_settings, config, exit_program, torrent_info):
     """
         Method to get a hybrid type from the source, resolution and type properties of the torrent
     """
@@ -173,7 +176,7 @@ def perform_delayed_hybrid_mapping(config, tracker_settings, torrent_info, exit_
                 tracker_settings=tracker_settings
             )
             if translation_value not in tracker_settings and delay_mapping == False:
-                tracker_settings[translation_value] = get_hybrid_type(
+                tracker_settings[translation_value] = __get_hybrid_type(
                     translation_value=translation_value,
                     tracker_settings=tracker_settings,
                     config=config,
@@ -189,8 +192,7 @@ def __create_imdb_without_tt_key(torrent_info):
     torrent_info["imdb_with_tt"] = torrent_info["imdb"]
     if len(torrent_info["imdb"]) >= 2:
         if str(torrent_info["imdb"]).startswith("tt"):
-            torrent_info["imdb"] = str(
-                torrent_info["imdb"]).replace("tt", "")
+            torrent_info["imdb"] = str(torrent_info["imdb"]).replace("tt", "")
         else:
             torrent_info["imdb_with_tt"] = f'tt{torrent_info["imdb"]}'
     else:
@@ -324,7 +326,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                         return "STOP"
 
                 if translation_key in ('source', 'resolution', 'resolution_id'):
-                    return_value = identify_resolution_source(
+                    return_value = __identify_resolution_source(
                         target_val=translation_key,
                         config=config,
                         relevant_torrent_info_values=relevant_torrent_info_values,
@@ -431,7 +433,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                 delayed_mapping = False
                 # to do hybrid translation we might need certain prerequisite fields to be resolved before hand in tracker settings.
                 # we first check whether they have been resolved or not.
-                # If those values have been resolved then we can just call the `get_hybrid_type` to resolve it.
+                # If those values have been resolved then we can just call the `__get_hybrid_type` to resolve it.
                 # otherwise we mark the present of this hybrid type and do the mapping after all required and optional
                 # value mapping have been completed.
                 # prerequisite needed only for tracker_settings. Not for torrent_info data
@@ -449,7 +451,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                     continue
 
                 logging.info(f"[HybridMapping] Going to perform hybrid mapping for :: '{translation_value}'")
-                tracker_settings[translation_value] = get_hybrid_type(
+                tracker_settings[translation_value] = __get_hybrid_type(
                     translation_value=translation_value,
                     tracker_settings=tracker_settings,
                     config=config,
@@ -469,7 +471,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
 
     # at this point we have finished iterating over the translation key items
     if is_hybrid_translation_needed:
-        tracker_settings[config["translation"]["hybrid_type"]] = get_hybrid_type(
+        tracker_settings[config["translation"]["hybrid_type"]] = __get_hybrid_type(
             translation_value=translation_value,
             tracker_settings=tracker_settings,
             config=config,
