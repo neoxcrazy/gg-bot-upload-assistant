@@ -116,7 +116,7 @@ class Rutorrent:
         # `seed_label` is the label which will be added to the cross-seeded torrents
         self.seed_label = os.getenv('cross_seed_label', 'GGBotCrossSeed')
         # `source_label` is thelabel which will be added to the original torrent in the client
-        self.source_label = os.getenv('source_seed_label', 'GGBotCrossSeed_Source')
+        self.source_label = f"{self.seed_label}_Source"
 
         try:
             logging.info("[Rutorrent] Checking connection to Rutorrent")
