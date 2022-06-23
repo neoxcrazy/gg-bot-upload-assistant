@@ -77,12 +77,6 @@ if str(os.getenv('auto_mode')).lower() not in ['true', 'false']:
     logging.error('[Main] `auto_mode` is not set to `true/false` in `config.env`. Defaulting to `false`')
 auto_mode = str(os.getenv('auto_mode', 'false')).lower()
 
-# import discord webhook url (if exists)
-if len(os.getenv('DISCORD_WEBHOOK')) != 0:
-    discord_url = str(os.getenv('DISCORD_WEBHOOK'))
-else:
-    discord_url = None
-
 # Setup args
 parser = argparse.ArgumentParser()
 
@@ -665,12 +659,6 @@ def format_title(json_config):
         # which is used to store the payload for the actual POST upload request
         torrent_info["torrent_title"] = str(formatted_title[1:])
 
-    # Update discord channel
-    if discord_url:
-        time.sleep(1)
-        requests.request("POST", discord_url, headers={
-            'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Torrent Title: **{torrent_info["torrent_title"]}**')
-
 
 # ---------------------------------------------------------------------- #
 #                       generate/edit .torrent file                      #
@@ -860,10 +848,6 @@ def upload_to_site(upload_to, tracker_api_key):
 
     if response.status_code in (200, 201):
         logging.info(f"[TrackerUpload] Upload response for {upload_to}: {response.text.encode('utf8')}")
-        # Update discord channel
-        if discord_url:
-            requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f"content=Upload response: **{response.text.encode('utf8')}**")
-
         if "success" in response.json():
             if str(response.json()["success"]).lower() == "true":
                 logging.info(f"[TrackerUpload] Upload to {upload_to} was a success!")
@@ -1001,10 +985,6 @@ torrent_client = utils.get_torrent_client_if_needed()
 # Set the value of args.path to a variable that we can overwrite with a path translation later (if needed)
 user_supplied_paths = args.path
 
-# If a user has supplied a discord webhook URL we can send updates to that channel
-if discord_url:
-    requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content={starting_new_upload}')
-
 # Verify we support the tracker specified
 logging.debug(f"[Main] Trackers provided by user {args.trackers}")
 upload_to_trackers = utils.get_and_validate_configured_trackers(args.trackers, args.all_trackers, api_keys_dict, acronym_to_tracker.keys())
@@ -1113,10 +1093,6 @@ for file in upload_queue:
         logging.debug(f"[Main] Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
         continue
 
-    # Update discord channel
-    if discord_url:
-        requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content=Uploading: **{torrent_info["upload_media"]}**')
-
     # -------- add .nfo if exists --------
     if args.nfo:
         if os.path.isfile(args.nfo[0]):
@@ -1130,10 +1106,6 @@ for file in upload_queue:
     # -------- Fix/update values --------
     # set the correct video & audio codecs (Dolby Digital --> DDP, use x264 if encode vs remux etc)
     identify_miscellaneous_details(guess_it_result)
-    # Update discord channel
-    if discord_url:
-        requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            data=f'content='f'Video Code: **{torrent_info["video_codec"]}**  |  Audio Code: **{torrent_info["audio_codec"]}**')
 
     movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
 
@@ -1205,11 +1177,6 @@ for file in upload_queue:
         torrent_info["imdb"] = metadata_result["imdb"]
         torrent_info["tvmaze"] = metadata_result["tvmaze"]
 
-    # Update discord channel
-    if discord_url:
-        requests.request("POST", discord_url,
-            headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'IMDB: **{torrent_info["imdb"]}**  |  TMDB: **{torrent_info["tmdb"]}**')
-
     # -------- Use official info from TMDB --------
     title, year, tvdb, mal = metadata_utilities.metadata_compare_tmdb_data_local(torrent_info)
     torrent_info["title"] = title
@@ -1243,16 +1210,12 @@ for file in upload_queue:
         console.line(count=2)
         console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
         logging.debug(f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
-        dupe_check_response = check_for_dupes_in_tracker(
-            tracker, temp_tracker_api_key)
+        dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
         # If dupes are present and user decided to stop upload, for single tracker uploads we stop operation immediately
         # True == dupe_found
         # False == no_dupes/continue upload
         if dupe_check_response:
             logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
-            if discord_url:  # Send discord notification if enabled
-                requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                    data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
             if args.auto_mode:
                 continue
             else:
@@ -1269,7 +1232,6 @@ for file in upload_queue:
         torrent_title_import=torrent_info["title"],
         base_path=working_folder,
         hash_prefix=torrent_info["working_folder"],
-        discord_url=discord_url,
         skip_screenshots=args.skip_screenshots
     )
 
@@ -1287,10 +1249,6 @@ for file in upload_queue:
 
         temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
         logging.info(f"[Main] Trying to upload to: {tracker}")
-
-        # Update discord channel
-        if discord_url:
-            requests.request("POST", discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content=Uploading to: **{config["name"]}**')
 
         # Create a new dictionary that we store the exact keys/vals that the site is expecting
         tracker_settings = {}
@@ -1351,11 +1309,6 @@ for file in upload_queue:
             # False == no_dupes/continue upload
             if dupe_check_response:
                 logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
-                # Send discord notification if enabled
-                if discord_url:
-                    requests.post(url=discord_url, headers={'Content-Type': 'application/x-www-form-urlencoded'},
-                        data=f'content='f'Dupe check failed, upload to **{str(tracker).upper()}** canceled')
-
                 # If dupe was found & the script is auto_mode OR if the user responds with 'n' for the 'dupe found, continue?' prompt
                 #  we will essentially stop the current 'for loops' iteration & jump back to the beginning to start next cycle (if exists else quits)
                 continue
@@ -1433,6 +1386,3 @@ for file in upload_queue:
     script_end_time = time.perf_counter()
     total_run_time = f'{script_end_time - script_start_time:0.4f}'
     logging.info(f"[Main] Total runtime is {total_run_time} seconds")
-    # Update discord channel
-    if discord_url:
-        requests.request("POST", discord_url, headers={ 'Content-Type': 'application/x-www-form-urlencoded'}, data=f'content='f'Total runtime: **{total_run_time} seconds**')
