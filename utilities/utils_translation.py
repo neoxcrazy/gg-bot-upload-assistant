@@ -342,7 +342,7 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
 
                     # Adding support for internal args
                     elif translation_key in ['doubleup', 'featured', 'freeleech', 'internal', 'sticky', 'tripleup', 'foreign', "3d"]:
-                        tracker_settings[config["translation"][translation_key]] = "1" if getattr(args, translation_key, default=False) is True else "0"
+                        tracker_settings[config["translation"][translation_key]] = "1" if getattr(args, translation_key, False) is True else "0"
 
                     # We dump all the info from torrent_info in tracker_settings here
                     elif translation_key in torrent_info:

@@ -23,5 +23,17 @@ RUN SPECIFIC TESTS
 PREPATE DEV ENVIRONMENT
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 sudo apt update
-sudo apt install unrar mediainfo ffmpeg mktorrent
+sudo apt install unrar mediainfo ffmpeg mktorrent apache2-utils
+
+
+NOTES
+_____________________
+mediainfo --version
+If you don't have the latest mediainfo, then you can install it using the scripts in `latest_mediainfo`
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+GENERATE .htpasswd FILE
+----------------------------------------------------------------------------------------------------------------------------------------------------
+sudo htpasswd -c ./samples/reuploader/.htpasswd admin
 ----------------------------------------------------------------------------------------------------------------------------------------------------
