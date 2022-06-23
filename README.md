@@ -261,7 +261,6 @@ docker run --rm -it \
     - [X] Mongo DB
 - [X] Removed discord webhook and notifications
 - [ ] Improved TMDB metadata search Phase 2
-- [ ] Discord notification for auto uploaded data
 - [ ] Accept MAL id as user argument
 - [X] Release GG-BOT source code to public
 - [X] Bug Fixes and Testing Phase 1
