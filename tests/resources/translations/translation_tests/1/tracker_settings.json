@@ -1,0 +1,22 @@
+{
+    "name": "The.Title.0000.Source.Audio.Codec.Video.Codec-GGBot",
+    "file": "/temp_upload/hash_for_file/GG-BOT-The.Title.0000.Source.Audio.Codec.Video.Codec-GGBot.torrent",
+    "mediainfo": "media_info_file.txt",
+    "cat": "2",
+    "source": "2",
+    "subcat": "11",
+    "subcat_2":"subcat_2_value",
+    "resolution": "4",
+    "sd":"",
+    "sdescr": "promo",
+    "descr": "mediainfo_summary_text",
+    "screen": "bbcode_thumb_nothumb",
+    "imdb": "https://www.imdb.com/title/tt10767168",
+    "tmdb": "https://www.themoviedb.org/tv/60572",
+    "mal": "https://myanimelist.net/anime/16782",
+    "tvmaze": "https://www.tvmaze.com/shows/13",
+    "tvdb": "https://www.thetvdb.com/?tab=series&id=279121",
+    "nfo": "nfo_file.nfo",
+    "format": "json",
+    "custom_edition":""
+}

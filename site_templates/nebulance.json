@@ -21,8 +21,7 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
+    "hybrid_mappings": {
     },
 
     "translation": {
@@ -108,7 +107,7 @@
     "Default":{},
 
     "dupes": {
-        
+
         "technical_jargons": {
             "authentication_mode": "API_KEY",
             "payload_type": "JSON",
@@ -118,7 +117,7 @@
         "strip_text": true,
 
         "payload": "{\"jsonrpc\": \"2.0\",\"id\": 1,\"method\": \"getTorrents\",\"params\": [\"<api_key>\",{\"tvmaze\": <tvmaze>},0,0]}",
-        
+
         "parse_json": {
             "is_needed": true,
             "top_lvl": "result",

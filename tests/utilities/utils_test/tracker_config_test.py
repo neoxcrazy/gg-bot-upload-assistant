@@ -39,8 +39,7 @@ def run_around_tests():
     if Path(folder).is_dir():
         clean_up(folder)
     else:
-        Path(f"{folder}/sample").mkdir(parents=True,
-                                       exist_ok=True)  # config.env folder
+        Path(f"{folder}/sample").mkdir(parents=True, exist_ok=True)  # config.env folder
 
     nano(f"{folder}/sample/config.env.sample", "key1=\nkey2=\nkey3=")
     yield
@@ -49,44 +48,35 @@ def run_around_tests():
 
 def test_write_file_contents_to_log_as_debug(mocker):
     mock_logger = mocker.patch("logging.debug")
-    utils.write_file_contents_to_log_as_debug(
-        f"{working_folder}{temp_working_dir}/sample/config.env.sample")
+    utils.write_file_contents_to_log_as_debug(f"{working_folder}{temp_working_dir}/sample/config.env.sample")
     assert mock_logger.call_count == 3
 
 
 def test_validate_env_file(mocker):
     get_env = mocker.patch("os.getenv", return_value="")
-    utils.validate_env_file(
-        f"{working_folder}{temp_working_dir}/sample/config.env.sample")
+    utils.validate_env_file(f"{working_folder}{temp_working_dir}/sample/config.env.sample")
     assert get_env.call_count == 3
 
 
 def test_get_and_validate_default_trackers(mocker):
-    mocker.patch(
-        "os.getenv", side_effect=__default_tracker_success_key_validation)
+    mocker.patch("os.getenv", side_effect=__default_tracker_success_key_validation)
 
-    acronym_to_tracker = json.load(
-        open(f'{working_folder}/parameters/tracker/acronyms.json'))
-    api_keys_dict = utils.prepare_and_validate_tracker_api_keys_dict(
-        f'{working_folder}/parameters/tracker/api_keys.json')
-    assert utils.get_and_validate_configured_trackers(
-        None, False, api_keys_dict, acronym_to_tracker.keys()) == ["ANT"]
+    acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
+    api_keys_dict = utils.prepare_and_validate_tracker_api_keys_dict(f'{working_folder}/parameters/tracker/api_keys.json')
+    assert utils.get_and_validate_configured_trackers(None, False, api_keys_dict, acronym_to_tracker.keys()) == ["ANT"]
 
 
 @pytest.mark.parametrize(
     ("trackers", "all_trackers"),
     [
-        pytest.param(["TSP", "BHD", "ABC"], True,
-                     id="trackers_provided_with_no_api_key"),
+        pytest.param(["TSP", "BHD", "ABC"], True, id="trackers_provided_with_no_api_key"),
         pytest.param([], False, id="default_trackers_with_no_api_key"),
     ]
 )
 def test_get_and_validate_configured_trackers_failures(trackers, all_trackers, mocker):
-    mocker.patch(
-        "os.getenv", side_effect=__default_tracker_failure_key_validation)
+    mocker.patch("os.getenv", side_effect=__default_tracker_failure_key_validation)
 
-    acronym_to_tracker = json.load(
-        open(f'{working_folder}/parameters/tracker/acronyms.json'))
+    acronym_to_tracker = json.load(open(f'{working_folder}/parameters/tracker/acronyms.json'))
     api_keys_dict = utils.prepare_and_validate_tracker_api_keys_dict(
         f'{working_folder}/parameters/tracker/api_keys.json')
 

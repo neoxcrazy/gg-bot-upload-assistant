@@ -8,7 +8,7 @@ import subprocess
 from rich import box
 from rich.table import Table
 from rich.console import Console
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
 console = Console()
 
@@ -107,7 +107,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
     bd_max_size = 0
     bd_max_file = ""  # file with the largest size inside the STEAM folder
 
-    for folder, subfolders, files in os.walk(f'{upload_media}BDMV/STREAM/'):
+    for folder, _, files in os.walk(f'{upload_media}BDMV/STREAM/'):
         # checking the size of each file
         for bd_file in files:
             size = os.stat(os.path.join(folder, bd_file)).st_size
@@ -116,12 +116,9 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
                 bd_max_size = size
                 bd_max_file = os.path.join(folder, bd_file)
 
-    bdinfo_output_split = str(' '.join(str(subprocess.check_output(
-        [bdinfo_script, upload_media, "-l"])).split())).split(' ')
-    logging.debug(
-        f"[BDInfoUtils] BDInfo output split from of list command: ---{bdinfo_output_split}--- ")
-    all_mpls_playlists = re.findall(
-        r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
+    bdinfo_output_split = str(' '.join(str(subprocess.check_output([bdinfo_script, upload_media, "-l"])).split())).split(' ')
+    logging.debug(f"[BDInfoUtils] BDInfo output split from of list command: ---{bdinfo_output_split}--- ")
+    all_mpls_playlists = re.findall(r'\d\d\d\d\d\.MPLS', str(bdinfo_output_split))
 
     dict_of_playlist_length_size = {}
     dict_of_playlist_info_list = []  # list of dict
@@ -129,8 +126,7 @@ def bdinfo_get_largest_playlist(bdinfo_script, auto_mode, upload_media):
     for index, mpls_playlist in enumerate(bdinfo_output_split):
         if mpls_playlist in all_mpls_playlists:
             playlist_details = {}
-            playlist_details["no"] = bdinfo_output_split[index -
-                                                         2].replace("\\n", "")
+            playlist_details["no"] = bdinfo_output_split[index - 2].replace("\\n", "")
             playlist_details["group"] = bdinfo_output_split[index - 1]
             playlist_details["file"] = bdinfo_output_split[index]
             playlist_details["length"] = bdinfo_output_split[index + 1]
@@ -303,10 +299,8 @@ def parse_bdinfo(bdinfo_location):
                 }
                 video_components = line.split(':', 1)[1].split('/')
                 video_metadata = {}
-                for loop_variable in range(0, len(video_components)):
-                    video_metadata[video_components_dict[loop_variable]
-                                   ] = video_components[loop_variable].strip()
-
+                for index, component in enumerate(video_components):
+                    video_metadata[video_components_dict[index]] = component.strip()
                 if "HEVC" in video_metadata["codec"]:
                     video_metadata["codec"] = "HEVC"
                 elif "AVC" in video_metadata["codec"]:
@@ -335,16 +329,15 @@ def parse_bdinfo(bdinfo_location):
                 audio_components = line.split(':', 1)[1].split(
                     '/ ')  # not so sure about this /{space}
                 audio_metadata = {}
-                for loop_variable in range(0, len(audio_components)):
+                for index, component in enumerate(audio_components):
                     # identifying and tagging atmos audio
-                    if "Atmos" in audio_components[loop_variable]:
-                        codec_split = audio_components[loop_variable].split(
-                            "/")
+                    if "Atmos" in component:
+                        codec_split = component.split("/")
                         audio_metadata["atmos"] = codec_split[1].strip()
-                        audio_components[loop_variable] = codec_split[0].strip()
+                        component = codec_split[0].strip()
 
-                    audio_metadata[audio_components_dict[loop_variable]
-                                   ] = audio_components[loop_variable].strip()
+                    audio_metadata[audio_components_dict[index]] = component.strip()
+
                 bdinfo["audio"].append(audio_metadata)
             # Disc Title: Venom: Let There Be Carnage - 4K Ultra HD
             elif line.startswith("Disc Title:"):

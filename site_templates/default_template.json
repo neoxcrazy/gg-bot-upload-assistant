@@ -21,13 +21,20 @@
         "payload_type": "MULTI-PART | JSON"
     },
 
-    "hybrid_type": {
-        "required": false,
-        "mapping": {
-            "tracker_required_key_1": {
-                "required_key_category_id": ["required ids"],
-                "required_key_resolution": ["required ids"],
-                "required_key_type_id": ["required ids"]
+    "hybrid_mappings": {
+        "hybrid_type_translation_tracker_key":{
+            "required": false,
+            "prerequisite": [
+                "list of tracker keys",
+                "that must be resolved/translated",
+                "before hybrid mapping can be done for this key"
+            ],
+            "mapping": {
+                "tracker_required_key_1": {
+                    "required_key_category_id": ["required ids"],
+                    "required_key_resolution": ["required ids"],
+                    "required_key_type_id": ["required ids"]
+                }
             }
         }
     },
@@ -235,7 +242,7 @@
             "top_lvl": "data",
             "torrent_details": "attributes"
         },
-        "payload":"{\"search\":\"<imdb>\"}", 
+        "payload":"{\"search\":\"<imdb>\"}",
         "payload_type": "MULTI-PART",
 
         "different_cuts": "100",

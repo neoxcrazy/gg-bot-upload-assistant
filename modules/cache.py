@@ -32,9 +32,6 @@ class Cache:
     def save(self, key, data):
         self.cache_client.save(key, data)
 
-    def save_or_update(self, key, data):
-        self.cache_client.save_or_update(key, data)
-
     def delete(self, key, query=None):
         return self.cache_client.delete(key, query)
 
@@ -44,11 +41,8 @@ class Cache:
     def get(self, key, filter=None):
         return self.cache_client.get(key, filter)
 
-    def get_all(self, key):
-        return self.cache_client.get_all(key)
-
     def close(self):
         self.cache_client.close()
 
-    def filter(self, key, filter):
-        return self.cache_client.filter(key, filter)
+    def advanced_get(self, key, limit, page_number, sort_field=None, filter=None):
+        return self.cache_client.advanced_get(key, limit, page_number, sort_field, filter)

@@ -7,16 +7,11 @@
     "platform": "XBTIT",
     "bbcode_line_break": "\n",
     "title_separator": " ",
-
     "technical_jargons": {
         "authentication_mode": "API_KEY",
         "payload_type": "MULTI-PART"
     },
-
-    "hybrid_type": {
-        "required": false
-    },
-
+    "hybrid_mappings": {},
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "filename",
@@ -35,10 +30,8 @@
         "mal": "mal",
         "igdb": "igdb",
         "nfo_file": "nfo",
-
         "season_number": "season_number",
         "episode_number": "episode_number",
-
         "optimized": "stream",
         "internal": "internal",
         "featured": "featured",
@@ -47,7 +40,6 @@
         "sticky": "sticky",
         "freeleech": "free"
     },
-
     "Required": {
         "torrent": "file",
         "filename": "string",
@@ -55,25 +47,21 @@
         "anonymous": "string",
         "sd": "string",
         "stream": "string",
-
         "tvdb": "string",
         "tmdb": "string",
         "imdb": "string",
         "mal": "string",
         "igdb": "string",
-
         "internal": "string",
         "free": "string",
         "featured": "string",
         "doubleup": "string",
         "tripleup": "string",
         "sticky": "string",
-
         "category": {
             "1": "movie",
             "2": "episode"
         },
-
         "type_id": {
             "1": {
                 "disc": 1,
@@ -98,7 +86,6 @@
                 "hdtv": 1
             }
         },
-
         "resolution_id": {
             "11": {
                 "4360p": 1
@@ -132,33 +119,26 @@
             }
         }
     },
-
     "Optional": {
         "nfo_file": "file",
         "season_number": "string",
         "episode_number": "string",
-
         "bdinfo": "string",
         "mediainfo": "string"
     },
-
-    "Default":{},
-
+    "Default": {},
     "dupes": {
         "technical_jargons": {
             "authentication_mode": "API_KEY",
             "payload_type": "MULTI-PART",
             "request_method": "GET"
         },
-        
         "url_format": "{search_url}&filter={title}",
         "strip_text": false,
-
         "parse_json": {
             "is_needed": true,
             "top_lvl": "data"
         },
-
         "different_cuts": "1",
         "2160p_remux": 1,
         "2160p_encode": 1,
@@ -167,7 +147,6 @@
         "720p_encode": 100,
         "else": 1
     },
-
     "torrent_title_format": {
         "episode": {
             "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
@@ -177,7 +156,6 @@
             "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
             "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         },
-
         "movie": {
             "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
             "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
@@ -187,7 +165,6 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
     "banned_groups": [
         "AROMA",
         "aXXo",

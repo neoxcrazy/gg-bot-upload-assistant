@@ -21,8 +21,7 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
+    "hybrid_mappings": {
     },
 
     "translation": {

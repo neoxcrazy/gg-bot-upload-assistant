@@ -76,7 +76,7 @@ def clean_up(pth):
         upload_media: /projects/Python\ Projects/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/
 
     ___________________________________________________________________________________________________________________________
-    
+
     --------------------------------------------------------- TV SHOW ---------------------------------------------------------
     ___________________________________________________________________________________________________________________________
 
@@ -97,9 +97,9 @@ def __cross_seed_no_translation_side_effect(param, default):
 def __cross_seed_with_translation_side_effect(param, default):
     if param in ["enable_post_processing", "translation_needed"]:
         return True
-    elif param == "uploader_path":
+    elif param == "uploader_accessible_path":
         return "/gg-bot-upload-assistant/files"
-    elif param == "client_path":
+    elif param == "client_accessible_path":
         return "/some/folder/accessible/by/client/data"
     elif param == "post_processing_mode":
         return "CROSS_SEED"

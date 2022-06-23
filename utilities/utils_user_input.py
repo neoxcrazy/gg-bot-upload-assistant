@@ -1,4 +1,3 @@
-import os
 import sys
 import json
 import logging
@@ -64,7 +63,7 @@ def collect_custom_messages_from_user(custom_text_components_path):
         choice = Prompt.ask("Choose which type of content to add:", choices=list_of_num, default="1")
         # the last component is always the hardcoded IDIOT key
         if choice == str(len(custom_text_components)):
-            console.print(f"[bold blue]:facepunch: Yes... Yes you are.:facepunch: [/bold blue] [bold red]Skipping further custom torrent descriptions collection and proceeding with upload[/bold red] :angry_face: ", justify='center')
+            console.print("[bold blue]:facepunch: Yes... Yes you are.:facepunch: [/bold blue] [bold red]Skipping further custom torrent descriptions collection and proceeding with upload[/bold red] :angry_face: ", justify='center')
             keep_going_mate = False
         else:
             title = None

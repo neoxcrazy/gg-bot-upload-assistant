@@ -6,79 +6,24 @@
     "source": "Swarmazon",
     "platform": "Swarmazon",
     "bbcode_line_break": "\n",
-    "title_separator" : " ",
-
-    "description_components":{
-        "code_code": "<pre></pre>"
+    "title_separator": " ",
+    "description_components": {
+        "code_code": "<code></code>"
     },
-
     "technical_jargons": {
         "authentication_mode": "API_KEY",
         "payload_type": "MULTI-PART"
     },
-
-    "hybrid_type": {
-        "required": true,
-        "__comments__": {
-            "1": "Movies: WEB-DL/WEBRip",
-            "3": "Movies: FullDisk, Remux, Encode",
-            "5": "TV: Episode (anything tv that fails check for 6)",
-            "6": "TV: Season (episode number is 0)",
-
-            "category_id":{
-                "1": "movie",
-                "2": "episode"
-            }
-        },
-        "mapping": {
-            "1":{
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source":{
-                    "data_source": "tracker",
-                    "values": ["4", "5"]
-                }
-            },
-            "3":{
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source":{
-                    "data_source": "tracker",
-                    "values": ["1", "3", "12"]
-                }
-            },
-            "6":{
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "episode_number": {
-                    "data_source": "torrent",
-                    "values": ["0"]
-                }
-            },
-            "5": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                }
-            }
-        }
-    },
-
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "description": "description",
         "mediainfo": "media_info",
         "bdinfo": "media_info",
-        "type": "category_id",
+        "type": "category",
         "source": "source",
-        "hybrid_type": "type_id",
+        "hybrid_type_1": "type_id",
+        "hybrid_type_2": "category_id",
         "resolution": "resolution_id",
         "tmdb": "tmdb",
         "imdb_with_tt": "media_ref",
@@ -98,7 +43,123 @@
         "sticky": "sticky",
         "freeleech": "free"
     },
-
+    "hybrid_mappings": {
+        "category_id":{
+            "required": true,
+            "prerequisite": [
+                "category"
+            ],
+            "mapping":{
+                "7":{
+                    "mal": {
+                        "data_source": "torrent",
+                        "not": true,
+                        "values": [
+                            "0"
+                        ]
+                    }
+                },
+                "1":{
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                },
+                "2":{
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                }
+            }
+        },
+        "type_id": {
+            "required": true,
+            "prerequisite": [
+                "category",
+                "source"
+            ],
+            "mapping": {
+                "57": {
+                    "mal": {
+                        "data_source": "torrent",
+                        "not": true,
+                        "values": [
+                            "0"
+                        ]
+                    }
+                },
+                "1": {
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4",
+                            "5"
+                        ]
+                    }
+                },
+                "3": {
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1",
+                            "3",
+                            "12"
+                        ]
+                    }
+                },
+                "6": {
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "episode_number": {
+                        "data_source": "torrent",
+                        "values": [
+                            "0"
+                        ]
+                    }
+                },
+                "5": {
+                    "category": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                }
+            },
+            "__comments__": {
+                "1": "Movies: WEB-DL/WEBRip",
+                "3": "Movies: FullDisk, Remux, Encode",
+                "5": "TV: Episode (anything tv that fails check for 6)",
+                "6": "TV: Season (episode number is 0)",
+                "47": "Anime: Mina",
+                "category": {
+                    "1": "movie",
+                    "2": "episode"
+                }
+            }
+        }
+    },
     "Required": {
         "torrent": "file",
         "name": "string",
@@ -107,23 +168,21 @@
         "sd": "string",
         "stream": "string",
         "tvdb": "string",
-        "type_id":"string",
+        "type_id":"hybrid_type",
+        "category_id":"hybrid_type",
         "tmdb": "string",
         "media_ref": "string",
         "mal": "string",
         "igdb": "string",
-
         "internal": "string",
         "free": "string",
         "featured": "string",
         "doubleup": "string",
         "sticky": "string",
-
-        "category_id": {
+        "category": {
             "1": "movie",
             "2": "episode"
         },
-
         "source": {
             "1": {
                 "disc": 1,
@@ -148,7 +207,6 @@
                 "hdtv": 1
             }
         },
-
         "resolution_id": {
             "11": {
                 "4360p": 1
@@ -182,33 +240,25 @@
             }
         }
     },
-
     "Optional": {
         "nfo_file": "file",
         "season_number": "string",
         "episode_number": "string",
-
         "media_info": "string"
     },
-
-    "Default":{},
-
+    "Default": {},
     "dupes": {
-        
         "technical_jargons": {
             "authentication_mode": "API_KEY",
             "payload_type": "MULTI-PART",
             "request_method": "GET"
         },
-
         "url_format": "{search_url}&media_ref={imdb}",
         "strip_text": false,
-
         "parse_json": {
             "is_needed": true,
             "top_lvl": "data"
         },
-
         "different_cuts": "1",
         "2160p_remux": 1,
         "2160p_encode": 1,
@@ -217,7 +267,6 @@
         "720p_encode": 100,
         "else": 1
     },
-
     "torrent_title_format": {
         "episode": {
             "bluray_disc": "{title} {year} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
@@ -227,7 +276,6 @@
             "hdtv": "{title} {year} {s00e00} {repack} {screen_size} {hybrid} {source} {audio_codec} {audio_channels} {video_codec} {release_group}",
             "dvd": "{title} {year} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         },
-
         "movie": {
             "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
             "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {audio_channels} {atmos} {release_group}",
@@ -237,16 +285,13 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {video_codec} {remux} {audio_codec} {audio_channels} {atmos} {release_group}"
         }
     },
-
     "banned_groups": [
         "AROMA",
         "aXXo",
         "BRrip",
         "CM8",
         "CrEwSaDe",
-        "d3g",
         "DNL",
-        "FGT",
         "FaNGDiNG0",
         "FRDS",
         "HD2DVD",
@@ -258,16 +303,18 @@
         "mHD",
         "mSD",
         "nHD",
-        "nikt0",
         "nSD",
         "NhaNc3",
         "PRODJi",
         "RDN",
         "SANTi",
         "STUTTERSHIT",
+        "RARBG",
         "ViSION",
         "WAF",
         "x0r",
-        "YIFY"
+        "YIFY",
+        "LycanHD",
+        "FGT"
     ]
 }

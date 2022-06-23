@@ -1,0 +1,489 @@
+{
+    "translation": {
+        "dot_torrent": "file",
+        "torrent_title": "name",
+        "mediainfo": "mediainfo",
+        "bdinfo": "mediainfo",
+        "type": "cat",
+        "source": "source",
+        "hybrid_type_2": "subcat_2",
+        "hybrid_type": "subcat",
+        "resolution": "resolution",
+        "shameless_self_promotion": "sdescr",
+        "mediainfo_summary": "descr",
+        "bbcode_thumb_nothumb": "screen",
+        "imdb": "imdb",
+        "sd":"sd",
+        "tmdb": "tmdb",
+        "edition":"edition",
+        "region":"region",
+        "mal": "mal",
+        "tvmaze": "tvmaze",
+        "tvdb": "tvdb",
+        "nfo_file": "nfo"
+    },
+    "hybrid_mappings": {
+        "subcat_2":{
+            "required": true,
+            "prerequisite": [
+                "subcat"
+            ],
+            "mapping": {
+                "subcat_2_value":{
+                    "subcat":{
+                        "data_source": "tracker",
+                        "values": [
+                            "IS_NOT_NONE_OR_IS_PRESENT"
+                        ]
+                    }
+                }
+            }
+        },
+        "subcat": {
+            "required": true,
+            "prerequisite": [
+                "cat",
+                "source"
+            ],
+            "mapping": {
+                "1": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    },
+                    "video_codec": {
+                        "data_source": "torrent",
+                        "values": [
+                            "x264",
+                            "H264",
+                            "h264",
+                            "x.264",
+                            "H.264",
+                            "h.264",
+                            "x 264",
+                            "H 264",
+                            "h 264",
+                            "AVC"
+                        ]
+                    }
+                },
+                "43": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    },
+                    "video_codec": {
+                        "data_source": "torrent",
+                        "values": [
+                            "x265",
+                            "H265",
+                            "h265",
+                            "x.265",
+                            "H.265",
+                            "h.265",
+                            "x 265",
+                            "H 265",
+                            "h 265",
+                            "HEVC"
+                        ]
+                    }
+                },
+                "2": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "video_codec": {
+                        "data_source": "torrent",
+                        "values": [
+                            "AVC"
+                        ]
+                    }
+                },
+                "48": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "video_codec": {
+                        "data_source": "torrent",
+                        "values": [
+                            "HEVC"
+                        ]
+                    }
+                },
+                "3": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                },
+                "5": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4",
+                            "5"
+                        ]
+                    }
+                },
+                "6": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "7"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "6"
+                        ]
+                    }
+                },
+                "7": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "10", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "6"
+                        ]
+                    }
+                },
+                "8": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "10", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4",
+                            "5"
+                        ]
+                    }
+                },
+                "10": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "10", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    }
+                },
+                "11": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "10", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                },
+                "12": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "10", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                },
+                "13": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "12", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "6"
+                        ]
+                    }
+                },
+                "14": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "12", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4",
+                            "5"
+                        ]
+                    }
+                },
+                "16": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "12", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    }
+                },
+                "17": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "12", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                },
+                "18": {
+                    "cat": {
+                        "data_source": "tracker",
+                        "values": [
+                            "12", "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                }
+            },
+            "__comments__": {
+                "1": "Movies: Encode x264",
+                "43": "Movies: Encode HEVC",
+                "2": "Movies: Remux",
+                "48": "Movies: Remux HEVC",
+                "3": "Movies: Blu-ray",
+                "5": "Movies: WEB-DL",
+                "6": "Movies: HDTV",
+                "45": "Movies: Remux 3D  --- NOT POSSIBLE",
+                "46": "Movies: Blu-ray 3D  --- NOT POSSIBLE",
+                "44": "Movies: Encode 3D  --- NOT POSSIBLE",
+                "7": "TV: HDTV",
+                "8": "TV: WEB-DL",
+                "10": "TV: Encode",
+                "11": "TV: Remux",
+                "12": "TV: Blu-ray",
+                "13": "TV Season: HDTV",
+                "14": "TV Season: WEB-DL",
+                "16": "TV Season: Encode",
+                "17": "TV Season: Remux",
+                "18": "TV Season: Blu-ray",
+                "_cat": {
+                    "data_source": "tracker",
+                    "7": "movie",
+                    "2":"episode"
+                },
+                "_source": {
+                    "data_source": "tracker",
+                    "1": "full disc",
+                    "2": "remux",
+                    "3": "encode",
+                    "4": "wedl",
+                    "5": "webrip",
+                    "6": "hdtv"
+                },
+                "_video_codec": {
+                    "data_source": "torrent"
+                }
+            }
+        }
+    },
+    "Required": {
+        "file": "file",
+        "name": "string",
+        "screen": "string",
+        "subcat": "hybrid_type",
+        "subcat_2": "hybrid_type",
+        "imdb": "url",
+        "tmdb": "url",
+        "tvmaze": "url",
+        "mal": "url",
+        "tvdb": "url",
+        "descr": "string",
+        "cat": {
+            "7": "movie",
+            "2":"episode"
+        },
+        "source": {
+            "1": {
+                "disc": 1,
+                "bluray_disc": 2,
+                "dvd_disc": 2
+            },
+            "2": {
+                "remux": 1,
+                "bluray_remux": 2,
+                "dvd_remux": 2
+            },
+            "3": {
+                "bluray_encode": 1
+            },
+            "4": {
+                "webdl": 1
+            },
+            "5": {
+                "webrip": 1
+            },
+            "6": {
+                "hdtv": 1
+            }
+        },
+        "resolution": {
+            "4": {
+                "4360p": 2,
+                "2160p": 2
+            },
+            "3": {
+                "1080p": 1
+            },
+            "2": {
+                "1080i": 1
+            },
+            "1": {
+                "720p": 1
+            },
+            "10": {
+                "other": 1
+            }
+        }
+    },
+    "Optional": {
+        "nfo": "file",
+        "mediainfo": "string",
+        "sdescr": "string",
+        "sd":"string",
+        "edition": [
+            "Collector",
+            "Director",
+            "Extended",
+            "Limited",
+            "Special",
+            "Theatrical",
+            "Uncut",
+            "Unrated"
+        ],
+        "region": [
+            "AUS",
+            "CAN",
+            "CEE",
+            "CHN",
+            "ESP",
+            "EUR",
+            "FRA",
+            "GBR",
+            "GER",
+            "HKG",
+            "ITA",
+            "JPN",
+            "KOR",
+            "NOR",
+            "NLD",
+            "RUS",
+            "TWN",
+            "USA"
+        ],
+        "tags": [
+            "Commentary",
+            "2in1",
+            "Hybrid",
+            "OpenMatte",
+            "2D3D",
+            "WEBRip",
+            "WEBDL",
+            "3D",
+            "4kRemaster",
+            "DualAudio",
+            "EnglishDub",
+            "Personal",
+            "Scene",
+            "DigitalExtras",
+            "Extras"
+        ]
+    },
+    "Default": {
+        "format": "json"
+    }
+}

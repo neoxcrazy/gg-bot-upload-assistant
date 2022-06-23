@@ -21,8 +21,7 @@
         "payload_type": "MULTI-PART"
     },
 
-    "hybrid_type": {
-        "required": false
+    "hybrid_mappings": {
     },
 
     "translation": {
@@ -99,7 +98,7 @@
         "bdinfo": "string",
         "mediainfo": "string"
     },
-    
+
     "Default":{},
 
     "dupes": {
@@ -108,7 +107,7 @@
             "payload_type": "MULTI-PART",
             "request_method": "GET"
         },
-        
+
         "url_format": "{search_url}&imdb={imdb}",
         "strip_text": false,
 
