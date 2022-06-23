@@ -1,5 +1,5 @@
 # Dev folders
-/temp_upload 
+/temp_upload
 /tests/resources/bdinfo/working_folder/*
 /tests/working_folder
 /.idea/
@@ -131,3 +131,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+entry.py
