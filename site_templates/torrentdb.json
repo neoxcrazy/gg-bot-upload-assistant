@@ -387,6 +387,9 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {remux} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}"
         }
     },
+    "torrent_title_translation" : {
+        "DD+" : "DDP"
+    },
     "banned_groups": [
         "YIFY",
         "YTS",
