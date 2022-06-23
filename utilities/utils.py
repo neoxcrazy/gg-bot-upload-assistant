@@ -530,8 +530,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
     if f"{tracker}_upload_status" in torrent_info and torrent_info[f"{tracker}_upload_status"] == True:
         logging.info("[Utils] Attempting to upload dot torrent to configured torrent client.")
         logging.info(f"[Utils] `upload_media` :: '{torrent_info['upload_media']}' `client_path` :: '{torrent_info['client_path']}' ")
-        console.print("Starting Post Processing....")
-        console.print(f"File Path: \t{torrent_info['upload_media']}")
+        console.print(f"\nFile Path: \t{torrent_info['upload_media']}")
         console.print(f"Client Save Path: \t{torrent_info['client_path']}")
 
         if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
@@ -545,7 +544,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         for file in glob.glob(f"{working_folder}/temp_upload/{torrent_info['working_folder']}" + r"/*.torrent"):
             if f"/{tracker}-" in file:
                 torrent_file = file
-                console.print(f"Identified .torrent file \t'{file}' for tracker '{tracker}'")
+                console.print(f"Identified .torrent file \t'{file}' for tracker as '{tracker}'")
                 logging.info(f"[Utils] Identified .torrent file '{file}' for tracker '{tracker}'")
 
         if torrent_file is not None:
@@ -568,6 +567,9 @@ def _post_mode_watch_folder(torrent_info, working_folder):
     move_locations = {"torrent": f"{os.getenv('dot_torrent_move_location')}", "media": f"{os.getenv('media_move_location')}"}
     logging.debug(f"[Utils] Move locations configured by user :: {move_locations}")
     torrent_info["post_processing_complete"] = True
+
+    console.print(f"Torrent move location :: [bold green]{move_locations['torrent']}[/bold green]")
+    console.print(f"Media move location :: [bold green]{move_locations['media']}[/bold green]")
 
     for move_location_key, move_location_value in move_locations.items():
         # If the user supplied a path & it exists we proceed
@@ -595,7 +597,8 @@ def _post_mode_watch_folder(torrent_info, working_folder):
                     try:
                         shutil.move(dot_torrent_file,f'{move_locations["torrent"]}{sub_folder}')
                     except Exception:
-                        logging.exception(f'[Utils] Cannot copy torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
+                        logging.exception(f'[Utils] Cannot move torrent {dot_torrent_file} to location {move_locations["torrent"] + sub_folder}')
+                        console.print(f"[bold red]Failed to move [green]{dot_torrent_file}[/green] to location [green]{move_locations['torrent'] + sub_folder}[/green] [/bold red]")
 
             # Media files are moved instead of copied so we need to make sure they don't already exist in the path the user provides
             if move_location_key == 'media':
@@ -612,9 +615,11 @@ def _post_mode_watch_folder(torrent_info, working_folder):
                     try:
                         shutil.move(torrent_info["upload_media"], move_location_value)
                     except Exception:
-                        logging.exception(f"[Utils] Cannot copy media {torrent_info['upload_media']} to location {move_location_value}")
+                        logging.exception(f"[Utils] Cannot move media {torrent_info['upload_media']} to location {move_location_value}")
+                        console.print(f"[bold red]Failed to move [green]{torrent_info['upload_media']}[/green] to location [green]{move_location_value}[/green] [/bold red]")
         else:
             logging.error(f"[Utils] Move path doesn't exist for {move_location_key} as {move_location_value}")
+            console.print(f"[bold red]Location [green]{move_location_value}[/green] doesn't exit. Cannot move [green]{move_location_key}[/green][/bold red]")
 
 
 def get_torrent_client_if_needed():
@@ -653,14 +658,17 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
 
         post_processing_mode = os.getenv("post_processing_mode", "")
         if post_processing_mode == "CROSS_SEED":
+            console.print("[bold] 🌱 Detected [red]Cross Seed[/red] as the post processing mode. 🌱 [/bold]")
             return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         elif post_processing_mode == "WATCH_FOLDER":
+            console.print("[bold] ⌚ Detected [red]Watch Folder[/red] as the post processing mode. ⌚ [/bold]")
             return _post_mode_watch_folder(torrent_info, working_folder)
         else:
             logging.error(f"[Utils] Post processing is enabled, but invalid mode provided: '{post_processing_mode}'")
             return False
     else:
         logging.info("[Utils] No process processing steps needed, as per users configuration")
+        console.print("\n[bold magenta] 😞  Oops!!. No post processing steps have been configured. 😞 [/bold magenta]", justify="center")
         return False
 
 

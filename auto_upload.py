@@ -1407,13 +1407,6 @@ for file in upload_queue:
             tracker_settings_table.add_row(f"[purple][bold]{tracker_settings_key}[/bold][/purple]", str(tracker_settings_value))
         console.print(tracker_settings_table, justify="center")
 
-    # -------- Post Processing --------
-    torrent_info["post_processing_complete"] = False
-    for tracker in upload_to_trackers:
-        if torrent_info["post_processing_complete"] == True:
-            break  # this flag is used for watch folder post processing. we need to move only once
-        utils.perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
-
     # Torrent Info
     console.print("\n\n")
     torrent_info_table = Table(show_header=True, title='[bold][deep_pink1]Extracted Torrent Metadata[/bold][/deep_pink1]', header_style="bold cyan")
@@ -1425,6 +1418,17 @@ for file in upload_queue:
         torrent_info_table.add_row("[purple][bold]{}[/bold][/purple]".format(torrent_info_key), str(torrent_info_value))
 
     console.print(torrent_info_table, justify="center")
+
+    # -------- Post Processing --------
+    console.line(count=2)
+    console.rule("Post Processing", style='red', align='center')
+    console.line(count=1)
+
+    torrent_info["post_processing_complete"] = False
+    for tracker in upload_to_trackers:
+        if torrent_info["post_processing_complete"] == True:
+            break  # this flag is used for watch folder post processing. we need to move only once
+        utils.perform_post_processing(torrent_info, torrent_client, working_folder, tracker)
 
     script_end_time = time.perf_counter()
     total_run_time = f'{script_end_time - script_start_time:0.4f}'
