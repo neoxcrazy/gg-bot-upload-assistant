@@ -292,7 +292,7 @@ def search_for_dupes_api(search_site, imdb, tmdb, tvmaze, torrent_info, tracker_
     # Now that we have the response from tracker(X) we can parse the json and try to identify dupes
     # We first break down the results into very basic categories like "remux", "encode", "web" etc and store the title + results here
     existing_release_types = {}
-    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0, 'hdr': 0, "dv": 0}  # We also log the num each type shows up on site
+    existing_releases_count = {'bluray_encode': 0, 'bluray_remux': 0, 'webdl': 0, 'webrip': 0, 'hdtv': 0, 'hdr': 0, "dv": 0, "dvd": 0}  # We also log the num each type shows up on site
     # this list will have the list of titles that are 100% dupes.
     # if we are trying to upload a single episode and a season pack already exist, then the season pack is 100% dupe
     # similarly if a repack or a proper release is already on tracker, then thats 100% dupe
