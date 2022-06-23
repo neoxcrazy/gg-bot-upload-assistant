@@ -13,5 +13,11 @@ README.md
 /dev_scripts
 /tests
 /Dockerfiles
+Dockerfile
+Dockerfile.*
 pytest.ini
 junit_report.xml
+coverage.xml
+/coverage
+/public
+requirements*.txt

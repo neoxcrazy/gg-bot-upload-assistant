@@ -85,6 +85,7 @@ uncommon_args.add_argument('-d', '--debug', action='store_true', help="Used for 
 uncommon_args.add_argument('-mkt', '--use_mktorrent', action='store_true', help="Use mktorrent instead of torf (Latest git version only)")
 uncommon_args.add_argument('-fpm', '--force_pymediainfo', action='store_true', help="Force use PyMediaInfo to extract video codec over regex extraction from file name")
 uncommon_args.add_argument('-ss', '--skip_screenshots', action='store_true', help="Skip screenshot generation and upload for a run (overrides config.env)")
+uncommon_args.add_argument('-disc', action='store_true',help="Unsupported for AutoReuploader. Added for compatibility with upload assistant")
 
 # args for Internal uploads
 internal_args = parser.add_argument_group('Internal Upload Arguments')
