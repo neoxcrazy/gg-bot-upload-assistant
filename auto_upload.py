@@ -262,14 +262,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
         # First check to see if we are uploading a 'raw bluray disc'
         if args.disc:
             # validating presence of bdinfo script for bare metal
-            bdinfo_utilities.bdinfo_validate_bdinfo_script_for_bare_metal(
-                bdinfo_script)
+            bdinfo_utilities.bdinfo_validate_bdinfo_script_for_bare_metal(bdinfo_script)
             # validating presence of BDMV/STREAM/
-            bdinfo_utilities.bdinfo_validate_presence_of_bdmv_stream(
-                torrent_info["upload_media"])
+            bdinfo_utilities.bdinfo_validate_presence_of_bdmv_stream(torrent_info["upload_media"])
 
-            raw_video_file, largest_playlist = bdinfo_utilities.bdinfo_get_largest_playlist(
-                bdinfo_script, auto_mode, torrent_info["upload_media"])
+            raw_video_file, largest_playlist = bdinfo_utilities.bdinfo_get_largest_playlist(bdinfo_script, auto_mode, torrent_info["upload_media"])
 
             torrent_info["raw_video_file"] = raw_video_file
             torrent_info["largest_playlist"] = largest_playlist
@@ -280,38 +277,28 @@ def identify_type_and_basic_info(full_path, guess_it_result):
                 torrent_info["raw_video_file"] = raw_video_file
 
         if 'raw_video_file' not in torrent_info:
-            logging.critical(
-                f"The folder {torrent_info['upload_media']} does not contain any video files")
-            console.print(
-                f"The folder {torrent_info['upload_media']} does not contain any video files\n\n", style='bold red')
+            logging.critical(f"The folder {torrent_info['upload_media']} does not contain any video files")
+            console.print(f"The folder {torrent_info['upload_media']} does not contain any video files\n\n", style='bold red')
             return "skip_to_next_file"
 
-        torrent_info["raw_file_name"] = os.path.basename(os.path.dirname(
-            f"{full_path}/"))  # this is used to isolate the folder name
+        torrent_info["raw_file_name"] = os.path.basename(os.path.dirname(f"{full_path}/"))  # this is used to isolate the folder name
     else:
         # For regular movies and single video files we can use the following the just get the filename
-        torrent_info["raw_file_name"] = os.path.basename(
-            full_path)  # this is used to isolate the file name
+        torrent_info["raw_file_name"] = os.path.basename(full_path)  # this is used to isolate the file name
 
     #---------------------------------Full Disk BDInfo Parsing--------------------------------------#
     # if the upload is for a full disk, we parse the bdinfo to indentify more information before moving on to the existing logic.
-    keys_we_need_but_missing_torrent_info_list = [
-        'video_codec', 'audio_codec']  # for disc we don't need mediainfo
+    keys_we_need_but_missing_torrent_info_list = ['video_codec', 'audio_codec']  # for disc we don't need mediainfo
     if args.disc:
         bdinfo_start_time = time.perf_counter()
-        logging.debug(
-            f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
-        console.print(
-            f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
+        logging.debug(f"Generating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}")
+        console.print(f"\nGenerating and parsing the BDInfo for playlist {torrent_info['largest_playlist']}\n", style='bold blue')
         torrent_info["mediainfo"] = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
-        torrent_info["bdinfo"] = bdinfo_utilities.bdinfo_generate_and_parse_bdinfo(
-            bdinfo_script, torrent_info, args.debug)  # TODO handle non-happy paths
-        logging.debug(
-            "::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
+        torrent_info["bdinfo"] = bdinfo_utilities.bdinfo_generate_and_parse_bdinfo(bdinfo_script, torrent_info, args.debug)  # TODO handle non-happy paths
+        logging.debug("::::::::::::::::::::::::::::: Parsed BDInfo output :::::::::::::::::::::::::::::")
         logging.debug(f"\n{pformat(torrent_info['bdinfo'])}")
         bdinfo_end_time = time.perf_counter()
-        logging.debug(
-            f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
+        logging.debug(f"Time taken for full bdinfo parsing :: {(bdinfo_end_time - bdinfo_start_time)}")
     else:
         # since this is not a disc, media info will be appended to the list
         keys_we_need_but_missing_torrent_info_list.append("mediainfo")
@@ -338,6 +325,7 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # parsing mediainfo, this will be reused for further processing.
     # only when the required data is mediainfo, this will be computed again, but as `text` format to write to file.
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
+    logging.debug(f'[Main] Torrent info just before MediaInfo generation. \n {pformat(torrent_info)}')
     media_info_result = basic_utilities.basic_get_mediainfo(parse_me)
 
     if args.disc:
@@ -635,8 +623,7 @@ def format_title(json_config):
             "{", "").replace("}", "").split(" ")
         for item in temp_load_torrent_info:
             # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            generate_format_string[item] = torrent_info[item].replace(
-                " ", separator) if item in torrent_info and torrent_info[item] is not None else ""
+            generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info and torrent_info[item] is not None else ""
 
         formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
         for key, value in generate_format_string.items():

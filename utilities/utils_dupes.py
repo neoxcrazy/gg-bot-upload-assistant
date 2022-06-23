@@ -161,8 +161,7 @@ def _fill_hdr_format_types(hdr_format_types, torrent_title, torrent_title_split)
 def _get_our_hdr_format(torrent_info):
     our_format = "normal"
     if "dv" in torrent_info and torrent_info["dv"] is not None:
-        our_format = "dv_hdr" if "hdr" in torrent_info and torrent_info[
-            "hdr"] is not None else "dv"
+        our_format = "dv_hdr" if "hdr" in torrent_info and torrent_info["hdr"] is not None else "dv"
     elif "hdr" in torrent_info and torrent_info["hdr"] is not None:
         our_format = "hdr"
     return our_format

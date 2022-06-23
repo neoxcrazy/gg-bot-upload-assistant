@@ -216,8 +216,7 @@ def reupload_get_processable_torrents(torrent_client, cache):
 
 def reupload_get_translated_torrent_path(torrent_path):
     if str(os.getenv('translation_needed', 'false')).lower() == 'true':
-        logging.info(
-            '[Main] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
+        logging.info('[Main] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
         host_path = f"{os.getenv('uploader_path', '')}/".replace('//', '/')
@@ -226,7 +225,6 @@ def reupload_get_translated_torrent_path(torrent_path):
         translated_path = str(torrent_path).replace(remote_path, host_path)
         # And finally log the changes
         logging.info(f'[Main] Remote path of the torrent: {torrent_path}')
-        logging.info(
-            f'[Main] Translated path of the torrent: {translated_path}')
+        logging.info(f'[Main] Translated path of the torrent: {translated_path}')
         torrent_path = translated_path
     return torrent_path

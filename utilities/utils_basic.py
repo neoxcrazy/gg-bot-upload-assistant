@@ -129,8 +129,7 @@ def basic_get_missing_video_codec(torrent_info, is_disc, auto_mode, media_info_v
             pymediainfo_video_codec = 'H.265'
         # for everything else we can just default to 'HEVC' since it'll technically be accurate no matter what
         else:
-            logging.info(
-                f"[BasicUtils] Defaulting video_codec as HEVC because writing library is missing and source is {torrent_info['source']}")
+            logging.info(f"[BasicUtils] Defaulting video_codec as HEVC because writing library is missing and source is {torrent_info['source']}")
             pymediainfo_video_codec = 'HEVC'
     # Now check and assign AVC based codecs
     elif "AVC" in media_info_video_track.format:
@@ -473,18 +472,16 @@ def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
     if "largest_playlist" not in torrent_info:
         # We'll remove the full file path for privacy reasons and only show the file (or folder + file) path in the "Complete name" of media_info_output
         if 'raw_video_file' in torrent_info:
-            essential_path = f"{torrent_info['raw_file_name']}/{os.path.basename(torrent_info['raw_video_file'])}"
+            # essential_path = f"{torrent_info['raw_file_name']}/{os.path.basename(torrent_info['raw_video_file'])}"
+            essential_path = f"{os.path.basename(torrent_info['raw_video_file'])}"
         else:
             essential_path = f"{os.path.basename(torrent_info['upload_media'])}"
         # depending on if the user is uploading a folder or file we need for format it correctly so we replace the entire path with just media file/folder name
-        logging.info(
-            f"[BasicUtils] Using the following path in mediainfo.txt: {essential_path}")
-        media_info_output = str(MediaInfo.parse(
-            parse_me, output="text", full=False)).replace(parse_me, essential_path)
+        logging.info(f"[BasicUtils] Using the following path in mediainfo.txt: {essential_path}")
+        media_info_output = str(MediaInfo.parse(parse_me, output="text", full=False)).replace(parse_me, essential_path)
         save_location = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}mediainfo.txt'
         logging.info(f'[BasicUtils] Saving mediainfo to: {save_location}')
-        logging.debug(
-            ":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
+        logging.debug(":::::::::::::::::::::::::::: MediaInfo Output ::::::::::::::::::::::::::::")
         logging.debug(f'\n{media_info_output}')
 
         with open(save_location, 'w+') as f:
@@ -501,8 +498,7 @@ def basic_get_mediainfo(raw_file):
     meddiainfo_start_time = time.perf_counter()
     media_info_result = MediaInfo.parse(raw_file)
     meddiainfo_end_time = time.perf_counter()
-    logging.debug(
-        f"[BasicUtils] Time taken for mediainfo to parse the file {raw_file} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
+    logging.debug(f"[BasicUtils] Time taken for mediainfo to parse the file {raw_file} :: {(meddiainfo_end_time - meddiainfo_start_time)}")
     return media_info_result
 
 
