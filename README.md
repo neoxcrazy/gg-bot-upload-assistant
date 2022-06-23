@@ -259,6 +259,7 @@ docker run --rm -it \
     - [X] Rutorrent
 - [X] Implement a caching mechanism
     - [X] Mongo DB
+- [X] Removed discord webhook and notifications
 - [ ] Improved TMDB metadata search Phase 2
 - [ ] Discord notification for auto uploaded data
 - [ ] Accept MAL id as user argument
