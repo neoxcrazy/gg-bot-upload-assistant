@@ -31,13 +31,11 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True)  # rar folder
-        Path(f"{folder}/media").mkdir(parents=True,
-                                      exist_ok=True)  # rar folder
 
-    shutil.copy(f"{working_folder}{rar_file_source}",
-                f"{working_folder}{rar_file_target}")
+    Path(f"{folder}/rar").mkdir(parents=True, exist_ok=True)  # rar folder
+    Path(f"{folder}/media").mkdir(parents=True, exist_ok=True)  # rar folder
+
+    shutil.copy(f"{working_folder}{rar_file_source}", f"{working_folder}{rar_file_target}")
     yield
     clean_up(folder)
 

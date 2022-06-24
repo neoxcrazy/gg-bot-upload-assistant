@@ -45,11 +45,9 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/temp_upload/{utils.get_hash('some_name')}/screenshots").mkdir(
-            parents=True, exist_ok=True)  # temp_upload folder
-        Path(f"{folder}/nothing").mkdir(parents=True,
-                                        exist_ok=True)  # temp_upload folder
+
+    Path(f"{folder}/temp_upload/{utils.get_hash('some_name')}/screenshots").mkdir(parents=True, exist_ok=True)  # temp_upload folder
+    Path(f"{folder}/nothing").mkdir(parents=True, exist_ok=True)  # temp_upload folder
 
     # creating some random files inside `/tests/working_folder/temp_upload`
     touch(f'{folder}/temp_upload/{utils.get_hash("some_name")}/torrent1.torrent')

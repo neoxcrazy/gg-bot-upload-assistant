@@ -31,15 +31,11 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/torrent/").mkdir(parents=True,
-                                         exist_ok=True)  # torrents folder
-        Path(f"{folder}/media").mkdir(parents=True,
-                                      exist_ok=True)  # media folder
-        Path(f"{folder}/move/torrent").mkdir(parents=True,
-                                             exist_ok=True)  # media folder
-        Path(f"{folder}/move/media").mkdir(parents=True,
-                                           exist_ok=True)  # media folder
+
+    Path(f"{folder}/torrent/").mkdir(parents=True, exist_ok=True)  # torrents folder
+    Path(f"{folder}/media").mkdir(parents=True, exist_ok=True)  # media folder
+    Path(f"{folder}/move/torrent").mkdir(parents=True, exist_ok=True)  # media folder
+    Path(f"{folder}/move/media").mkdir(parents=True, exist_ok=True)  # media folder
 
     touch(f"{folder}/media/file.mkv")
     touch(f"{folder}/torrent/test1.torrent")
@@ -116,7 +112,7 @@ def __watch_folder_type_side_effect(param, default=None):
     2. Move media and torrent with type based movement
     3. Move media
     4. Move media with type based movement
-    5. Move torrent 
+    5. Move torrent
     6. Move torrent with type based movement
 """
 # moving torrent and media

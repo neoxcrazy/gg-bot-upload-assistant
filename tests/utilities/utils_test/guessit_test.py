@@ -31,9 +31,8 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True,
-                                                          exist_ok=True)  # media guessit folder
+
+    Path(f"{folder}/media/{dummy_for_guessit}").mkdir(parents=True, exist_ok=True)  # media guessit folder
 
     touch(f"{folder}/media/{dummy_for_guessit}/{dummy_for_guessit}.mkv")
     yield

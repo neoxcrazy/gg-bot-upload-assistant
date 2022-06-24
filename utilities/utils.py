@@ -125,13 +125,24 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             piece_size = get_piece_size_for_mktorrent(torrent_size)
             logging.info(f'[DotTorrentGeneration] Size of the torrent: {torrent_size}')
             logging.info(f'[DotTorrentGeneration] Piece Size of the torrent: {piece_size}')
-            if len(announce) == 1:
-                os.system(
-                    f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
-            else:
-                os.system(
-                    f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
+
+            os.system(
+                f"mktorrent -v -p -l {piece_size} -c \"Torrent created by GG-Bot Upload Assistant\" -s '{source}' -a '{announce[0]}' -o \"{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent\" \"{media}\"")
+
             logging.info("[DotTorrentGeneration] Mktorrent .torrent write into {}".format("[" + source + "]" + torrent_title + ".torrent"))
+
+            logging.info("[DotTorrentGeneration] Using torf to do some cleanup on the created torrent")
+            edit_torrent = Torrent.read(glob.glob(f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent')[0])
+            edit_torrent.created_by = "GG-Bot Upload Assistant"
+            edit_torrent.metainfo['created by'] = "GG-Bot Upload Assistant"
+
+            if len(announce) > 1:
+                # multiple announce urls
+                edit_torrent.metainfo['announce-list'] = []
+                for index in range(0, len(announce)):
+                    edit_torrent.metainfo['announce-list'].append([announce[index]])
+
+            Torrent.copy(edit_torrent).write(filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
         else:
             print("Using python torf to generate the torrent")
             torrent = Torrent(media,
@@ -139,8 +150,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
                               source=source,
                               comment="Torrent created by GG-Bot Upload Assistant",
                               created_by="GG-Bot Upload Assistant",
-                              exclude_globs=[
-                                  "*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens", "*.sfv"],
+                              exclude_globs=["*.txt", "*.jpg", "*.png", "*.nfo", "*.svf", "*.rar", "*.screens", "*.sfv"],
                               private=True,
                               creation_date=datetime.now())
             torrent.piece_size = calculate_piece_size(torrent.size)
@@ -155,8 +165,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
-        edit_torrent = Torrent.read(
-            glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
+        edit_torrent = Torrent.read(glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
 
         if len(announce) == 1:
             logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")
@@ -166,7 +175,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             logging.debug(f"[DotTorrentGeneration] Multiple announce urls provided for tracker {tracker}. Updating announce-list")
             edit_torrent.metainfo.pop('announce-list', "")
             edit_torrent.metainfo['announce-list'] = list()
-            for announce_url in announce[1:]:
+            for announce_url in announce:
                 logging.debug(f"[DotTorrentGeneration] Adding secondary announce url {announce_url}")
                 announce_list = list()
                 announce_list.append(announce_url)

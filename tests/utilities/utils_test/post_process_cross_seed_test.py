@@ -16,9 +16,8 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/temp_upload/test_working_folder").mkdir(parents=True,
-                                                                exist_ok=True)  # temp_upload folder
+
+    Path(f"{folder}/temp_upload/test_working_folder").mkdir(parents=True, exist_ok=True)  # temp_upload folder
 
     # created torrents for cross-seeding tests
     touch(f'{folder}/temp_upload/test_working_folder/TRACKER-Some Title different from torrent_title.torrent')

@@ -38,8 +38,8 @@ def run_around_tests():
 
     if Path(folder).is_dir():
         clean_up(folder)
-    else:
-        Path(f"{folder}/sample").mkdir(parents=True, exist_ok=True)  # config.env folder
+
+    Path(f"{folder}/sample").mkdir(parents=True, exist_ok=True)  # config.env folder
 
     nano(f"{folder}/sample/config.env.sample", "key1=\nkey2=\nkey3=")
     yield
