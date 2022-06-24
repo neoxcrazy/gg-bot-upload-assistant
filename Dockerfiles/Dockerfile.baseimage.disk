@@ -47,7 +47,7 @@ COPY --from=GIT_CLONER /clone/BDInfoCLI-ng/ .
 RUN nuget restore -NonInteractive
 RUN xbuild /property:Configuration=Release /property:OutDir=/usr/src/app/build/
 
-# installing packages for 
+# installing packages for
 # - rar extraction
 # - mediainfo creation
 # - audio analyzing

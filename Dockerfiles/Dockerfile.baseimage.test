@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------
-# The contents of this base image is from official python:3.8 image, 
-# with the addition of unrar package being added by default for 
-# performing the tests associated with gg-bot upload assistant and auto reuploader 
+# The contents of this base image is from official python:3.8 image,
+# with the addition of unrar package being added by default for
+# performing the tests associated with gg-bot upload assistant and auto reuploader
 # ------------------------------------------------------------------------------------
 FROM alpine:3.14
 
@@ -105,10 +105,11 @@ RUN set -eux; \
 	; \
 	apk del --no-network .build-deps;
 
-# installing packages for 
+# installing packages for
 # - rar extraction
 RUN \
 	apk add --no-cache --upgrade unrar; \
+	apk add --no-cache --upgrade mktorrent; \
 	apk add --no-cache --upgrade curl; \
 	apk add --no-cache --virtual=build-dependencies g++;
 

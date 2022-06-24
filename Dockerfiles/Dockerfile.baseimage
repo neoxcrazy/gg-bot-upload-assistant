@@ -12,7 +12,7 @@ RUN \
 	py3-pip \
 	python3-dev
 
-# installing packages for 
+# installing packages for
 # - rar extraction
 # - mediainfo creation
 # - audio analyzing
