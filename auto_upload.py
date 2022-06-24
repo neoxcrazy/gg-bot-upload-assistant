@@ -139,8 +139,11 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     with open(f"{working_folder}/site_templates/" + str(acronym_to_tracker.get(str(tracker).lower())) + ".json", "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
 
+    # If the user provides this arg with the title right after in double quotes then we automatically use that
+    # If the user does not manually provide the title (Most common) then we pull the renaming template from *.json & use all the info we gathered earlier to generate a title
     # -------- format the torrent title --------
-    format_title(config)
+    torrent_info["torrent_title"] = str(args.title[0]) if args.title else translation_utilities.format_title(config, torrent_info)
+
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
     try:
@@ -567,93 +570,6 @@ def identify_miscellaneous_details(guess_it_result):
     res = re.sub("[^0-9]", "", torrent_info["screen_size"])
     if int(res) < 720:
         torrent_info["sd"] = 1
-
-
-def format_title(json_config):
-    # If the user provides this arg with the title right after in double quotes then we automatically use that
-    if args.title:
-        torrent_info["torrent_title"] = str(args.title[0])
-
-    # If the user does not manually provide the title (Most common) then we pull the renaming template from *.json & use all the info we gathered earlier to generate a title
-    else:
-        # ------------------ Load correct "naming config" ------------------ #
-        # Here we open the uploads corresponding .json file and using the current uploads "source" we pull in a custom naming config
-        # this "naming config" can individually tweaked for each site & "content_type" (bluray_encode, web, etc)
-
-        # Because 'webrips' & 'webdls' have basically the same exact naming style we convert the 'source_type' to just 'web' (we do something similar to DVDs as well)
-        if str(torrent_info["source"]).lower() == "dvd":
-            config_profile = "dvd"
-        elif str(torrent_info["source"]).lower() == "web":
-            config_profile = "web"
-        else:
-            config_profile = torrent_info["source_type"]
-
-        # tracker_torrent_name_style_config = torrent_info["source_type"] if str(torrent_info["source"]).lower() != "web" else "web"
-        tracker_torrent_name_style_config = config_profile
-        tracker_torrent_name_style = json_config['torrent_title_format'][torrent_info["type"]][str(
-            tracker_torrent_name_style_config)]
-
-        # ------------------ Set some default naming styles here ------------------ #
-        # Fix BluRay
-        if "bluray" in torrent_info["source_type"]:
-            if "disc" in torrent_info["source_type"]:
-                # Raw bluray discs have a "-" between the words "Blu" & "Ray"
-                if "uhd" in torrent_info:
-                    torrent_info["source"] = f"{torrent_info['uhd']} Blu-ray"
-                else:
-                    torrent_info["source"] = "Blu-ray"
-            else:
-                # BluRay encodes & Remuxs just use the complete word "BluRay"
-                torrent_info["source"] = "BluRay"
-
-        # Now fix WEB
-        if str(torrent_info["source"]).lower() == "web":
-            if torrent_info["source_type"] == "webrip":
-                torrent_info["web_type"] = "WEBRip"
-            else:
-                torrent_info["web_type"] = "WEB-DL"
-
-        # Fix DVD
-        if str(torrent_info["source"]).lower() == "dvd":
-            if torrent_info["source_type"] in ('dvd_remux', 'dvd_disc'):
-                # later in the script if this ends up being a DVD Remux we will add the tag "Remux" to the torrent title
-                torrent_info["source"] = "DVD"
-            else:
-                # Anything else is just a dvdrip
-                torrent_info["source"] = "DVDRip"
-
-        # ------------------ Actual format the title now ------------------ #
-
-        # This dict will store the "torrent_info" response for each item in the "naming config"
-        generate_format_string = {}
-        separator = json_config["title_separator"] or " "
-
-        temp_load_torrent_info = tracker_torrent_name_style.replace(
-            "{", "").replace("}", "").split(" ")
-        for item in temp_load_torrent_info:
-            # Here is were we actual get the torrent_info response and add it to the "generate_format_string" dict we declared earlier
-            generate_format_string[item] = torrent_info[item].replace(" ", separator) if item in torrent_info and torrent_info[item] is not None else ""
-
-        formatted_title = ""  # This is the final torrent title, we add any info we get from "torrent_info" to it using the "for loop" below
-        for key, value in generate_format_string.items():
-            # ignore no matches (e.g. most TV Shows don't have the "year" added to its title so unless it was directly specified in the filename we also ignore it)
-            if len(value) != 0:
-                formatted_title = f'{formatted_title}{"-" if key == "release_group" else separator}{value}'
-
-        # Custom title translations specific to tracker
-        # Certain terms might not be allowed in certain trackers. Such terms are configured in a separate config in the tracker template.
-        # Eg: DD+ might not be allowed in certain trackers. Instead they'll use DDP
-        # These translations are then applied here.
-        if "torrent_title_translation" in json_config:
-            torrent_title_translation = json_config["torrent_title_translation"]
-            logging.info(f"Going to apply title translations to generated title: {formatted_title}")
-            for key, val in torrent_title_translation.items():
-                formatted_title = formatted_title.replace(key, val)
-
-        logging.info(f"[Main] Torrent title after formatting and translations: {formatted_title}")
-        # Finally save the "formatted_title" into torrent_info which later will get passed to the dict "tracker_settings"
-        # which is used to store the payload for the actual POST upload request
-        torrent_info["torrent_title"] = str(formatted_title[1:])
 
 
 # ---------------------------------------------------------------------- #
@@ -1211,6 +1127,9 @@ for file in upload_queue:
     else:
         logging.debug('[Main] User decided not to add custom text to torrent description or running in auto_mode')
 
+    # Fix some default naming styles
+    translation_utilities.fix_default_naming_styles(torrent_info)
+
     # -------- Dupe check for single tracker uploads --------
     # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
     # If there are duplicates in the tracker, then we do not waste time taking and uploading screenshots.
@@ -1269,8 +1188,10 @@ for file in upload_queue:
         with open("{}/site_templates/".format(working_folder) + str(acronym_to_tracker.get(str(tracker).lower())) + ".json", "r", encoding="utf-8") as config_file:
             config = json.load(config_file)
 
+        # If the user provides this arg with the title right after in double quotes then we automatically use that
+        # If the user does not manually provide the title (Most common) then we pull the renaming template from *.json & use all the info we gathered earlier to generate a title
         # -------- format the torrent title --------
-        format_title(config)
+        torrent_info["torrent_title"] = str(args.title[0]) if args.title else translation_utilities.format_title(config, torrent_info)
 
         # (Theory) BHD has a different bbcode parser then BLU/ACM so the line break is different for each site
         # this is why we set it in each sites *.json file then retrieve it here in this 'for loop' since its different for each site
