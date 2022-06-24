@@ -91,6 +91,7 @@ common_args.add_argument('-a', '--all_trackers', action='store_true',help="Selec
 common_args.add_argument('-tmdb', nargs=1, help="Use this to manually provide the TMDB ID")
 common_args.add_argument('-imdb', nargs=1, help="Use this to manually provide the IMDB ID")
 common_args.add_argument('-tvmaze', nargs=1, help="Use this to manually provide the TVmaze ID")
+common_args.add_argument('-mal', nargs=1, help="Use this to manually provide the MAL ID. If uploader detects any MAL id during search, this will be ignored.")
 common_args.add_argument('-anon', action='store_true',help="Tf you want your upload to be anonymous (no other info needed, just input '-anon'")
 
 # Less commonly used args (Not essential for most)
@@ -1166,6 +1167,14 @@ for file in upload_queue:
 
     # -------- Use official info from TMDB --------
     title, year, tvdb, mal = metadata_utilities.metadata_compare_tmdb_data_local(torrent_info)
+
+    # using user provided MAL if uploader was not able to find out one
+    if mal == "0":
+        # uploader couldn't identify any mal id
+        if args.mal is not None and len(args.mal[0]) > 1:
+            # user has provided a mal id manually. Since we were not able to identify one, we'll use the id provided by the user.
+                mal = args.mal[0]
+
     torrent_info["title"] = title
     if year is not None:
         torrent_info["year"] = year
