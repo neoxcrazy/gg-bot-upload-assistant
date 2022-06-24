@@ -4,7 +4,6 @@
 import os
 import re
 import glob
-import time
 import json
 import base64
 import logging
