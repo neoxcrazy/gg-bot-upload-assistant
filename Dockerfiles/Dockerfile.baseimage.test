@@ -107,6 +107,7 @@ RUN set -eux; \
 
 # installing packages for
 # - rar extraction
+# - mktorrent
 RUN \
 	apk add --no-cache --upgrade unrar; \
 	apk add --no-cache --upgrade mktorrent; \
