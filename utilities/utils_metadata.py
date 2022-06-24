@@ -17,7 +17,7 @@ def _do_tmdb_search(url):
 
 
 def __is_auto_reuploader():
-    return os.getenv("auto_select_tmdb_result", None) is None and os.getenv("tmdb_result_auto_select_threshold", None) is not None
+    return os.getenv("tmdb_result_auto_select_threshold", None) is not None
 
 
 def _return_for_reuploader_and_exit_for_assistant(selected_tmdb_results_data=None):
@@ -187,26 +187,30 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
             # The idea is that we can then show the user all valid options they can select
             list_of_num.append(str(i))
 
-        if auto_mode == 'false' and selected_tmdb_results > 1 and bool(os.getenv("auto_select_tmdb_result", False)) == False:
-            # prompt for user input with 'list_of_num' working as a list of valid choices
-            user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
-        elif selected_tmdb_results <= int(os.getenv("tmdb_result_auto_select_threshold", 1)) or int(os.getenv("tmdb_result_auto_select_threshold", 1)) == 0:
-            # this is applicable only for re-uploader
-            # if user configured `tmdb_result_auto_select_threshold` as 0, then we can proceed
-            # or
-            # selected_tmdb_results must be less than or equal to the threshold configured,
-            console.print("Auto selected the #1 result from TMDB...")
-            user_input_tmdb_id_num = "1"
-            logging.info(f"[MetadataUtils] auto_mode is enabled so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+
+        if __is_auto_reuploader():
+            if selected_tmdb_results <= int(os.getenv("tmdb_result_auto_select_threshold", 1)) or int(os.getenv("tmdb_result_auto_select_threshold", 1)) == 0:
+                console.print("Auto selected the #1 result from TMDB...")
+                user_input_tmdb_id_num = "1"
+                logging.info(f"[MetadataUtils] `tmdb_result_auto_select_threshold` is valid so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+            else:
+                console.print("Cannot auto select a TMDB id. Marking this upload as [bold red]TMDB_IDENTIFICATION_FAILED[/bold red]")
+                logging.info("[MetadataUtils] Cannot auto select a TMDB id. Marking this upload as TMDB_IDENTIFICATION_FAILED")
+                return {
+                    "tmdb": "0",
+                    "imdb": "0",
+                    "tvmaze": "0",
+                    "possible_matches": selected_tmdb_results_data
+                }
         else:
-            console.print("Cannot auto select a TMDB id. Marking this upload as [bold red]TMDB_IDENTIFICATION_FAILED[/bold red]")
-            logging.info("[MetadataUtils] Cannot auto select a TMDB id. Marking this upload as TMDB_IDENTIFICATION_FAILED")
-            return {
-                "tmdb": "0",
-                "imdb": "0",
-                "tvmaze": "0",
-                "possible_matches": selected_tmdb_results_data
-            }
+            if auto_mode == 'true' or selected_tmdb_results == 1:
+                console.print("Auto selected the #1 result from TMDB...")
+                user_input_tmdb_id_num = "1"
+                logging.info(f"[MetadataUtils] 'auto_mode' is enabled or 'only 1 result from TMDB', so we are auto selecting #1 from tmdb results (TMDB ID: {str(result_dict[user_input_tmdb_id_num])})")
+            else:
+                # prompt for user input with 'list_of_num' working as a list of valid choices
+                user_input_tmdb_id_num = Prompt.ask("Input the correct Result #", choices=list_of_num, default="1")
+
 
         # We take the users (valid) input (or auto selected number) and use it to retrieve the appropriate TMDB ID
         # torrent_info["tmdb"] = str(result_dict[user_input_tmdb_id_num])

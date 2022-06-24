@@ -1,0 +1,25 @@
+{
+    "tmdb": "9502",
+    "imdb": "0",
+    "tvmaze": "0",
+    "possible_matches": [
+        {
+            "result_num": 1,
+            "title": "Kung Fu Panda",
+            "content_type": "movie",
+            "tmdb_id": 9502,
+            "release_date": "2008-06-04",
+            "language": "en",
+            "overview": "When the Valley of Peace is threatened, lazy Po the panda discovers his destiny as the \"chosen one\" and trains to become a kung fu hero, but transforming the unsleek slacker into a brave warrior won't be easy. It's up to Master Shifu and the Furious Five -- Tigress, Crane, Mantis, Viper and Monkey -- to give it a try."
+        },
+        {
+            "result_num": 2,
+            "title": "Kung Fu Panda: Secrets of the Furious Five",
+            "content_type": "movie",
+            "tmdb_id": 15854,
+            "release_date": "2008-11-08",
+            "language": "en",
+            "overview": "Ordered to teach a martial arts class of rambunctious bunny kittens, Po tells stories of each of the Furious Five's pasts."
+        }
+    ]
+}
