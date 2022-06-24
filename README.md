@@ -262,6 +262,7 @@ docker run --rm -it \
 - [X] Removed discord webhook and notifications
 - [ ] Improved TMDB metadata search Phase 2
 - [ ] Accept MAL id as user argument
+- [X] Human readable sub folder for temporary data
 - [X] Release GG-BOT source code to public
 - [X] Bug Fixes and Testing Phase 1
 - [X] Bug Fixes and Testing Phase 2

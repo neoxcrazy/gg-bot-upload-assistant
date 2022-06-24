@@ -331,7 +331,13 @@ def delete_leftover_files(working_folder, file, resume=False):
     else:
         os.mkdir(f"{working_folder}/temp_upload/")
 
-    unique_hash = get_hash(file)
+    if bool(os.getenv("readable_temp_data", False)) == True:
+        files = f'{file}/'.replace("//", "/").strip().replace(" ", ".").replace(":", ".").replace("'", "").split("/")[:-1]
+        files.reverse()
+        unique_hash = files[0]
+    else:
+        unique_hash = get_hash(file)
+
     if not Path(f"{working_folder}/temp_upload/{unique_hash}").is_dir():
         os.mkdir(f"{working_folder}/temp_upload/{unique_hash}")
     if not Path(f"{working_folder}/temp_upload/{unique_hash}/screenshots/").is_dir():
