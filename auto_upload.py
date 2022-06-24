@@ -123,9 +123,12 @@ internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin 
 args = parser.parse_args()
 
 
+# ---------------------------------------------------------------------- #
+#                          Dupe Check in Tracker                         #
+# ---------------------------------------------------------------------- #
 def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
-    """ Method to check for any duplicate torrents in the tracker.
-
+    """
+        Method to check for any duplicate torrents in the tracker.
         First we read the configuration for the tracker and format the title according to the tracker configuration
         Then invoke the `search_for_dupes_api` method and return the result.
 
@@ -140,17 +143,22 @@ def check_for_dupes_in_tracker(tracker, temp_tracker_api_key):
     format_title(config)
 
     # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-    return dupe_utilities.search_for_dupes_api(
-        acronym_to_tracker[str(tracker).lower()],
-        imdb=torrent_info["imdb"],
-        tmdb=torrent_info["tmdb"],
-        tvmaze=torrent_info["tvmaze"],
-        torrent_info=torrent_info,
-        tracker_api=temp_tracker_api_key,
-        debug=args.debug,
-        working_folder=working_folder,
-        auto_mode=os.getenv('auto_mode')
-    )
+    try:
+        return dupe_utilities.search_for_dupes_api(
+            acronym_to_tracker[str(tracker).lower()],
+            imdb=torrent_info["imdb"],
+            tmdb=torrent_info["tmdb"],
+            tvmaze=torrent_info["tvmaze"],
+            torrent_info=torrent_info,
+            tracker_api=temp_tracker_api_key,
+            debug=args.debug,
+            working_folder=working_folder,
+            auto_mode=os.getenv('auto_mode')
+        )
+    except Exception as e:
+        logging.exception(f'[Main] Error occured while performing dupe check for tracker {tracker}. Error: {e}')
+        console.print("[bold red]Unexpected error occured while performing dupe check. Assuming dupe exists on tracker and skipping[/bold red]")
+        return True  # marking that dupes are present in the tracker
 
 
 def identify_type_and_basic_info(full_path, guess_it_result):
@@ -654,6 +662,7 @@ def format_title(json_config):
 def generate_callback(torrent, filepath, pieces_done, pieces_total):
     calculate_percentage = 100 * float(pieces_done) / float(pieces_total)
     print_progress_bar(calculate_percentage, 100, prefix='Creating .torrent file:', suffix='Complete', length=30)
+# -------------- END of generate_callback --------------
 
 
 def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', print_end="\r"):
@@ -664,6 +673,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     # Print New Line on Complete
     if iteration == total:
         print()
+# -------------- END of print_progress_bar --------------
 
 
 # ---------------------------------------------------------------------- #
@@ -724,7 +734,9 @@ def upload_to_site(upload_to, tracker_api_key):
                 logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
                 continue
         elif str(config[req_opt][key]) == "file|string|array":
-            # for file|String|array we read the contents of the file line by line, where each line becomes and element of the array or list
+            """
+                for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
+            """
             if os.path.isfile(tracker_settings[key]):
                 logging.debug(f"[TrackerUpload] Setting file {tracker_settings[key]} as string array for key '{key}'")
                 with open(tracker_settings[key], 'r') as file_contents:
@@ -854,6 +866,7 @@ def upload_to_site(upload_to, tracker_api_key):
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+                return False
         elif "success" in str(response.json()).lower():
             if str(response.json()["success"]).lower() == "true":
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
@@ -863,6 +876,7 @@ def upload_to_site(upload_to, tracker_api_key):
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+                return False
         elif "status" in str(response.json()).lower():
             if str(response.json()["status"]).lower() == "true":
                 logging.info("[TrackerUpload] Upload to {} was a success!".format(upload_to))
@@ -872,6 +886,7 @@ def upload_to_site(upload_to, tracker_api_key):
             else:
                 console.print('Upload to tracker failed.', style='bold red')
                 logging.critical("[TrackerUpload] Upload to {} failed".format(upload_to))
+                return False
         else:
             console.print('Upload to tracker failed.', style='bold red')
             logging.critical("[TrackerUpload] Something really went wrong when uploading to {} and we didn't even get a 'success' json key".format(upload_to))
@@ -1299,8 +1314,7 @@ for file in upload_queue:
             console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
             logging.debug(f"[Main] Dumping torrent_info contents to log before dupe check: \n{pformat(torrent_info)}")
             # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
-            dupe_check_response = check_for_dupes_in_tracker(
-                tracker, temp_tracker_api_key)
+            dupe_check_response = check_for_dupes_in_tracker(tracker, temp_tracker_api_key)
             # True == dupe_found
             # False == no_dupes/continue upload
             if dupe_check_response:

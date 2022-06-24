@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # default included packages
 import os
 import re
@@ -64,7 +66,7 @@ load_dotenv(f'{working_folder}/reupload.config.env')
 # Getting the keys present in the config.env.sample
 # These keys are then used to compare with the env variable keys provided during runtime.
 # Presently we just displays any missing keys, TODO in the future do something more useful with this information
-utils.validate_env_file(f'{working_folder}/reupload.config.env.sample')
+utils.validate_env_file(f'{working_folder}/samples/reuploader/reupload.config.env')
 
 # Used to correctly select json file
 # the value in this dictionay must correspond to the file name of the site template
@@ -268,7 +270,7 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
                 for file|array we read the contents of the file line by line, where each line becomes and element of the array or list
             """
             if os.path.isfile(tracker_settings[key]):
-                logging.debug(f"[TrackerUpload] Setting file {tracker_settings[key]} as string array for key {key}")
+                logging.debug(f"[TrackerUpload] Setting file {tracker_settings[key]} as string array for key '{key}'")
                 with open(tracker_settings[key], 'r') as file_contents:
                     screenshot_array = []
                     for line in file_contents.readlines():
@@ -276,8 +278,20 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
                     payload[f'{key}[]' if config["technical_jargons"]["payload_type"] == "MULTI-PART" else key] = screenshot_array
                     logging.debug(f"[TrackerUpload] String array data for key {key} :: {screenshot_array}")
             else:
-                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key {req_opt} does not exist!")
+                logging.critical(f"[TrackerUpload] The file/path `{tracker_settings[key]}` for key '{req_opt}' does not exist!")
                 continue
+        elif str(config[req_opt][key]) == "string|array":
+            """
+                for string|array we split the data with by new line, where each line becomes and element of the array or list
+            """
+            logging.debug(f"[TrackerUpload] Setting data {tracker_settings[key]} as string array for key '{key}'")
+            screenshot_array = []
+            for line in tracker_settings[key].split("\n"):
+                if len(line.strip()) > 0:
+                    screenshot_array.append(line.strip())
+            payload[f'{key}[]' if config["technical_jargons"]["payload_type"] == "MULTI-PART" else key] = screenshot_array
+            logging.debug(f"[TrackerUpload] String array data for key '{key}' :: {screenshot_array}")
+
         elif str(config[req_opt][key]) == "file|base64":
             # file encoded as base64 string
             if os.path.isfile(tracker_settings[key]):
@@ -302,7 +316,7 @@ def upload_to_site(upload_to, tracker_api_key, config, tracker_settings):
                 logging.info(f"[TrackerUpload] Optional key {key} will be added to payload")
             payload[key] = val
 
-    logging.fatal("[TrackerUpload] URL: {url} \n Data: {data} \n Files: {files}".format(url=url_masked, data=payload, files=files))
+    logging.fatal(f"[TrackerUpload] URL: {url_masked} \n Data: {payload} \n Files: {files}")
 
     response = None
     if config["technical_jargons"]["payload_type"] == "JSON":
