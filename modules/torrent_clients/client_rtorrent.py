@@ -70,7 +70,8 @@ class Rutorrent:
     def get_dynamic_trackers(self, torrent):
         # a sanity check just to be sure
         if self.dynamic_tracker_selection == True:
-            category = torrent["d.get_custom1"]
+            # this torrent is the translated data hence category instead of d.custom1
+            category = torrent["category"]
             # removing any trailing ::
             if category.endswith("::"):
                 category = category[:-2]

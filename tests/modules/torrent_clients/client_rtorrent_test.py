@@ -50,13 +50,13 @@ def test_init_rutorrent_dynamic_reuploader(mocker):
 @pytest.mark.parametrize(
     ("torrent", "expected"),
     [
-        pytest.param({"d.get_custom1": "GGBOT"}, [], id="no_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::"}, [], id="no_trackers_provided"),
-        pytest.param({"d.get_custom1": "SomeOtherLabel"}, [], id="wrong_label"),
-        pytest.param({"d.get_custom1": ""}, [], id="no_label"),
-        pytest.param({"d.get_custom1": "GGBOT::TSP::ATH"}, ["TSP", "ATH"], id="two_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::TSP::ATH::"}, ["TSP", "ATH"], id="two_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::spd::ath::"}, ["spd", "ath"], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT"}, [], id="no_trackers_provided"),
+        pytest.param({"category": "GGBOT::"}, [], id="no_trackers_provided"),
+        pytest.param({"category": "SomeOtherLabel"}, [], id="wrong_label"),
+        pytest.param({"category": ""}, [], id="no_label"),
+        pytest.param({"category": "GGBOT::TSP::ATH"}, ["TSP", "ATH"], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT::TSP::ATH::"}, ["TSP", "ATH"], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT::spd::ath::"}, ["spd", "ath"], id="two_trackers_provided"),
     ]
 )
 def test_get_dynamic_trackers(torrent, expected, mocker):
@@ -68,13 +68,13 @@ def test_get_dynamic_trackers(torrent, expected, mocker):
 @pytest.mark.parametrize(
     ("torrent", "expected"),
     [
-        pytest.param({"d.get_custom1": "GGBOT"}, [], id="no_trackers_provided"),
-        pytest.param({"d.get_custom1": "SomeOtherLabel"}, [], id="wrong_label"),
-        pytest.param({"d.get_custom1": ""}, [], id="no_label"),
-        pytest.param({"d.get_custom1": "GGBOT::"}, [], id="no_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::TSP::ATH"}, [], id="two_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::TSP::ATH::"}, [], id="two_trackers_provided"),
-        pytest.param({"d.get_custom1": "GGBOT::spd::ath::"}, [], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT"}, [], id="no_trackers_provided"),
+        pytest.param({"category": "SomeOtherLabel"}, [], id="wrong_label"),
+        pytest.param({"category": ""}, [], id="no_label"),
+        pytest.param({"category": "GGBOT::"}, [], id="no_trackers_provided"),
+        pytest.param({"category": "GGBOT::TSP::ATH"}, [], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT::TSP::ATH::"}, [], id="two_trackers_provided"),
+        pytest.param({"category": "GGBOT::spd::ath::"}, [], id="two_trackers_provided"),
     ]
 )
 def test_get_dynamic_trackers_when_disabled(torrent, expected, mocker):
