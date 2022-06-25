@@ -474,7 +474,7 @@ def test_get_available_dynamic_trackers_qbittorrnet(torrent, upload_to_trackers,
     assert get_available_dynamic_trackers(
         torrent_client=qbit,
         torrent=torrent,
-        upload_to_trackers=upload_to_trackers,
+        original_upload_to_trackers=upload_to_trackers,
         api_keys_dict=api_keys_dict,
         all_trackers_list=json.load(open(f'{working_folder}/parameters/tracker/acronyms.json')).keys()
     ) == expected

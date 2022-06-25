@@ -228,7 +228,7 @@ def reupload_get_translated_torrent_path(torrent_path):
     return torrent_path
 
 
-def get_available_dynamic_trackers(torrent_client, torrent, upload_to_trackers, api_keys_dict, all_trackers_list):
+def get_available_dynamic_trackers(torrent_client, torrent, original_upload_to_trackers, api_keys_dict, all_trackers_list):
     # we first try to dynamically select the trackers to upload to from the torrent label. (if the feature is enabled.)
     if bool(os.getenv("dynamic_tracker_selection", False)) == True:
         try:
@@ -240,7 +240,7 @@ def get_available_dynamic_trackers(torrent_client, torrent, upload_to_trackers, 
                 all_trackers_list = all_trackers_list
             )
         except AssertionError:
-            logging.error(f"[Main] None of the trackers dynamic trackers {dynamic_trackers} have a valid configuration. Proceeding with fall back trackers {upload_to_trackers}")
+            logging.error(f"[Main] None of the trackers dynamic trackers {dynamic_trackers} have a valid configuration. Proceeding with fall back trackers {original_upload_to_trackers}")
 
     # well, no need to select trackers dynamically or no valid dynamic trackers (exception case)
-    return upload_to_trackers
+    return original_upload_to_trackers

@@ -843,7 +843,7 @@ def reupload_job():
         upload_to_trackers = reupload_utilities.get_available_dynamic_trackers(
             torrent_client=torrent_client,
             torrent=torrent,
-            upload_to_trackers=upload_to_trackers,
+            original_upload_to_trackers=upload_to_trackers,
             api_keys_dict=api_keys_dict,
             all_trackers_list=acronym_to_tracker.keys()
         )
