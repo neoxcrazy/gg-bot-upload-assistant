@@ -133,7 +133,7 @@ def _check_for_tmdb_cached_data(cache, title, year, content_type):
 def reupload_get_movie_db_from_cache(cache, cached_data, title, year, upload_type):
     movie_db = _check_for_tmdb_cached_data(cache, title, year, upload_type)
     logging.debug(
-        f"[Main] MovieDB data obtained from cache: {pformat(movie_db)}")
+        f"[ReuploadUtils] MovieDB data obtained from cache: {pformat(movie_db)}")
 
     # if we don't have any movie_db data cached in tmdb repo, repo then we'll initialize the movie_db dictionary.cache
     # similarly if there is a user provided tmdb id (from gg-bot-visor) then we'll give higher priority to users choice and clear the cached movie_db
@@ -192,29 +192,28 @@ def reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_da
 
 
 def reupload_get_processable_torrents(torrent_client, cache):
-    logging.info('[Main] Listing latest torrents status from client')
+    logging.info('[ReuploadUtils] Listing latest torrents status from client')
     # listing all the torrents that needs to be re-uploaded
     torrents = torrent_client.list_torrents()
 
     # Attributes present in the torrent list
     # "category", "completed", "content_path", "hash", "name", "save_path", "size", "tracker"
-    logging.info(f'[Main] Total number of torrents that needs to be reuploaded are {len(torrents)}')
+    logging.info(f'[ReuploadUtils] Total number of torrents that needs to be reuploaded are {len(torrents)}')
 
     # listing out only the completed torrents and eliminating unprocessable torrents based on cached data
-    logging.debug(f'[Main] Torrent data from client: {pformat(torrents)}')
+    logging.debug(f'[ReuploadUtils] Torrent data from client: {pformat(torrents)}')
     torrents = list(
         filter(lambda torrent: not is_unprocessable_data_present_in_cache(torrent["hash"], cache),
-               filter(
-            lambda torrent: torrent["completed"] == torrent["size"], torrents)
+               filter(lambda torrent: torrent["completed"] == torrent["size"], torrents)
         )
     )
-    logging.info(f'[Main] Total number of completed torrents that needs to be reuploaded are {len(torrents)}')
+    logging.info(f'[ReuploadUtils] Total number of completed torrents that needs to be reuploaded are {len(torrents)}')
     return torrents
 
 
 def reupload_get_translated_torrent_path(torrent_path):
     if str(os.getenv('translation_needed', 'false')).lower() == 'true':
-        logging.info('[Main] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
+        logging.info('[ReuploadUtils] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...
         host_path = f"{os.getenv('uploader_path', '')}/".replace('//', '/')
@@ -222,8 +221,8 @@ def reupload_get_translated_torrent_path(torrent_path):
 
         translated_path = str(torrent_path).replace(remote_path, host_path)
         # And finally log the changes
-        logging.info(f'[Main] Remote path of the torrent: {torrent_path}')
-        logging.info(f'[Main] Translated path of the torrent: {translated_path}')
+        logging.info(f'[ReuploadUtils] Remote path of the torrent: {torrent_path}')
+        logging.info(f'[ReuploadUtils] Translated path of the torrent: {translated_path}')
         torrent_path = translated_path
     return torrent_path
 
@@ -231,8 +230,10 @@ def reupload_get_translated_torrent_path(torrent_path):
 def get_available_dynamic_trackers(torrent_client, torrent, original_upload_to_trackers, api_keys_dict, all_trackers_list):
     # we first try to dynamically select the trackers to upload to from the torrent label. (if the feature is enabled.)
     if bool(os.getenv("dynamic_tracker_selection", False)) == True:
+        logging.info("[ReuploadUtils] Uploader running in dynamic tracker section mode. Attempting to resolve any dynamic trackers")
         try:
             dynamic_trackers = torrent_client.get_dynamic_trackers(torrent)
+            logging.info(f"[ReuploadUtils] Dynamic trackers obtained from the torrent {torrent['name']} are {dynamic_trackers}")
             return get_and_validate_configured_trackers(
                 trackers = dynamic_trackers,
                 all_trackers = False,
@@ -240,7 +241,7 @@ def get_available_dynamic_trackers(torrent_client, torrent, original_upload_to_t
                 all_trackers_list = all_trackers_list
             )
         except AssertionError:
-            logging.error(f"[Main] None of the trackers dynamic trackers {dynamic_trackers} have a valid configuration. Proceeding with fall back trackers {original_upload_to_trackers}")
+            logging.error(f"[ReuploadUtils] None of the trackers dynamic trackers {dynamic_trackers} have a valid configuration. Proceeding with fall back trackers {original_upload_to_trackers}")
 
     # well, no need to select trackers dynamically or no valid dynamic trackers (exception case)
     return original_upload_to_trackers

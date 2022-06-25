@@ -847,6 +847,7 @@ def reupload_job():
             api_keys_dict=api_keys_dict,
             all_trackers_list=acronym_to_tracker.keys()
         )
+        logging.info(f"[Main] Trackers this torrent needs to be uploaded to are {upload_to_trackers_working}")
 
         save_path = torrent["save_path"]
         # before we start doing anything we need to check whether the media file can be accessed by the uploader.
