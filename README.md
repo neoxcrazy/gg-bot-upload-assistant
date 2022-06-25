@@ -298,6 +298,10 @@ docker run --rm -it \
         * Improved dupe check - Phase 1
         * Improved TMDB metadata search Phase 1
         * Improved screenshots url management
+        * Code cleanup for better code quality
+        * Codecov and Codacy integrations
+        * More unit tests for stability and reduced bugs
+        * Improved tests coverage
 
     Bug Fixes
         * Issue#32: Atmos not detected if not present in file name
