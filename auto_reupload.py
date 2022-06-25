@@ -839,12 +839,11 @@ def reupload_job():
                 logging.info(f"[Main] Skipping upload and processing of torrent {cached_data['name']} since retry limit has exceeded")
                 continue
 
-        upload_to_trackers_copy = upload_to_trackers
         # dynamic_tracker_selection
-        upload_to_trackers = reupload_utilities.get_available_dynamic_trackers(
+        upload_to_trackers_working = reupload_utilities.get_available_dynamic_trackers(
             torrent_client=torrent_client,
             torrent=torrent,
-            original_upload_to_trackers=upload_to_trackers_copy,
+            original_upload_to_trackers=upload_to_trackers,
             api_keys_dict=api_keys_dict,
             all_trackers_list=acronym_to_tracker.keys()
         )
@@ -999,8 +998,8 @@ def reupload_job():
         # -------- Dupe check for single tracker uploads --------
         # If user has provided only one Tracker to upload to, then we do dupe check prior to taking screenshots. [if dupe_check is enabled]
         # If there are duplicates in the tracker, then we do not waste time taking and uploading screenshots.
-        if os.getenv('check_dupes') == 'true' and len(upload_to_trackers) == 1:
-            tracker = upload_to_trackers[0]
+        if os.getenv('check_dupes') == 'true' and len(upload_to_trackers_working) == 1:
+            tracker = upload_to_trackers_working[0]
             temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
 
             console.line(count=2)
@@ -1048,7 +1047,7 @@ def reupload_job():
         # If the user has configured only one tracker, then dupe will not reach here.
         # single tracker dupe check is handled prior to screenshot generation
         is_non_dupes_present = False
-        for tracker in upload_to_trackers:
+        for tracker in upload_to_trackers_working:
 
             torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Auto-ReUploader'
 
@@ -1093,7 +1092,7 @@ def reupload_job():
             # we take the screenshots and uploads them, then do dupe check for the trackers.
             # dupe check need not be performed if user provided only one tracker.
             # in cases where only one tracker is provided, dupe check will be performed prior to taking screenshots.
-            if os.getenv('check_dupes') == 'true' and len(upload_to_trackers) > 1:
+            if os.getenv('check_dupes') == 'true' and len(upload_to_trackers_working) > 1:
                 console.line(count=2)
                 console.rule(f"Dupe Check [bold]({tracker})[/bold]", style='red', align='center')
                 # Call the function that will search each site for dupes and return a similarity percentage, if it exceeds what the user sets in config.env we skip the upload
