@@ -411,7 +411,7 @@ def __dynamic_trackers_side_effect(param, default=None):
     ("torrent", "upload_to_trackers", "api_keys_dict", "expected"),
     [
         pytest.param(
-            {"category":"GGBOT::TSP::ATH"},
+            {"category":"GGBOT::TSP::ATH", "name":"Torrent.Name"},
             ["BHD, BLU"],
             {
                 "tsp_api_key":"YES",
@@ -423,7 +423,7 @@ def __dynamic_trackers_side_effect(param, default=None):
             id="dynamic_trackers_yes"
         ),
         pytest.param(
-            {"category":"GGBOT::TSP::ATH"},
+            {"category":"GGBOT::TSP::ATH", "name":"Torrent.Name"},
             ["BHD, BLU"],
             {
                 "tsp_api_key":"YES",
@@ -434,7 +434,7 @@ def __dynamic_trackers_side_effect(param, default=None):
             id="dynamic_trackers_yes"
         ),
         pytest.param(
-            {"category":"GGBOT::TSP::ATH::BHD::BHDTV"},
+            {"category":"GGBOT::TSP::ATH::BHD::BHDTV", "name":"Torrent.Name"},
             ["BHD, BLU"],
             {
                 "tsp_api_key":"YES",
@@ -445,7 +445,7 @@ def __dynamic_trackers_side_effect(param, default=None):
             id="dynamic_trackers_yes"
         ),
         pytest.param(
-            {"category":"GGBOT::TSP::ATH"},
+            {"category":"GGBOT::TSP::ATH", "name":"Torrent.Name"},
             ["BHD, BLU"],
             {
                 "bhd_api_key":"YES",
@@ -455,7 +455,7 @@ def __dynamic_trackers_side_effect(param, default=None):
             id="dynamic_trackers_validation_failed"
         ),
         pytest.param(
-            {"category":"GGBOT::TSP::"},
+            {"category":"GGBOT::TSP::", "name":"Torrent.Name"},
             ["BHD, BLU"],
             {
                 "bhd_api_key":"YES",
