@@ -1050,7 +1050,7 @@ def reupload_job():
         is_non_dupes_present = False
         for tracker in upload_to_trackers:
 
-            torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Auto-Uploader'
+            torrent_info["shameless_self_promotion"] = f'Uploaded with {"<3" if str(tracker).upper() in ("BHD", "BHDTV") or os.name == "nt" else "❤"} using GG-BOT Auto-ReUploader'
 
             temp_tracker_api_key = api_keys_dict[f"{str(tracker).lower()}_api_key"]
             logging.info(f"[Main] Trying to upload to: {tracker}")
