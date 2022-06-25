@@ -22,8 +22,14 @@ class Qbittorrent:
             username=os.getenv('client_username'),
             password=os.getenv('client_password'),
         )
-        # `target_label` is the label of the torrents that we are interested in
-        self.target_label = os.getenv('reupload_label', '')
+
+        self.dynamic_tracker_selection = bool(os.getenv("dynamic_tracker_selection", False))
+        if self.dynamic_tracker_selection == True:
+            # reuploader running in dynamic tracker selection mode
+            self.target_label = "GGBOT"
+        else:
+            # `target_label` is the label of the torrents that we are interested in
+            self.target_label = os.getenv('reupload_label', '')
         # `seed_label` is the label which will be added to the cross-seeded torrents
         self.seed_label = os.getenv('cross_seed_label', 'GGBotCrossSeed')
         # `source_label` is thelabel which will be added to the original torrent in the client
@@ -41,6 +47,18 @@ class Qbittorrent:
         print(f'qBittorrent: {self.qbt_client.app.version}')
         print(f'qBittorrent Web API: {self.qbt_client.app.web_api_version}')
 
+    def get_dynamic_trackers(self, torrent):
+        # a sanity check just to be sure
+        if self.dynamic_tracker_selection == True:
+            category = torrent["category"]
+            # removing any trailing ::
+            if category.endswith("::"):
+                category = category[:-2]
+            trackers = category.split("::")
+            return trackers[1:] # first entry will always be GGBOT
+        else:
+            return []
+
     def __match_label(self, torrent):
         # we don't want to consider cross-seeded torrents uploaded by the bot
         if self.seed_label == torrent.category:
@@ -48,7 +66,11 @@ class Qbittorrent:
         # user wants to ignore labels, hence we'll consider all the torrents
         if self.target_label == "IGNORE_LABEL":
             return True
-        return torrent.category == self.target_label
+        # if dynamic tracker selection is enabled, then labels will follow the pattern GGBOT::TR1::TR2::TR3
+        if self.dynamic_tracker_selection == True:
+            return torrent.category.startswith(self.target_label)
+        else:
+            return torrent.category == self.target_label
 
     def __extract_necessary_keys(self, torrent):
         return {key: value for key, value in torrent.items() if key in qbt_keys}

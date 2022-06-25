@@ -67,6 +67,18 @@ class Rutorrent:
             'd.is_multi_file': data[33]
         }
 
+    def get_dynamic_trackers(self, torrent):
+        # a sanity check just to be sure
+        if self.dynamic_tracker_selection == True:
+            category = torrent["d.get_custom1"]
+            # removing any trailing ::
+            if category.endswith("::"):
+                category = category[:-2]
+            trackers = category.split("::")
+            return trackers[1:] # first entry will always be GGBOT
+        else:
+            return []
+
     def __match_label(self, torrent):
         # we don't want to consider cross-seeded torrents uploaded by the bot
         if self.seed_label == torrent["d.get_custom1"]:
@@ -74,7 +86,11 @@ class Rutorrent:
         # user wants to ignore labels, hence we'll consider all the torrents
         if self.target_label == "IGNORE_LABEL":
             return True
-        return torrent["d.get_custom1"] == self.target_label
+        # if dynamic tracker selection is enabled, then labels will follow the pattern GGBOT::TR1::TR2::TR3
+        if self.dynamic_tracker_selection == True:
+            return torrent["d.get_custom1"].startswith(self.target_label)
+        else:
+            return torrent["d.get_custom1"] == self.target_label
 
     def __do_key_translation(self, key):
         return rutorrent_keys_translation[key] if key in rutorrent_keys_translation else key
@@ -111,8 +127,13 @@ class Rutorrent:
         else:
             self.header = {}
 
-        # `target_label` is the label of the torrents that we are interested in
-        self.target_label = os.getenv('reupload_label', '')
+        self.dynamic_tracker_selection = bool(os.getenv("dynamic_tracker_selection", False))
+        if self.dynamic_tracker_selection == True:
+            # reuploader running in dynamic tracker selection mode
+            self.target_label = "GGBOT"
+        else:
+            # `target_label` is the label of the torrents that we are interested in
+            self.target_label = os.getenv('reupload_label', '')
         # `seed_label` is the label which will be added to the cross-seeded torrents
         self.seed_label = os.getenv('cross_seed_label', 'GGBotCrossSeed')
         # `source_label` is thelabel which will be added to the original torrent in the client

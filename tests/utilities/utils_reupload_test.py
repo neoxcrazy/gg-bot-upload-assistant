@@ -2,8 +2,13 @@ import os
 import json
 import pytest
 
+from pathlib import Path
 from pytest_mock import mocker
 from utilities.utils_reupload import *
+from modules.torrent_clients.client_qbittorrent import Qbittorrent
+
+
+working_folder = Path(__file__).resolve().parent.parent.parent
 
 
 def test_initialize_torrent_data(mocker):
@@ -118,10 +123,8 @@ def test_should_upload_be_skipped(torrent, expected, mocker):
     [
         pytest.param(None, None, id="no_data_in_cache"),
         pytest.param([], None, id="empty_data_in_cache"),
-        pytest.param([{"status": "value"}], {
-                     "status": "value"}, id="data_in_cache"),
-        pytest.param([{"status": "value"}, {"status1": "value1"}], {
-                     "status": "value"}, id="multiple_data_in_cache")
+        pytest.param([{"status": "value"}], {"status": "value"}, id="data_in_cache"),
+        pytest.param([{"status": "value"}, {"status1": "value1"}],{"status": "value"}, id="multiple_data_in_cache")
     ]
 )
 def test_get_cached_data(return_data, expected, mocker):
@@ -133,35 +136,29 @@ def test_get_cached_data(return_data, expected, mocker):
 @pytest.mark.parametrize(
     ("return_data", "new_status", "expected"),
     [
-        pytest.param([{"status": "value"}], "NEW_STATUS",
-                     "NEW_STATUS", id="updating_status"),
+        pytest.param([{"status": "value"}], "NEW_STATUS","NEW_STATUS", id="updating_status"),
     ]
 )
 def test_update_torrent_status(return_data, new_status, expected, mocker):
     mock_cache_client = mocker.patch('modules.cache.Cache')
     mocker.patch("modules.cache.Cache.get", return_value=return_data)
     mocker.patch("modules.cache.Cache.save", return_value=None)
-    assert update_torrent_status("info_hash", new_status, mock_cache_client)[
-        "status"] == expected
+    assert update_torrent_status("info_hash", new_status, mock_cache_client)["status"] == expected
 
 
 @pytest.mark.parametrize(
     ("new_data", "is_json", "return_data", "expected"),
     [
-        pytest.param("NEW_DATA", False, [
-                     {"field": "b"}], "NEW_DATA", id="updating_normal_field"),
-        pytest.param({"a": "b", "b": "c"}, True, [{"field": "b"}], json.dumps(
-            {"a": "b", "b": "c"}), id="updating_json_data"),
-        pytest.param(None, True, [{"field": "b"}],
-                     None, id="updating_json_none_data"),
+        pytest.param("NEW_DATA", False, [{"field": "b"}], "NEW_DATA", id="updating_normal_field"),
+        pytest.param({"a": "b", "b": "c"}, True, [{"field": "b"}], json.dumps({"a": "b", "b": "c"}), id="updating_json_data"),
+        pytest.param(None, True, [{"field": "b"}], None, id="updating_json_none_data"),
     ]
 )
 def test_update_field(new_data, is_json, return_data, expected, mocker):
     mock_cache_client = mocker.patch('modules.cache.Cache')
     mocker.patch("modules.cache.Cache.get", return_value=return_data)
     mocker.patch("modules.cache.Cache.save", return_value=None)
-    assert update_field("info_hash", "field", new_data,
-                        is_json, mock_cache_client)["field"] == expected
+    assert update_field("info_hash", "field", new_data,is_json, mock_cache_client)["field"] == expected
 
 
 def test_insert_into_job_repo(mocker):
@@ -176,19 +173,15 @@ def test_insert_into_job_repo(mocker):
     [
         pytest.param(None, None, {}, id="no_movie_db_data"),
         pytest.param(None, [], {}, id="empty_movie_db_data"),
-        pytest.param(None, [{"status": "value"}], {
-                     "status": "value"}, id="movie_db_in_cache_no_cached_data"),
-        pytest.param({}, [{"status": "value"}], {"status": "value"},
-                     id="movie_db_in_cache_cached_data_without_user_choice"),
-        pytest.param({"tmdb_user_choice": ""}, [{"status": "value"}], {
-        }, id="movie_db_in_cache_cached_data_wit_user_choice"),
+        pytest.param(None, [{"status": "value"}], {"status": "value"}, id="movie_db_in_cache_no_cached_data"),
+        pytest.param({}, [{"status": "value"}], {"status": "value"},id="movie_db_in_cache_cached_data_without_user_choice"),
+        pytest.param({"tmdb_user_choice": ""}, [{"status": "value"}], {}, id="movie_db_in_cache_cached_data_wit_user_choice"),
     ]
 )
 def test_reupload_get_movie_db_from_cache(cached_data, movie_db, expected, mocker):
     mock_cache_client = mocker.patch('modules.cache.Cache')
     mocker.patch("modules.cache.Cache.get", return_value=movie_db)
-    assert reupload_get_movie_db_from_cache(
-        mock_cache_client, cached_data, "", "", "") == expected
+    assert reupload_get_movie_db_from_cache(mock_cache_client, cached_data, "", "", "") == expected
 
 
 @pytest.mark.parametrize(
@@ -353,13 +346,10 @@ def test_reupload_get_processable_torrents(cache_get_data, list_torrents_data, e
     mock_cache_client = mocker.patch('modules.cache.Cache')
     mocker.patch("modules.cache.Cache.get", return_value=cache_get_data)
 
-    mocker_torrent_client = mocker.patch(
-        'modules.torrent_client.TorrentClient')
-    mocker.patch("modules.torrent_client.TorrentClient.list_torrents",
-                 return_value=list_torrents_data)
+    mocker_torrent_client = mocker.patch('modules.torrent_client.TorrentClient')
+    mocker.patch("modules.torrent_client.TorrentClient.list_torrents",return_value=list_torrents_data)
 
-    assert reupload_get_processable_torrents(
-        mocker_torrent_client, mock_cache_client) == expected
+    assert reupload_get_processable_torrents(mocker_torrent_client, mock_cache_client) == expected
 
 
 def __torrent_path_not_translation_side_effect(param, default=None):
@@ -407,6 +397,84 @@ def test_reupload_get_translated_torrent_path(torrent_path, expected_path, mocke
     ]
 )
 def test_reupload_get_no_translated_torrent_path(torrent_path, expected_path, mocker):
-    mocker.patch(
-        "os.getenv", side_effect=__torrent_path_not_translation_side_effect)
+    mocker.patch("os.getenv", side_effect=__torrent_path_not_translation_side_effect)
     assert reupload_get_translated_torrent_path(torrent_path) == expected_path
+
+
+def __dynamic_trackers_side_effect(param, default=None):
+    if param == "dynamic_tracker_selection":
+        return True
+    return default
+
+
+@pytest.mark.parametrize(
+    ("torrent", "upload_to_trackers", "api_keys_dict", "expected"),
+    [
+        pytest.param(
+            {"category":"GGBOT::TSP::ATH"},
+            ["BHD, BLU"],
+            {
+                "tsp_api_key":"YES",
+                "ath_api_key":"YES",
+                "bhd_api_key":"YES",
+                "blu_api_key":"YES",
+            },
+            ['TSP', 'ATH'],
+            id="dynamic_trackers_yes"
+        ),
+        pytest.param(
+            {"category":"GGBOT::TSP::ATH"},
+            ["BHD, BLU"],
+            {
+                "tsp_api_key":"YES",
+                "bhd_api_key":"YES",
+                "blu_api_key":"YES",
+            },
+            ['TSP'],
+            id="dynamic_trackers_yes"
+        ),
+        pytest.param(
+            {"category":"GGBOT::TSP::ATH::BHD::BHDTV"},
+            ["BHD, BLU"],
+            {
+                "tsp_api_key":"YES",
+                "bhd_api_key":"YES",
+                "blu_api_key":"YES",
+            },
+            ['TSP', "BHD"],
+            id="dynamic_trackers_yes"
+        ),
+        pytest.param(
+            {"category":"GGBOT::TSP::ATH"},
+            ["BHD, BLU"],
+            {
+                "bhd_api_key":"YES",
+                "blu_api_key":"YES",
+            },
+            ["BHD, BLU"],
+            id="dynamic_trackers_validation_failed"
+        ),
+        pytest.param(
+            {"category":"GGBOT::TSP::"},
+            ["BHD, BLU"],
+            {
+                "bhd_api_key":"YES",
+                "blu_api_key":"YES",
+            },
+            ["BHD, BLU"],
+            id="dynamic_trackers_validation_failed"
+        ),
+    ]
+)
+def test_get_available_dynamic_trackers_qbittorrnet(torrent, upload_to_trackers, api_keys_dict, expected, mocker):
+    mock_cache_client = mocker.patch("qbittorrentapi.Client")
+    mocker.patch("os.getenv", side_effect=__dynamic_trackers_side_effect)
+    qbit = Qbittorrent()
+
+    assert get_available_dynamic_trackers(
+        torrent_client=qbit,
+        torrent=torrent,
+        upload_to_trackers=upload_to_trackers,
+        api_keys_dict=api_keys_dict,
+        all_trackers_list=json.load(open(f'{working_folder}/parameters/tracker/acronyms.json')).keys()
+    ) == expected

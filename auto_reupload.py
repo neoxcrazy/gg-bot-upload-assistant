@@ -839,6 +839,15 @@ def reupload_job():
                 logging.info(f"[Main] Skipping upload and processing of torrent {cached_data['name']} since retry limit has exceeded")
                 continue
 
+        # dynamic_tracker_selection
+        upload_to_trackers = reupload_utilities.get_available_dynamic_trackers(
+            torrent_client=torrent_client,
+            torrent=torrent,
+            upload_to_trackers=upload_to_trackers,
+            api_keys_dict=api_keys_dict,
+            all_trackers_list=acronym_to_tracker.keys()
+        )
+
         save_path = torrent["save_path"]
         # before we start doing anything we need to check whether the media file can be accessed by the uploader.
         # to check whether the file is accessible we need to adhere to any path translations that user want to do

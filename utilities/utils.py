@@ -482,7 +482,7 @@ def get_and_validate_configured_trackers(trackers, all_trackers, api_keys_dict, 
         tracker = str(tracker)
         if f"{tracker.lower()}_api_key" in api_keys_dict:
             # Make sure that an API key is set for that site
-            if len(api_keys_dict[(tracker.lower()) + "_api_key"]) <= 1:
+            if len(api_keys_dict[f"{tracker.lower()}_api_key"]) <= 1:
                 continue
             if tracker.upper() not in upload_to_trackers:
                 upload_to_trackers.append(tracker.upper())

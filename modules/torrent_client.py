@@ -44,3 +44,6 @@ class TorrentClient:
 
     def update_torrent_category(self, info_hash, category_name=None):
         self.client.update_torrent_category(info_hash, category_name)
+
+    def get_dynamic_trackers(self, torrent):
+        return self.client.get_dynamic_trackers(torrent)

@@ -250,7 +250,8 @@ docker run --rm -it \
 - [X] Hybrid Mapping v2
 - [X] Add Support for new platforms
     - [X] Swarmazon
-- [X] Automatic torrent re-uploader
+- [X] Automatic torrent ReUploader
+- [X] Auto ReUploader: Dynamic Tracker Selection
 - [X] Improved dupe check - Phase 1
 - [X] Improved screenshots url management
 - [X] Improved TMDB metadata search Phase 1

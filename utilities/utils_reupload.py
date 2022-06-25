@@ -5,6 +5,7 @@ import logging
 import datetime
 
 from pprint import pformat
+from utilities.utils import get_and_validate_configured_trackers
 
 
 TORRENT_DB_KEY_PREFIX = "ReUpload::Torrent"
@@ -62,7 +63,6 @@ def initialize_torrent_data(torrent, cache):
     init_data["status"] = TorrentStatus.PENDING
     init_data["torrent"] = json.dumps(torrent)
     # when this attempt becomes greater than 3, the torrent will be marked as UNKNOWN_FAILURE
-    # TODO convert this to a model class that can be used with GG-Bot Visor as well seamlessly
     init_data["upload_attempt"] = 1
     init_data["movie_db"] = "None"
     init_data["date_created"] = datetime.datetime.now().isoformat()
@@ -74,8 +74,7 @@ def initialize_torrent_data(torrent, cache):
 
 
 def should_upload_be_skipped(cache, torrent):
-    logging.info(
-        f'[ReuploadUtils] Updating upload attempt for torrent {torrent["name"]}')
+    logging.info(f'[ReuploadUtils] Updating upload attempt for torrent {torrent["name"]}')
     torrent["upload_attempt"] = torrent["upload_attempt"] + 1
     if torrent["upload_attempt"] > UPLOAD_RETRY_LIMIT:
         torrent["status"] = TorrentStatus.UNKNOWN_FAILURE
@@ -209,8 +208,7 @@ def reupload_get_processable_torrents(torrent_client, cache):
             lambda torrent: torrent["completed"] == torrent["size"], torrents)
         )
     )
-    logging.info(
-        f'[Main] Total number of completed torrents that needs to be reuploaded are {len(torrents)}')
+    logging.info(f'[Main] Total number of completed torrents that needs to be reuploaded are {len(torrents)}')
     return torrents
 
 
@@ -228,3 +226,21 @@ def reupload_get_translated_torrent_path(torrent_path):
         logging.info(f'[Main] Translated path of the torrent: {translated_path}')
         torrent_path = translated_path
     return torrent_path
+
+
+def get_available_dynamic_trackers(torrent_client, torrent, upload_to_trackers, api_keys_dict, all_trackers_list):
+    # we first try to dynamically select the trackers to upload to from the torrent label. (if the feature is enabled.)
+    if bool(os.getenv("dynamic_tracker_selection", False)) == True:
+        try:
+            dynamic_trackers = torrent_client.get_dynamic_trackers(torrent)
+            return get_and_validate_configured_trackers(
+                trackers = dynamic_trackers,
+                all_trackers = False,
+                api_keys_dict = api_keys_dict,
+                all_trackers_list = all_trackers_list
+            )
+        except AssertionError:
+            logging.error(f"[Main] None of the trackers dynamic trackers {dynamic_trackers} have a valid configuration. Proceeding with fall back trackers {upload_to_trackers}")
+
+    # well, no need to select trackers dynamically or no valid dynamic trackers (exception case)
+    return upload_to_trackers
