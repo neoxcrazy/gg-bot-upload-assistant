@@ -839,11 +839,12 @@ def reupload_job():
                 logging.info(f"[Main] Skipping upload and processing of torrent {cached_data['name']} since retry limit has exceeded")
                 continue
 
+        upload_to_trackers_copy = upload_to_trackers
         # dynamic_tracker_selection
         upload_to_trackers = reupload_utilities.get_available_dynamic_trackers(
             torrent_client=torrent_client,
             torrent=torrent,
-            original_upload_to_trackers=upload_to_trackers,
+            original_upload_to_trackers=upload_to_trackers_copy,
             api_keys_dict=api_keys_dict,
             all_trackers_list=acronym_to_tracker.keys()
         )
