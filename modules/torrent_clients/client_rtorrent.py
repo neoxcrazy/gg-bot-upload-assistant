@@ -99,6 +99,7 @@ class Rutorrent:
     def __extract_necessary_keys(self, torrent):
         torrent = {self.__do_key_translation(key): value for key, value in torrent.items() if key in rutorrent_keys}
         torrent["save_path"] = torrent["content_path"].replace(torrent["name"], "")
+        torrent["category"]=torrent["category"].replace("%3A",":")
         return torrent
 
     def __format_bytes(self, size):
