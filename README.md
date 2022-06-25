@@ -310,6 +310,8 @@ docker run --rm -it \
         * Issue#40: False positive DV detection
         * Issue:47: TDB uploads fails from auto-reuploader
 
+<br>
+
 ## **2.0.7**
     Removed Trackers
         * Telly - ShutDown
@@ -339,6 +341,8 @@ docker run --rm -it \
         * Issue#35: HEVC codec being used for web releases
         * Issue#36: Broken screenshots after new UNIT3D update
         * Issue:38: Cross-seeding error with multiple trackers
+
+<br>
 
 ## **2.0.6**
     New Trackers
