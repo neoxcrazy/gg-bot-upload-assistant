@@ -408,7 +408,8 @@
         "DD+" : "DDP",
         "HDR10+" : "HDR10Plus",
         "DTS:X": "DTS-X",
-        ":":""
+        ":":"",
+        "?":""
     },
 
     "banned_groups": [

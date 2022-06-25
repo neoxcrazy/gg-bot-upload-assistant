@@ -222,7 +222,8 @@ def _get_url_type_data(translation_key, torrent_info):
     elif translation_key == "tvmaze" and torrent_info["type"] == "episode":
         url = f"https://www.tvmaze.com/shows/{torrent_info['tvmaze']}"
     else:
-        logging.error(f"[Main] Invalid key for url translation provided -- Key {translation_key}")
+        logging.error(f"[Translation] Invalid key for url translation provided -- Key {translation_key}")
+    logging.debug(f"[Translation] Created url type data for {translation_key} as {url}")
     return url
 
 
@@ -352,8 +353,10 @@ def choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, a
                         tracker_settings[config["translation"][translation_key]] = "0"
 
                 elif required_value == "url":
-                    # URLs can be set only to for certain media databases
-                    tracker_settings[config["translation"][translation_key]] = _get_url_type_data(translation_key, torrent_info)
+                    # we need this check becase some trackers accepts media database urls from the same key, thereby overwriting the previous data
+                    if config["translation"][translation_key] not in tracker_settings or len(tracker_settings[config["translation"][translation_key]]) == 0:
+                        # URLs can be set only to for certain media databases
+                        tracker_settings[config["translation"][translation_key]] = _get_url_type_data(translation_key, torrent_info)
                 else:
                     logging.error(f"[Main] Invalid value type {required_value} configured for required item {required_key} with translation key {required_key}")
 
