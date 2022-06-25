@@ -247,35 +247,10 @@ docker run --rm -it \
 
 # Roadmap
 ### v3.0
-- [X] Hybrid Mapping v2
-- [X] Add Support for new platforms
-    - [X] Swarmazon
-- [X] Automatic torrent ReUploader
-- [X] Auto ReUploader: Dynamic Tracker Selection
-- [X] Improved dupe check - Phase 1
-- [X] Improved screenshots url management
-- [X] Improved TMDB metadata search Phase 1
-- [X] Support for communicating with torrent clients
-    - [X] Qbittorrent
-    - [X] Rutorrent
-- [X] Implement a caching mechanism
-    - [X] Mongo DB
-- [X] Removed discord webhook and notifications
 - [ ] Improved TMDB metadata search Phase 2
-- [X] Accept MAL id as user argument
-- [X] Human readable sub folder for temporary data
-- [X] Release GG-BOT source code to public
-- [X] Bug Fixes and Testing Phase 1
-- [X] Bug Fixes and Testing Phase 2
-- [X] Issue#32: Atmos not detected if not present in file name
-- [X] Issue#37: Automatic cross-seeding not working
-- [X] Issue#39: Info log says translation needed even when disabled
-- [X] Issue#40: False positive DV detection
-- [X] Issue:47: TDB uploads fails from auto-reuploader
 
 ### v3.0.1
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
-- [ ] Support for overriding target tracker through categories
 - [ ] Ability to reuse already existing torrents.
 - [ ] Add support for anonymous uploads to BHDTV
 - [ ] Support for Dual Audio Detection
@@ -300,6 +275,36 @@ docker run --rm -it \
 <br>
 
 # Change Log
+
+
+## **3.0 UNRELEASED SUBJECTED TO CHANGE**
+    New Trackers
+        * Swarmazon
+
+    New Features
+        * Open Source GG-BOT Uploaders
+        * Hybrid Mapping v2
+        * GG-BOT Auto ReUploader
+        * Auto ReUploader: Dynamic Tracker Selection
+        * Auto ReUploader: Caching
+            * Mongo DB
+        * Auto ReUploader: Bug Fixes and Testing Phase 1
+        * Auto ReUploader: Bug Fixes and Testing Phase 2
+        * Removed discord webhook and notifications
+        * Accept MAL id as user argument
+        * Human readable sub folder for temporary data
+
+    Underhood Changes
+        * Improved dupe check - Phase 1
+        * Improved TMDB metadata search Phase 1
+        * Improved screenshots url management
+
+    Bug Fixes
+        * Issue#32: Atmos not detected if not present in file name
+        * Issue#37: Automatic cross-seeding not working
+        * Issue#39: Info log says translation needed even when disabled
+        * Issue#40: False positive DV detection
+        * Issue:47: TDB uploads fails from auto-reuploader
 
 ## **2.0.7**
     Removed Trackers
