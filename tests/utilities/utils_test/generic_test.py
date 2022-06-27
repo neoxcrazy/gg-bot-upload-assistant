@@ -156,3 +156,37 @@ def test_create_temp_upload_itself():
     assert computed_working_folder == f"{hash}/"
     assert Path(f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}").is_dir() == True
     assert Path(f"{working_folder}{temp_working_dir}/nothing/temp_upload/{hash}/screenshots/").is_dir() == True
+
+
+@pytest.mark.parametrize(
+    ("torrent_info", "expected"),
+    [
+        pytest.param(
+            { "release_group" : "RELEASE_GROUP", "upload_media" : "/data/Movies/Name of the Movie 2022 STREAM WEB-DL DD+ 5.1 Atmos DV HDR HEVC-RELEASE_GROUP.mkv" },
+            "RELEASE_GROUP",
+            id="proper_release_group_from_guessit"
+        ),
+        pytest.param(
+            { "upload_media" : "/data/Movies/Name of the Movie 2022 STREAM WEB-DL DD+ 5.1 Atmos DV HDR HEVC.mkv" },
+            "NOGROUP",
+            id="no_release_group_from_guessit"
+        ),
+        pytest.param(
+            { "release_group" : "", "upload_media" : "/data/Movies/Name of the Movie 2022 STREAM WEB-DL DD+ 5.1 Atmos DV HDR HEVC.mkv" },
+            "NOGROUP",
+            id="empty_group_from_guessit"
+        ),
+        pytest.param(
+            { "release_group" : "X-RELEASE_GROUP", "upload_media" : "/data/Movies/Name of the Movie 2022 STREAM WEB-DL 7.1 Atmos DV HDR HEV DTS-X-RELEASE_GROUP.mkv" },
+            "RELEASE_GROUP",
+            id="dts-x-wrong_group_from_guessit"
+        ),
+        pytest.param(
+            { "release_group" : "DV", "upload_media" : "/data/Movies/Name of the Movie 2022 STREAM WEB-DL DD+ 5.1 Atmos DV HDR HEVC.mkv" },
+            "NOGROUP",
+            id="group_from_guessit_when_no_group"
+        ),
+    ]
+)
+def test_sanitize_release_group_from_guessit(torrent_info, expected):
+    assert utils.sanitize_release_group_from_guessit(torrent_info) == expected

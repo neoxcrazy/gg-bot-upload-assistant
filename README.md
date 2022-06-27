@@ -305,6 +305,7 @@ docker run --rm -it \
         * Issue#39: Info log says translation needed even when disabled
         * Issue#40: False positive DV detection
         * Issue:47: TDB uploads fails from auto-reuploader
+        * Issue:51: Setting DV as release group instead of NOGROUP
 
 <br>
 

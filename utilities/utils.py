@@ -694,3 +694,33 @@ def display_banner(mode):
     console.print(f'[bold green]{gg_bot}[/bold green]', justify="center")
     console.print(f'[bold blue]{mode}[/bold blue]', justify="center", style='#38ACEC')
     return True
+
+
+def sanitize_release_group_from_guessit(torrent_info):
+    # setting NOGROUP as group if the release_group cannot be identified from guessit
+    if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0:
+        # sometimes, guessit identifies wrong release groups. So we just do another sanity check just to ensure that the release group
+        # provided by guessit is correct.
+        if torrent_info["upload_media"].replace(".mkv", "").replace(".mp4", "").endswith(f"-{torrent_info['release_group']}"):
+            # well the release group identified by guessit seems correct.
+            if torrent_info["release_group"].startswith("X-"):
+                # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
+                logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
+                return torrent_info["release_group"][2:]
+        else:
+            return "NOGROUP"
+            logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
+    else:
+        return "NOGROUP"
+        logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
+    return torrent_info["release_group"]
+
+    # -------------------------------------------------------------
+    # if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None) is None:
+    #     logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
+    #     return "NOGROUP"
+    # elif torrent_info["release_group"].startswith("X-"):
+    #     # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
+    #     logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
+    #     return torrent_info["release_group"][2:]
+    # return torrent_info["release_group"]
