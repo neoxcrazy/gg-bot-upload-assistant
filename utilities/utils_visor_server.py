@@ -42,8 +42,8 @@ def __get_all_data_from_torrents_collection(cache, page_number, sort_field, item
     return cache.advanced_get(TORRENT_DB_KEY_PREFIX, items_per_page, page_number, sort_field, filter_query)
 
 
-def __get_unique_document(cache, hash):
-    document = cache.get(TORRENT_DB_KEY_PREFIX, { "hash" : { "$regex" : f"^{hash}" } } )
+def __get_unique_document(cache, info_hash):
+    document = cache.get(TORRENT_DB_KEY_PREFIX, { "hash" : { "$regex" : f"^{info_hash}" } } )
     return None if len(document) != 1 else document[0]
 
 

@@ -139,8 +139,8 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
             if len(announce) > 1:
                 # multiple announce urls
                 edit_torrent.metainfo['announce-list'] = []
-                for index in range(0, len(announce)):
-                    edit_torrent.metainfo['announce-list'].append([announce[index]])
+                for announce_url in announce:
+                    edit_torrent.metainfo['announce-list'].append([announce_url])
 
             Torrent.copy(edit_torrent).write(filepath=f'{working_folder}/temp_upload/{hash_prefix}{tracker}-{torrent_title}.torrent', overwrite=True)
         else:
