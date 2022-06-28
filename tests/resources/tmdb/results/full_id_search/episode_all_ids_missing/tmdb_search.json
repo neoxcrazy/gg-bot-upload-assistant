@@ -1,0 +1,47 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "backdrop_path": "/wiE9doxiLwq3WCGamDIOb2PqBqc.jpg",
+            "first_air_date": "2013-09-12",
+            "genre_ids": [
+                18,
+                80
+            ],
+            "id": 60574,
+            "name": "Peaky Blinders",
+            "origin_country": [
+                "GB"
+            ],
+            "original_language": "en",
+            "original_name": "Peaky Blinders",
+            "overview": "A gangster family epic set in 1919 Birmingham, England and centered on a gang who sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby, who means to move up in the world.",
+            "popularity": 1681.185,
+            "poster_path": "/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+            "vote_average": 8.6,
+            "vote_count": 6748
+        },
+        {
+            "backdrop_path": "/ocluAVFzhGAnU25IyTr07E6SgBr.jpg",
+            "first_air_date": "2022-03-07",
+            "genre_ids": [
+                99,
+                80
+            ],
+            "id": 194690,
+            "name": "The Real Peaky Blinders",
+            "origin_country": [
+                "GB"
+            ],
+            "original_language": "en",
+            "original_name": "The Real Peaky Blinders",
+            "overview": "Exploring the mass gang movement that originated in Birmingham and other industrial cities in the 19th century and evolved into modern gangsterism in the early 20th.",
+            "popularity": 101.975,
+            "poster_path": "/6Ifsz3YepD6M6hlx24u5Ei9VdFq.jpg",
+            "vote_average": 2,
+            "vote_count": 1
+        }
+    ],
+    "total_pages": 1,
+    "total_results": 2
+}

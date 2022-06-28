@@ -289,6 +289,7 @@ docker run --rm -it \
         * Removed discord webhook and notifications
         * Accept MAL id as user argument
         * Human readable sub folder for temporary data
+        * Ability to force add multiple files in movie dot torrent
 
     Underhood Changes
         * Improved dupe check - Phase 1

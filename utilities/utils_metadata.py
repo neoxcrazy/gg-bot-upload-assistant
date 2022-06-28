@@ -40,7 +40,7 @@ def _return_for_reuploader_and_exit_for_assistant(selected_tmdb_results_data=Non
         sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
 
 
-def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
+def _metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
     console.line(count=2)
     console.rule("TMDB Search Results", style='red', align='center')
     console.line(count=1)
@@ -115,8 +115,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
 
             # Same situation as with the movie/tv title. The key changes depending on what the content type is
             selected_year = "N.A."
-            year_match = list(map(possible_match.get, filter(
-                lambda x: x in "release_date, first_air_date", possible_match)))
+            year_match = list(map(possible_match.get, filter(lambda x: x in "release_date, first_air_date", possible_match)))
             if len(year_match) > 0:
                 selected_year = year_match.pop()
             else:
@@ -215,11 +214,11 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
         # We take the users (valid) input (or auto selected number) and use it to retrieve the appropriate TMDB ID
         # torrent_info["tmdb"] = str(result_dict[user_input_tmdb_id_num])
         tmdb = str(result_dict[user_input_tmdb_id_num])
-        # Now we can call the function 'metadata_get_external_id()' to try and identify the IMDB ID (insert it into torrent_info dict right away)
-        imdb = str(metadata_get_external_id(id_site='tmdb', id_value=tmdb, external_site="imdb", content_type=content_type))
+        # Now we can call the function '_metadata_get_external_id()' to try and identify the IMDB ID (insert it into torrent_info dict right away)
+        imdb = str(_metadata_get_external_id(id_site='tmdb', id_value=tmdb, external_site="imdb", content_type=content_type))
         if content_type in ["episode", "tv"]:  # getting TVmaze ID
-            # Now we can call the function 'metadata_get_external_id()' to try and identify the TVmaze ID (insert it into torrent_info dict right away)
-            tvmaze = str(metadata_get_external_id(id_site='imdb', id_value=imdb, external_site="tvmaze", content_type=content_type))
+            # Now we can call the function '_metadata_get_external_id()' to try and identify the TVmaze ID (insert it into torrent_info dict right away)
+            tvmaze = str(_metadata_get_external_id(id_site='imdb', id_value=imdb, external_site="tvmaze", content_type=content_type))
         else:
             tvmaze = "0"
         return {
@@ -232,7 +231,7 @@ def metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
         _return_for_reuploader_and_exit_for_assistant(selected_tmdb_results_data)
 
 
-def metadata_get_external_id(id_site, id_value, external_site, content_type):
+def _metadata_get_external_id(id_site, id_value, external_site, content_type):
     """
         This method is called when we need to get id for `external_site` using the id `id_value` which we already have for site `id_site`
 
@@ -254,7 +253,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
             if id_site == "tmdb":  # we have tmdb id
                 logging.info(f"[MetadataUtils] GET Request For IMDB Lookup: https://api.themoviedb.org/3/{content_type}/{id_value}/external_ids?api_key=<REDACTED>&language=en-US")
                 imdb_id_request = requests.get(get_imdb_id_from_tmdb_url).json()
-                if imdb_id_request["imdb_id"] is None:
+                if imdb_id_request["imdb_id"] is None or len(imdb_id_request["imdb_id"]) < 1:
                     logging.debug("[MetadataUtils] Returning imdb id as `0`")
                     return "0"
                 logging.debug(f"[MetadataUtils] Returning imdb id as `{imdb_id_request['imdb_id']}`")
@@ -270,7 +269,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                 logging.info(f"[MetadataUtils] GET Request For TVMAZE Lookup: {get_tvmaze_id_from_imdb_url}")
                 tvmaze_id_request = requests.get(get_tvmaze_id_from_imdb_url).json()
                 logging.debug(f"[MetadataUtils] Returning tvmaze id as `{tvmaze_id_request['id']}`")
-                return tvmaze_id_request["id"] if tvmaze_id_request["id"] is not None else "0"
+                return str(tvmaze_id_request["id"]) if tvmaze_id_request["id"] is not None else "0"
             else:
                 logging.error("[MetadataUtils] Cannot fetch tvmaze id without imdb id.")
                 logging.debug("[MetadataUtils] Returning tvmaze id as `0`")
@@ -282,6 +281,7 @@ def metadata_get_external_id(id_site, id_value, external_site, content_type):
                 if len(tmdb_id_request[item]) == 1:
                     logging.debug(f"[MetadataUtils] Returning tmdb id as `{str(tmdb_id_request[item][0]['id'])}`")
                     return str(tmdb_id_request[item][0]["id"]) if tmdb_id_request[item][0]["id"] is not None else "0"
+            # TODO see how we can get tmdb id if we have tvmaze id
     except Exception:
         logging.exception("[MetadataUtils] Error while fetching external id. Returning `0` as the id")
         return "0"
@@ -375,3 +375,80 @@ def metadata_compare_tmdb_data_local(torrent_info):
         year = get_media_info["release_date"][:4]
         logging.info(f"[MetadataUtils] Using the year we got from TMDB: {year}")
     return title, year, tvdb, mal
+
+
+# ---------------------------------------------------------------------- #
+#           !!! WARN !!! This Method has side effects. !!! WARN !!!
+# ---------------------------------------------------------------------- #
+# The method rewrites the following fields in torrent_info
+# imdb, tmdb, tvmaze
+# The method returns the data obtained from tmdb after filtering
+def fill_database_ids(torrent_info, tmdb_id, imdb_id, tvmaze_id, auto_mode):
+    movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
+    possible_matches = None
+
+    # -------- Get TMDB & IMDB ID --------
+    # If the TMDB/IMDB was not supplied then we need to search TMDB for it using the title & year
+    for media_id_key, media_id_val in {"tmdb": [tmdb_id], "imdb": [imdb_id], "tvmaze": [tvmaze_id]}.items():
+        # we include ' > 1 ' to prevent blank ID's and issues later
+        if media_id_val is not None and len(media_id_val[0]) > 1:
+            # We have one more check here to verify that the "tt" is included for the IMDB ID (TMDB won't accept it if it doesnt)
+            if media_id_key == 'imdb' and not str(media_id_val[0]).lower().startswith('tt'):
+                torrent_info[media_id_key] = f'tt{media_id_val[0]}'
+            else:
+                torrent_info[media_id_key] = media_id_val[0]
+
+    if all(x in torrent_info for x in movie_db_providers):
+        # This means both the TMDB & IMDB ID are already in the torrent_info dict
+        logging.info("[Main] TMDB, TVmaze & IMDB ID have been identified from media_info, so no need to make any TMDB API request")
+
+    elif any(x in torrent_info for x in ['imdb', 'tmdb', 'tvmaze']):
+        # This means we can skip the search via title/year and instead use whichever ID to get the other (tmdb -> imdb and vice versa)
+        ids_present = list(filter(lambda id: id in torrent_info, movie_db_providers))
+        ids_missing = [id for id in movie_db_providers if id not in ids_present]
+
+        logging.info(f"[Main] We have '{ids_present}' with us currently.")
+        logging.info(f"[Main] We are missing '{ids_missing}' starting External Database API requests now")
+        # highest priority is given to imdb id.
+        # if imdb id is provided by the user, then we use it to figure our the other two ids.
+        # else we go for tmdb id and then tvmaze id
+
+        if "imdb" in ids_present:
+            # imdb id is available.
+            torrent_info["tmdb"] = _metadata_get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
+            if torrent_info["type"] == "episode":
+                torrent_info["tvmaze"] = _metadata_get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
+            else:
+                torrent_info["tvmaze"] = "0"
+        elif "tmdb" in ids_present:
+            torrent_info["imdb"] = _metadata_get_external_id(id_site="tmdb", id_value=torrent_info["tmdb"], external_site="imdb", content_type=torrent_info["type"])
+            # we got value for imdb id, now we can use that to find out the tvmaze id
+            if torrent_info["type"] == "episode":
+                torrent_info["tvmaze"] = _metadata_get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tvmaze", content_type=torrent_info["type"])
+        elif "tvmaze" in ids_present:
+            if torrent_info["type"] == "episode":
+                # we get the imdb id from tvmaze
+                torrent_info["imdb"] = _metadata_get_external_id(id_site="tvmaze", id_value=torrent_info["tvmaze"], external_site="imdb", content_type=torrent_info["type"])
+                # and use the imdb id to find out the tmdb id
+                torrent_info["tmdb"] = _metadata_get_external_id(id_site="imdb", id_value=torrent_info["imdb"], external_site="tmdb", content_type=torrent_info["type"])
+            else:
+                logging.fatal("[Main] TVMaze id provided for a non TV show. trying to identify 'TMDB' & 'IMDB' ID via title & year")
+                # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
+                metadata_result = _metadata_search_tmdb_for_id(
+                    query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode)
+                torrent_info["tmdb"] = metadata_result["tmdb"]
+                torrent_info["imdb"] = metadata_result["imdb"]
+                torrent_info["tvmaze"] = metadata_result["tvmaze"]
+                possible_matches = metadata_result["possible_matches"]
+    else:
+        logging.info("[Main] We are missing the 'TMDB', 'TVMAZE' & 'IMDB' ID, trying to identify it via title & year")
+        # this method searchs and gets all three ids ` 'imdb', 'tmdb', 'tvmaze' `
+        metadata_result = _metadata_search_tmdb_for_id(
+            query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode
+        )
+
+        torrent_info["tmdb"] = metadata_result["tmdb"]
+        torrent_info["imdb"] = metadata_result["imdb"]
+        torrent_info["tvmaze"] = metadata_result["tvmaze"]
+        possible_matches = metadata_result["possible_matches"]
+    return possible_matches

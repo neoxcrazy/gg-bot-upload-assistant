@@ -200,8 +200,7 @@ def test_client_upload_movie_folder(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch(
-        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
@@ -211,8 +210,30 @@ def test_client_upload_movie_folder(mocker):
         False,
         True
     )
-    assert utils.perform_post_processing(
-        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+
+
+def test_client_upload_movie_folder_allow_multiple_files(mocker):
+    torrent_info = {}
+    torrent_info["raw_file_name"] = "Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA"
+    torrent_info["raw_video_file"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA.mkv"
+    torrent_info["upload_media"] = "/gg-bot-upload-assistant/files/Varathan.2018.1080p.Blu-ray.Remux.AVC.DTS-HD.MA.5.1-FAFDA/"
+    torrent_info[f"TRACKER_upload_status"] = True
+    torrent_info["type"] = "movie"
+    torrent_info["working_folder"] = "test_working_folder/"
+    tracker = "TRACKER"
+
+    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mock_client = mocker.patch('modules.torrent_client.TorrentClient')
+    mock_client.upload_torrent = __mock_upload_torrent
+
+    expected = (
+        f'{working_folder}{temp_working_dir}/temp_upload/{torrent_info["working_folder"]}TRACKER-Some Title different from torrent_title.torrent',
+        '/gg-bot-upload-assistant/files/',
+        False,
+        True
+    )
+    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker, True) == expected
 
 
 def test_client_upload_movie_folder_torrent_upload_failed(mocker):
@@ -267,8 +288,7 @@ def test_client_upload_movie_file_relative(mocker):
     torrent_info["working_folder"] = "test_working_folder/"
     tracker = "TRACKER"
 
-    mocker.patch(
-        "os.getenv", side_effect=__cross_seed_no_translation_side_effect)
+    mocker.patch("os.getenv", side_effect=__cross_seed_no_translation_side_effect)
     mock_client = mocker.patch('modules.torrent_client.TorrentClient')
     mock_client.upload_torrent = __mock_upload_torrent
 
@@ -278,5 +298,4 @@ def test_client_upload_movie_file_relative(mocker):
         False,
         True
     )
-    assert utils.perform_post_processing(
-        torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected
+    assert utils.perform_post_processing(torrent_info, mock_client, f"{working_folder}{temp_working_dir}", tracker) == expected

@@ -1,0 +1,27 @@
+{
+    "movie_results": [
+        {
+            "video": false,
+            "id": 557,
+            "overview": "After being bitten by a genetically altered spider at Oscorp, nerdy but endearing high school student Peter Parker is endowed with amazing powers to become the superhero known as Spider-Man.",
+            "release_date": "2002-05-01",
+            "adult": false,
+            "backdrop_path": "/gUATaiYFjlIYWLmVsPcuThGTFnU.jpg",
+            "vote_count": 15844,
+            "genre_ids": [
+                14,
+                28
+            ],
+            "vote_average": 7.2,
+            "original_language": "en",
+            "original_title": "Spider-Man",
+            "poster_path": "/gh4cZbhZxyTbgxQPxD0dOudNPTn.jpg",
+            "title": "Spider-Man",
+            "popularity": 138.341
+        }
+    ],
+    "person_results": [],
+    "tv_results": [],
+    "tv_episode_results": [],
+    "tv_season_results": []
+}

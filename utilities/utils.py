@@ -536,7 +536,7 @@ def _get_client_translated_path(torrent_info):
     return f'{torrent_info["upload_media"]}/'.replace('//', '/')
 
 
-def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker):
+def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker, allow_multiple_files):
     # TODO check and validate connection to torrent client.
     # or should this be done at the start?? Just becase torrent client connection cannot be established
     # doesn't mean that we cannot do the upload. Maybe show a warning at the start that cross-seeding is enabled and
@@ -548,7 +548,7 @@ def _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
         console.print(f"\nFile Path: \t{torrent_info['upload_media']}")
         console.print(f"Client Save Path: \t{torrent_info['client_path']}")
 
-        if "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
+        if allow_multiple_files == False and  "raw_video_file" in torrent_info and torrent_info["type"] == "movie":
             logging.info(f'[Utils] `raw_video_file` :: {torrent_info["raw_video_file"]}')
             save_path = torrent_info["client_path"]
         else:
@@ -653,7 +653,7 @@ def get_torrent_client_if_needed():
         return None
 
 
-def perform_post_processing(torrent_info, torrent_client, working_folder, tracker):
+def perform_post_processing(torrent_info, torrent_client, working_folder, tracker, allow_multiple_files=False):
     # After we finish uploading, we can add all the dot torrent files to a torrent client to start seeding immediately.
     # This post processing step can be enabled or disabled based on the users configuration
     if bool(os.getenv("enable_post_processing", False)):
@@ -673,10 +673,10 @@ def perform_post_processing(torrent_info, torrent_client, working_folder, tracke
 
         post_processing_mode = os.getenv("post_processing_mode", "")
         if post_processing_mode == "CROSS_SEED":
-            console.print("[bold] 🌱 Detected [red]Cross Seed[/red] as the post processing mode. 🌱 [/bold]")
-            return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker)
+            console.print("[bold] 🌱 Detected [red]Cross Seed[/red] as the post processing mode. 🌱 [/bold]", justify="center")
+            return _post_mode_cross_seed(torrent_client, torrent_info, working_folder, tracker, allow_multiple_files)
         elif post_processing_mode == "WATCH_FOLDER":
-            console.print("[bold] ⌚ Detected [red]Watch Folder[/red] as the post processing mode. ⌚ [/bold]")
+            console.print("[bold] ⌚ Detected [red]Watch Folder[/red] as the post processing mode. ⌚ [/bold]", justify="center")
             return _post_mode_watch_folder(torrent_info, working_folder)
         else:
             logging.error(f"[Utils] Post processing is enabled, but invalid mode provided: '{post_processing_mode}'")
@@ -714,13 +714,3 @@ def sanitize_release_group_from_guessit(torrent_info):
         return "NOGROUP"
         logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
     return torrent_info["release_group"]
-
-    # -------------------------------------------------------------
-    # if (torrent_info["release_group"] if "release_group" in torrent_info and len(torrent_info["release_group"]) > 0 else None) is None:
-    #     logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
-    #     return "NOGROUP"
-    # elif torrent_info["release_group"].startswith("X-"):
-    #     # a special case where title ends with DTS-X-EPSILON and guess it extracts release group as X-EPSILON
-    #     logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
-    #     return torrent_info["release_group"][2:]
-    # return torrent_info["release_group"]
