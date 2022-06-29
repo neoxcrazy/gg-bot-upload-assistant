@@ -54,8 +54,7 @@ def is_unprocessable_data_present_in_cache(info_hash, cache):
 
 
 def initialize_torrent_data(torrent, cache):
-    logging.debug(
-        f'[ReuploadUtils] Intializing torrent data in cache for {torrent["name"]}')
+    logging.debug(f'[ReuploadUtils] Intializing torrent data in cache for {torrent["name"]}')
     init_data = {}
     init_data["id"] = get_unique_id()
     init_data["hash"] = torrent["hash"]
@@ -68,8 +67,7 @@ def initialize_torrent_data(torrent, cache):
     init_data["date_created"] = datetime.datetime.now().isoformat()
     init_data["possible_matches"] = "None"
     cache.save(f'{TORRENT_DB_KEY_PREFIX}::{torrent["hash"]}', init_data)
-    logging.debug(
-        f'[ReuploadUtils] Successfully initialized torrent data in cache for {torrent["name"]}')
+    logging.debug(f'[ReuploadUtils] Successfully initialized torrent data in cache for {torrent["name"]}')
     return init_data  # adding return for testing
 
 
@@ -102,38 +100,31 @@ def update_field(info_hash, field, data, is_json, cache):
     existing_data = cache.get(f'{TORRENT_DB_KEY_PREFIX}::{info_hash}')[0]
     if is_json and data is not None:
         data = json.dumps(data)
-    logging.debug(
-        f'[ReuploadUtils] Updating `{field}` of `{info_hash}` from `{existing_data[field]}` to `{data}`')
+    logging.debug(f'[ReuploadUtils] Updating `{field}` of `{info_hash}` from `{existing_data[field]}` to `{data}`')
     existing_data[field] = data
     cache.save(f'{TORRENT_DB_KEY_PREFIX}::{info_hash}', existing_data)
     return existing_data  # returning data for testing
 
 
 def insert_into_job_repo(job_repo_entry, cache):
-    logging.debug(
-        f'[ReuploadUtils] Saving job entry in cache for {job_repo_entry["hash"]}')
-    cache.save(
-        f'{JOB_REPO_DB_KEY_PREFIX}::{job_repo_entry["hash"]}::{job_repo_entry["tracker"]}', job_repo_entry)
-    logging.debug(
-        f'[ReuploadUtils] Successfully saved job entry in cache for {job_repo_entry["hash"]}')
+    logging.debug(f'[ReuploadUtils] Saving job entry in cache for {job_repo_entry["hash"]}')
+    cache.save(f'{JOB_REPO_DB_KEY_PREFIX}::{job_repo_entry["hash"]}::{job_repo_entry["tracker"]}', job_repo_entry)
+    logging.debug(f'[ReuploadUtils] Successfully saved job entry in cache for {job_repo_entry["hash"]}')
     return job_repo_entry  # returning data for testing
 
 
 def _cache_tmdb_selection(cache, movie_db):
-    cache.save(
-        f'{TMDB_DB_KEY_PREFIX}::{movie_db["title"]}@{movie_db["year"]}', movie_db)
+    cache.save(f'{TMDB_DB_KEY_PREFIX}::{movie_db["title"]}@{movie_db["year"]}', movie_db)
 
 
 def _check_for_tmdb_cached_data(cache, title, year, content_type):
-    data = cache.get(f'{TMDB_DB_KEY_PREFIX}', {"$or": [{"$and": [{"type": content_type}, {"$and": [
-                     {"title": title}, {"year": year}]}]}, {"$and": [{"type": content_type}, {"title": title}]}]})
+    data = cache.get(f'{TMDB_DB_KEY_PREFIX}', {"$or": [{"$and": [{"type": content_type}, {"$and": [{"title": title}, {"year": year}]}]}, {"$and": [{"type": content_type}, {"title": title}]}]})
     return data[0] if data is not None and len(data) > 0 else None
 
 
 def reupload_get_movie_db_from_cache(cache, cached_data, title, year, upload_type):
     movie_db = _check_for_tmdb_cached_data(cache, title, year, upload_type)
-    logging.debug(
-        f"[ReuploadUtils] MovieDB data obtained from cache: {pformat(movie_db)}")
+    logging.debug(f"[ReuploadUtils] MovieDB data obtained from cache: {pformat(movie_db)}")
 
     # if we don't have any movie_db data cached in tmdb repo, repo then we'll initialize the movie_db dictionary.cache
     # similarly if there is a user provided tmdb id (from gg-bot-visor) then we'll give higher priority to users choice and clear the cached movie_db
@@ -183,11 +174,9 @@ def reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_da
 
     external_db_id = ""
     if required_id in movie_db:  # TODO need to figure out why None is saved in metadata db
-        external_db_id = str(
-            movie_db[required_id]) if movie_db[required_id] is not None else ""
+        external_db_id = str(movie_db[required_id]) if movie_db[required_id] is not None else ""
     elif required_id in torrent_info:
-        external_db_id = str(
-            torrent_info[required_id]) if torrent_info[required_id] is not None else ""
+        external_db_id = str(torrent_info[required_id]) if torrent_info[required_id] is not None else ""
     return external_db_id
 
 
@@ -245,3 +234,54 @@ def get_available_dynamic_trackers(torrent_client, torrent, original_upload_to_t
 
     # well, no need to select trackers dynamically or no valid dynamic trackers (exception case)
     return original_upload_to_trackers
+
+
+def update_success_status_for_torrent_upload(cache, torrent, tracker, upload_response):
+    # getting the overall status of the torrent from cache
+    torrent_status = get_torrent_status(torrent["hash"], cache)
+
+    # this is the first tracker for this torrent
+    _save_job_repo_entry(cache, torrent["hash"], tracker, JobStatus.SUCCESS, upload_response)
+
+    if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
+        # updating the voerall status of the torrent
+        update_field(torrent["hash"], "status", TorrentStatus.SUCCESS, False, cache)
+        return TorrentStatus.SUCCESS
+    elif torrent_status == TorrentStatus.FAILED:
+        # updating the voerall status of the torrent
+        update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+        return TorrentStatus.PARTIALLY_SUCCESSFUL
+    # here the status could be SUCCESS or PARTIALLY_SUCCESSFUL, We don't need to make any changes to this status
+    # for testing purpose we just return the status from cache
+    return torrent_status
+
+
+def _save_job_repo_entry(cache, info_hash, tracker, status, upload_response):
+    job_repo_entry = {}
+    job_repo_entry["job_id"] = get_unique_id()
+    job_repo_entry["hash"] = info_hash
+    job_repo_entry["tracker"] = tracker
+    job_repo_entry["status"] = status
+    job_repo_entry["tracker_response"] = json.dumps(upload_response)
+    insert_into_job_repo(job_repo_entry, cache)
+
+
+def update_failure_status_for_torrent_upload(cache, torrent, tracker, upload_response):
+    # getting the overall status of the torrent from cache
+    torrent_status = get_torrent_status(torrent["hash"], cache)
+
+    # this is the first tracker for this torrent
+    _save_job_repo_entry(cache, torrent["hash"], tracker, JobStatus.FAILED, upload_response)
+
+    # inserting the torernt->tracker data to job_repository
+    if torrent_status == TorrentStatus.PENDING or torrent_status == TorrentStatus.READY_FOR_PROCESSING:
+        # updating the overall status of the torrent
+        update_field(torrent["hash"], "status", TorrentStatus.FAILED, False, cache)
+        return TorrentStatus.FAILED
+    elif torrent_status == TorrentStatus.SUCCESS:
+        # updating the overall status of the torrent
+        update_field(torrent["hash"], "status", TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
+        return TorrentStatus.PARTIALLY_SUCCESSFUL
+    # here status could be FAILED or PARTIALLY_SUCCESSFUL, we don't need to change this status
+    # for testing purpose we just return the status obtained from cache
+    return torrent_status

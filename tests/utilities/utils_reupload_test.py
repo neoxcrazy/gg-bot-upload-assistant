@@ -478,3 +478,75 @@ def test_get_available_dynamic_trackers_qbittorrnet(torrent, upload_to_trackers,
         api_keys_dict=api_keys_dict,
         all_trackers_list=json.load(open(f'{working_folder}/parameters/tracker/acronyms.json')).keys()
     ) == expected
+
+
+@pytest.mark.parametrize(
+    ("torrent", "current_status", "expected"),
+    [
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "PENDING"}],
+            "SUCCESS",
+            id="upload_success_status_pending"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "READY_FOR_PROCESSING"}],
+            "SUCCESS",
+            id="upload_success_status_ready"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "FAILED"}],
+            "PARTIALLY_SUCCESSFUL",
+            id="upload_success_status_failed"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "TMDB_IDENTIFICATION_FAILED"}],
+            "TMDB_IDENTIFICATION_FAILED",
+            id="invalid_status_return_from_cache"
+        ),
+    ]
+)
+def test_update_success_status_for_torrent_upload(torrent, current_status, expected, mocker):
+    mock_cache_client = mocker.patch('modules.cache.Cache')
+    mocker.patch("modules.cache.Cache.get", return_value=current_status)
+
+    assert update_success_status_for_torrent_upload(mock_cache_client, torrent, "TRACKER", {}) == expected
+
+
+@pytest.mark.parametrize(
+    ("torrent", "current_status", "expected"),
+    [
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "PENDING"}],
+            "FAILED",
+            id="upload_failed_status_pending"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "READY_FOR_PROCESSING"}],
+            "FAILED",
+            id="upload_failed_status_ready"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "SUCCESS"}],
+            "PARTIALLY_SUCCESSFUL",
+            id="upload_failed_status_success"
+        ),
+        pytest.param(
+            {"hash":"info_hash"},
+            [{"status": "TMDB_IDENTIFICATION_FAILED"}],
+            "TMDB_IDENTIFICATION_FAILED",
+            id="invalid_status_return_from_cache"
+        ),
+    ]
+)
+def test_update_failure_status_for_torrent_upload(torrent, current_status, expected, mocker):
+    mock_cache_client = mocker.patch('modules.cache.Cache')
+    mocker.patch("modules.cache.Cache.get", return_value=current_status)
+
+    assert update_failure_status_for_torrent_upload(mock_cache_client, torrent, "TRACKER", {}) == expected

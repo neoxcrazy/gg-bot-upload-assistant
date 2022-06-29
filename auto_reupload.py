@@ -1069,27 +1069,7 @@ def reupload_job():
 
             # Tracker Settings
             if upload_status:
-                # getting the overall status of the torrent from cache
-                torrent_status = reupload_utilities.get_torrent_status(torrent["hash"], cache)
-
-                # this is the first tracker for this torrent
-                job_repo_entry = {}
-                job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
-                job_repo_entry["hash"] = torrent["hash"]
-                job_repo_entry["tracker"] = tracker
-                job_repo_entry["status"] = reupload_utilities.JobStatus.SUCCESS
-                job_repo_entry["tracker_response"] = json.dumps(upload_response)
-                # inserting the torernt->tracker data to job_repository
-                reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
-
-                if torrent_status == reupload_utilities.TorrentStatus.PENDING or torrent_status == reupload_utilities.TorrentStatus.READY_FOR_PROCESSING:
-                    # updating the voerall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.SUCCESS, False, cache)
-                elif torrent_status == reupload_utilities.TorrentStatus.FAILED:
-                    # updating the voerall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
-                else:
-                    pass  # here the status could be SUCCESS or PARTIALLY_SUCCESSFUL, We don't need to make any changes to this status
+                reupload_utilities.update_success_status_for_torrent_upload(cache, torrent, tracker, upload_response)
 
                 # -------- Post Processing --------
                 # TODO do proper post processing steps
@@ -1112,33 +1092,11 @@ def reupload_job():
                     is_skip_checking=True
                 )
             else:
-                # getting the overall status of the torrent from cache
-                torrent_status = reupload_utilities.get_torrent_status(torrent["hash"], cache)
+                reupload_utilities.update_failure_status_for_torrent_upload(cache, torrent, tracker, upload_response)
 
-                # this is the first tracker for this torrent
-                job_repo_entry = {}
-                job_repo_entry["job_id"] = reupload_utilities.get_unique_id()
-                job_repo_entry["hash"] = torrent["hash"]
-                job_repo_entry["tracker"] = tracker
-                job_repo_entry["status"] = reupload_utilities.JobStatus.FAILED
-                job_repo_entry["tracker_response"] = json.dumps(upload_response)
-                # inserting the torernt->tracker data to job_repository
-                reupload_utilities.insert_into_job_repo(job_repo_entry, cache)
-
-                if torrent_status == reupload_utilities.TorrentStatus.PENDING or torrent_status == reupload_utilities.TorrentStatus.READY_FOR_PROCESSING:
-                    # updating the overall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.FAILED, False, cache)
-                elif torrent_status == reupload_utilities.TorrentStatus.SUCCESS:
-                    # updating the overall status of the torrent
-                    reupload_utilities.update_field(torrent["hash"], "status", reupload_utilities.TorrentStatus.PARTIALLY_SUCCESSFUL, False, cache)
-                else:
-                    pass  # here status could be FAILED or PARTIALLY_SUCCESSFUL, we don't need to change this status
-
-        # -------- Post Processing --------
-        # TODO do proper post processing steps
+        # marking dupe check failed torrents
         torrent_client.update_torrent_category(info_hash=torrent["hash"], category_name=None if is_non_dupes_present else reupload_utilities.TorrentStatus.DUPE_CHECK_FAILED)
 # -------------- END of reupload_job --------------
-
 
 
 # The scheduled job to fetch and parse torrents will be executed every minute
