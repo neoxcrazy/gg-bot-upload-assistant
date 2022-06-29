@@ -201,7 +201,7 @@ def reupload_get_processable_torrents(torrent_client, cache):
 
 
 def reupload_get_translated_torrent_path(torrent_path):
-    if str(os.getenv('translation_needed', 'false')).lower() == 'true':
+    if bool(os.getenv('translation_needed', False)) == True:
         logging.info('[ReuploadUtils] Translating paths... ("translation_needed" flag set to True in reupload.config.env) ')
 
         # Just in case the user didn't end the path with a forward slash...

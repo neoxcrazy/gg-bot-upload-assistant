@@ -354,14 +354,14 @@ def test_reupload_get_processable_torrents(cache_get_data, list_torrents_data, e
 
 def __torrent_path_not_translation_side_effect(param, default=None):
     if param == "translation_needed":
-        return "false"
+        return False
     else:
         return default
 
 
 def __torrent_path_translation_side_effect(param, default=None):
     if param == "translation_needed":
-        return "true"
+        return True
     elif param == "uploader_path":
         return '/uploader/path/'
     elif param == "torrent_client_path":
