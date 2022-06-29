@@ -362,9 +362,9 @@ def __torrent_path_not_translation_side_effect(param, default=None):
 def __torrent_path_translation_side_effect(param, default=None):
     if param == "translation_needed":
         return True
-    elif param == "uploader_path":
+    elif param == "uploader_accessible_path":
         return '/uploader/path/'
-    elif param == "torrent_client_path":
+    elif param == "client_accessible_path":
         return "/client/location/"
     else:
         return default
