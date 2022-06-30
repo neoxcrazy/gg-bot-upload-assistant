@@ -145,6 +145,21 @@
                         ]
                     }
                 },
+                "53": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "mal": {
+                        "data_source": "torrent",
+                        "not": true,
+                        "values": [
+                            "0"
+                        ]
+                    }
+                },
                 "21": {
                     "category_id": {
                         "data_source": "tracker",
@@ -255,7 +270,7 @@
                 "59": "Movies: SDTV/PDTV",
                 "21": "TV: Web-DL",
                 "52": "TV: Sports - NOT POSSIBLE",
-                "53": "TV: Anime - NOT POSSIBLE",
+                "53": "TV: Anime",
                 "60": "TV: Full Disk",
                 "61": "TV: WEBRip",
                 "62": "TV: Remux",
