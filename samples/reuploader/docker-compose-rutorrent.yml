@@ -35,6 +35,7 @@ services:
     image: noobmaster669/gg-bot-uploader:${GG_BOT_REUPLOADER_VERSION}
     restart: unless-stopped
     hostname: gg-bot-reuploader
+    tty: true
     # change the below volume mapping according to your torrent client
     volumes:
       - ${BASE_PATH}/data/downloads:/downloads
