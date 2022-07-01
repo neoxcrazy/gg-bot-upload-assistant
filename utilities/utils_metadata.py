@@ -391,7 +391,7 @@ def fill_database_ids(torrent_info, tmdb_id, imdb_id, tvmaze_id, auto_mode):
     # If the TMDB/IMDB was not supplied then we need to search TMDB for it using the title & year
     for media_id_key, media_id_val in {"tmdb": [tmdb_id], "imdb": [imdb_id], "tvmaze": [tvmaze_id]}.items():
         # we include ' > 1 ' to prevent blank ID's and issues later
-        if media_id_val is not None and len(media_id_val[0]) > 1:
+        if media_id_val[0] is not None and len(media_id_val[0]) > 1:
             # We have one more check here to verify that the "tt" is included for the IMDB ID (TMDB won't accept it if it doesnt)
             if media_id_key == 'imdb' and not str(media_id_val[0]).lower().startswith('tt'):
                 torrent_info[media_id_key] = f'tt{media_id_val[0]}'
