@@ -242,10 +242,8 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-### v3.0
-- [ ] Improved TMDB metadata search Phase 2
-
 ### v3.0.1
+- [ ] Improved TMDB metadata search Phase 2
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
 - [ ] Ability to reuse already existing torrents.
 - [ ] Add support for anonymous uploads to BHDTV
