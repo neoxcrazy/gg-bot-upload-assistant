@@ -15,7 +15,7 @@
 ## Screenshots
 <!-- Any relevant logs or expection stack which show the issue !-->
 
-### Logs / Trace
+## Logs / Trace
 <!-- Any relevant logs or expection stack which show the issue !-->
 
 ## Priority/Severity
