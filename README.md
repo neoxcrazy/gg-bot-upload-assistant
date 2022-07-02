@@ -301,12 +301,14 @@ docker run --rm -it \
         * Improved tests coverage
 
     Bug Fixes
+        * Issue#18: Invalid name for BHDTV uploads
         * Issue#32: Atmos not detected if not present in file name
         * Issue#37: Automatic cross-seeding not working
         * Issue#39: Info log says translation needed even when disabled
         * Issue#40: False positive DV detection
         * Issue:47: TDB uploads fails from auto-reuploader
         * Issue:51: Setting DV as release group instead of NOGROUP
+        * Issue:61: TVMaze ID argument overridden when no result returned
 
 <br>
 
