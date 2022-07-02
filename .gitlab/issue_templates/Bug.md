@@ -1,40 +1,25 @@
----
-name: Bug report
-about: Create a report to help us improve
+## Quick Information
+<!-- This is to help replicate the issue as closeley as possible !-->
+- **GG-BOT:** Upload Assistant / Auto ReUploader <!-- Delete as appropriate !-->
+- **Deployment:** Docker / Windows / Linux <!-- Delete as appropriate !-->
 
----
+## What Happened?
+<!-- A brief description of what happened when you tried to perform an action !-->
 
-### Expected behavior
-A clear and concise description of what you want to do and what you think should happen. (Code to reproduce the behavior can be added below).
+## Expected result
+<!-- What should have happened when you performed the actions !-->
 
+## Steps to reproduce
+<!-- List the steps required to produce the error. These should be as few as possible !-->
 
-### Actual behavior
-What happened instead. Add as much detail as you can. Include (copy and paste) stack traces and any output.
-
-
-## Code to reproduce the behavior
-Show us how to reproduce the failiure. If you can, use trajectory files from the test data.
-
-``` python
-import maicos
-
-....
-
-```
-
-### Version information
-- Type of deployment
-  - [X] Docker
-  - [ ] Bare Metal
-- Tag / Version:  
-- System
-  - [X] Linux: <provide_your_distro_here>
-  - [ ] Windows
-  - [ ] Mac
-  - [ ] Arm-Based
+## Screenshots
+<!-- Any relevant logs or expection stack which show the issue !-->
 
 ### Logs / Trace
-```
-Stack trace showing the error / exception.
-Attaching the log from the uploader is also appreciated.
-```
+<!-- Any relevant logs or expection stack which show the issue !-->
+
+## Priority/Severity
+<!-- Delete as appropriate. The priority and severity assigned may be different to this !-->
+- [ ] High (anything that impacts the normal user flow or blocks app usage)
+- [ ] Medium (anything that negatively affects the user experience)
+- [ ] Low (anything else e.g., typos, missing icons, layout issues, etc.)
