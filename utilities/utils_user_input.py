@@ -52,13 +52,12 @@ def collect_custom_messages_from_user(custom_text_components_path):
     console.print("If any tracker does not support one of the type, then it will be defaulted to 'PLAIN TEXT'", justify='center')
     console.print("[bold red]:warning: The text components added will be added to torrent description in the order which they are entered :warning:[/bold red]", justify='center')
 
-    # starting a loop to accept multiple components from user
-    # displaying the list of components available
-    for index, component in enumerate(custom_text_components):
-        console.print(f'{index + 1}. {component["display_name"]}')
-
     keep_going_mate = True
     while keep_going_mate == True:
+        # starting a loop to accept multiple components from user
+        # displaying the list of components available
+        for index, component in enumerate(custom_text_components):
+            console.print(f'{index + 1}. {component["display_name"]}')
 
         choice = Prompt.ask("Choose which type of content to add:", choices=list_of_num, default="1")
         # the last component is always the hardcoded IDIOT key
