@@ -314,6 +314,15 @@ def __env_auto_uploader(param, default=None):
         ),
         pytest.param(
             {"type": "episode"},
+            ["123123"],
+            ["tt7654323"],
+            ["12342"],
+            False,
+            {"imdb":"tt7654323", "tmdb":"123123", "tvmaze":"12342", "possible_match":None},
+            id="episode_all_ids_available"
+        ),
+        pytest.param(
+            {"type": "episode"},
             "123123",
             "7654323",
             "12342",

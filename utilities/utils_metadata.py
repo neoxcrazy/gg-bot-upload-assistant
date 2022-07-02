@@ -386,10 +386,16 @@ def metadata_compare_tmdb_data_local(torrent_info):
 def fill_database_ids(torrent_info, tmdb_id, imdb_id, tvmaze_id, auto_mode):
     movie_db_providers = ['imdb', 'tmdb', 'tvmaze']
     possible_matches = None
-
+    # small sanity check
+    if not isinstance(tmdb_id, list):
+        tmdb_id = [tmdb_id]
+    if not isinstance(imdb_id, list):
+        imdb_id = [imdb_id]
+    if not isinstance(tvmaze_id, list):
+        tvmaze_id = [tvmaze_id]
     # -------- Get TMDB & IMDB ID --------
     # If the TMDB/IMDB was not supplied then we need to search TMDB for it using the title & year
-    for media_id_key, media_id_val in {"tmdb": [tmdb_id], "imdb": [imdb_id], "tvmaze": [tvmaze_id]}.items():
+    for media_id_key, media_id_val in {"tmdb": tmdb_id, "imdb": imdb_id, "tvmaze": tvmaze_id}.items():
         # we include ' > 1 ' to prevent blank ID's and issues later
         if media_id_val[0] is not None and len(media_id_val[0]) > 1:
             # We have one more check here to verify that the "tt" is included for the IMDB ID (TMDB won't accept it if it doesnt)

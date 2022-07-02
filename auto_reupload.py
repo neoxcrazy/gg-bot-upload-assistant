@@ -888,7 +888,7 @@ def reupload_job():
         metadata_tvmaze = reupload_utilities.reupload_get_external_id_based_on_priority(movie_db, torrent_info, cached_data, "tvmaze")
 
         # tmdb, imdb and tvmaze in torrent_info will be filled by this method
-        possible_matches = metadata_utilities.fill_database_ids(torrent_info, metadata_tmdb, metadata_imdb, metadata_tvmaze, auto_mode)
+        possible_matches = metadata_utilities.fill_database_ids(torrent_info, [metadata_tmdb], [metadata_imdb], [metadata_tvmaze], auto_mode)
 
         if torrent_info["tmdb"] == "0" and torrent_info["imdb"] == "0" and torrent_info["tvmaze"] == "0":
             # here we couldn't select a tmdb id automatically / no results from tmdb. Hence we mark this as a special case and stop the upload of the torrent
