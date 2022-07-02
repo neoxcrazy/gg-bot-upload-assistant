@@ -1,10 +1,9 @@
-Fixes #
+## What does this MR do and why?
 
-Changes made in this Pull Request:
- - 
+_Describe in detail what your merge request does and why._
 
-
-PR Checklist
-------------
- - [ ] Docs?
- - [ ] Issue raised/referenced?
+<!--
+Please keep this description updated with any discussion that takes place so
+that reviewers can understand your intent. Keeping the description updated is
+especially important if they didn't participate in the discussion.
+-->
