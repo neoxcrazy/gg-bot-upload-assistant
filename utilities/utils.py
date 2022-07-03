@@ -51,8 +51,10 @@ def get_piece_size_for_mktorrent(size):
         return 22
     elif size <= 16 * 2**30:    # 8 GiB - 16 GiB
         return 23
-    else:                       # anything > 16 GiB
+    elif size <= 64 * 2**30:    # 16 GiB - 64 GiB
         return 24
+    else:                       # anything > 32 GiB
+        return 25
 
 
 def calculate_piece_size(size):
@@ -84,13 +86,11 @@ def calculate_piece_size(size):
         pieces = size / 2048
     elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
         pieces = size / 4096
-    elif size <= 128 * 2**30:  # 128 GiB / 4096 pieces = 16 MiB max
-        pieces = size / 8192
     elif size > 64 * 2**30:
-        pieces = size / 10240
+        pieces = size / 4096  # 32 MiB max
     # Math is magic!
-    # piece_size_max :: 16 * 1024 * 1024 => 16MB
-    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
+    # piece_size_max :: 32 * 1024 * 1024 => 16MB
+    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 32 * 1024 * 1024))
 
 
 def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None, hash_prefix=""):
