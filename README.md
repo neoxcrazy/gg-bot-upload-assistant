@@ -288,6 +288,7 @@ docker run --rm -it \
         * Accept MAL id as user argument
         * Human readable sub folder for temporary data
         * Ability to force add multiple files in movie dot torrent
+        * Support for 32MB piece size for torrents larger than 64 GB
 
     Underhood Changes
         * Improved dupe check - Phase 1
