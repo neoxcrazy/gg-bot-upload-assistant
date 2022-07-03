@@ -86,11 +86,15 @@ def calculate_piece_size(size):
         pieces = size / 2048
     elif size <= 64 * 2**30:   # 64 GiB / 4096 pieces = 16 MiB max
         pieces = size / 4096
+    elif size <= 128 * 2**30:  # 128 GiB / 4096 pieces = 16 MiB max
+        pieces = size / 8192
     elif size > 64 * 2**30:
-        pieces = size / 4096  # 32 MiB max
+        pieces = size / 10240
+
     # Math is magic!
-    # piece_size_max :: 32 * 1024 * 1024 => 16MB
-    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 32 * 1024 * 1024))
+    # piece_size_max :: 16 * 1024 * 1024 => 16MB
+    # cannot increase this piece size as this is a limitation with pytorf
+    return int(min(max(1 << max(0, math.ceil(math.log(pieces, 2))), 16 * 1024), 16 * 1024 * 1024))
 
 
 def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None, hash_prefix=""):
