@@ -1,21 +1,11 @@
 import os
-import json
 import glob
 import math
-import time
-import shutil
-import hashlib
 import logging
-import pyfiglet
-import subprocess
 
 from torf import Torrent
 from pathlib import Path
-from pprint import pformat
-from guessit import guessit
 from datetime import datetime
-from dotenv import dotenv_values
-from rich.console import Console
 
 
 class GGBOTTorrent(Torrent):
