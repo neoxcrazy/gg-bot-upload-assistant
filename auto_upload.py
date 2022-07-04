@@ -1010,6 +1010,7 @@ for file in upload_queue:
         # uploader couldn't identify any mal id
         if args.mal is not None and len(args.mal[0]) > 1:
             # user has provided a mal id manually. Since we were not able to identify one, we'll use the id provided by the user.
+                logging.info(f"[Main] Using user provided mal id '{args.mal[0]}'")
                 mal = args.mal[0]
 
     torrent_info["title"] = title
