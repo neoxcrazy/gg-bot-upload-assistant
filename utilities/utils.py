@@ -1,7 +1,6 @@
 import os
 import json
 import glob
-import math
 import time
 import shutil
 import hashlib
@@ -12,7 +11,6 @@ import subprocess
 from pathlib import Path
 from pprint import pformat
 from guessit import guessit
-from datetime import datetime
 from dotenv import dotenv_values
 from rich.console import Console
 
@@ -543,9 +541,9 @@ def sanitize_release_group_from_guessit(torrent_info):
                 logging.info(f'Guessit identified release group as {torrent_info["release_group"]}. Since this starts with X- (probably from DTS-X-RELEASE_GROUP), overwriting release group as {torrent_info["release_group"][2:]}')
                 return torrent_info["release_group"][2:]
         else:
-            return "NOGROUP"
             logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
+            return "NOGROUP"
     else:
-        return "NOGROUP"
         logging.debug("Release group could not be identified by guessit. Setting release group as NOGROUP")
+        return "NOGROUP"
     return torrent_info["release_group"]
