@@ -160,13 +160,8 @@ class Rutorrent:
             raise err
 
     def list_torrents(self):
-<<<<<<< HEAD
-        response = self.__call_server(f'{self.base_url}{self.__default_path}', data = {'mode':'list'})
-        if type(response["t"]) == list: 
-=======
         response = self.__call_server(f'{self.base_url}{self.__default_path}', data={'mode': 'list'})
         if isinstance(response["t"], list):
->>>>>>> dev
             return []
         return list(map(self.__extract_necessary_keys, filter(self.__match_label, map(self.__get_torrent_info, response["t"].items()))))
 
