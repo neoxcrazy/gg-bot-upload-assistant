@@ -2,9 +2,9 @@ FROM alpine:3.15 AS GIT_CLONER
 
 RUN apk fix
 RUN apk --update add git git-lfs less openssh && \
-    git lfs install && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /var/cache/apk/*
+	git lfs install && \
+	rm -rf /var/lib/apt/lists/* && \
+	rm /var/cache/apk/*
 
 RUN mkdir /clone
 WORKDIR  /clone
@@ -47,7 +47,7 @@ COPY --from=GIT_CLONER /clone/BDInfoCLI-ng/ .
 RUN nuget restore -NonInteractive
 RUN xbuild /property:Configuration=Release /property:OutDir=/usr/src/app/build/
 
-# installing packages for 
+# installing packages for
 # - rar extraction
 # - mediainfo creation
 # - audio analyzing

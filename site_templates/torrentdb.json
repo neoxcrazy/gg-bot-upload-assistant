@@ -7,227 +7,298 @@
     "platform": "TorrentDB",
     "bbcode_line_break": "\n",
     "title_separator": " ",
-
-    "description_components":{
+    "description_components": {
         "code_code": "[code][/code]",
-        "spoiler_code":"[spoiler=TITLE_PLACEHOLDER][/spoiler]",
-        "quote_code":"[quote][/quote]"
+        "spoiler_code": "[spoiler=TITLE_PLACEHOLDER][/spoiler]",
+        "quote_code": "[quote][/quote]"
     },
-
     "technical_jargons": {
         "authentication_mode": "BEARER",
         "payload_type": "MULTI-PART"
     },
-
     "translation": {
         "dot_torrent": "torrent",
         "torrent_title": "name",
         "mediainfo": "media_info",
         "bdinfo": "media_info",
-        "url_images":"screenshot_urls",
+        "url_images": "screenshot_urls",
         "description": "description",
-        "season_number":"season",
-        "episode_number":"episode",
-        "complete_season":"complete_season",
+        "season_number": "season",
+        "episode_number": "episode",
+        "complete_season": "complete_season",
         "type": "category_id",
         "source": "source",
-        "hybrid_type":"type_id",
+        "hybrid_type": "type_id",
         "resolution": "resolution",
-        "anonymous":"anon",
-        "3d":"threeD",
-        "foreign":"foreign",
+        "anonymous": "anon",
+        "3d": "threeD",
+        "foreign": "foreign",
         "tmdb": "tmdb",
         "imdb": "imdb",
         "nfo_file": "nfo"
     },
-
-    "hybrid_type": {
-        "required": true,
-        "__comments__": {
-            "6": "Movies: Web-DL",
-            "54": "Movies: Full Disk",
-            "55": "Movies: WEBRip",
-            "56": "Movies: Remux",
-            "57": "Movies: Encode",
-            "58": "Movies: HDTV",
-            "59": "Movies: SDTV/PDTV",
-
-            "21": "TV: Web-DL",
-            "52": "TV: Sports - NOT POSSIBLE",
-            "53": "TV: Anime - NOT POSSIBLE",
-            "60": "TV: Full Disk",
-            "61": "TV: WEBRip",
-            "62": "TV: Remux",
-            "63": "TV: Encode",
-            "64": "TV: HDTV",
-            "65": "TV: SDTV/PDTV",
-
-            "category_id":{
-                "1": "movie",
-                "2": "episode"
-            }
-        },
-        "mapping": {
-            "6": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
+    "hybrid_mappings": {
+        "type_id": {
+            "required": true,
+            "prerequisite": [
+                "category_id",
+                "source",
+                "resolution"
+            ],
+            "mapping": {
+                "6": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4"
+                        ]
+                    }
                 },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["4"]
+                "54": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                },
+                "55": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "5"
+                        ]
+                    }
+                },
+                "56": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                },
+                "57": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    }
+                },
+                "58": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "6"
+                        ]
+                    }
+                },
+                "59": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    },
+                    "resolution": {
+                        "data_source": "tracker",
+                        "values": [
+                            "576p",
+                            "480p"
+                        ]
+                    }
+                },
+                "53": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "mal": {
+                        "data_source": "torrent",
+                        "not": true,
+                        "values": [
+                            "0"
+                        ]
+                    }
+                },
+                "21": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "4"
+                        ]
+                    }
+                },
+                "60": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "1"
+                        ]
+                    }
+                },
+                "61": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "5"
+                        ]
+                    }
+                },
+                "62": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    }
+                },
+                "63": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "3"
+                        ]
+                    }
+                },
+                "64": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "source": {
+                        "data_source": "tracker",
+                        "values": [
+                            "6"
+                        ]
+                    }
+                },
+                "65": {
+                    "category_id": {
+                        "data_source": "tracker",
+                        "values": [
+                            "2"
+                        ]
+                    },
+                    "resolution": {
+                        "data_source": "tracker",
+                        "values": [
+                            "576p",
+                            "480p"
+                        ]
+                    }
                 }
             },
-            "54": {
+            "__comments__": {
+                "6": "Movies: Web-DL",
+                "54": "Movies: Full Disk",
+                "55": "Movies: WEBRip",
+                "56": "Movies: Remux",
+                "57": "Movies: Encode",
+                "58": "Movies: HDTV",
+                "59": "Movies: SDTV/PDTV",
+                "21": "TV: Web-DL",
+                "52": "TV: Sports - NOT POSSIBLE",
+                "53": "TV: Anime",
+                "60": "TV: Full Disk",
+                "61": "TV: WEBRip",
+                "62": "TV: Remux",
+                "63": "TV: Encode",
+                "64": "TV: HDTV",
+                "65": "TV: SDTV/PDTV",
                 "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                }
-            },
-            "55": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["5"]
-                }
-            },
-            "56": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                }
-            },
-            "57": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["3"]
-                }
-            },
-            "58": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["6"]
-                }
-            },
-            "59": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                },
-                "resolution": {
-                    "data_source": "tracker",
-                    "values": ["576p", "480p"]
-                }
-            },
-            "21": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["4"]
-                }
-            },
-            "60": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["1"]
-                }
-            },
-            "61": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["5"]
-                }
-            },
-            "62": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                }
-            },
-            "63": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["3"]
-                }
-            },
-            "64": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "source": {
-                    "data_source": "tracker",
-                    "values": ["6"]
-                }
-            },
-            "65": {
-                "category_id": {
-                    "data_source": "tracker",
-                    "values": ["2"]
-                },
-                "resolution": {
-                    "data_source": "tracker",
-                    "values": ["576p", "480p"]
+                    "1": "movie",
+                    "2": "episode"
                 }
             }
         }
     },
-
     "Required": {
         "torrent": "file",
         "name": "string",
-        "screenshot_urls": "file|string|array",
+        "type_id":"hybrid_type",
+        "screenshot_urls": "string|array",
         "imdb": "string",
-        "description":"string",
-        "anon":"string",
-        "foreign":"string",
-        "threeD":"string",
-        "tmdb":"string",
-        "type_id":"string",
-
+        "description": "string",
+        "anon": "string",
+        "foreign": "string",
+        "threeD": "string",
+        "tmdb": "string",
         "category_id": {
             "1": "movie",
             "2": "episode"
         },
-
         "source": {
             "1": {
                 "disc": 1,
@@ -252,7 +323,6 @@
                 "hdtv": 1
             }
         },
-
         "resolution": {
             "4320p (8k)": {
                 "4360p": 1
@@ -280,41 +350,32 @@
             }
         }
     },
-
     "Optional": {
         "nfo": "file|base64",
         "media_info": "string",
-
         "season": "string",
         "episode": "string",
-        "complete_season":"string"
+        "complete_season": "string"
     },
-
-    "Default":{
-        "skip_duplicate_check" : "1"
+    "Default": {
+        "skip_duplicate_check": "1"
     },
-
     "dupes": {
         "technical_jargons": {
             "authentication_mode": "BEARER",
             "payload_type": "MULTI-PART",
             "request_method": "POST"
         },
-
         "strip_text": true,
-
-        "_comments" : {
-            "payload" : "payload is the json data that needs to be sent to tracker",
-            "_payload" : "payload must be a valid json",
-            "formatting" : "content to be replaced must be enclosed with <>"
+        "_comments": {
+            "payload": "payload is the json data that needs to be sent to tracker",
+            "_payload": "payload must be a valid json",
+            "formatting": "content to be replaced must be enclosed with <>"
         },
-
-        "payload":"{\"search\":\"<imdb>\"}", 
-
+        "payload": "{\"search\":\"<imdb>\"}",
         "parse_json": {
             "is_needed": false
         },
-
         "different_cuts": "1",
         "2160p_remux": 1,
         "2160p_encode": 1,
@@ -323,7 +384,6 @@
         "720p_encode": 100,
         "else": 1
     },
-
     "torrent_title_format": {
         "episode": {
             "bluray_disc": "{title} {s00e00} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
@@ -333,7 +393,6 @@
             "hdtv": "{title} {s00e00} {repack} {screen_size} {hybrid} {source} {video_codec} {audio_codec} {audio_channels} {release_group}",
             "dvd": "{title} {s00e00} {edition} {repack} {screen_size} {region} {hybrid} {source} {remux} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}"
         },
-
         "movie": {
             "bluray_disc": "{title} {year} {edition} {repack} {screen_size} {region} {source} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
             "bluray_remux": "{title} {year} {edition} {repack} {screen_size} {uhd} {hybrid} {source} {remux} {dv} {hdr} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}",
@@ -343,8 +402,17 @@
             "dvd": "{title} {year} {edition} {repack} {screen_size} {region} {hybrid} {source} {remux} {video_codec} {audio_codec} {atmos} {audio_channels} {release_group}"
         }
     },
-
+    "torrent_title_translation" : {
+        "DD+" : "DDP"
+    },
     "banned_groups": [
-        "YIFY", "YTS", "d3g", "mSD", "x0r", "RARBG", "MeGusta", "FGT"
+        "YIFY",
+        "YTS",
+        "d3g",
+        "mSD",
+        "x0r",
+        "RARBG",
+        "MeGusta",
+        "FGT"
     ]
 }

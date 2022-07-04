@@ -13,9 +13,9 @@ gg-bot-base:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -30,9 +30,10 @@ gg-bot-base:
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:latest"
-  only:
-    changes:
-      - Dockerfiles/Dockerfile.baseimage
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs only on master branch
+      changes:
+        - Dockerfiles/Dockerfile.baseimage
 
 #
 # -------------- noobmaster669/gg-bot-base:aarch64-latest
@@ -43,9 +44,9 @@ gg-bot-base-aarch64:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -60,11 +61,11 @@ gg-bot-base-aarch64:
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:aarch64-latest"
-  only:
-    changes:
-      - Dockerfiles/Dockerfile.baseimage.aarch64
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs only on master branch
+      changes:
+        - Dockerfiles/Dockerfile.baseimage.aarch64
 
-  
 #
 # -------------- noobmaster669/gg-bot-base:armhf-latest
 # This is the base image for GG-BOT Upload Assistant armhf flavour
@@ -74,9 +75,9 @@ gg-bot-base-armhf:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -91,10 +92,10 @@ gg-bot-base-armhf:
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:armhf-latest"
-  only:
-    changes:
-      - Dockerfiles/Dockerfile.baseimage.armhf
-
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs only on master branch
+      changes:
+        - Dockerfiles/Dockerfile.baseimage.armhf
 
 #
 # -------------- noobmaster669/gg-bot-base:test-latest
@@ -105,9 +106,9 @@ gg-bot-base-test:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -122,9 +123,10 @@ gg-bot-base-test:
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:test-latest"
-  only:
-    changes:
-      - Dockerfiles/Dockerfile.baseimage.test
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs only on master branch
+      changes:
+        - Dockerfiles/Dockerfile.baseimage.test
 
 #
 # -------------- noobmaster669/gg-bot-base:disk-latest
@@ -135,9 +137,9 @@ gg-bot-base-disk:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -152,6 +154,7 @@ gg-bot-base-disk:
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
     - docker push "$DOCKER_CI_REGISTRY_BASE_IMAGE:disk-latest"
-  only:
-    changes:
-      - Dockerfiles/Dockerfile.baseimage.disk
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs only on master branch
+      changes:
+        - Dockerfiles/Dockerfile.baseimage.disk

@@ -1,4 +1,33 @@
-# **GG-BOT Upload Assistant**
+<div align="center">
+<h1 align="center">GG-BOT Upload Assistant & Auto ReUploader</h1>
+  <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant">
+    <img src="https://i.ibb.co/vsqPhLM/gg-bot-round.png" alt="Logo" width="128">
+  </a>
+</div>
+<br>
+<div align="center">
+    One size fits all solution for automated torrent uploading
+    <br />
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/wikis/home">Read Wiki</a>
+    ·
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/issues/new">Report Bug</a>
+    ·
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/issues/new">Request Feature</a>
+</div>
+<br>
+<div align="center">
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master"><img alt="pipeline status" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/pipeline.svg" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/releases"><img alt="Latest Release" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/badges/release.svg" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/-/commits/master"><img alt="coverage report" src="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant/badges/master/coverage.svg" /></a>
+    <a href="https://hub.docker.com/r/noobmaster669/gg-bot-uploader/"><img alt="coverage report" src="https://img.shields.io/docker/pulls/noobmaster669/gg-bot-uploader" /></a>
+    <a href="https://gitlab.com/NoobMaster669/gg-bot-upload-assistant"><img src="https://img.shields.io/badge/dynamic/json?color=green&logo=gitlab&label=stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F32631784"></a>
+    <a href="https://codecov.io/gl/NoobMaster669/gg-bot-upload-assistant">
+  <img src="https://codecov.io/gl/NoobMaster669/gg-bot-upload-assistant/branch/feature/swarmazon/graph/badge.svg?token=YORMWC9D77"/>
+  <a href="https://www.codacy.com/gl/NoobMaster669/gg-bot-upload-assistant/dashboard?utm_source=gitlab.com&amp;utm_medium=referral&amp;utm_content=NoobMaster669/gg-bot-upload-assistant&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/474a4fa3f5b5483bbf464d82afefe7cf"/></a>
+</a>
+</div>
+
+## Overview:
 GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out of uploading. The project is a fork of [XPBot](https://github.com/ryelogheat/xpbot) (huge credits to the original team), which has been modified to work with trackers using different codebases. GG-BOT Upload assistant is intended to be a one size fits all solution for automated torrent uploading.
 
 
@@ -7,7 +36,9 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 > If you do not wish to use the docker version of the application, its recommended to checkout and use tags instead of branches for stability reasons.
 
 
-![One Size Fits All](https://imgs.xkcd.com/comics/standards.png "One Size Fits All")
+<div align="center">
+    <img src="https://imgs.xkcd.com/comics/standards.png">
+</div>
 
 <br>
 
@@ -39,7 +70,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong>Site Name</strong></td>
         </th>
         <tr style="text-align: center">
-            <td rowspan="11"><strong>UNIT3D</strong></td>
+            <td rowspan="10"><strong>UNIT3D</strong></td>
             <td><strong>ACM</strong></td>
             <td><strong><a href="https://asiancinema.me">AsianCinema</a></strong></td>
         </tr>
@@ -58,10 +89,6 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
         <tr style="text-align: center">
             <td><strong>R4E</strong></td>
             <td><strong><a href="https://racing4everyone.eu">Racing4Everyone</a></strong></td>
-        </tr>
-        <tr style="text-align: center">
-            <td><strong>Telly</strong></td>
-            <td><strong><a href="https://telly.wtf">Telly.wtf</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>Ntelogo</strong></td>
@@ -84,9 +111,14 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
             <td><strong><a href="https://reelflix.xyz/">ReelFliX</a></strong></td>
         </tr>
         <tr style="text-align: center">
-            <td><strong>XBTIT</strong></td>
+            <td rowspan="1"><strong>XBTIT</strong></td>
             <td><strong>TSP</strong></td>
             <td><strong><a href="https://thesceneplace.com/">TheScenePlace</a></strong></td>
+        </tr>
+        <tr style="text-align: center">
+            <td rowspan="1"><strong>Swarmazon</strong></td>
+            <td><strong>SZN</strong></td>
+            <td><strong><a href="https://swarmazon.club/">Swarmazon</a></strong></td>
         </tr>
         <tr style="text-align: center">
             <td><strong>TBDev</strong></td>
@@ -160,7 +192,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 ## Bare Metal / VM:
 1. Clone this repository `git clone https://gitlab.com/NoobMaster669/gg-bot-upload-assistant.git`
 > It is recommended to checkout a tag and use it instead of using as the master branch, as there is a possibility for master branch to have bug / error / conflicts during merges.<br>
-> Checkout a tag using the command `git checkout tags/<TAG>` 
+> Checkout a tag using the command `git checkout tags/<TAG>`
 2. Checkout a release tag/version that you wish to use `git checkout tags/2.0`
 2. Install necessary packages ```pip install -r requirements.txt```
 3. Grand execute permission for user. `chmod u+x auto_upload.py`
@@ -178,7 +210,7 @@ GG-BOT Upload Assistant is a torrent auto uploader to take the manual work out o
 <br>
 
 ## Docker (recommended):
-1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`] 
+1. Create new folder / dir [`mkdir GGBotUploader && cd GGBotUploader`]
 2. Download `samples/assistant/config.env` to the newly created folder (`GGBotUploader`)
 3. Fill out the required values in `config.env`
 5. Run GG-Bot-Uploader using docker run command below. (For more samples refer to Wiki [Docker Run Command Examples](https://gitlab.com/gg-bot/gg-bot-uploader/-/wikis/Docker-Run-Command-Examples))
@@ -190,13 +222,13 @@ docker run --rm -it \
 ```
 > See [DockerHub](https://hub.docker.com/r/noobmaster669/gg-bot-uploader/tags) for various tags
 
-<br /> 
+<br />
 
 **Things to note:**
 1. We use TMDB API for all things media related (Title, Year, External IDs, etc)
 2. If you provide the IMDB ID via ```-imdb```, you must include the 'tt' that precedes the numerical ID
 3. When providing multiple database (TMDB, IMDB, TVMAZE ) ids via optional arguments, uploader uses the ids with priority **`IMDB > TMDB > TVMAZE`**
-4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`** 
+4. Full Disk uploads are supported ONLY in FAT version of the docker images. Look for image tags in the format **`:FullDisk-{TAG}`**
 
 <br>
 
@@ -210,21 +242,13 @@ docker run --rm -it \
 <br>
 
 # Roadmap
-
-### v3.0
-- [X] Automatic torrent re-uploader
-- [X] Improved dupe check - Phase 1
-- [X] Improved TMDB metadata search
-- [X] Support for communicating with torrent clients
-    - [X] Qbittorrent
-    - [X] Rutorrent
-- [X] Implement a caching mechanism
-    - [X] Mongo DB
+### v3.0.1
+- [ ] Improved TMDB metadata search Phase 2
 - [ ] EPIC: GG-Bot Visor for reports and failure recoveries
-- [ ] Support for overriding target tracker through categories
-- [X] Bug Fixes and Testing Phase 1
-- [ ] Bug Fixes and Testing Phase 2
-- [ ] Discord notification for auto uploaded data
+- [ ] Ability to reuse already existing torrents.
+- [ ] Add support for anonymous uploads to BHDTV
+- [ ] Support for Dual Audio Detection
+- [ ] Better MAL id detection
 
 ### Backlogs
 - [ ] EPIC: Migrate GG-BOT Runtime to work with GG-BOT Auto ReUploader
@@ -240,17 +264,57 @@ docker run --rm -it \
     - [ ] Anasch
     - [ ] MoreThanTV
     - [ ] GreatPosterWall
-    - [ ] Swarmazon
 - [ ] Add support for DVDs
 
 <br>
 
 # Change Log
 
+
+## **3.0 UNRELEASED SUBJECTED TO CHANGE**
+    New Trackers
+        * Swarmazon
+
+    New Features
+        * Open Source GG-BOT Uploaders
+        * Hybrid Mapping v2
+        * GG-BOT Auto ReUploader
+        * Auto ReUploader: Dynamic Tracker Selection
+        * Auto ReUploader: Caching
+            * Mongo DB
+        * Auto ReUploader: Bug Fixes and Testing Phase 1
+        * Auto ReUploader: Bug Fixes and Testing Phase 2
+        * Removed discord webhook and notifications
+        * Accept MAL id as user argument
+        * Human readable sub folder for temporary data
+        * Ability to force add multiple files in movie dot torrent
+        * Support for 32MB piece size for torrents larger than 64 GB (mktorrent only)
+
+    Underhood Changes
+        * Improved dupe check - Phase 1
+        * Improved TMDB metadata search Phase 1
+        * Improved screenshots url management
+        * Code cleanup for better code quality
+        * Codecov and Codacy integrations
+        * More unit tests for stability and reduced bugs
+        * Improved tests coverage
+
+    Bug Fixes
+        * Issue#18: Invalid name for BHDTV uploads
+        * Issue#32: Atmos not detected if not present in file name
+        * Issue#37: Automatic cross-seeding not working
+        * Issue#39: Info log says translation needed even when disabled
+        * Issue#40: False positive DV detection
+        * Issue:47: TDB uploads fails from auto-reuploader
+        * Issue:51: Setting DV as release group instead of NOGROUP
+        * Issue:61: TVMaze ID argument overridden when no result returned
+
+<br>
+
 ## **2.0.7**
     Removed Trackers
         * Telly - ShutDown
-    
+
     New Features
         * Ability to resume / reuse assets from previous uploads
         * Improved watch folder movement during post-processing
@@ -259,7 +323,7 @@ docker run --rm -it \
             * Qbittorrent
             * Rutorrent
         * Migrated torrent client feature from v3.0 alpha version
-    
+
     Underhood Changes
         * Refactored dupe check logic
         * Refactored screenshots and image upload logic
@@ -267,7 +331,7 @@ docker run --rm -it \
         * Add unit tests to the cicd pipeline
         * Refactored cicd for better performance and faster builds
         * Introded pre-built base images for cicd improvements
-        
+
     Bug Fixes
         * Issue#10: Prevent unnecessary folders from being added in movie uploads
         * Issue#12: 4K WEB-DLs video codec are named as HEVC instead of H.265
@@ -275,20 +339,22 @@ docker run --rm -it \
         * Issue#34: Cross-Seeding uploading torrents for failed uploads
         * Issue#35: HEVC codec being used for web releases
         * Issue#36: Broken screenshots after new UNIT3D update
-        * Issue#38: Cross-Seeding bug fix
+        * Issue:38: Cross-seeding error with multiple trackers
+
+<br>
 
 ## **2.0.6**
     New Trackers
         * Anthelion
         * ReelFlix
-    
+
     New Features
         * Refactoring code in anticipation to v3.0 release
         * Improved dupe check with HDR Support
         * Improved dupe check with support for REPACKS and PROPER
         * Dynamic piece size calculation for mktorrent
-        * Implemented a Skip Screenshots feature 
-        
+        * Implemented a Skip Screenshots feature
+
     Bug Fixes
         * Issue#25: Unhashable list error when uploading tv shows
         * Issue#26: NBL dupe check issue
@@ -297,6 +363,7 @@ docker run --rm -it \
         * Issue#31: Uploads to BIT-HDTV failing
 
 <br>
+
 ## **2.0.5**
     New Trackers
         * SkipTheTrailers
@@ -305,7 +372,7 @@ docker run --rm -it \
         * Support for default trackers
         * Ability to upload to all available trackers (USE WITH CAUTION)
         * Improved TMDB search results filtering
-    
+
     Bug Fixes
         * Issue#19: Multiple episode naming bug fixed
         * Issue#20: Uploader crash when handling complete packs from tracker
@@ -422,7 +489,7 @@ docker run --rm -it \
 
 ##  **1.1**
     New Trackers
-        * DesiTorrents 
+        * DesiTorrents
     New Features
         * No spoiler screenshot feature
         * CICD pipeline optimizations

@@ -4,48 +4,6 @@
 # ********************************************** #
 # ********************************************** #
 
-# Image ID: registry.gitlab.com/noobmaster669/gg-bot-upload-assistant:{TAG}
-# Image Description: Normal Docker Image build and stored in GitLab Container Registry
-# Build Conditions: On all branches and tags
-gitlab-gg-bot-upload-assistant:
-  stage: deploy
-  image:
-    name: $DOCKER_IMAGE
-  services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
-  variables:
-    DOCKER_HOST: tcp://buildcontainer:2375/
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  script:
-    - mv Dockerfiles/Dockerfile ./
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=":latest"
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
-      elif [[ $CI_COMMIT_TAG ]]; then
-        tag=":$CI_COMMIT_TAG"
-        echo "Running for tag '$CI_COMMIT_TAG': tag = $tag"
-      else
-        tag=":$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - |
-      echo "Building Image '$CI_REGISTRY_IMAGE${tag}"
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" .
-    - |
-      echo "Publishing Image to Gitlab Container Registry: '$CI_REGISTRY_IMAGE${tag}"
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
-  rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"'  # runs for every tags and master branch and dev branch
-      exists:
-        - Dockerfiles/Dockerfile
-
-
 # Image ID: noobmaster669/gg-bot-uploader:{TAG}
 # Image Description: Normal Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
@@ -54,9 +12,9 @@ dockerhub-gg-bot-upload-assistant:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -83,11 +41,11 @@ dockerhub-gg-bot-upload-assistant:
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
     - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "dev"' # runs for every tags and master branch and dev branch
       exists:
         - Dockerfiles/Dockerfile
 
-  
+
 # Image ID: noobmaster669/gg-bot-uploader:aarch64-{TAG}
 # Image Description: arm32v7 Docker Image build and stored in Docker Registry
 # Build Conditions: On all tags and master branch
@@ -96,9 +54,9 @@ dockerhub-gg-bot-upload-assistant-aarch64:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -125,10 +83,9 @@ dockerhub-gg-bot-upload-assistant-aarch64:
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
     - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
+    - if: "$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs for every tags and master branch
       exists:
         - Dockerfiles/Dockerfile.aarch64
-
 
 # Image ID: noobmaster669/gg-bot-uploader:arm32v7-{TAG}
 # Image Description: arm32v7 Docker Image build and stored in Docker Registry
@@ -138,9 +95,9 @@ dockerhub-gg-bot-upload-assistant-armhf:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -165,12 +122,11 @@ dockerhub-gg-bot-upload-assistant-armhf:
     - docker build --pull -t "$DOCKER_CI_REGISTRY_IMAGE${tag}" -f Dockerfile.armhf .
     - |
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
-    - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}" 
+    - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
+    - if: "$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs for every tags and master branch
       exists:
         - Dockerfiles/Dockerfile.armhf
-
 
 # Image ID: noobmaster669/gg-bot-uploader:FullDisk-{TAG}
 # Image Description: Normal Docker Image build and stored in Docker Registry
@@ -180,9 +136,9 @@ dockerhub-gg-bot-upload-assistant-fulldisk:
   image:
     name: $DOCKER_IMAGE
   services:
-   - name: docker:dind
-     alias: buildcontainer
-     entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+    - name: docker:dind
+      alias: buildcontainer
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://buildcontainer:2375/
     DOCKER_DRIVER: overlay2
@@ -209,6 +165,6 @@ dockerhub-gg-bot-upload-assistant-fulldisk:
       echo "Publishing Image to Docker Hub Container Registry: '$DOCKER_CI_REGISTRY_IMAGE${tag}"
     - docker push "$DOCKER_CI_REGISTRY_IMAGE${tag}"
   rules:
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH' # runs for every tags and master branch
+    - if: "$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # runs for every tags and master branch
       exists:
         - Dockerfiles/Dockerfile.disk

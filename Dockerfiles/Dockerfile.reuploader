@@ -1,0 +1,20 @@
+# using the gg-bot base image
+FROM noobmaster669/gg-bot-base:latest
+
+WORKDIR /app
+
+# add local files
+COPY requirements/requirements_reuploader.txt .
+RUN \
+  echo "**** install pip packages ****" && \
+  pip3 install -r requirements_reuploader.txt && \
+  pip3 freeze > requirements_reuploader.txt
+
+COPY . .
+RUN rm -r requirements/ requirements_reuploader.txt
+RUN rm auto_upload.py && chmod +x auto_reupload.py
+
+# ports and volumes
+VOLUME /data /temp_upload
+
+ENTRYPOINT [ "python3", "auto_reupload.py"]

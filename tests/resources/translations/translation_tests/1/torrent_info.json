@@ -1,0 +1,26 @@
+{
+    "imdb": "tt10767168",
+    "mal": "16782",
+    "tvdb": "279121",
+    "tmdb": "60572",
+    "tvmaze": "13",
+
+    "torrent_title": "The.Title.0000.Source.Audio.Codec.Video.Codec-GGBot",
+    "working_folder": "hash_for_file/",
+    "type": "episode",
+
+    "edition": "",
+    "region": "",
+    "mediainfo": "media_info_file.txt",
+    "mediainfo_summary": "mediainfo_summary_text",
+    "nfo_file": "nfo_file.nfo",
+
+    "source": "",
+    "source_type": "remux",
+    "screen_size": "2160p",
+    "bluray_disc_type": "bluray_remux",
+
+    "dot_torrent": "The.Title.0000.Source.Audio.Codec.Video.Codec-GGBot.torrent",
+    "shameless_self_promotion": "promo",
+    "bbcode_thumb_nothumb": "bbcode_thumb_nothumb"
+}

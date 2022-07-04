@@ -11,7 +11,7 @@ RUN \
   pip3 freeze > requirements.txt
 
 COPY . .
-RUN rm -r requirements/
+RUN rm -r requirements/ requirements.txt
 RUN rm auto_reupload.py && chmod +x auto_upload.py
 
 # ports and volumes

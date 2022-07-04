@@ -1,0 +1,59 @@
+{
+    "id": 269,
+    "url": "https://www.tvmaze.com/shows/269/peaky-blinders",
+    "name": "Peaky Blinders",
+    "type": "Scripted",
+    "language": "English",
+    "genres": [
+        "Drama",
+        "Crime",
+        "History"
+    ],
+    "status": "Ended",
+    "runtime": null,
+    "averageRuntime": 61,
+    "premiered": "2013-09-12",
+    "ended": "2022-04-03",
+    "officialSite": "http://www.bbc.co.uk/programmes/b045fz8r",
+    "schedule": {
+        "time": "21:00",
+        "days": [
+            "Sunday"
+        ]
+    },
+    "rating": {
+        "average": 8.6
+    },
+    "weight": 99,
+    "network": {
+        "id": 12,
+        "name": "BBC One",
+        "country": {
+            "name": "United Kingdom",
+            "code": "GB",
+            "timezone": "Europe/London"
+        },
+        "officialSite": "https://www.bbc.co.uk/bbcone"
+    },
+    "webChannel": null,
+    "dvdCountry": null,
+    "externals": {
+        "tvrage": 37240,
+        "thetvdb": 270915,
+        "imdb": "tt2442560"
+    },
+    "image": {
+        "medium": "https://static.tvmaze.com/uploads/images/medium_portrait/48/122213.jpg",
+        "original": "https://static.tvmaze.com/uploads/images/original_untouched/48/122213.jpg"
+    },
+    "summary": "<p>An epic gangster drama set in the lawless streets of 1920s Birmingham.</p>",
+    "updated": 1649088205,
+    "_links": {
+        "self": {
+            "href": "https://api.tvmaze.com/shows/269"
+        },
+        "previousepisode": {
+            "href": "https://api.tvmaze.com/episodes/2270891"
+        }
+    }
+}

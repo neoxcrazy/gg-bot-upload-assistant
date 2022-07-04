@@ -1,0 +1,62 @@
+{
+    "id": 34650,
+    "url": "https://www.tvmaze.com/shows/34650/in-the-dark",
+    "name": "In the Dark",
+    "type": "Scripted",
+    "language": "English",
+    "genres": [
+        "Drama",
+        "Comedy",
+        "Crime"
+    ],
+    "status": "Running",
+    "runtime": 60,
+    "averageRuntime": 60,
+    "premiered": "2019-04-04",
+    "ended": null,
+    "officialSite": "https://www.cwtv.com/shows/in-the-dark/",
+    "schedule": {
+        "time": "21:00",
+        "days": [
+            "Wednesday"
+        ]
+    },
+    "rating": {
+        "average": 6.7
+    },
+    "weight": 99,
+    "network": {
+        "id": 5,
+        "name": "The CW",
+        "country": {
+            "name": "United States",
+            "code": "US",
+            "timezone": "America/New_York"
+        },
+        "officialSite": "https://www.cwtv.com/"
+    },
+    "webChannel": null,
+    "dvdCountry": null,
+    "externals": {
+        "tvrage": null,
+        "thetvdb": 347645,
+        "imdb": "tt7772602"
+    },
+    "image": {
+        "medium": "https://static.tvmaze.com/uploads/images/medium_portrait/361/904615.jpg",
+        "original": "https://static.tvmaze.com/uploads/images/original_untouched/361/904615.jpg"
+    },
+    "summary": "<p>Murphy is a hard-living, hard-drinking, disaffected twenty-something with a penchant for cigarettes and casual sex. She's also blind. Murphy lives with her supportive best friend, Jess, and - more reluctantly - her trusty guide dog, Pretzel, whose presence she resents. Murphy's closest friend is a sweet teenager named Tyson, who she befriends after he saved her from a violent mugging. Her life comes crashing down when she stumbles upon what she's sure is the lifeless body of Tyson in the alley outside her apartment. But when the police arrive there is no body to be found - and with Murphy not exactly sober, the police aren't especially inclined to investigate. Murphy is determined to find the truth, no matter the risk… even if it means she has to sober up a little.</p>",
+    "updated": 1656139007,
+    "_links": {
+        "self": {
+            "href": "https://api.tvmaze.com/shows/34650"
+        },
+        "previousepisode": {
+            "href": "https://api.tvmaze.com/episodes/2339746"
+        },
+        "nextepisode": {
+            "href": "https://api.tvmaze.com/episodes/2343058"
+        }
+    }
+}

@@ -1,10 +1,7 @@
 import os
-import math
 import base64
 import logging
 import requests
-
-from pprint import pformat
 
 
 rutorrent_keys = ["d.get_custom1", "d.get_bytes_done", "d.get_base_path", "hash", "d.get_name", "d.get_size_bytes"]
@@ -15,6 +12,8 @@ rutorrent_keys_translation = {
     "d.get_name": "name",
     "d.get_size_bytes": "size"
 }
+
+
 class Rutorrent:
 
     __connection_check_path = "/plugins/check_port/action.php?init"
@@ -23,16 +22,15 @@ class Rutorrent:
     __default_path = "/plugins/httprpc/action.php"
     __upload_torrent_path = "/php/addtorrent.php"
 
-    def __call_server(self, url, data={}, files=None, header=None):
-        response = requests.post(url, data=data, files=files, headers=header or self.header)
+    def __call_server(self, url, data=None, files=None, header=None):
+        response = requests.post(url, data=data if data is not None else {}, files=files, headers=header or self.header)
         return response.json() if 'application/json' in response.headers.get('Content-Type') else response
-
 
     def __get_torrent_info(self, item):
         key = item[0]
         data = item[1]
         return {
-            'hash' : key,
+            'hash': key,
             'd.is_open': data[0],
             'd.is_hash_checking': data[1],
             'd.is_hash_checked': data[2],
@@ -69,28 +67,46 @@ class Rutorrent:
             'd.is_multi_file': data[33]
         }
 
+    def get_dynamic_trackers(self, torrent):
+        # a sanity check just to be sure
+        if self.dynamic_tracker_selection == True:
+            # this torrent is the translated data hence category instead of d.custom1
+            category = torrent["category"]
+            # removing any trailing ::
+            if category.endswith("::"):
+                category = category[:-2]
+            trackers = category.split("::")
+            return trackers[1:] # first entry will always be GGBOT
+        else:
+            return []
+
     def __match_label(self, torrent):
         # we don't want to consider cross-seeded torrents uploaded by the bot
         if self.seed_label == torrent["d.get_custom1"]:
             return False
         # user wants to ignore labels, hence we'll consider all the torrents
-        if self.target_label == "IGNORE_LABEL": 
+        if self.target_label == "IGNORE_LABEL":
             return True
-        return torrent["d.get_custom1"] == self.target_label
+        # if dynamic tracker selection is enabled, then labels will follow the pattern GGBOT::TR1::TR2::TR3
+        if self.dynamic_tracker_selection == True:
+            return torrent["d.get_custom1"].startswith(self.target_label)
+        else:
+            return torrent["d.get_custom1"] == self.target_label
 
     def __do_key_translation(self, key):
         return rutorrent_keys_translation[key] if key in rutorrent_keys_translation else key
 
     def __extract_necessary_keys(self, torrent):
-        torrent =  {self.__do_key_translation(key):value for key, value in torrent.items() if key in rutorrent_keys}
+        torrent = {self.__do_key_translation(key): value for key, value in torrent.items() if key in rutorrent_keys}
         torrent["save_path"] = torrent["content_path"].replace(torrent["name"], "")
+        torrent["category"]=torrent["category"].replace("%3A",":")
         return torrent
 
     def __format_bytes(self, size):
         # 2**10 = 1024
         power = 2**10
         n = 0
-        power_labels = {0 : '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+        power_labels = {0: '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
         while size > power:
             size /= power
             n += 1
@@ -100,25 +116,30 @@ class Rutorrent:
         self.host = os.getenv("client_host")
         if self.host is None or len(self.host) == 0:
             raise Exception("Invalid RuTorrent host provided")
-            
-        self.port = os.getenv("client_port") or 80
+
+        self.port = os.getenv("client_port", "80")
         self.username = os.getenv("client_username")
         self.password = os.getenv("client_password")
-        self.path = os.getenv("client_path") or "/"
+        self.path = os.getenv("client_path", "/")
         self.base_url = f'{self.host}:{self.port}{self.path}'
-        
+
         if self.username:
             hashed = base64.b64encode(f"{self.username}:{self.password or ''}".encode('ascii')).decode('ascii')
-            self.header = {"Authorization" : f"Basic {hashed}"}
+            self.header = {"Authorization": f"Basic {hashed}"}
         else:
             self.header = {}
 
-        # `target_label` is the label of the torrents that we are interested in
-        self.target_label = os.getenv('reupload_label', '')
+        self.dynamic_tracker_selection = bool(os.getenv("dynamic_tracker_selection", False))
+        if self.dynamic_tracker_selection == True:
+            # reuploader running in dynamic tracker selection mode
+            self.target_label = "GGBOT"
+        else:
+            # `target_label` is the label of the torrents that we are interested in
+            self.target_label = os.getenv('reupload_label', '')
         # `seed_label` is the label which will be added to the cross-seeded torrents
         self.seed_label = os.getenv('cross_seed_label', 'GGBotCrossSeed')
         # `source_label` is thelabel which will be added to the original torrent in the client
-        self.source_label = os.getenv('source_seed_label', 'GGBotCrossSeed_Source')
+        self.source_label = f"{self.seed_label}_Source"
 
         try:
             logging.info("[Rutorrent] Checking connection to Rutorrent")
@@ -138,33 +159,30 @@ class Rutorrent:
             logging.fatal(f"Failed to connect to rutorrent. Error:{response.text}")
             raise err
 
-
     def list_torrents(self):
+<<<<<<< HEAD
         response = self.__call_server(f'{self.base_url}{self.__default_path}', data = {'mode':'list'})
         if type(response["t"]) == list: 
+=======
+        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={'mode': 'list'})
+        if isinstance(response["t"], list):
+>>>>>>> dev
             return []
         return list(map(self.__extract_necessary_keys, filter(self.__match_label, map(self.__get_torrent_info, response["t"].items()))))
-
 
     def upload_torrent(self, torrent, save_path, use_auto_torrent_management, is_skip_checking, category=None):
         category = category if category is not None else self.seed_label
         logging.info(f"[Rutorrent] Uploading torrent with category {category}")
-        response = self.__call_server(f'{self.base_url}{self.__upload_torrent_path}', 
-            data = {
-                "fast_resume" : "1" if is_skip_checking else "0", 
-                "label" : category, 
-                "dir_edit" : save_path
-            },
-            files = {
-                "torrent_file": open(torrent, "rb")
-            }
+        self.__call_server(
+            f'{self.base_url}{self.__upload_torrent_path}',
+            data={ "fast_resume": "1" if is_skip_checking else "0", "label": category, "dir_edit": save_path},
+            files={"torrent_file": open(torrent, "rb")}
         )
-    
 
     def update_torrent_category(self, info_hash, category_name=None):
         category_name = category_name if category_name is not None else self.source_label
         logging.info(f"[Rutorrent] Updating category of torrent with hash {info_hash} to {category_name}")
-        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={"mode": "setlabel", "hash": info_hash, "v": category_name, "s":"label"})
+        response = self.__call_server(f'{self.base_url}{self.__default_path}', data={"mode": "setlabel", "hash": info_hash, "v": category_name, "s": "label"})
         if response[0] == category_name:
             logging.info(f"[Rutorrent] Successfully updated category of torrent with hash {info_hash} to {category_name}")
         else:

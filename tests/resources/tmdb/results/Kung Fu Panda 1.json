@@ -1,0 +1,49 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "adult": false,
+            "backdrop_path": "/vndouqEyQqpvvk0FwIlkfceblrh.jpg",
+            "genre_ids": [
+                28,
+                12,
+                16,
+                10751,
+                35
+            ],
+            "id": 9502,
+            "original_language": "en",
+            "original_title": "Kung Fu Panda",
+            "overview": "When the Valley of Peace is threatened, lazy Po the panda discovers his destiny as the \"chosen one\" and trains to become a kung fu hero, but transforming the unsleek slacker into a brave warrior won't be easy. It's up to Master Shifu and the Furious Five -- Tigress, Crane, Mantis, Viper and Monkey -- to give it a try.",
+            "popularity": 117.358,
+            "poster_path": "/wWt4JYXTg5Wr3xBW2phBrMKgp3x.jpg",
+            "release_date": "2008-06-04",
+            "title": "Kung Fu Panda",
+            "video": false,
+            "vote_average": 7.2,
+            "vote_count": 9410
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/osRhBUpGIFjwfVfHuIYVG18T9QA.jpg",
+            "genre_ids": [
+                16,
+                10751,
+                28
+            ],
+            "id": 15854,
+            "original_language": "en",
+            "original_title": "Kung Fu Panda: Secrets of the Furious Five",
+            "overview": "Ordered to teach a martial arts class of rambunctious bunny kittens, Po tells stories of each of the Furious Five's pasts.",
+            "popularity": 23.808,
+            "poster_path": "/tv52mGWtf13T3XEQj3Heow1whuc.jpg",
+            "release_date": "2008-11-08",
+            "title": "Kung Fu Panda: Secrets of the Furious Five",
+            "video": false,
+            "vote_average": 6.7,
+            "vote_count": 321
+        }
+    ],
+    "total_pages": 1,
+    "total_results": 2
+}

@@ -1,25 +1,22 @@
-# Project exclude paths
-/.github
-*.mkv
-*.mp4
-*.torrent
+# Dev folders
 /temp_upload
 /tests/resources/bdinfo/working_folder/*
 /tests/working_folder
 /.idea/
-.coverage
 /.vscode
-bdinfo*.txt
-/config.env
-reupload.config.env
 /dev_comments
-/_ignore
-/POC/
-# Byte-compiled / optimized / DLL files
 __pycache__/
+/POC/
+/coverage
+
+# Excluded file formats
+*.mkv
+*.mp4
+*.torrent
+
+# Byte-compiled / optimized / DLL files
 *.py[cod]
 *$py.class
-/coverage
 
 # C extensions
 *.so
@@ -63,6 +60,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+junit_report.xml
 *.cover
 .hypothesis/
 .pytest_cache/
@@ -113,6 +111,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+config.env
+reupload.config.env
 
 # Spyder project settings
 .spyderproject
@@ -131,3 +131,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+entry.py
+*server.py
