@@ -566,26 +566,6 @@ def identify_miscellaneous_details(guess_it_result):
 
 
 # ---------------------------------------------------------------------- #
-#                       generate/edit .torrent file                      #
-# ---------------------------------------------------------------------- #
-def generate_callback(torrent, filepath, pieces_done, pieces_total):
-    calculate_percentage = 100 * float(pieces_done) / float(pieces_total)
-    print_progress_bar(calculate_percentage, 100, prefix='Creating .torrent file:', suffix='Complete', length=30)
-# -------------- END of generate_callback --------------
-
-
-def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', print_end="\r"):
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filled_length = int(length * iteration // total)
-    bar = fill * filled_length + '-' * (length - filled_length)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end)
-    # Print New Line on Complete
-    if iteration == total:
-        print()
-# -------------- END of print_progress_bar --------------
-
-
-# ---------------------------------------------------------------------- #
 #                             Upload that shit!                          #
 # ---------------------------------------------------------------------- #
 def upload_to_site(upload_to, tracker_api_key):
@@ -1188,8 +1168,7 @@ for file in upload_queue:
             hash_prefix=torrent_info["working_folder"],
             use_mktorrent=args.use_mktorrent,
             tracker=tracker,
-            torrent_title=torrent_info["torrent_title"],
-            callback=generate_callback
+            torrent_title=torrent_info["torrent_title"]
         )
 
         # -------- Assign specific tracker keys --------

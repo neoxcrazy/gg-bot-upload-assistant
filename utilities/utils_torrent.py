@@ -102,7 +102,7 @@ def calculate_piece_size(size):
 
 
 
-def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, callback=None, hash_prefix=""):
+def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, hash_prefix=""):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """

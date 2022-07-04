@@ -27,6 +27,7 @@ def get_hash(string):
     hashed.update(string.encode())
     return hashed.hexdigest()
 
+
 def write_cutsom_user_inputs_to_description(torrent_info, description_file_path, config, tracker, bbcode_line_break, debug=False):
     # -------- Add custom descriptions to description.txt --------
     if "custom_user_inputs" in torrent_info:
