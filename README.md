@@ -271,7 +271,7 @@ docker run --rm -it \
 # Change Log
 
 
-## **3.0 UNRELEASED SUBJECTED TO CHANGE**
+## **3.0**
     New Trackers
         * Swarmazon
 
