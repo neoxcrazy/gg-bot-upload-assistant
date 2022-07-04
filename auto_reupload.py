@@ -34,6 +34,7 @@ import utilities.utils_miscellaneous as miscellaneous_utilities
 import utilities.utils_translation as translation_utilities
 import utilities.utils_reupload as reupload_utilities
 import utilities.utils_metadata as metadata_utilities
+import utilities.utils_torrent as torrent_utilities
 import utilities.utils_basic as basic_utilities
 import utilities.utils as utils
 
@@ -1036,7 +1037,7 @@ def reupload_job():
             else:
                 torrent_media = torrent_info["upload_media"]
 
-            utils.generate_dot_torrent(
+            torrent_utilities.generate_dot_torrent(
                 media=torrent_media,
                 announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
                 source=config["source"],

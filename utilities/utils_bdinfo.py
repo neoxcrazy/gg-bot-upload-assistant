@@ -1,4 +1,3 @@
-from utilities.utils import write_file_contents_to_log_as_debug
 import os
 import re
 import shutil
@@ -9,6 +8,7 @@ from rich import box
 from rich.table import Table
 from rich.console import Console
 from rich.prompt import Prompt
+from utilities.utils import write_file_contents_to_log_as_debug
 
 console = Console()
 
