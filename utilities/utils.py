@@ -164,11 +164,11 @@ def delete_leftover_files(working_folder, file, resume=False):
             logging.info(f"[Utils] Resume flag provided by user. Preserving the contents of the folder: {working_folder}/temp_upload/")
         else:
             files = glob.glob(f'{working_folder}/temp_upload/*')
-            for f in files:
-                if os.path.isfile(f):
-                    os.remove(f)
-                else:
-                    shutil.rmtree(f)
+           # for f in files:
+           #     if os.path.isfile(f):
+           #         os.remove(f)
+           #     else:
+           #         shutil.rmtree(f)
             logging.info(f"[Utils] Deleted the contents of the folder: {working_folder}/temp_upload/")
     else:
         os.mkdir(f"{working_folder}/temp_upload/")

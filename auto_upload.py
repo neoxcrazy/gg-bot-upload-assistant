@@ -991,7 +991,7 @@ def processDot(torrent):
 
 # Now for each file we've been supplied (batch more or just the user manually specifying multiple files) we create a loop here that uploads each of them until none are left
 upload_queue.sort()
-def upload(torrent):
+for torrent in upload_queue:
     status , file = processDot(torrent)
     if not status:
         shutil.move(torrent,f"missing/{torrent.split('/')[-1]}")
