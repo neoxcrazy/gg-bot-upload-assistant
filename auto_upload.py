@@ -10,6 +10,8 @@ import json
 import base64
 import logging
 import argparse
+import shutil
+import bencoding
 from pprint import pformat
 
 # These packages need to be installed
@@ -123,7 +125,7 @@ internal_args.add_argument('-tripleup', action='store_true',help="(Internal) Giv
 internal_args.add_argument('-sticky', action='store_true', help="(Internal) Pin the new upload")
 
 args = parser.parse_args()
-
+DIR = os.getenv('DIR')
 
 # ---------------------------------------------------------------------- #
 #                          Dupe Check in Tracker                         #
@@ -185,7 +187,8 @@ def identify_type_and_basic_info(full_path, guess_it_result):
 
     # ------------ Save obvious info we are almost guaranteed to get from guessit into torrent_info dict ------------ #
     # But we can immediately assign some values now like Title & Year
-    if not guess_it_result["title"]:
+    if 'title' not in guess_it_result:
+        return 'skip_to_next_file'
         raise AssertionError(
             "Guessit could not even extract the title, something is really wrong with this filename.")
 
@@ -242,8 +245,11 @@ def identify_type_and_basic_info(full_path, guess_it_result):
     # Depending on if this is a tv show or movie we have some other 'required' keys that we need (season/episode)
     # guessit uses 'episode' for all tv related content (including seasons)
     if torrent_info["type"] == "episode":
-        s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes = basic_utilities.basic_get_episode_basic_details(
+        episode_basic_details = basic_utilities.basic_get_episode_basic_details(
             guess_it_result)
+        if episode_basic_details == 'skip_to_next_file':
+            return 'skip_to_next_file'
+        s00e00, season_number, episode_number, complete_season, individual_episodes, daily_episodes = episode_basic_details
         torrent_info["s00e00"] = s00e00
         torrent_info["season_number"] = season_number
         torrent_info["episode_number"] = episode_number
@@ -356,11 +362,16 @@ def identify_type_and_basic_info(full_path, guess_it_result):
             logging.info(f"[Main] Obtained IMDB Id from mediainfo summary. Proceeding with {args.imdb}")
 
     #  Now we'll try to use regex, mediainfo, ffprobe etc to try and auto get that required info
+    skip = False
     for missing_val in keys_we_need_but_missing_torrent_info:
         # Save the analyze_video_file() return result into the 'torrent_info' dict
         torrent_info[missing_val] = analyze_video_file(
             missing_value=missing_val, media_info=media_info_result)
-
+        if torrent_info[missing_val] == 'skip_to_next_file':
+            skip = True
+            continue
+    if skip:
+        return 'skip_to_next_file'
     logging.debug(
         "::::::::::::::::::::::::::::: Torrent Information collected so far :::::::::::::::::::::::::::::")
     logging.debug(f"\n{pformat(torrent_info)}")
@@ -434,8 +445,10 @@ def analyze_video_file(missing_value, media_info):
 
     # ------------------- Source ------------------- #
     if missing_value == "source":
-        source, source_type = basic_utilities.basic_get_missing_source(
-            torrent_info, args.disc, auto_mode, missing_value)
+        try:
+            source, source_type = basic_utilities.basic_get_missing_source(torrent_info, args.disc, auto_mode, missing_value)
+        except:
+            return 'skip_to_next_file'
         torrent_info["source"] = source
         torrent_info["source_type"] = source_type
         return source
@@ -450,10 +463,13 @@ def analyze_video_file(missing_value, media_info):
 
     # ---------------- Audio Codec ---------------- #
     if missing_value == "audio_codec":
-        audio_codec, atmos = basic_utilities.basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=args.disc, auto_mode=auto_mode,
+        missing_audio_codec = basic_utilities.basic_get_missing_audio_codec(torrent_info=torrent_info, is_disc=args.disc, auto_mode=auto_mode,
                                                                            audio_codec_file_path=f'{working_folder}/parameters/audio_codecs.json',
                                                                            media_info_audio_track=media_info_audio_track, parse_me=parse_me,
                                                                            missing_value=missing_value)
+        if missing_audio_codec == 'skip_to_next_file':
+            return 'skip_to_next_file'
+        audio_codec, atmos = missing_audio_codec
 
         if atmos is not None:
             torrent_info["atmos"] = atmos
@@ -490,6 +506,8 @@ def identify_miscellaneous_details(guess_it_result):
     if "source_type" not in torrent_info:
         torrent_info["source_type"] = miscellaneous_utilities.miscellaneous_identify_source_type(torrent_info["raw_file_name"], auto_mode, torrent_info["source"])
 
+    if torrent_info["source_type"] == 'skip_to_next_file':
+        return 'skip_to_next_file'
     # ------ WEB streaming service stuff here ------ #
     if torrent_info["source"] == "Web":
         # TODO check whether None needs to be set as `web_source`
@@ -739,6 +757,9 @@ def upload_to_site(upload_to, tracker_api_key):
         logging.info(f"[TrackerUpload] Upload response for {upload_to}: {response.text.encode('utf8')}")
         if "success" in response.json():
             if str(response.json()["success"]).lower() == "true":
+                url_location = f'{working_folder}/temp_upload/{torrent_info["working_folder"]}torrent_id.txt'
+                with open(url_location, 'w+') as f:
+                    f.write(response.json()['data'].split('/')[-1].split('.')[0])
                 logging.info(f"[TrackerUpload] Upload to {upload_to} was a success!")
                 console.line(count=2)
                 console.rule(f"\n :thumbsup: Successfully uploaded to {upload_to} :balloon: \n", style='bold green1', align='center')
@@ -931,32 +952,52 @@ if args.batch:
 # all files we upload (even if its 1) get added to this list
 upload_queue = []
 
+
 if args.batch:
-    logging.info("[Main] Running in batch mode")
-    logging.info(f"[Main] Uploading all the items in the folder: {args.path}")
-    # # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
-    # for arg_file in glob.glob(f'{args.path[0]}/*'):
-    #     # Since we are in batch mode, we upload every file/folder we find in the path the user specified
-    #     upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
-    # logging.debug(f'[Main] Upload queue for batch mode {upload_queue}')
-    dirlist = [args.path[0]]
-    for (dirpath, dirnames, filenames) in os.walk(dirlist.pop()):
-        dirlist.extend(dirnames)
-        # if filenames.endsWith(".mkv") or filenames.endsWith(".mp4"):
-        upload_queue.extend(
-            filter(lambda file_name: file_name.endswith(".mkv") or file_name.endswith(".mp4"),
-                   map(lambda path_and_file: os.path.join(*path_and_file), zip([dirpath] * len(filenames), filenames))))
-    logging.info(f'[Main] Upload queue for batch mode {upload_queue}')
+    logging.info("running in batch mode")
+    logging.info(f"Uploading all the items in the folder: {args.path}")
+    # This should be OK to upload, we've caught all the obvious issues above ^^ so if this is able to run we should be alright
+    for arg_file in glob.glob(f'{args.path[0]}/*'):
+        # Since we are in batch mode, we upload every file/folder we find in the path the user specified
+        upload_queue.append(arg_file)  # append each item to the list 'upload_queue' now
 else:
-    logging.info("[Main] Running in regular '-path' mode, starting upload now")
+    logging.info("Running in regular '-path' mode, starting upload now")
     # This means the ran the script normally and specified a direct path to some media (or multiple media items, in which case we append it like normal to the list 'upload_queue')
     for arg_file in user_supplied_paths:
         upload_queue.append(arg_file)
 
 logging.debug(f"[Main] Upload queue: {upload_queue}")
+def processDot(torrent):
+    try:
+        f = open(torrent, "rb")
+        raw_torrent = f.read()
+        f.close()
+        torrent_header = bencoding.decode(raw_torrent)
+        dot = {"name":torrent_header[b'info'][b'name'].decode("utf-8"), 'files': [torrent_header[b'info'][b'name'].decode("utf-8")]}
+        if b'files' in torrent_header[b'info']:
+            #print('tem files')
+            dot['files'] = []
+            for file in torrent_header[b'info'][b'files']:
+                #print(file)
+                dot['files'].append(dot['name']+'/'+file[b'path'][0].decode("utf-8"))    
+        for file in dot['files']:
+            if not os.path.isfile(DIR + file):
+                return False, dot['name']
+        return True, DIR + dot['name']
+    except Exception as e:
+        print(e)
+        return False, ''
+        pass
 
 # Now for each file we've been supplied (batch more or just the user manually specifying multiple files) we create a loop here that uploads each of them until none are left
-for file in upload_queue:
+upload_queue.sort()
+def upload(torrent):
+    status , file = processDot(torrent)
+    if not status:
+        shutil.move(torrent,f"missing/{torrent.split('/')[-1]}")
+        continue    
+    
+    
     # Remove all old temp_files & data from the previous upload
     torrent_info.clear()
     # the working_folder will container a hash value with succeeding /
@@ -983,6 +1024,7 @@ for file in upload_queue:
     if identify_type_and_basic_info(torrent_info["upload_media"], guess_it_result) == 'skip_to_next_file':
         # If there is an issue with the file & we can't upload we use this check to skip the current file & move on to the next (if exists)
         logging.debug(f"[Main] Skipping {torrent_info['upload_media']} because type and basic information cannot be identified.")
+        shutil.move(torrent,f"error/{torrent.split('/')[-1]}")
         continue
 
     # -------- add .nfo if exists --------
@@ -997,11 +1039,16 @@ for file in upload_queue:
 
     # -------- Fix/update values --------
     # set the correct video & audio codecs (Dolby Digital --> DDP, use x264 if encode vs remux etc)
-    identify_miscellaneous_details(guess_it_result)
-
+    skip = identify_miscellaneous_details(guess_it_result)
+    if skip == 'skip_to_next_file':
+        shutil.move(torrent,f"error/{torrent.split('/')[-1]}")
+        continue
     # tmdb, imdb and tvmaze in torrent_info will be filled by this method
     metadata_utilities.fill_database_ids(torrent_info, args.tmdb, args.imdb, args.tvmaze, auto_mode)
-
+    if not 'tmdb' in torrent_info:
+        print('No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID')
+        shutil.move(torrent,f"error/{torrent.split('/')[-1]}")
+        continue
     # -------- Use official info from TMDB --------
     title, year, tvdb, mal = metadata_utilities.metadata_compare_tmdb_data_local(torrent_info)
 
@@ -1054,6 +1101,7 @@ for file in upload_queue:
         if dupe_check_response:
             logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
             if auto_mode == "true":
+                shutil.move(torrent,f"dupe/{torrent.split('/')[-1]}")
                 continue
             else:
                 sys.exit(console.print("\nOK, quitting now..\n",style="bold red", highlight=False))
@@ -1149,6 +1197,7 @@ for file in upload_queue:
                 logging.error(f"[Main] Could not upload to: {tracker} because we found a dupe on site")
                 # If dupe was found & the script is auto_mode OR if the user responds with 'n' for the 'dupe found, continue?' prompt
                 #  we will essentially stop the current 'for loops' iteration & jump back to the beginning to start next cycle (if exists else quits)
+                shutil.move(torrent,f"dupe/{torrent.split('/')[-1]}")
                 continue
 
         # -------- Generate .torrent file --------
@@ -1161,7 +1210,7 @@ for file in upload_queue:
         else:
             torrent_media = torrent_info["upload_media"]
 
-        torrent_utilities.generate_dot_torrent(
+        generated = torrent_utilities.generate_dot_torrent(
             media=torrent_media,
             announce=list(os.getenv(f"{str(tracker).upper()}_ANNOUNCE_URL").split(" ")),
             source=config["source"],
@@ -1169,13 +1218,18 @@ for file in upload_queue:
             hash_prefix=torrent_info["working_folder"],
             use_mktorrent=args.use_mktorrent,
             tracker=tracker,
-            torrent_title=torrent_info["torrent_title"]
+            torrent_title=torrent_info["torrent_title"],
+            torrent=torrent
         )
+        if generated == 'skip_to_next_file':
+            shutil.move(torrent,f"error/{torrent.split('/')[-1]}")
+            continue
 
         # -------- Assign specific tracker keys --------
         # This function takes the info we have the dict torrent_info and associates with the right key/values needed for us to use X trackers API
         # if for some reason the upload cannot be performed to the specific tracker, the method returns "STOP"
         if translation_utilities.choose_right_tracker_keys(config, tracker_settings, tracker, torrent_info, args, working_folder) == "STOP":
+            shutil.move(torrent,f"error/{torrent.split('/')[-1]}")
             continue
 
         logging.debug("::::::::::::::::::::::::::::: Final torrent_info with all data filled :::::::::::::::::::::::::::::")
@@ -1214,12 +1268,17 @@ for file in upload_queue:
     console.rule("Post Processing", style='red', align='center')
     console.line(count=1)
 
-    torrent_info["post_processing_complete"] = False
-    for tracker in upload_to_trackers:
-        if torrent_info["post_processing_complete"] == True:
-            break  # this flag is used for watch folder post processing. we need to move only once
-        utils.perform_post_processing(torrent_info, torrent_client, working_folder, tracker, args.allow_multiple_files)
-
+    #torrent_info["post_processing_complete"] = False
+    #for tracker in upload_to_trackers:
+    #    if torrent_info["post_processing_complete"] == True:
+    #        break  # this flag is used for watch folder post processing. we need to move only once
+    #    utils.perform_post_processing(torrent_info, torrent_client, working_folder, tracker, args.allow_multiple_files)
+    shutil.move(torrent,f"lancados/{torrent.split('/')[-1]}")
+    try:
+        print(torrent_info["working_folder"])
+        shutil.move(f'{working_folder}/temp_upload/{torrent_info["working_folder"]}',f'{working_folder}/cache/{torrent_info["working_folder"]}')
+    except:
+        pass
     script_end_time = time.perf_counter()
     total_run_time = f'{script_end_time - script_start_time:0.4f}'
     logging.info(f"[Main] Total runtime is {total_run_time} seconds")

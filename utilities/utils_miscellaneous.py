@@ -150,7 +150,8 @@ def miscellaneous_identify_source_type(raw_file_name, auto_mode, source):
             "\nCritical error when trying to extract: 'source_type' (more specific version of 'source', think bluray_remux & just bluray) ", style='red bold')
         console.print("Quitting now..")
         # and finally exit since this will affect all trackers we try and upload to, so it makes no sense to try the next tracker
-        sys.exit()
+        #sys.exit()
+        return 'skip_to_next_file'
     logging.debug(
         f'[MiscellaneousUtils] Source type identified as {return_source_type}')
     return return_source_type

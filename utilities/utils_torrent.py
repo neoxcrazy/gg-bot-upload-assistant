@@ -92,7 +92,7 @@ def calculate_piece_size(size):
 
 
 
-def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title, hash_prefix=""):
+def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent, tracker, torrent_title,torrent, hash_prefix=""):
     """
         media : the -p path param passed to GGBot. (dot torrent will be created for this path or file)
     """
@@ -100,7 +100,8 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
     logging.info(f"[DotTorrentGeneration] Primary announce url: {announce[0]}")
     logging.info(f"[DotTorrentGeneration] Source field in info will be set as `{source}`")
 
-    if len(glob.glob(f"{working_folder}/temp_upload/{hash_prefix}*.torrent")) == 0:
+    if len(glob.glob(torrent)) == 0:
+        return 'skip_to_next_file'
         # we need to actually generate a torrent file "from scratch"
         logging.info("[DotTorrentGeneration] Generating new .torrent file since old ones doesn't exist")
         if use_mktorrent:
@@ -165,7 +166,7 @@ def generate_dot_torrent(media, announce, source, working_folder, use_mktorrent,
         logging.info("[DotTorrentGeneration] Editing previous .torrent file to work with {} instead of generating a new one".format(source))
 
         # just choose whichever, doesn't really matter since we replace the same info anyways
-        edit_torrent = GGBOTTorrent.read(glob.glob(f'{working_folder}/temp_upload/{hash_prefix}*.torrent')[0])
+        edit_torrent = GGBOTTorrent.read(torrent)
 
         if len(announce) == 1:
             logging.debug(f"[DotTorrentGeneration] Only one announce url provided for tracker {tracker}.")

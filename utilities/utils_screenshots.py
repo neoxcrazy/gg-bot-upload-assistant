@@ -7,7 +7,7 @@ import logging
 import requests
 import pyimgbox
 import ptpimg_uploader
-
+import oxipng 
 from rich.progress import track
 from rich.console import Console
 
@@ -15,10 +15,18 @@ from ffmpy import FFmpeg
 from pathlib import Path
 from datetime import datetime
 from imgurpython import ImgurClient
-
+import platform
 # For more control over rich terminal content, import and construct a Console object.
 console = Console()
-
+def _optimize_images(image):
+    
+    if os.path.exists(image):
+        try:
+            oxipng.optimize(image, level=6)
+        except Exception as e:
+            print(e)
+            pass
+    return
 
 def _get_ss_range(duration, num_of_screenshots):
     # If no spoilers is enabled, then screenshots are taken from first half of the movie or tv show
@@ -314,6 +322,7 @@ def take_upload_screens(duration, upload_media_import, torrent_title_import, bas
             # This is how we fall back to a second host if the first fails
             for img_host in enabled_img_hosts_list:
                 # call the function that uploads the screenshot
+                _optimize_images(ss_to_upload)
                 upload_image = _upload_screens(
                     img_host=img_host,
                     img_host_api=os.getenv(f'{img_host}_api_key'),

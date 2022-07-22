@@ -1,0 +1,111 @@
+General
+Unique ID                                : 168786875263070743624386348337590160888 (0x7EFB2B7359EA54F67C24235E61BFCDF8)
+Complete name                            : A.Dama.e.o.Vagabundo.2019.2160p.DSNP.WEB-DL.DDP5.1.HDR.HEVC.DUAL-PD.mkv
+Format                                   : Matroska
+Format version                           : Version 4
+File size                                : 12.1 GiB
+Duration                                 : 1 h 42 min
+Overall bit rate                         : 16.9 Mb/s
+Encoded date                             : UTC 2021-03-14 09:27:36
+Writing application                      : mkvmerge v30.0.0 ('Interstellar') 64-bit
+Writing library                          : libebml v1.3.6 + libmatroska v1.4.9
+
+Video
+ID                                       : 1
+Format                                   : HEVC
+Format/Info                              : High Efficiency Video Coding
+Format profile                           : Main 10@L5@High
+Codec ID                                 : V_MPEGH/ISO/HEVC
+Duration                                 : 1 h 42 min
+Bit rate                                 : 15.9 Mb/s
+Width                                    : 3 840 pixels
+Height                                   : 2 160 pixels
+Display aspect ratio                     : 16:9
+Frame rate mode                          : Constant
+Frame rate                               : 23.976 (24000/1001) FPS
+Color space                              : YUV
+Chroma subsampling                       : 4:2:0
+Bit depth                                : 10 bits
+Bits/(Pixel*Frame)                       : 0.080
+Stream size                              : 11.4 GiB (94%)
+Default                                  : Yes
+Forced                                   : No
+Color range                              : Limited
+Color primaries                          : BT.2020
+Transfer characteristics                 : PQ
+Matrix coefficients                      : BT.2020 non-constant
+
+Audio #1
+ID                                       : 2
+Format                                   : E-AC-3
+Format/Info                              : Enhanced AC-3
+Commercial name                          : Dolby Digital Plus
+Codec ID                                 : A_EAC3
+Duration                                 : 1 h 42 min
+Bit rate mode                            : Constant
+Bit rate                                 : 256 kb/s
+Channel(s)                               : 6 channels
+Channel layout                           : L R C LFE Ls Rs
+Sampling rate                            : 48.0 kHz
+Frame rate                               : 31.250 FPS (1536 SPF)
+Compression mode                         : Lossy
+Stream size                              : 188 MiB (2%)
+Language                                 : Portuguese
+Service kind                             : Complete Main
+Default                                  : Yes
+Forced                                   : No
+
+Audio #2
+ID                                       : 3
+Format                                   : E-AC-3 JOC
+Format/Info                              : Enhanced AC-3 with Joint Object Coding
+Commercial name                          : Dolby Digital Plus with Dolby Atmos
+Codec ID                                 : A_EAC3
+Duration                                 : 1 h 42 min
+Bit rate mode                            : Constant
+Bit rate                                 : 768 kb/s
+Channel(s)                               : 6 channels
+Channel layout                           : L R C LFE Ls Rs
+Sampling rate                            : 48.0 kHz
+Frame rate                               : 31.250 FPS (1536 SPF)
+Compression mode                         : Lossy
+Stream size                              : 565 MiB (5%)
+Language                                 : English
+Service kind                             : Complete Main
+Default                                  : No
+Forced                                   : No
+Complexity index                         : 16
+Number of dynamic objects                : 15
+Bed channel count                        : 1 channel
+Bed channel configuration                : LFE
+
+Text #1
+ID                                       : 4
+Format                                   : UTF-8
+Codec ID                                 : S_TEXT/UTF8
+Codec ID/Info                            : UTF-8 Plain Text
+Duration                                 : 1 h 35 min
+Bit rate                                 : 0 b/s
+Frame rate                               : 0.001 FPS
+Count of elements                        : 7
+Stream size                              : 99.0 Bytes (0%)
+Title                                    : Brazilian (Forced)
+Language                                 : Portuguese
+Default                                  : Yes
+Forced                                   : Yes
+
+Text #2
+ID                                       : 5
+Format                                   : UTF-8
+Codec ID                                 : S_TEXT/UTF8
+Codec ID/Info                            : UTF-8 Plain Text
+Duration                                 : 1 h 41 min
+Bit rate                                 : 49 b/s
+Frame rate                               : 0.233 FPS
+Count of elements                        : 1420
+Stream size                              : 36.8 KiB (0%)
+Title                                    : Brazilian
+Language                                 : Portuguese
+Default                                  : No
+Forced                                   : No
+

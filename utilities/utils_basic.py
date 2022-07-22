@@ -291,7 +291,8 @@ def basic_get_missing_audio_codec(torrent_info, is_disc, auto_mode, audio_codec_
 
     # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
     # Exit the script now
-    quit_log_reason(reason="Could not detect audio_codec via regex, pymediainfo, & ffprobe. force_auto_upload=false so we quit now", missing_value=missing_value)
+    return 'skip_to_next_file'
+    #quit_log_reason(reason="Could not detect audio_codec via regex, pymediainfo, & ffprobe. force_auto_upload=false so we quit now", missing_value=missing_value)
 
 
 def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me, media_info_audio_track, missing_value):
@@ -462,8 +463,9 @@ def basic_get_missing_source(torrent_info, is_disc, auto_mode, missing_value):
         # Now that we've got all the source related info, we can return the 'parent source' and move on
         return source, source_type
     else:  # shit
-        quit_log_reason(
-            reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source", missing_value=missing_value)
+        return 'skip_to_next_file'
+       # quit_log_reason(
+        #    reason="auto_mode is enabled & we can't auto detect the source (e.g. bluray, webdl, dvd, etc). Upload form requires the Source", missing_value=missing_value)
 
 
 def basic_get_missing_mediainfo(torrent_info, parse_me, working_folder):
@@ -544,8 +546,9 @@ def basic_get_episode_basic_details(guess_it_result):
         else:
             logging.critical(
                 "[BasicUtils] Could not detect Season or date (daily episode) so we can not upload this")
-            sys.exit(console.print(
-                "\ncould not detect the 'season' or 'date' (daily episode). Cannot upload this.. quitting now\n", style="bold red"))
+            return 'skip_to_next_file'
+            #sys.exit(console.print(
+            #    "\ncould not detect the 'season' or 'date' (daily episode). Cannot upload this.. quitting now\n", style="bold red"))
     else:
         # This else is for when we have a season number, so we can immediately assign it to the torrent_info dict
         season_number = int(guess_it_result["season"])

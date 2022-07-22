@@ -542,6 +542,8 @@ def format_title(json_config, torrent_info):
     # Here we open the uploads corresponding .json file and using the current uploads "source" we pull in a custom naming config
     # this "naming config" can individually tweaked for each site & "content_type" (bluray_encode, web, etc)
 
+    temp_title = str(torrent_info["raw_file_name"]).replace('.mkv','').replace('.mp4','').replace(".", " ").replace("DDP2 0","DDP2.0").replace("DDP5 1","DDP5.1").replace("H 264","H.264").replace("H 265","H.264").replace("DD+7 1","DD+7.1").replace("AAC2 0","AAC2.0").replace("DDP2 0","DDP2.0").replace("DDP5 1","DDP5.1").replace("H 264","H.264").replace("H 265","H.264").replace("DD+7 1","DD+7.1").replace("AAC2 0","AAC2.0").replace('DD5 1','DD5.1').replace('DD2 0','DD2.0').replace('TrueHD 7 1','TrueHD 7.1').replace('DTS-HD MA 7 1','DTS-HD MA 7.1').replace('-C A A','-C.A.A')
+    return " ".join(temp_title.split())
     # Because 'webrips' & 'webdls' have basically the same exact naming style we convert the 'source_type' to just 'web' (we do something similar to DVDs as well)
     if str(torrent_info["source"]).lower() == "dvd":
         config_profile = "dvd"

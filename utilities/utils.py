@@ -126,7 +126,7 @@ def write_uploader_signature_to_description(description_file_path, tracker, bbco
             logging.debug(f'[Utils] User provided signature :: {uploader_signature}')
             if not uploader_signature.startswith("[center]") and not uploader_signature.endswith("[/center]"):
                 uploader_signature = f'[center]{uploader_signature}[/center]'
-            uploader_signature = f'{uploader_signature}{bbcode_line_break}[center]Powered by GG-BOT Upload Assistant[/center]'
+            uploader_signature = f'{uploader_signature}'
             description.write(f'{bbcode_line_break}{bbcode_line_break}{uploader_signature}')
         else:
             logging.debug('[Utils] User has not provided any custom uploader signature to use. Using default signature')

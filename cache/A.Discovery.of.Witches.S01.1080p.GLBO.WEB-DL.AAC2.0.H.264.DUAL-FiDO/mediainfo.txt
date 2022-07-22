@@ -1,0 +1,87 @@
+General
+Unique ID                                : 8512889177521705004296784370615305423 (0x66785D766EA71A33C31C53A0E99C4CF)
+Complete name                            : A.Discovery.of.Witches.S01E01.1080p.GLBO.WEB-DL.AAC2.0.H.264.DUAL-FiDO.mkv
+Format                                   : Matroska
+Format version                           : Version 4
+File size                                : 1.53 GiB
+Duration                                 : 44 min 34 s
+Overall bit rate                         : 4 916 kb/s
+Encoded date                             : UTC 2021-06-10 14:58:20
+Writing application                      : mkvmerge v45.0.0 ('Heaven in Pennies') 64-bit
+Writing library                          : libebml v1.3.10 + libmatroska v1.5.2
+
+Video
+ID                                       : 1
+Format                                   : AVC
+Format/Info                              : Advanced Video Codec
+Format profile                           : High@L4
+Format settings                          : CABAC / 2 Ref Frames
+Format settings, CABAC                   : Yes
+Format settings, Reference frames        : 2 frames
+Codec ID                                 : V_MPEG4/ISO/AVC
+Duration                                 : 44 min 34 s
+Bit rate                                 : 4 660 kb/s
+Width                                    : 1 920 pixels
+Height                                   : 1 080 pixels
+Display aspect ratio                     : 16:9
+Frame rate mode                          : Constant
+Frame rate                               : 29.970 (29970/1000) FPS
+Color space                              : YUV
+Chroma subsampling                       : 4:2:0
+Bit depth                                : 8 bits
+Scan type                                : Progressive
+Bits/(Pixel*Frame)                       : 0.075
+Stream size                              : 1.45 GiB (95%)
+Writing library                          : x264 core 155
+Encoding settings                        : cabac=1 / ref=2 / deblock=1:0:0 / analyse=0x3:0x113 / me=hex / subme=4 / psy=1 / psy_rd=1.00:0.00 / mixed_ref=0 / me_range=16 / chroma_me=1 / trellis=1 / 8x8dct=1 / cqm=0 / deadzone=21,11 / fast_pskip=1 / chroma_qp_offset=0 / threads=34 / lookahead_threads=8 / sliced_threads=0 / nr=0 / decimate=1 / interlaced=0 / bluray_compat=0 / constrained_intra=0 / bframes=1 / b_pyramid=0 / b_adapt=1 / b_bias=0 / direct=1 / weightb=1 / open_gop=0 / weightp=1 / keyint=30 / keyint_min=16 / scenecut=0 / intra_refresh=0 / rc=2pass / mbtree=0 / bitrate=4660 / ratetol=1.0 / qcomp=0.60 / qpmin=0 / qpmax=69 / qpstep=4 / cplxblur=20.0 / qblur=0.5 / ip_ratio=1.40 / pb_ratio=1.30 / aq=1:1.00
+Default                                  : Yes
+Forced                                   : No
+
+Audio #1
+ID                                       : 2
+Format                                   : AAC LC
+Format/Info                              : Advanced Audio Codec Low Complexity
+Codec ID                                 : A_AAC-2
+Duration                                 : 44 min 34 s
+Bit rate                                 : 128 kb/s
+Channel(s)                               : 2 channels
+Channel layout                           : L R
+Sampling rate                            : 44.1 kHz
+Frame rate                               : 43.066 FPS (1024 SPF)
+Compression mode                         : Lossy
+Stream size                              : 40.8 MiB (3%)
+Language                                 : Portuguese
+Default                                  : Yes
+Forced                                   : No
+
+Audio #2
+ID                                       : 3
+Format                                   : AAC LC
+Format/Info                              : Advanced Audio Codec Low Complexity
+Codec ID                                 : A_AAC-2
+Duration                                 : 44 min 34 s
+Bit rate                                 : 128 kb/s
+Channel(s)                               : 2 channels
+Channel layout                           : L R
+Sampling rate                            : 44.1 kHz
+Frame rate                               : 43.066 FPS (1024 SPF)
+Compression mode                         : Lossy
+Stream size                              : 40.8 MiB (3%)
+Language                                 : English
+Default                                  : No
+Forced                                   : No
+
+Text
+ID                                       : 4
+Format                                   : UTF-8
+Codec ID                                 : S_TEXT/UTF8
+Codec ID/Info                            : UTF-8 Plain Text
+Duration                                 : 44 min 29 s
+Bit rate                                 : 42 b/s
+Frame rate                               : 0.158 FPS
+Count of elements                        : 422
+Stream size                              : 13.7 KiB (0%)
+Language                                 : Portuguese
+Default                                  : Yes
+Forced                                   : No
+

@@ -37,7 +37,8 @@ def _return_for_reuploader_and_exit_for_assistant(selected_tmdb_results_data=Non
             "possible_matches": selected_tmdb_results_data
         }
     else:
-        sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
+        return False
+        #sys.exit("No results found on TMDB, try running this script again but manually supply the TMDB or IMDB ID")
 
 
 def _metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
@@ -174,6 +175,7 @@ def _metadata_search_tmdb_for_id(query_title, year, content_type, auto_mode):
         if result_num < 1:
             console.print("Cannot auto select a TMDB id. Marking this upload as [bold red]TMDB_IDENTIFICATION_FAILED[/bold red]")
             logging.info("[MetadataUtils] Cannot auto select a TMDB id. Marking this upload as TMDB_IDENTIFICATION_FAILED")
+            return 'skip_to_next_file'
             _return_for_reuploader_and_exit_for_assistant(selected_tmdb_results_data)
 
         # once the loop is done we can show the table to the user
@@ -452,7 +454,10 @@ def fill_database_ids(torrent_info, tmdb_id, imdb_id, tvmaze_id, auto_mode):
         metadata_result = _metadata_search_tmdb_for_id(
             query_title=torrent_info["title"], year=torrent_info["year"] if "year" in torrent_info else "", content_type=torrent_info["type"], auto_mode=auto_mode
         )
-
+        if not metadata_result:
+            return False
+        if 'tmdb' not in metadata_result:
+                    return False            
         torrent_info["tmdb"] = metadata_result["tmdb"]
         torrent_info["imdb"] = metadata_result["imdb"]
         torrent_info["tvmaze"] = metadata_result["tvmaze"]
