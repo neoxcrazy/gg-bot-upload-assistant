@@ -372,7 +372,8 @@ def basic_get_missing_audio_channels(torrent_info, is_disc, auto_mode, parse_me,
 
     # Well shit, if nothing above returned any value then it looks like this is the end of our journey :(
     # Exit the script now
-    quit_log_reason(reason="Audio_Channels are not in the filename, and we can't extract it using regex or ffprobe. force_auto_upload=false so we quit now", missing_value=missing_value)
+    return 'skip_to_next_file'
+    #quit_log_reason(reason="Audio_Channels are not in the filename, and we can't extract it using regex or ffprobe. force_auto_upload=false so we quit now", missing_value=missing_value)
 
 
 def basic_get_missing_screen_size(torrent_info, is_disc, media_info_video_track, auto_mode, missing_value):
