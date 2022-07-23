@@ -430,9 +430,11 @@ def analyze_video_file(missing_value, media_info):
 
     # ffprobe/mediainfo need to access to video file not folder, set that here using the 'parse_me' variable
     parse_me = torrent_info["raw_video_file"] if "raw_video_file" in torrent_info else torrent_info["upload_media"]
-
+    try:
     # In pretty much all cases "media_info.tracks[1]" is going to be the video track and media_info.tracks[2] will be the primary audio track
-    media_info_video_track = media_info.tracks[1]
+        media_info_video_track = media_info.tracks[1]
+    except:
+        return 'skip_to_next_file'
     # I've encountered a media file without an audio track one time... this try/exception should handle any future situations like that
     try:
         media_info_audio_track = media_info.tracks[2]

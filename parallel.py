@@ -17,6 +17,6 @@ def run(torrent):
 
 
 upload_queue.sort()
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=20)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 futures = [executor.submit(run, item) for item in upload_queue]
 concurrent.futures.wait(futures)
